@@ -63,12 +63,12 @@ class JwtFilter(
         servletResponse.contentType = "application/json;charset=UTF-8"
         if (token.isNullOrEmpty()) {
             log.info("\t\t> token 为空或不存在")
-            servletResponse.writer.println(gson.toJson(ResultUtil.errorDefaultStatus(timestamp, ErrorCode.TOKEN_NOT_EXIST)))
+            servletResponse.writer.println(gson.toJson(ResultUtil.error(timestamp, ErrorCode.TOKEN_NOT_EXIST)))
         } else if (uuid.isNullOrEmpty()) {
             log.info("\t\t> uuid 为空或不存在")
-            servletResponse.writer.println(gson.toJson(ResultUtil.errorDefaultStatus(timestamp, ErrorCode.UUID_NOT_EXIST)))
+            servletResponse.writer.println(gson.toJson(ResultUtil.error(timestamp, ErrorCode.UUID_NOT_EXIST)))
         } else {
-            servletResponse.writer.println(gson.toJson(ResultUtil.errorDefaultStatus(timestamp, ErrorCode.SERVER_INTERNAL_ERROR)))
+            servletResponse.writer.println(gson.toJson(ResultUtil.error(timestamp, ErrorCode.SERVER_INTERNAL_ERROR)))
         }
         return false
     }

@@ -40,7 +40,7 @@ class TimestampFilter : Filter {
                         log.info("\t> 时间戳检查未通过")
                         res.writer.println(
                             gson.toJson(
-                                ResultUtil.errorDefaultStatus(
+                                ResultUtil.error(
                                     timestamp,
                                     ErrorCode.TIMESTAMP_INVALID
                                 )
@@ -52,6 +52,6 @@ class TimestampFilter : Filter {
             }
         }
         log.warn("\t> 未检测到时间戳")
-        res.writer.println(gson.toJson(ResultUtil.errorDefaultStatus(timestamp, ErrorCode.TIMESTAMP_NOT_EXIST)))
+        res.writer.println(gson.toJson(ResultUtil.error(timestamp, ErrorCode.TIMESTAMP_NOT_EXIST)))
     }
 }
