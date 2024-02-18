@@ -1,0 +1,12 @@
+project:
+  version: @app.version@
+  java: @java.version@
+  kotlin: @kotlin.version@
+  build:
+    time: @build.time@
+spring:
+  profiles:
+    active: dev
+mybatis:
+  configuration:
+    map-underscore-to-camel-case: true

@@ -31,3 +31,7 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Customize ###
+/src/main/resources/application-dev.yaml
+/logs/
