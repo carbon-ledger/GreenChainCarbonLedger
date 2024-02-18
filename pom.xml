@@ -76,19 +76,6 @@
             <artifactId>jjwt-api</artifactId>
             <version>0.11.3</version>
         </dependency>
-        <dependency>
-            <groupId>io.jsonwebtoken</groupId>
-            <artifactId>jjwt-impl</artifactId>
-            <version>0.11.3</version>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.jsonwebtoken</groupId>
-            <artifactId>jjwt-jackson</artifactId>
-            <version>0.11.3</version>
-            <scope>runtime</scope>
-        </dependency>
-
         <!-- Mysql -->
         <dependency>
             <groupId>com.mysql</groupId>
@@ -105,6 +92,18 @@
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
+        </dependency>
+        <!-- Http Client -->
+        <dependency>
+            <groupId>commons-httpclient</groupId>
+            <artifactId>commons-httpclient</artifactId>
+            <version>3.1</version>
+        </dependency>
+        <!-- BCrypt -->
+        <dependency>
+            <groupId>org.mindrot</groupId>
+            <artifactId>jbcrypt</artifactId>
+            <version>0.4</version>
         </dependency>
         <!-- Shiro -->
         <dependency>
