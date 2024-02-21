@@ -1,6 +1,7 @@
 name: 新功能
 about: 创建一个新功能工单，用于发放给开发者进行功能开发
 title: "[FEAT] "
+ref: "feature"
 labels: ["功能/新的", "优先级/低"]
 body:
   - type: markdown
