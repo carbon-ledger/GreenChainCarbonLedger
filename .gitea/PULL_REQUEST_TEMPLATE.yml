@@ -31,8 +31,8 @@ body:
         - 文档更新
     validations:
       required: true
-  - type: input
-    id: pr-input-1
+  - type: textarea
+    id: pr-textarea-1
     attributes:
       label: 请对此合并请求进行简要描述
       description: 请简要描述此合并请求的内容，方便其他开发者快速了解。
