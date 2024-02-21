@@ -1,0 +1,48 @@
+name: 新功能描述
+about: 创建一个新功能的详细描述
+title: "[FEAT]: "
+body:
+  - type: input
+    id: feature-name
+    attributes:
+      label: 功能点名称
+      description: 请输入新功能的名称。
+      placeholder: 例如：用户登录功能
+    validations:
+      required: true
+
+  - type: textarea
+    id: feature-description
+    attributes:
+      label: 功能描述详情
+      description: 请详细描述该功能的业务逻辑和用户交互流程。
+      placeholder: 详细描述功能实现的业务逻辑、用户界面交互等。
+    validations:
+      required: true
+
+  - type: textarea
+    id: mysql-design
+    attributes:
+      label: MySQL数据库设计
+      description: 如果此功能需要数据库支持，请提供MySQL数据库的设计详情。
+      placeholder: 请在此处添加MySQL数据库设计相关的表结构、字段及其类型等信息。
+    validations:
+      required: false
+
+  - type: textarea
+    id: redis-design
+    attributes:
+      label: Redis设计
+      description: 如果此功能需要使用Redis，请提供Redis的设计方案。
+      placeholder: 请在此处添加Redis的数据结构设计、键名规范等信息。
+    validations:
+      required: false
+
+  - type: input
+    id: apifox-interface
+    attributes:
+      label: Apifox接口名称
+      description: 请输入与此功能相关的Apifox接口名称。
+      placeholder: 例如：POST /api/user/login
+    validations:
+      required: true
