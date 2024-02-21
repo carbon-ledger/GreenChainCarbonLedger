@@ -7,10 +7,12 @@ body:
     attributes:
       value: |
         ## 注意事项
+        
         请在右侧选择好标签，项目选择 **服务外包「绿链碳账本」** ，指派成员务必带上你自己和 @XiaoLFeng
         否则我将无法及时收到消息进行功能开发！
         
         标题请按需求填写！
+        
         ---
   - type: input
     id: feature-name
