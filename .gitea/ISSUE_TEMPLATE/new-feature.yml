@@ -1,6 +1,7 @@
-name: 新功能描述
-about: 创建一个新功能的详细描述
-title: "[FEAT]: "
+name: 新功能
+about: 创建一个新功能工单，用于发放给开发者进行功能开发
+title: "[FEAT] "
+labels: ["功能/新的", "优先级/低"]
 body:
   - type: input
     id: feature-name
@@ -43,6 +44,6 @@ body:
     attributes:
       label: Apifox接口名称
       description: 请输入与此功能相关的Apifox接口名称。
-      placeholder: 例如：POST /api/user/login
+      placeholder: userAuthLogin接口
     validations:
       required: true
