@@ -33,5 +33,5 @@ build/
 .vscode/
 
 ### Customize ###
-/src/main/resources/application-dev.yaml
+/src/main/resources/application-dev.yml
 /logs/

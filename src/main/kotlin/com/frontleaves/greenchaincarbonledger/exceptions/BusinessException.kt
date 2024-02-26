@@ -33,7 +33,7 @@ class BusinessException {
     fun noResourceFound(e: NoResourceFoundException): ResponseEntity<BaseResponse> {
         val timestamp = System.currentTimeMillis()
         log.error("[Exception] 业务异常: 页面未找到<{}>", e.resourcePath)
-        return ResultUtil.error(timestamp, "页面 ${e.resourcePath} 不存在", ErrorCode.PAGE_NOT_FOUNDED)
+        return ResultUtil.error(timestamp, "页面 /${e.resourcePath} 不存在", ErrorCode.PAGE_NOT_FOUNDED)
     }
 
     @ExceptionHandler(value = [HttpMessageNotReadableException::class])

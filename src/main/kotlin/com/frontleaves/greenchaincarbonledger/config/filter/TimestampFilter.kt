@@ -9,7 +9,9 @@ import jakarta.servlet.Filter
 import jakarta.servlet.FilterChain
 import jakarta.servlet.ServletRequest
 import jakarta.servlet.ServletResponse
+import jakarta.servlet.http.HttpServlet
 import jakarta.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletResponse
 
 /**
  * TimestampFilter
@@ -23,10 +25,11 @@ class TimestampFilter : Filter {
     private val gson = Gson()
 
     override fun doFilter(req: ServletRequest, res: ServletResponse, chain: FilterChain?) {
+        val response = res as HttpServletResponse
         val timestamp = System.currentTimeMillis()
         log.info("[Filter] 执行 TimestampFilter 方法 | 时间戳时间检查")
         val getTimestamp = (req as HttpServletRequest).getHeaders("X-Timestamp")
-        res.contentType = "application/json;charset=UTF-8"
+        response.contentType = "application/json;charset=UTF-8"
         if (getTimestamp != null) {
             if (getTimestamp.hasMoreElements()) {
                 val time = getTimestamp.nextElement()
@@ -38,20 +41,33 @@ class TimestampFilter : Filter {
                         return
                     } else {
                         log.info("\t> 时间戳检查未通过")
-                        res.writer.println(
-                            gson.toJson(
-                                ResultUtil.error(
-                                    timestamp,
-                                    ErrorCode.TIMESTAMP_INVALID
+                        response.also {
+                            it.status = 400
+                            it.writer.write(
+                                gson.toJson(
+                                    ResultUtil.error(
+                                        timestamp,
+                                        ErrorCode.TIMESTAMP_INVALID
+                                    ).body
                                 )
                             )
-                        )
+                        }
                         return
                     }
                 }
             }
         }
         log.warn("\t> 未检测到时间戳")
-        res.writer.println(gson.toJson(ResultUtil.error(timestamp, ErrorCode.TIMESTAMP_NOT_EXIST)))
+        res.also {
+            it.status = 400
+            it.writer.write(
+                gson.toJson(
+                    ResultUtil.error(
+                        timestamp,
+                        ErrorCode.TIMESTAMP_NOT_EXIST
+                    ).body
+                )
+            )
+        }
     }
 }
