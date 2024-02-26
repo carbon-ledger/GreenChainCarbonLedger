@@ -1,6 +1,6 @@
 package com.frontleaves.greenchaincarbonledger.config.redis
 
-import com.frontleaves.commons.BusinessConstants
+import com.frontleaves.greenchaincarbonledger.common.BusinessConstants
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.data.redis.core.StringRedisTemplate
 import java.util.concurrent.TimeUnit

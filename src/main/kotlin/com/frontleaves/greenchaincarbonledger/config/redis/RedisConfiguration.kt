@@ -1,8 +1,8 @@
 package com.frontleaves.greenchaincarbonledger.config.redis
 
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.core.env.Environment
 import org.springframework.data.redis.connection.RedisConnectionFactory
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory
@@ -12,20 +12,19 @@ import org.springframework.data.redis.serializer.RedisSerializer
 import org.springframework.data.redis.serializer.StringRedisSerializer
 
 @Configuration
-open class RedisConfiguration {
-    @Value("\${spring.redis.host}")
-    private val host: String? = null
+open class RedisConfiguration(env: Environment) {
 
-    @Value("\${spring.redis.port}")
-    private val port: Int? = null
-
-    @Value("\${spring.redis.password}")
-    private val password: String? = null
+    private val host = env.getProperty("spring.data.redis.host")
+    private val port = env.getProperty("spring.data.redis.port")?.toInt()
+    private val password = env.getProperty("spring.data.redis.password")
 
     @Bean
     open fun jedisConnectionFactory(): JedisConnectionFactory {
-        val config = RedisStandaloneConfiguration(host!!, port!!)
-        config.setPassword(password)
+        val config = RedisStandaloneConfiguration().also {
+            it.hostName = host!!
+            it.port = port!!
+            it.setPassword(password)
+        }
         return JedisConnectionFactory(config)
     }
 

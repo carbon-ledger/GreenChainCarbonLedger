@@ -1,4 +1,4 @@
-package com.frontleaves.commons
+package com.frontleaves.greenchaincarbonledger.common
 
 /**
  * 业务常量
