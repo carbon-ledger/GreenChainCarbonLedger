@@ -48,7 +48,7 @@ class IndexController(private val getConfig: ProjectConfig) {
      *
      * @return 前端页面
      */
-    @GetMapping("/public/**")
+    //@GetMapping("/public/**")
     fun front(): String {
         return "index"
     }

@@ -30,12 +30,8 @@ open class ShiroConfig(
         shiroFactory.securityManager = manager
         val map = HashMap<String, String>()
             .also {
-                it["/**"] = "cors,time,authc"
-                it["/user/auth/**"] = "cors,time"
-                it["/avatar/get/*"] = "cors"
-                it["/avatar/get/*/json"] = "cors,time"
-                it["/mail/send/code"] = "cors,time"
-                it["/info"] = "cors"
+                it["/**"] = "cors"
+                it["/auth/**"] = "cors,time"
             }
         shiroFactory.filterChainDefinitionMap = map
 

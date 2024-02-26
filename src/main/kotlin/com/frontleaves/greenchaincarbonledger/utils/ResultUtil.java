@@ -110,11 +110,11 @@ public class ResultUtil {
     @NotNull
     public static ResponseEntity<BaseResponse> error(Long timestamp, ErrorCode errorCode) {
         log.info("[Overhead] 开销时间 {} 毫秒", System.currentTimeMillis() - timestamp);
-        log.info("<{}>{}} | {} - 不带数据", errorCode.code, errorCode.output, errorCode.message);
+        log.info("<{}>{} | {} - 不带数据", errorCode.code, errorCode.output, errorCode.message);
         // 返回结果
         return ResponseEntity
                 .status(errorCode.code / 100)
-                .body(new BaseResponse("Error", 500, errorCode.message, null));
+                .body(new BaseResponse(errorCode.output, 500, errorCode.message, null));
     }
 
     /**
@@ -135,7 +135,7 @@ public class ResultUtil {
         // 返回结果
         return ResponseEntity
                 .status(errorCode.code / 100)
-                .body(new BaseResponse("Error", 500, errorCode.message, data));
+                .body(new BaseResponse(errorCode.output, 500, errorCode.message, data));
     }
 
     /**
