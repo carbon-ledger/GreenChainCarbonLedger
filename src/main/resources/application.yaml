@@ -10,3 +10,10 @@ spring:
 mybatis:
   configuration:
     map-underscore-to-camel-case: true
+server:
+  servlet:
+    context-path: "/api/v1"
+  port: 8081
+logging:
+  file:
+    path: "./logs"

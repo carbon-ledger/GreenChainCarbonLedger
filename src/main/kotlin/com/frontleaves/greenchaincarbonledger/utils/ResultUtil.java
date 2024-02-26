@@ -177,7 +177,7 @@ public class ResultUtil {
     @NotNull
     public static ResponseEntity<BaseResponse> custom(Long timestamp, String output, Integer code, String message, Object data) {
         log.info("[Overhead] 开销时间 {} 毫秒", System.currentTimeMillis() - timestamp);
-        log.info("<{}}>{} | [自定义]{}", code, output, message);
+        log.info("<{}>{} | [自定义]{}", code, output, message);
         // 检查 code 位数
         int responseCode;
         if (code.toString().length() == 5) {
