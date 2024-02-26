@@ -15,7 +15,7 @@ import org.springframework.mail.javamail.JavaMailSenderImpl
  * @author xiao_lfeng
  */
 @Configuration
-class MailConfig {
+open class MailConfig {
     @Value("\${spring.mail.host}")
     private lateinit var emailHost: String
 
@@ -26,7 +26,7 @@ class MailConfig {
     private lateinit var emailPassword: String
 
     @Bean
-    fun javaMailSender(): JavaMailSender {
+    open fun javaMailSender(): JavaMailSender {
         return JavaMailSenderImpl()
             .apply {
                 defaultEncoding = "UTF-8"

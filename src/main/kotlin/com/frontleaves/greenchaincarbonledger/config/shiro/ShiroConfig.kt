@@ -20,12 +20,12 @@ import org.springframework.context.annotation.Configuration
  * @since v1.0.0-SNAPSHOT
  */
 @Configuration
-class ShiroConfig(
+open class ShiroConfig(
     private val jwtUtil: JwtUtil
 ) {
 
     @Bean
-    fun filterFactoryBean(@Qualifier("manager") manager: DefaultWebSecurityManager?): ShiroFilterFactoryBean {
+    open fun filterFactoryBean(@Qualifier("manager") manager: DefaultWebSecurityManager?): ShiroFilterFactoryBean {
         val shiroFactory = ShiroFilterFactoryBean()
         shiroFactory.securityManager = manager
         val map = HashMap<String, String>()
@@ -55,14 +55,14 @@ class ShiroConfig(
 
 
     @Bean
-    fun manager(@Qualifier("myRealm") myRealm: MyRealm?): DefaultWebSecurityManager {
+    open fun manager(@Qualifier("myRealm") myRealm: MyRealm?): DefaultWebSecurityManager {
         val manager = DefaultWebSecurityManager()
             .also { it.setRealm(myRealm) }
         return manager
     }
 
     @Bean
-    fun myRealm(): MyRealm {
+    open fun myRealm(): MyRealm {
         return MyRealm()
     }
 }
