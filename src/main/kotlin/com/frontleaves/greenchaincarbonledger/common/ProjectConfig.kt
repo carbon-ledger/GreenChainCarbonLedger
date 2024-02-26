@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component
  */
 @Component
 class ProjectConfig(private val env: Environment) {
-    final val getProjectInfoMap = HashMap<String, String?>()
+    val getProjectInfoMap = HashMap<String, String?>()
 
     init {
         getProjectInfoMap
