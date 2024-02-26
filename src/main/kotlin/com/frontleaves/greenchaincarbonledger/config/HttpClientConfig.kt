@@ -13,10 +13,10 @@ import org.springframework.context.annotation.Configuration
  * @author xiao_lfeng
  */
 @Configuration
-class HttpClientConfig {
+open class HttpClientConfig {
 
     @Bean
-    fun httpClient(): HttpClient {
+    open fun httpClient(): HttpClient {
         return HttpClient()
             .apply { httpConnectionManager.params.connectionTimeout = 5000 }
     }
