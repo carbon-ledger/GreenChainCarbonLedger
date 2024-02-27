@@ -58,16 +58,15 @@ public class UserDAO {
      */
     public String checkUserExist(String username, String email, String phone, String realname) {
         log.info("[DAO] 执行 checkUserExist 方法");
-        log.info("\t> Mysql 读取");
-        UserDO userDO = userMapper.getUserByUsername(username);
+        UserDO userDO = this.getUserByUsername(username);
         if (userDO != null) {
             return "用户名已存在";
         }
-        userDO = userMapper.getUserByEmail(email);
+        userDO = this.getUserByEmail(email);
         if (userDO != null) {
             return "邮箱已存在";
         }
-        userDO = userMapper.getUserByPhone(phone);
+        userDO = this.getUserByPhone(phone);
         if (userDO != null) {
             return "手机号已存在";
         }
@@ -99,19 +98,19 @@ public class UserDAO {
 
     public UserDO getUserByEmail(String user) {
         log.info("[DAO] 执行 getUserByEmail 方法");
-        log.info("\t> Mysql 查询");
+        log.info("\t> Mysql 读取");
         return userMapper.getUserByEmail(user);
     }
 
     public UserDO getUserByPhone(String user) {
         log.info("[DAO] 执行 getUserByPhone 方法");
-        log.info("\t> Mysql 查询");
+        log.info("\t> Mysql 读取");
         return userMapper.getUserByPhone(user);
     }
 
     public UserDO getUserByUsername(String user) {
         log.info("[DAO] 执行 getUserByUsername 方法");
-        log.info("\t> Mysql 查询");
+        log.info("\t> Mysql 读取");
         return userMapper.getUserByUsername(user);
     }
 }
