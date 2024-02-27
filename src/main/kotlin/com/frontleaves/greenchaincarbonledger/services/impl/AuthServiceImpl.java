@@ -2,7 +2,9 @@ package com.frontleaves.greenchaincarbonledger.services.impl;
 
 import com.frontleaves.greenchaincarbonledger.dao.UserDAO;
 import com.frontleaves.greenchaincarbonledger.models.doData.UserDO;
+import com.frontleaves.greenchaincarbonledger.models.voData.getData.AuthLoginVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.AuthOrganizeRegisterVO;
+import com.frontleaves.greenchaincarbonledger.models.voData.returnData.BackAuthLoginVO;
 import com.frontleaves.greenchaincarbonledger.services.AuthService;
 import com.frontleaves.greenchaincarbonledger.utils.BaseResponse;
 import com.frontleaves.greenchaincarbonledger.utils.ErrorCode;
@@ -14,6 +16,9 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.regex.Pattern;
 
 /**
  * AuthServiceImpl
@@ -29,13 +34,6 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
     private final UserDAO userDAO;
-
-    @NotNull
-    @Override
-    public ResponseEntity<BaseResponse> userLogin(@NotNull HttpServletRequest request, @NotNull String user, @NotNull String password) {
-        Long timestamp = System.currentTimeMillis();
-        return ResultUtil.success(timestamp);
-    }
 
     @NotNull
     @Override
@@ -60,6 +58,46 @@ public class AuthServiceImpl implements AuthService {
             return ResultUtil.success(timestamp, "管理用户注册成功");
         } else {
             return ResultUtil.error(timestamp, ErrorCode.SERVER_INTERNAL_ERROR);
+        }
+    }
+
+    @NotNull
+    @Override
+    public ResponseEntity<BaseResponse> userLogin(long timestamp, @NotNull HttpServletRequest request, @NotNull AuthLoginVO authLoginVO) {
+        // 检索用户
+        UserDO getUserDO;
+        if (Pattern.matches("^\\w+([-+.]\\w+)*@\\w+([-.]\\w+)*\\.\\w+([-.]\\w+)*$", authLoginVO.getUser())) {
+            getUserDO = userDAO.getUserByEmail(authLoginVO.getUser());
+        } else if (Pattern.matches("^(13[0-9]|14[01456879]|15[0-35-9]|16[2567]|17[0-8]|18[0-9]|19[0-35-9])\\d{8}$", authLoginVO.getUser())) {
+            getUserDO = userDAO.getUserByPhone(authLoginVO.getUser());
+        } else {
+            getUserDO = userDAO.getUserByUsername(authLoginVO.getUser());
+        }
+        // 检查用户是否存在
+        if (getUserDO != null) {
+            // 用户存在（密码检查）
+            if (ProcessingUtil.passwordCheck(authLoginVO.getPassword(), getUserDO.getPassword())) {
+                BackAuthLoginVO newBackAuthLoginVO = new BackAuthLoginVO();
+                BackAuthLoginVO.UserVO newUserVO = new BackAuthLoginVO.UserVO();
+                BackAuthLoginVO.PermissionVO newPermission = new BackAuthLoginVO.PermissionVO();
+                newUserVO
+                        .setUuid(getUserDO.getUuid())
+                        .setUserName(getUserDO.getUuid())
+                        .setPhone(getUserDO.getPhone())
+                        .setEmail(newUserVO.getEmail())
+                        .setRealName(getUserDO.getRealName());
+                newPermission
+                        .setUserPermission(new ArrayList<>())
+                        .setRolePermission(new ArrayList<>());
+                newBackAuthLoginVO
+                        .setUser(newUserVO)
+                        .setPermission(newPermission);
+                return ResultUtil.success(timestamp, "登录成功", newBackAuthLoginVO);
+            } else {
+                return ResultUtil.error(timestamp, ErrorCode.USER_PASSWORD_ERROR);
+            }
+        } else {
+            return ResultUtil.error(timestamp, ErrorCode.USER_NOT_EXISTED);
         }
     }
 }
