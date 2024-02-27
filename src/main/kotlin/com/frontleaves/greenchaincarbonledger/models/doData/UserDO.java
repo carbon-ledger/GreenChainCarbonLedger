@@ -1,6 +1,7 @@
 package com.frontleaves.greenchaincarbonledger.models.doData;
 
 import lombok.Data;
+import lombok.experimental.Accessors;
 
 import java.sql.Timestamp;
 
@@ -14,20 +15,22 @@ import java.sql.Timestamp;
  * @author xiao_lfeng
  */
 @Data
+@Accessors(chain = true)
 public class UserDO {
     public Long uid;
     public String uuid;
     public String userName;
-    public String email;
-    public String phone;
     public String nickName;
     public String realName;
-    public String password;
-    public String oldPassword;
+    public String email;
+    public String phone;
     public String avatar;
-    public Short status;
-    public Boolean emailVerify;
-    public Boolean phoneVerify;
+    public String password;
+    public Short role;
+    public String permission;
     public Timestamp createdAt;
     public Timestamp updatedAt;
+    public Boolean ban;
+    public String invite;
+    public Timestamp deletedAt;
 }
