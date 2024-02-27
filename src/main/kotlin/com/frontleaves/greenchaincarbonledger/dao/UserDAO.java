@@ -1,7 +1,10 @@
 package com.frontleaves.greenchaincarbonledger.dao;
 
+import com.frontleaves.greenchaincarbonledger.common.BusinessConstants;
 import com.frontleaves.greenchaincarbonledger.mapper.UserMapper;
 import com.frontleaves.greenchaincarbonledger.models.doData.UserDO;
+import com.frontleaves.greenchaincarbonledger.utils.redis.UserRedis;
+import com.google.gson.Gson;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
@@ -20,6 +23,8 @@ import org.springframework.stereotype.Repository;
 @RequiredArgsConstructor
 public class UserDAO {
     private final UserMapper userMapper;
+    private final UserRedis userRedis;
+    private final Gson gson;
 
     /**
      * 根据UUID获取用户
@@ -31,8 +36,13 @@ public class UserDAO {
      */
     public UserDO getUserByUuid(String uuid) {
         log.info("[DAO] 执行 getUserByUUID 方法");
-        log.info("\t> Mysql 读取");
-        return userMapper.getUserByUuid(uuid);
+        if (userRedis.getData(BusinessConstants.NONE, uuid) != null) {
+            log.info("\t> Redis 读取");
+            return gson.fromJson(userRedis.getData(BusinessConstants.NONE, uuid), UserDO.class);
+        } else {
+            log.info("\t> Mysql 读取");
+            return userMapper.getUserByUuid(uuid);
+        }
     }
 
     /**
