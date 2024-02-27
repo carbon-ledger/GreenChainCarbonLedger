@@ -1,5 +1,6 @@
 package com.frontleaves.greenchaincarbonledger.services
 
+import com.frontleaves.greenchaincarbonledger.models.voData.getData.AuthOrganizeRegisterVO
 import com.frontleaves.greenchaincarbonledger.utils.BaseResponse
 import jakarta.servlet.http.HttpServletRequest
 import org.springframework.http.ResponseEntity
@@ -27,4 +28,22 @@ interface AuthService {
      * @return 登录结果
      */
     fun userLogin(request: HttpServletRequest, user: String, password: String): ResponseEntity<BaseResponse>
+
+    /**
+     * adminUserRegister
+     *
+     * 管理员用户注册
+     *
+     * 管理员用户注册, 用于管理员用户注册操作
+     *
+     * @param timestamp 时间戳
+     * @param request 请求
+     * @param authOrganizeRegisterVO 注册信息
+     * @return 注册结果
+     */
+    fun adminUserRegister(
+        timestamp: Long,
+        request: HttpServletRequest,
+        authOrganizeRegisterVO: AuthOrganizeRegisterVO
+    ): ResponseEntity<BaseResponse>
 }
