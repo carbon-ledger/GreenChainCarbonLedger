@@ -1,6 +1,6 @@
 package com.frontleaves.greenchaincarbonledger.utils.redis
 
-import KotlinSlf4j.Companion.log
+import com.frontleaves.greenchaincarbonledger.annotations.KotlinSlf4j.Companion.log
 import com.frontleaves.greenchaincarbonledger.common.BusinessConstants
 import com.frontleaves.greenchaincarbonledger.common.RedisConstant
 import com.frontleaves.greenchaincarbonledger.config.redis.RedisOperation
@@ -14,8 +14,8 @@ import java.util.concurrent.TimeUnit
  *
  * 授权Redis，用于授权相关操作
  *
- * @since v1.0.0
- * @version v1.0.0
+ * @since v1.0.0-SNAPSHOT
+ * @version v1.0.0-SNAPSHOT
  * @author xiao_lfeng
  */
 @Component

@@ -7,8 +7,8 @@ import lombok.Data;
  * <hr/>
  * 用于接收用户注册请求的数据, 用于接收用户注册请求的数据
  *
- * @since v1.0.0
- * @version v1.0.0
+ * @since v1.0.0-SNAPSHOT
+ * @version v1.0.0-SNAPSHOT
  * @author xiao_lfeng
  */
 @Data

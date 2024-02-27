@@ -1,4 +1,4 @@
-package com.frontleaves.greenchaincarbonledger.mapper;
+package com.frontleaves.greenchaincarbonledger.mappers;
 
 import com.frontleaves.greenchaincarbonledger.models.doData.UserDO;
 import org.apache.ibatis.annotations.Insert;
@@ -10,6 +10,8 @@ import org.apache.ibatis.annotations.Select;
  * <hr/>
  * 用于用户的数据访问对象, 用于Mybatis
  *
+ * @version v1.0.0-SNAPSHOT
+ * @since v1.0.0-SNAPSHOT
  * @author xiao_feng
  */
 @Mapper

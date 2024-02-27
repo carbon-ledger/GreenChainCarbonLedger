@@ -1,6 +1,6 @@
 package com.frontleaves.greenchaincarbonledger.utils.security
 
-import KotlinSlf4j.Companion.log
+import com.frontleaves.greenchaincarbonledger.annotations.KotlinSlf4j.Companion.log
 import com.frontleaves.greenchaincarbonledger.dao.UserDAO
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
@@ -15,7 +15,8 @@ import java.util.*
  * 用于生成和验证 JWT Token
  *
  * @author xiao_lfeng
- * @since v1.0.0-SNAPSHOT-SNAPSHOT
+ * @since v1.0.0-SNAPSHOT
+ * @version v1.0.0-SNAPSHOT
  */
 @Component
 class JwtUtil(private val userDAO: UserDAO) {

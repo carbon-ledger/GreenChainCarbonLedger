@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController
  * 首页控制器, 用于返回系统信息
  *
  * @since v1.0.0-SNAPSHOT
+ * @version v1.0.0-SNAPSHOT
  * @author xiao_lfeng
  */
 @RestController
