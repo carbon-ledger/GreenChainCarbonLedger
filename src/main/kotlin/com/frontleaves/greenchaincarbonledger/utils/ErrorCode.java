@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
  * <hr/>
  * 用于定义错误码, 用于返回错误信息, 用于返回错误码
  *
- * @author xiao_feng
+ * @author xiao_lfeng
  * @version v1.0.0-SNAPSHOT
  * @since v1.0.0-SNAPSHOT
  */

@@ -1,7 +1,7 @@
 package com.frontleaves.greenchaincarbonledger.dao;
 
 import com.frontleaves.greenchaincarbonledger.common.BusinessConstants;
-import com.frontleaves.greenchaincarbonledger.mapper.UserMapper;
+import com.frontleaves.greenchaincarbonledger.mappers.UserMapper;
 import com.frontleaves.greenchaincarbonledger.models.doData.UserDO;
 import com.frontleaves.greenchaincarbonledger.utils.redis.UserRedis;
 import com.google.gson.Gson;
@@ -14,8 +14,8 @@ import org.springframework.stereotype.Repository;
  * <hr/>
  * 用于用户的数据访问对象
  *
- * @version v1.0.0
- * @since v1.0.0
+ * @version v1.0.0-SNAPSHOT
+ * @since v1.0.0-SNAPSHOT
  * @author xiao_lfeng
  */
 @Slf4j

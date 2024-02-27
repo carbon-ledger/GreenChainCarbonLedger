@@ -1,8 +1,10 @@
+package com.frontleaves.greenchaincarbonledger.annotations
+
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 /**
- * KotlinSlf4j - Kotlin日志系统
+ * com.frontleaves.greenchaincarbonledger.annotations.KotlinSlf4j - Kotlin日志系统
  *
  * @since v1.0.0-SNAPSHOT
  * @see org.slf4j.Logger

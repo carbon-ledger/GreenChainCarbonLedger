@@ -14,8 +14,8 @@ import java.util.UUID;
  * <hr/>
  * 用于处理请求的工具类, 对通用内容进行工具化处理
  *
- * @since v1.0.0
- * @version v1.0.0
+ * @since v1.0.0-SNAPSHOT
+ * @version v1.0.0-SNAPSHOT
  * @author xiao_lfeng
  */
 public class ProcessingUtil {
@@ -27,7 +27,7 @@ public class ProcessingUtil {
      *
      * @param bindingResult 参数校验结果
      * @return {@link ArrayList <String>}
-     * @since v1.0.0
+     * @since v1.0.0-SNAPSHOT
      */
     @NotNull
     public static ArrayList<String> getValidatedErrorList(@NotNull BindingResult bindingResult) {
@@ -45,7 +45,7 @@ public class ProcessingUtil {
      *
      * @param password 密码
      * @return {@link String}
-     * @since v1.0.0
+     * @since v1.0.0-SNAPSHOT
      */
     @NotNull
     public static String passwordEncrypt(@NotNull String password) {
@@ -60,7 +60,7 @@ public class ProcessingUtil {
      * @param password 密码
      * @param hash 密码hash
      * @return {@link Boolean}
-     * @since v1.0.0
+     * @since v1.0.0-SNAPSHOT
      */
     @NotNull
     public static Boolean passwordCheck(@NotNull String password, @NotNull String hash) {
@@ -73,7 +73,7 @@ public class ProcessingUtil {
      * 用于创建UUID
      *
      * @return {@link String}
-     * @since v1.0.0
+     * @since v1.0.0-SNAPSHOT
      */
     @NotNull
     public static String createUuid() {

@@ -5,8 +5,8 @@ package com.frontleaves.greenchaincarbonledger.common
  *
  * 用于存放Redis常量
  *
- * @version v1.0.0
- * @since v1.0.0
+ * @version v1.0.0-SNAPSHOT
+ * @since v1.0.0-SNAPSHOT
  * @author 筱锋xiao_lfeng
  */
 object RedisConstant {

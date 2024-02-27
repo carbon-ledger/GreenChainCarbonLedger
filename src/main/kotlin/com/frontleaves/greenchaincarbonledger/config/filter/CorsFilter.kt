@@ -1,6 +1,6 @@
 package com.frontleaves.greenchaincarbonledger.config.filter
 
-import KotlinSlf4j.Companion.log
+import com.frontleaves.greenchaincarbonledger.annotations.KotlinSlf4j.Companion.log
 import jakarta.servlet.Filter
 import jakarta.servlet.FilterChain
 import jakarta.servlet.ServletRequest
