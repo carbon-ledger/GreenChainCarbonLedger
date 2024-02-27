@@ -96,4 +96,22 @@ public class UserDAO {
             return false;
         }
     }
+
+    public UserDO getUserByEmail(String user) {
+        log.info("[DAO] 执行 getUserByEmail 方法");
+        log.info("\t> Mysql 查询");
+        return userMapper.getUserByEmail(user);
+    }
+
+    public UserDO getUserByPhone(String user) {
+        log.info("[DAO] 执行 getUserByPhone 方法");
+        log.info("\t> Mysql 查询");
+        return userMapper.getUserByPhone(user);
+    }
+
+    public UserDO getUserByUsername(String user) {
+        log.info("[DAO] 执行 getUserByUsername 方法");
+        log.info("\t> Mysql 查询");
+        return userMapper.getUserByUsername(user);
+    }
 }
