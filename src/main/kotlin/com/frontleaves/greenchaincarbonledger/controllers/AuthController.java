@@ -1,5 +1,6 @@
 package com.frontleaves.greenchaincarbonledger.controllers;
 
+import com.frontleaves.greenchaincarbonledger.models.voData.getData.AuthChangeVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.AuthLoginVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.AuthOrganizeRegisterVO;
 import com.frontleaves.greenchaincarbonledger.services.AuthService;
@@ -21,9 +22,9 @@ import org.springframework.web.bind.annotation.*;
  * <hr/>
  * 用于处理用户认证相关的请求, 包括登录, 注册, 验证码等
  *
- * @since v1.0.0
- * @version v1.0.0
  * @author xiao_lfeng
+ * @version v1.0.0
+ * @since v1.0.0
  */
 @Slf4j
 @RestController
@@ -50,11 +51,11 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<BaseResponse> userLogin(
-        @RequestBody @Validated AuthLoginVO authLoginVO,
-        HttpServletRequest request,
-        @NotNull BindingResult bindingResult
+            @RequestBody @Validated AuthLoginVO authLoginVO,
+            HttpServletRequest request,
+            @NotNull BindingResult bindingResult
     ) {
-        log.info("[Controller] 请求 adminUserRegister 接口");
+        log.info("[Controller] 请求 userLogin 接口");
         long timestamp = System.currentTimeMillis();
         // 对请求参数进行校验
         if (bindingResult.hasErrors()) {
@@ -62,5 +63,22 @@ public class AuthController {
         }
         // 业务操作
         return authService.userLogin(timestamp, request, authLoginVO);
+    }
+
+    @PatchMapping("/change")
+    //创建userchange 并且获取userchange所需要的值
+    public ResponseEntity<BaseResponse> userchange(
+            @RequestBody @Validated AuthChangeVO authChangeVO,
+            HttpServletRequest request,
+            @NotNull BindingResult bindingResult
+    ) {
+        log.info("[Controller] 请求 userchange 接口");
+        long timestamp = System.currentTimeMillis();
+        //请求参数进行校验
+        if (bindingResult.hasErrors()) {
+            return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR, ProcessingUtil.getValidatedErrorList(bindingResult));
+        }
+        //业务操作
+        return authService.userChange(timestamp, request, authChangeVO);
     }
 }

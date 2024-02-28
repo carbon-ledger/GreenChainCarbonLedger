@@ -4,6 +4,7 @@ import com.frontleaves.greenchaincarbonledger.models.doData.UserDO;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
 /**
  * UserMapper
@@ -34,4 +35,7 @@ public interface UserMapper {
             VALUES (#{uuid}, #{userName}, #{realName}, #{email}, #{phone}, #{password})
         """)
     boolean createUser(UserDO newUserDO);
+
+    @Update("UPDATE fy_carbon.fy_user SET password = #{password} WHERE uuid = #{uuid}")
+    void updateUser(UserDO getUserDO);
 }

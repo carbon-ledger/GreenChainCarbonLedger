@@ -32,6 +32,7 @@ open class ShiroConfig(
             .also {
                 it["/**"] = "cors"
                 it["/auth/**"] = "cors,time"
+                it["/auth/change"] = "cors,time,authc"
             }
         shiroFactory.filterChainDefinitionMap = map
 
