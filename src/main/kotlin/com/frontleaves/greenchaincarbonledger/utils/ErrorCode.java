@@ -24,6 +24,7 @@ public enum ErrorCode {
     USER_PASSWORD_CURRENT_ERROR("UserOldERROR",40009,"当前密码错误"),
     USER_PASSWORD_REPEAT_ERROR("UsePasswordRepeatError",40010,"新密码与当前密码重复"),
     REQUEST_BODY_ERROR("RequestBodyError", 40301, "请求体参数错误"),
+    TOKEN_VERIFY_ERROR("TokenVerifyError", 40302, "Token 验证错误"),
     REQUEST_BODY_MISSING("RequestBodyMissing", 40302, "请求体缺失(请求体不能为空)"),
     USER_EXISTED("UsernameExisted", 40303, "用户已存在"),
     USER_NOT_EXISTED("UsernameNotExist", 40304, "用户不存在"),

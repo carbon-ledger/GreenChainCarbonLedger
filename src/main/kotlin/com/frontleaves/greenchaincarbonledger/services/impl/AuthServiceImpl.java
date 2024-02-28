@@ -11,6 +11,7 @@ import com.frontleaves.greenchaincarbonledger.utils.BaseResponse;
 import com.frontleaves.greenchaincarbonledger.utils.ErrorCode;
 import com.frontleaves.greenchaincarbonledger.utils.ProcessingUtil;
 import com.frontleaves.greenchaincarbonledger.utils.ResultUtil;
+import com.frontleaves.greenchaincarbonledger.utils.security.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
@@ -91,6 +92,7 @@ public class AuthServiceImpl implements AuthService {
                         .setUserPermission(new ArrayList<>())
                         .setRolePermission(new ArrayList<>());
                 newBackAuthLoginVO
+                        .setToken(new JwtUtil(userDAO).signToken(getUserDO.getUuid()))
                         .setUser(newUserVO)
                         .setPermission(newPermission);
                 return ResultUtil.success(timestamp, "登录成功", newBackAuthLoginVO);
