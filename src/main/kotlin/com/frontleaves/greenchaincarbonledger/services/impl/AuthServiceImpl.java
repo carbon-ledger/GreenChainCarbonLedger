@@ -107,7 +107,6 @@ public class AuthServiceImpl implements AuthService {
     public ResponseEntity<BaseResponse> organizeRegister(
             long timestamp,
             @NotNull HttpServletRequest request,
-            // 为了区分用户注册里面使用的形参名，此处加上了NEW
             @NotNull AuthOrganizeRegisterVO authOrganizeRegisterVO) {
         // 检索组织是否唯一存在
         String checkUserExist = userDAO.checkUserExist(authOrganizeRegisterVO.getUsername(), authOrganizeRegisterVO.getEmail(), authOrganizeRegisterVO.getPhone(), authOrganizeRegisterVO.getOrganize());
