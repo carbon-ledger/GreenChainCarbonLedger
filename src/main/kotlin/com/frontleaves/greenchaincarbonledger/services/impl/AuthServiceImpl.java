@@ -3,6 +3,7 @@ package com.frontleaves.greenchaincarbonledger.services.impl;
 import com.frontleaves.greenchaincarbonledger.dao.UserDAO;
 import com.frontleaves.greenchaincarbonledger.models.doData.UserDO;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.AuthLoginVO;
+import com.frontleaves.greenchaincarbonledger.models.voData.getData.AuthNewOrganizeRegisterVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.AuthOrganizeRegisterVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.returnData.BackAuthLoginVO;
 import com.frontleaves.greenchaincarbonledger.services.AuthService;
@@ -38,6 +39,7 @@ public class AuthServiceImpl implements AuthService {
     @NotNull
     @Override
     @Transactional
+    // 这里方法形参的命名有问题
     public ResponseEntity<BaseResponse> adminUserRegister(long timestamp, @NotNull HttpServletRequest request, @NotNull AuthOrganizeRegisterVO authOrganizeRegisterVO) {
         // 检查用户是否存在
         String checkUserExist = userDAO.checkUserExist(authOrganizeRegisterVO.getUsername(), authOrganizeRegisterVO.getEmail(), authOrganizeRegisterVO.getPhone(), authOrganizeRegisterVO.getRealname());
@@ -100,4 +102,35 @@ public class AuthServiceImpl implements AuthService {
             return ResultUtil.error(timestamp, ErrorCode.USER_NOT_EXISTED);
         }
     }
+
+    @NotNull
+    @Override
+    public ResponseEntity<BaseResponse> organizeRegister(
+            long timestamp,
+            @NotNull HttpServletRequest request,
+            // 为了区分用户注册里面使用的形参名，此处加上了NEW
+            @NotNull AuthNewOrganizeRegisterVO authNewOrganizeRegisterVO) {
+        // 检索组织是否唯一存在
+        String checkUserExist = userDAO.checkUserExist(authNewOrganizeRegisterVO.getUsername(), authNewOrganizeRegisterVO.getEmail(), authNewOrganizeRegisterVO.getPhone(), authNewOrganizeRegisterVO.getOrganize());
+        if (checkUserExist != null) {
+            return ResultUtil.error(timestamp, checkUserExist, ErrorCode.Organize_Not_Existed);
+        }
+        // 保存组织
+        UserDO newUserDO = new UserDO();
+        newUserDO
+                .setUuid(ProcessingUtil.createUuid())
+                .setRealName(authNewOrganizeRegisterVO.getOrganize())
+                .setUserName(authNewOrganizeRegisterVO.getUsername())
+                .setPhone(authNewOrganizeRegisterVO.getPhone())
+                .setEmail(authNewOrganizeRegisterVO.getEmail())
+                .setInvite(authNewOrganizeRegisterVO.getInvite())
+                .setPassword(authNewOrganizeRegisterVO.getPassword());
+        if (userDAO.createUser(newUserDO)){
+            return ResultUtil.success(timestamp, "组织账户注册成功");
+        } else {
+            return ResultUtil.error(timestamp, ErrorCode.SERVER_INTERNAL_ERROR);
+        }
+    }
+
+
 }
