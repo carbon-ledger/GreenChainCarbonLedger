@@ -7,6 +7,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 
 import java.util.ArrayList;
+import java.util.Random;
 import java.util.UUID;
 
 /**
@@ -78,5 +79,30 @@ public class ProcessingUtil {
     @NotNull
     public static String createUuid() {
         return UUID.randomUUID().toString();
+    }
+
+    /**
+     * 生成验证码
+     * <hr/>
+     * 用于生成验证码
+     *
+     * @param size 验证码长度
+     * @return {@link String}
+     * @since v1.0.0
+     */
+    @NotNull
+    public static String makeVerifyCode(int size) {
+        Random random = new Random();
+        StringBuilder stringBuilder = new StringBuilder();
+        for (int i = 0; i < size; i++) {
+            String code;
+            switch (random.nextInt(3)) {
+                case 0 -> code = String.valueOf(random.nextInt(10));
+                case 1 -> code = String.valueOf((char) (random.nextInt(26) + 65));
+                default -> code = String.valueOf((char) (random.nextInt(26) + 97));
+            }
+            stringBuilder.append(code);
+        }
+        return stringBuilder.toString();
     }
 }

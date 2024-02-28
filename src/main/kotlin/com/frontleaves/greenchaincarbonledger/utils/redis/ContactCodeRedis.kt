@@ -9,17 +9,8 @@ import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.stereotype.Component
 import java.util.concurrent.TimeUnit
 
-/**
- * 用户Redis
- *
- * 用户Redis，用于用户相关操作
- *
- * @since v1.0.0
- * @version v1.0.0
- * @author xiao_lfeng
- */
 @Component
-class UserRedis(
+class ContactCodeRedis(
     redisTemplate: RedisTemplate<String, String>,
     stringRedisTemplate: StringRedisTemplate
 ) : RedisOperation<String>(redisTemplate, stringRedisTemplate) {
@@ -33,7 +24,7 @@ class UserRedis(
      * @return 返回过期时间
      */
     override fun getExpiredAt(businessConstants: BusinessConstants, field: String): Long {
-        val key = (RedisConstant.TYPE_AUTH + RedisConstant.TABLE_USER + businessConstants.value) + field
+        val key = (RedisConstant.TYPE_CODE + RedisConstant.TABLE_VERIFY + businessConstants.value) + field
         log.info("\t\t> 读取 Redis 键为 {} 的过期时间", key)
         return redisTemplate.getExpire(key)
     }
@@ -48,7 +39,7 @@ class UserRedis(
      * @return 返回是否删除成功
      */
     override fun delData(businessConstants: BusinessConstants, field: String): Boolean {
-        val key = (RedisConstant.TYPE_AUTH + RedisConstant.TABLE_USER + businessConstants.value) + field
+        val key = (RedisConstant.TYPE_CODE + RedisConstant.TABLE_VERIFY + businessConstants.value) + field
         log.info("\t\t> 删除 Redis 键为 {} 的数据", key)
         return redisTemplate.delete(key)
     }
@@ -63,7 +54,7 @@ class UserRedis(
      * @return 返回元素
      */
     override fun getData(businessConstants: BusinessConstants, field: String): String? {
-        val key = (RedisConstant.TYPE_AUTH + RedisConstant.TABLE_USER + businessConstants.value) + field
+        val key = (RedisConstant.TYPE_CODE + RedisConstant.TABLE_VERIFY + businessConstants.value) + field
         log.info("\t\t> 读取 Redis 键为 {} 的数据", key)
         return redisTemplate.opsForValue()[key]
     }
@@ -80,7 +71,8 @@ class UserRedis(
      * @return 返回是否添加成功
      */
     override fun setData(businessConstants: BusinessConstants, field: String, value: String, time: Long): Boolean {
-        val key = (RedisConstant.TYPE_AUTH + RedisConstant.TABLE_USER + businessConstants.value) + field
+        // 处理数据
+        val key = (RedisConstant.TYPE_CODE + RedisConstant.TABLE_VERIFY + businessConstants.value) + field
         log.info("\t\t> 设置 Redis 键为 {} 的数据", key)
         redisTemplate.also {
             it.opsForValue()[key] = value
