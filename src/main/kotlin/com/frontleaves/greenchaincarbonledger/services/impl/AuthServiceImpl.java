@@ -4,7 +4,7 @@ import com.frontleaves.greenchaincarbonledger.dao.UserDAO;
 import com.frontleaves.greenchaincarbonledger.models.doData.UserDO;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.AuthChangeVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.AuthLoginVO;
-import com.frontleaves.greenchaincarbonledger.models.voData.getData.AuthOrganizeRegisterVO;
+import com.frontleaves.greenchaincarbonledger.models.voData.getData.AuthUserRegisterVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.returnData.BackAuthLoginVO;
 import com.frontleaves.greenchaincarbonledger.services.AuthService;
 import com.frontleaves.greenchaincarbonledger.utils.BaseResponse;
@@ -39,9 +39,9 @@ public class AuthServiceImpl implements AuthService {
     @NotNull
     @Override
     @Transactional
-    public ResponseEntity<BaseResponse> adminUserRegister(long timestamp, @NotNull HttpServletRequest request, @NotNull AuthOrganizeRegisterVO authOrganizeRegisterVO) {
+    public ResponseEntity<BaseResponse> adminUserRegister(long timestamp, @NotNull HttpServletRequest request, @NotNull AuthUserRegisterVO authUserRegisterVO) {
         // 检查用户是否存在
-        String checkUserExist = userDAO.checkUserExist(authOrganizeRegisterVO.getUsername(), authOrganizeRegisterVO.getEmail(), authOrganizeRegisterVO.getPhone(), authOrganizeRegisterVO.getRealname());
+        String checkUserExist = userDAO.checkUserExist(authUserRegisterVO.getUsername(), authUserRegisterVO.getEmail(), authUserRegisterVO.getPhone(), authUserRegisterVO.getRealname());
         if (checkUserExist != null) {
             return ResultUtil.error(timestamp, checkUserExist, ErrorCode.USER_NOT_EXISTED);
         }
@@ -49,11 +49,11 @@ public class AuthServiceImpl implements AuthService {
         UserDO newUserDO = new UserDO();
         newUserDO
                 .setUuid(ProcessingUtil.createUuid())
-                .setUserName(authOrganizeRegisterVO.getUsername())
-                .setRealName(authOrganizeRegisterVO.getRealname())
-                .setEmail(authOrganizeRegisterVO.getEmail())
-                .setPhone(authOrganizeRegisterVO.getPhone())
-                .setPassword(ProcessingUtil.passwordEncrypt(authOrganizeRegisterVO.getPassword()))
+                .setUserName(authUserRegisterVO.getUsername())
+                .setRealName(authUserRegisterVO.getRealname())
+                .setEmail(authUserRegisterVO.getEmail())
+                .setPhone(authUserRegisterVO.getPhone())
+                .setPassword(ProcessingUtil.passwordEncrypt(authUserRegisterVO.getPassword()))
                 .setRole((short) 2);
         if (userDAO.createUser(newUserDO)) {
             return ResultUtil.success(timestamp, "管理用户注册成功");

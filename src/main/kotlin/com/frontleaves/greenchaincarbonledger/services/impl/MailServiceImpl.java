@@ -41,11 +41,11 @@ public class MailServiceImpl implements MailService {
         // 检查UserAgent与UserIp是否存在
         log.debug("\t> 检查UserAgent与UserIp是否存在");
         log.debug("\t\t> User-Agent: {} | User-IP: {}", request.getHeader("User-Agent"), request.getRemoteAddr());
-        if (!request.getHeader("User-Agent").isBlank() || !request.getRemoteAddr().isBlank()) {
+        if (!request.getHeader("User-Agent").isBlank() && !request.getRemoteAddr().isBlank()) {
+            log.debug("\t\t> 验证通过");
+        } else {
             log.warn("\t\t> 用户访问信息不合法");
             return ResultUtil.error(timestamp, ErrorCode.USER_ACCESS_ILLEGAL);
-        } else {
-            log.debug("\t\t> 验证通过");
         }
         VerifyCodeDO getVerifyCodeDO = verifyCodeDAO.getVerifyCodeByContact(email);
         if (getVerifyCodeDO != null) {
