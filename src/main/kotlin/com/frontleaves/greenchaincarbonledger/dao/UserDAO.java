@@ -114,4 +114,8 @@ public class UserDAO {
         log.info("\t> Mysql 查询");
         return userMapper.getUserByUsername(user);
     }
+
+    public void updateUser(UserDO getUserDO) {
+        userMapper.updateUser(getUserDO);
+    }
 }

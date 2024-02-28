@@ -2,6 +2,7 @@ package com.frontleaves.greenchaincarbonledger.services.impl;
 
 import com.frontleaves.greenchaincarbonledger.dao.UserDAO;
 import com.frontleaves.greenchaincarbonledger.models.doData.UserDO;
+import com.frontleaves.greenchaincarbonledger.models.voData.getData.AuthChangeVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.AuthLoginVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.AuthOrganizeRegisterVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.returnData.BackAuthLoginVO;
@@ -98,6 +99,39 @@ public class AuthServiceImpl implements AuthService {
             }
         } else {
             return ResultUtil.error(timestamp, ErrorCode.USER_NOT_EXISTED);
+        }
+    }
+
+    @NotNull
+    @Override
+    public ResponseEntity<BaseResponse> userChange(long timestamp, @NotNull HttpServletRequest request, @NotNull AuthChangeVO authChangeVO) {
+        //首先进行用户定义新密码的格式判断
+        if (Pattern.matches("^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z]).{6,30}$", authChangeVO.getNewPassword())) {
+            //获取用户的UUID再将用户的UUID与数据库中的UUID进行校验，取出数据库的实例
+            String getUuid = request.getHeader("X-Auth-UUID");
+            UserDO getUserDO = userDAO.getUserByUuid(getUuid);
+            //用户输入的当前密码和数据库中密码进行校验
+            if (ProcessingUtil.passwordCheck(authChangeVO.getCurrentPassword(), getUserDO.getPassword())) {
+                //当前密码与新密码进行检查，重复则提示报错，不重复则继续进行,下一步在else里面继续进行验证
+                if (authChangeVO.getCurrentPassword().equals(authChangeVO.getNewPassword())) {
+                    return ResultUtil.error(timestamp, ErrorCode.USER_PASSWORD_REPEAT_ERROR);
+                } else {
+                    //将用户输入的重复新密码进行检查
+                    if (authChangeVO.getNewPassword().equals(authChangeVO.getNewPasswordConfirm())) {
+                        //新密码更新到数据库中
+                        getUserDO.setPassword(ProcessingUtil.passwordEncrypt(authChangeVO.getNewPassword()));
+                        userDAO.updateUser(getUserDO);
+                        return ResultUtil.success(timestamp, "密码更新完毕");
+                    } else {
+                        return ResultUtil.error(timestamp, ErrorCode.USER_PASSWORD_INCONSISTENCY_ERROR);
+                    }
+                }
+
+            } else {
+                return ResultUtil.error(timestamp, ErrorCode.USER_PASSWORD_CURRENT_ERROR);
+            }
+        } else {
+            return ResultUtil.error(timestamp, ErrorCode.USER_PASSWORD_DEFINITION_ERROR);
         }
     }
 }
