@@ -114,7 +114,7 @@ public class ResultUtil {
         // 返回结果
         return ResponseEntity
                 .status(errorCode.code / 100)
-                .body(new BaseResponse(errorCode.output, 500, errorCode.message, null));
+                .body(new BaseResponse(errorCode.output, errorCode.code, errorCode.message, null));
     }
 
     /**
@@ -135,7 +135,7 @@ public class ResultUtil {
         // 返回结果
         return ResponseEntity
                 .status(errorCode.code / 100)
-                .body(new BaseResponse(errorCode.output, 500, errorCode.message, data));
+                .body(new BaseResponse(errorCode.output, errorCode.code, errorCode.message, data));
     }
 
     /**

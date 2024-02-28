@@ -1,7 +1,7 @@
 package com.frontleaves.greenchaincarbonledger.dao;
 
 import com.frontleaves.greenchaincarbonledger.common.BusinessConstants;
-import com.frontleaves.greenchaincarbonledger.mapper.UserMapper;
+import com.frontleaves.greenchaincarbonledger.mappers.UserMapper;
 import com.frontleaves.greenchaincarbonledger.models.doData.UserDO;
 import com.frontleaves.greenchaincarbonledger.utils.redis.UserRedis;
 import com.google.gson.Gson;
@@ -14,8 +14,8 @@ import org.springframework.stereotype.Repository;
  * <hr/>
  * 用于用户的数据访问对象
  *
- * @version v1.0.0
- * @since v1.0.0
+ * @version v1.0.0-SNAPSHOT
+ * @since v1.0.0-SNAPSHOT
  * @author xiao_lfeng
  */
 @Slf4j
@@ -58,16 +58,15 @@ public class UserDAO {
      */
     public String checkUserExist(String username, String email, String phone, String realname) {
         log.info("[DAO] 执行 checkUserExist 方法");
-        log.info("\t> Mysql 读取");
-        UserDO userDO = userMapper.getUserByUsername(username);
+        UserDO userDO = this.getUserByUsername(username);
         if (userDO != null) {
             return "用户名已存在";
         }
-        userDO = userMapper.getUserByEmail(email);
+        userDO = this.getUserByEmail(email);
         if (userDO != null) {
             return "邮箱已存在";
         }
-        userDO = userMapper.getUserByPhone(phone);
+        userDO = this.getUserByPhone(phone);
         if (userDO != null) {
             return "手机号已存在";
         }
@@ -99,19 +98,19 @@ public class UserDAO {
 
     public UserDO getUserByEmail(String user) {
         log.info("[DAO] 执行 getUserByEmail 方法");
-        log.info("\t> Mysql 查询");
+        log.info("\t> Mysql 读取");
         return userMapper.getUserByEmail(user);
     }
 
     public UserDO getUserByPhone(String user) {
         log.info("[DAO] 执行 getUserByPhone 方法");
-        log.info("\t> Mysql 查询");
+        log.info("\t> Mysql 读取");
         return userMapper.getUserByPhone(user);
     }
 
     public UserDO getUserByUsername(String user) {
         log.info("[DAO] 执行 getUserByUsername 方法");
-        log.info("\t> Mysql 查询");
+        log.info("\t> Mysql 读取");
         return userMapper.getUserByUsername(user);
     }
 

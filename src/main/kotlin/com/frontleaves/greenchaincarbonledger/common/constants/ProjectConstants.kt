@@ -1,4 +1,4 @@
-package com.frontleaves.greenchaincarbonledger.common
+package com.frontleaves.greenchaincarbonledger.common.constants
 
 import org.springframework.core.env.Environment
 import org.springframework.stereotype.Component
@@ -10,9 +10,11 @@ import org.springframework.stereotype.Component
  *
  * @param env Spring 环境变量
  * @since v1.0.0-SNAPSHOT
+ * @version v1.0.0-SNAPSHOT
+ * @author xiao_lfeng
  */
 @Component
-class ProjectConfig(private val env: Environment) {
+class ProjectConstants(private val env: Environment) {
     val getProjectInfoMap = HashMap<String, String?>()
 
     init {

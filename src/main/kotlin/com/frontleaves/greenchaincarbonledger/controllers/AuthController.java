@@ -1,6 +1,5 @@
 package com.frontleaves.greenchaincarbonledger.controllers;
 
-import com.frontleaves.greenchaincarbonledger.models.voData.getData.AuthChangeVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.AuthLoginVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.AuthOrganizeRegisterVO;
 import com.frontleaves.greenchaincarbonledger.services.AuthService;
@@ -22,9 +21,9 @@ import org.springframework.web.bind.annotation.*;
  * <hr/>
  * 用于处理用户认证相关的请求, 包括登录, 注册, 验证码等
  *
- * @author xiao_lfeng
+ * @since v1.0.0-SNAPSHOT
  * @version v1.0.0
- * @since v1.0.0
+ * @author xiao_lfeng-SNAPSHOT
  */
 @Slf4j
 @RestController

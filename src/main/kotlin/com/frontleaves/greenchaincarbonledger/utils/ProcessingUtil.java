@@ -7,6 +7,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 
 import java.util.ArrayList;
+import java.util.Random;
 import java.util.UUID;
 
 /**
@@ -14,8 +15,8 @@ import java.util.UUID;
  * <hr/>
  * 用于处理请求的工具类, 对通用内容进行工具化处理
  *
- * @since v1.0.0
- * @version v1.0.0
+ * @since v1.0.0-SNAPSHOT
+ * @version v1.0.0-SNAPSHOT
  * @author xiao_lfeng
  */
 public class ProcessingUtil {
@@ -27,7 +28,7 @@ public class ProcessingUtil {
      *
      * @param bindingResult 参数校验结果
      * @return {@link ArrayList <String>}
-     * @since v1.0.0
+     * @since v1.0.0-SNAPSHOT
      */
     @NotNull
     public static ArrayList<String> getValidatedErrorList(@NotNull BindingResult bindingResult) {
@@ -45,7 +46,7 @@ public class ProcessingUtil {
      *
      * @param password 密码
      * @return {@link String}
-     * @since v1.0.0
+     * @since v1.0.0-SNAPSHOT
      */
     @NotNull
     public static String passwordEncrypt(@NotNull String password) {
@@ -60,7 +61,7 @@ public class ProcessingUtil {
      * @param password 密码
      * @param hash 密码hash
      * @return {@link Boolean}
-     * @since v1.0.0
+     * @since v1.0.0-SNAPSHOT
      */
     @NotNull
     public static Boolean passwordCheck(@NotNull String password, @NotNull String hash) {
@@ -73,10 +74,35 @@ public class ProcessingUtil {
      * 用于创建UUID
      *
      * @return {@link String}
-     * @since v1.0.0
+     * @since v1.0.0-SNAPSHOT
      */
     @NotNull
     public static String createUuid() {
         return UUID.randomUUID().toString();
+    }
+
+    /**
+     * 生成验证码
+     * <hr/>
+     * 用于生成验证码
+     *
+     * @param size 验证码长度
+     * @return {@link String}
+     * @since v1.0.0
+     */
+    @NotNull
+    public static String makeVerifyCode(int size) {
+        Random random = new Random();
+        StringBuilder stringBuilder = new StringBuilder();
+        for (int i = 0; i < size; i++) {
+            String code;
+            switch (random.nextInt(3)) {
+                case 0 -> code = String.valueOf(random.nextInt(10));
+                case 1 -> code = String.valueOf((char) (random.nextInt(26) + 65));
+                default -> code = String.valueOf((char) (random.nextInt(26) + 97));
+            }
+            stringBuilder.append(code);
+        }
+        return stringBuilder.toString();
     }
 }

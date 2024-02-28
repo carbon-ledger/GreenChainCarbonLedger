@@ -1,6 +1,6 @@
 package com.frontleaves.greenchaincarbonledger.utils.redis
 
-import KotlinSlf4j.Companion.log
+import com.frontleaves.greenchaincarbonledger.annotations.KotlinSlf4j.Companion.log
 import com.frontleaves.greenchaincarbonledger.common.BusinessConstants
 import com.frontleaves.greenchaincarbonledger.common.RedisConstant
 import com.frontleaves.greenchaincarbonledger.config.redis.RedisOperation
@@ -14,8 +14,8 @@ import java.util.concurrent.TimeUnit
  *
  * 用户Redis，用于用户相关操作
  *
- * @since v1.0.0
- * @version v1.0.0
+ * @since v1.0.0-SNAPSHOT
+ * @version v1.0.0-SNAPSHOT
  * @author xiao_lfeng
  */
 @Component
@@ -76,7 +76,7 @@ class UserRedis(
      * @param businessConstants 业务常量
      * @param field             字段
      * @param value             值
-     * @param time              过期时间
+     * @param time              过期时间(分钟)
      * @return 返回是否添加成功
      */
     override fun setData(businessConstants: BusinessConstants, field: String, value: String, time: Long): Boolean {

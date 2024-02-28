@@ -1,6 +1,6 @@
 package com.frontleaves.greenchaincarbonledger.utils.redis
 
-import com.frontleaves.greenchaincarbonledger.annotations.KotlinSlf4j.Companion.log
+import KotlinSlf4j.Companion.log
 import com.frontleaves.greenchaincarbonledger.common.BusinessConstants
 import com.frontleaves.greenchaincarbonledger.common.RedisConstant
 import com.frontleaves.greenchaincarbonledger.config.redis.RedisOperation
@@ -9,17 +9,8 @@ import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.stereotype.Component
 import java.util.concurrent.TimeUnit
 
-/**
- * 授权Redis
- *
- * 授权Redis，用于授权相关操作
- *
- * @since v1.0.0-SNAPSHOT
- * @version v1.0.0-SNAPSHOT
- * @author xiao_lfeng
- */
 @Component
-class AuthorizeRedis(
+class ContactCodeRedis(
     redisTemplate: RedisTemplate<String, String>,
     stringRedisTemplate: StringRedisTemplate
 ) : RedisOperation<String>(redisTemplate, stringRedisTemplate) {
@@ -33,7 +24,7 @@ class AuthorizeRedis(
      * @return 返回过期时间
      */
     override fun getExpiredAt(businessConstants: BusinessConstants, field: String): Long {
-        val key = (RedisConstant.TYPE_AUTH + RedisConstant.TABLE_TOKEN + businessConstants.value) + field
+        val key = (RedisConstant.TYPE_CODE + RedisConstant.TABLE_VERIFY + businessConstants.value) + field
         log.info("\t\t> 读取 Redis 键为 {} 的过期时间", key)
         return redisTemplate.getExpire(key)
     }
@@ -48,7 +39,7 @@ class AuthorizeRedis(
      * @return 返回是否删除成功
      */
     override fun delData(businessConstants: BusinessConstants, field: String): Boolean {
-        val key = (RedisConstant.TYPE_AUTH + RedisConstant.TABLE_TOKEN + businessConstants.value) + field
+        val key = (RedisConstant.TYPE_CODE + RedisConstant.TABLE_VERIFY + businessConstants.value) + field
         log.info("\t\t> 删除 Redis 键为 {} 的数据", key)
         return redisTemplate.delete(key)
     }
@@ -63,7 +54,7 @@ class AuthorizeRedis(
      * @return 返回元素
      */
     override fun getData(businessConstants: BusinessConstants, field: String): String? {
-        val key = (RedisConstant.TYPE_AUTH + RedisConstant.TABLE_TOKEN + businessConstants.value) + field
+        val key = (RedisConstant.TYPE_CODE + RedisConstant.TABLE_VERIFY + businessConstants.value) + field
         log.info("\t\t> 读取 Redis 键为 {} 的数据", key)
         return redisTemplate.opsForValue()[key]
     }
@@ -81,7 +72,7 @@ class AuthorizeRedis(
      */
     override fun setData(businessConstants: BusinessConstants, field: String, value: String, time: Long): Boolean {
         // 处理数据
-        val key: String = (RedisConstant.TYPE_AUTH + RedisConstant.TABLE_TOKEN + businessConstants.value) + field
+        val key = (RedisConstant.TYPE_CODE + RedisConstant.TABLE_VERIFY + businessConstants.value) + field
         log.info("\t\t> 设置 Redis 键为 {} 的数据", key)
         redisTemplate.also {
             it.opsForValue()[key] = value
