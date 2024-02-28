@@ -17,10 +17,8 @@ import org.springframework.http.ResponseEntity
  */
 interface AuthService {
     /**
-     * adminUserRegister
-     *
-     * 管理员用户注册
-     *
+     * ## adminUserRegister
+     * ### 管理员用户注册
      * 管理员用户注册, 用于管理员用户注册操作
      *
      * @param timestamp 时间戳

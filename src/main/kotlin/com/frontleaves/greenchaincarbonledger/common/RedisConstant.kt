@@ -14,7 +14,7 @@ object RedisConstant {
      * 类型分类
      */
     // 邮件相关
-    const val TYPE_EMAIL: String = "mail:"
+    const val TYPE_CODE: String = "code:"
 
     // 登陆相关
     const val TYPE_AUTH: String = "auth:"
@@ -25,8 +25,8 @@ object RedisConstant {
     /*
      * 表分类
      */
-    // 邮箱验证码
-    const val TABLE_EMAIL: String = "code:"
+    // 校验相关
+    const val TABLE_VERIFY: String = "verify:"
 
     // 令牌相关
     const val TABLE_TOKEN: String = "token:"
