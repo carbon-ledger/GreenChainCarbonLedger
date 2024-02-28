@@ -76,7 +76,7 @@ class AuthorizeRedis(
      * @param businessConstants 业务常量
      * @param field             字段
      * @param value             值
-     * @param time              过期时间
+     * @param time              过期时间(分钟)
      * @return 返回是否添加成功
      */
     override fun setData(businessConstants: BusinessConstants, field: String, value: String, time: Long): Boolean {
