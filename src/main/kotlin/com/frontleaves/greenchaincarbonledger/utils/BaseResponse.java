@@ -1,5 +1,6 @@
 package com.frontleaves.greenchaincarbonledger.utils;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -12,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
  * @since v1.0.0-SNAPSHOT
  */
 @Slf4j
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public record BaseResponse(String output, Integer code, String message, Object data) {
 
     public BaseResponse(String output, Integer code, String message, Object data) {

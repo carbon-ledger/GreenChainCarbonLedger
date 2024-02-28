@@ -1,6 +1,6 @@
 package com.frontleaves.greenchaincarbonledger.exceptions
 
-import KotlinSlf4j.Companion.log
+import com.frontleaves.greenchaincarbonledger.annotations.KotlinSlf4j.Companion.log
 import com.frontleaves.greenchaincarbonledger.utils.BaseResponse
 import com.frontleaves.greenchaincarbonledger.utils.ErrorCode
 import com.frontleaves.greenchaincarbonledger.utils.ResultUtil
@@ -15,9 +15,10 @@ import org.thymeleaf.exceptions.TemplateInputException
 /**
  * BusinessException
  *
- * 业务异常处理
+ * 业务异常处理，用于处理业务异常，返回错误信息
  *
  * @since v1.0.0-SNAPSHOT
+ * @version v1.0.0-SNAPSHOT
  * @author xiao_lfeng
  */
 @RestControllerAdvice

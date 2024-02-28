@@ -1,6 +1,6 @@
 package com.frontleaves.greenchaincarbonledger.config.filter
 
-import KotlinSlf4j.Companion.log
+import com.frontleaves.greenchaincarbonledger.annotations.KotlinSlf4j.Companion.log
 import com.frontleaves.greenchaincarbonledger.utils.ErrorCode
 import com.frontleaves.greenchaincarbonledger.utils.ResultUtil
 import com.google.gson.Gson
@@ -9,7 +9,6 @@ import jakarta.servlet.Filter
 import jakarta.servlet.FilterChain
 import jakarta.servlet.ServletRequest
 import jakarta.servlet.ServletResponse
-import jakarta.servlet.http.HttpServlet
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 

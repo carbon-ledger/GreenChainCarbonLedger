@@ -13,14 +13,13 @@ import org.springframework.http.ResponseEntity
  * 授权服务接口, 用于定义授权服务的方法, 用于授权服务的实现
  *
  * @since v1.0.0-SNAPSHOT
+ * @version v1.0.0-SNAPSHOT
  * @author xiao_lfeng
  */
 interface AuthService {
     /**
-     * adminUserRegister
-     *
-     * 管理员用户注册
-     *
+     * ## adminUserRegister
+     * ### 管理员用户注册
      * 管理员用户注册, 用于管理员用户注册操作
      *
      * @param timestamp 时间戳
