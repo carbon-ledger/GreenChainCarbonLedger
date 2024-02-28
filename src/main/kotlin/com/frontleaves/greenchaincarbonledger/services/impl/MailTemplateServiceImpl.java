@@ -1,5 +1,6 @@
 package com.frontleaves.greenchaincarbonledger.services.impl;
 
+import com.frontleaves.greenchaincarbonledger.common.constants.SystemConstants;
 import com.frontleaves.greenchaincarbonledger.services.MailTemplateService;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -22,8 +23,8 @@ import java.util.HashMap;
  *
  * @author xiao_lfeng
  * @version v1.0.0-SNAPSHOT
- * @since v1.0.0-SNAPSHOT
  * @see com.frontleaves.greenchaincarbonledger.services.MailTemplateService
+ * @since v1.0.0-SNAPSHOT
  */
 @Slf4j
 @Service
@@ -50,12 +51,25 @@ public class MailTemplateServiceImpl implements MailTemplateService {
 
     @Override
     public void mailSendCode(@NotNull String email, @NotNull String code, @NotNull String template) {
+        log.info("[Service] 执行 mailSendCode 方法");
+        HashMap<String, Object> prepareData = new HashMap<>();
+        prepareData.put("email", email);
+        prepareData.put("code", code);
 
+        switch (template) {
+            case "user-login" -> prepareData.put("title", SystemConstants.SYSTEM_NAME + " - 用户登陆");
+            case "user-register" -> prepareData.put("title", SystemConstants.SYSTEM_NAME + " - 用户注册");
+            case "user-forget-password" -> prepareData.put("title", SystemConstants.SYSTEM_NAME + " - 忘记密码");
+            default -> prepareData.put("title", SystemConstants.SYSTEM_NAME + " - 验证码");
+        }
+        this.sendMail(email, prepareData, "./mail/" + template + ".html");
     }
 
     @Override
     public void mailSend(@NotNull String email, @NotNull HashMap<String, Object> data, @NotNull String template) {
-
+        log.info("[Service] 执行 mailSend 方法");
+        HashMap<String, Object> prepareData = new HashMap<>(data);
+        this.sendMail(email, prepareData, "./mail/" + template + ".html");
     }
 
     /**

@@ -1,6 +1,6 @@
 package com.frontleaves.greenchaincarbonledger.controllers
 
-import com.frontleaves.greenchaincarbonledger.common.ProjectConfig
+import com.frontleaves.greenchaincarbonledger.common.constants.ProjectConstants
 import com.frontleaves.greenchaincarbonledger.utils.BaseResponse
 import com.frontleaves.greenchaincarbonledger.utils.ResultUtil
 import org.springframework.http.ResponseEntity
@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController
  * @author xiao_lfeng
  */
 @RestController
-class IndexController(private val getConfig: ProjectConfig) {
+class IndexController(private val getConfig: ProjectConstants) {
 
     /**
      * index
