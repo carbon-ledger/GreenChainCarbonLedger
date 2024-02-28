@@ -29,8 +29,8 @@ public enum ErrorCode {
     TEMPLATE_PARSE_ERROR("TemplateParseError", 40308, "模板解析错误"),
     PAGE_NOT_FOUNDED("PageNotFounded", 40401, "页面不存在"),
     REQUEST_METHOD_NOT_SUPPORTED("RequestMethodNotSupported", 40500, "请求方法不支持"),
-    SERVER_INTERNAL_ERROR("ServerInternalError", 50000, "服务器内部错误");
-
+    SERVER_INTERNAL_ERROR("ServerInternalError", 50000, "服务器内部错误"),
+    Organize_Not_Existed("OrganizeNotExist", 40399, "组织不存在");
     final String output;
     final Integer code;
     final String message;
