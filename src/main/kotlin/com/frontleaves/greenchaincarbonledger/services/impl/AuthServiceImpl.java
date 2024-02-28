@@ -3,6 +3,7 @@ package com.frontleaves.greenchaincarbonledger.services.impl;
 import com.frontleaves.greenchaincarbonledger.dao.UserDAO;
 import com.frontleaves.greenchaincarbonledger.models.doData.UserDO;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.AuthLoginVO;
+import com.frontleaves.greenchaincarbonledger.models.voData.getData.AuthOrganizeRegisterVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.AuthUserRegisterVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.returnData.BackAuthLoginVO;
 import com.frontleaves.greenchaincarbonledger.services.AuthService;
@@ -107,9 +108,9 @@ public class AuthServiceImpl implements AuthService {
             long timestamp,
             @NotNull HttpServletRequest request,
             // 为了区分用户注册里面使用的形参名，此处加上了NEW
-            @NotNull AuthNewOrganizeRegisterVO authNewOrganizeRegisterVO) {
+            @NotNull AuthOrganizeRegisterVO authOrganizeRegisterVO) {
         // 检索组织是否唯一存在
-        String checkUserExist = userDAO.checkUserExist(authNewOrganizeRegisterVO.getUsername(), authNewOrganizeRegisterVO.getEmail(), authNewOrganizeRegisterVO.getPhone(), authNewOrganizeRegisterVO.getOrganize());
+        String checkUserExist = userDAO.checkUserExist(authOrganizeRegisterVO.getUsername(), authOrganizeRegisterVO.getEmail(), authOrganizeRegisterVO.getPhone(), authOrganizeRegisterVO.getOrganize());
         if (checkUserExist != null) {
             return ResultUtil.error(timestamp, checkUserExist, ErrorCode.Organize_Not_Existed);
         }
@@ -117,12 +118,12 @@ public class AuthServiceImpl implements AuthService {
         UserDO newUserDO = new UserDO();
         newUserDO
                 .setUuid(ProcessingUtil.createUuid())
-                .setRealName(authNewOrganizeRegisterVO.getOrganize())
-                .setUserName(authNewOrganizeRegisterVO.getUsername())
-                .setPhone(authNewOrganizeRegisterVO.getPhone())
-                .setEmail(authNewOrganizeRegisterVO.getEmail())
-                .setInvite(authNewOrganizeRegisterVO.getInvite())
-                .setPassword(authNewOrganizeRegisterVO.getPassword());
+                .setRealName(authOrganizeRegisterVO.getOrganize())
+                .setUserName(authOrganizeRegisterVO.getUsername())
+                .setPhone(authOrganizeRegisterVO.getPhone())
+                .setEmail(authOrganizeRegisterVO.getEmail())
+                .setInvite(authOrganizeRegisterVO.getInvite())
+                .setPassword(authOrganizeRegisterVO.getPassword());
         if (userDAO.createUser(newUserDO)){
             return ResultUtil.success(timestamp, "组织账户注册成功");
         } else {

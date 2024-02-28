@@ -6,7 +6,7 @@ import lombok.Data;
  * @author 32841
  */
 @Data
-public class AuthNewOrganizeRegisterVO {
+public class AuthOrganizeRegisterVO {
     String organize;
     String username;
     // 为什么此处的手机号的类型为字符串类型
