@@ -1,5 +1,6 @@
 package com.frontleaves.greenchaincarbonledger.controllers;
 
+import com.frontleaves.greenchaincarbonledger.models.voData.getData.AuthChangeVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.AuthLoginVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.AuthOrganizeRegisterVO;
 import com.frontleaves.greenchaincarbonledger.services.AuthService;
