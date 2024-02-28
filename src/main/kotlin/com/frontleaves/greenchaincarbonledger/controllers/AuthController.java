@@ -66,13 +66,14 @@ public class AuthController {
     }
 
     @PatchMapping("/change")
-    //创建userchange 并且获取userchange所需要的值
-    public ResponseEntity<BaseResponse> userchange(
+    //创建userChange 并且获取userChange所需要的值
+    public ResponseEntity<BaseResponse> userChange(
             @RequestBody @Validated AuthChangeVO authChangeVO,
-            HttpServletRequest request,
-            @NotNull BindingResult bindingResult
+            @NotNull BindingResult bindingResult,
+            HttpServletRequest request
+
     ) {
-        log.info("[Controller] 请求 userchange 接口");
+        log.info("[Controller] 请求 userChange 接口");
         long timestamp = System.currentTimeMillis();
         //请求参数进行校验
         if (bindingResult.hasErrors()) {
