@@ -1,6 +1,6 @@
 package com.frontleaves.greenchaincarbonledger.utils.redis
 
-import KotlinSlf4j.Companion.log
+import com.frontleaves.greenchaincarbonledger.annotations.KotlinSlf4j.Companion.log
 import com.frontleaves.greenchaincarbonledger.common.BusinessConstants
 import com.frontleaves.greenchaincarbonledger.common.RedisConstant
 import com.frontleaves.greenchaincarbonledger.config.redis.RedisOperation
