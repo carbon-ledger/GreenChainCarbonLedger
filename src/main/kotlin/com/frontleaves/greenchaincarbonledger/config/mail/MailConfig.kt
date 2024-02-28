@@ -38,7 +38,7 @@ open class MailConfig {
                     .also {
                         it["mail.smtp.auth"] = "true"
                         it["mail.smtp.starttls.enable"] = "true"
-                        //it["mail.debug"] = "true"
+                        it["mail.debug"] = "true"
                         it["mail.transport.protocol"] = "smtp"
                     }
             }

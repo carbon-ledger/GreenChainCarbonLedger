@@ -40,9 +40,9 @@ public class VerifyCodeDAO {
         log.info("\t> Redis 读取");
         String redisData;
         if (Pattern.matches("^\\w+([-+.]\\w+)*@\\w+([-.]\\w+)*\\.\\w+([-.]\\w+)*$", content)) {
-            redisData = contactCodeRedis.getData(BusinessConstants.EMAIL, content);
+            redisData = (String) contactCodeRedis.getData(BusinessConstants.EMAIL, content);
         } else if (Pattern.matches("^(13[0-9]|14[01456879]|15[0-35-9]|16[2567]|17[0-8]|18[0-9]|19[0-35-9])\\d{8}$", content)) {
-            redisData = contactCodeRedis.getData(BusinessConstants.PHONE, content);
+            redisData = (String) contactCodeRedis.getData(BusinessConstants.PHONE, content);
         } else {
             return null;
         }
