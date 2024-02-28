@@ -2,7 +2,7 @@ package com.frontleaves.greenchaincarbonledger.controllers;
 
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.AuthChangeVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.AuthLoginVO;
-import com.frontleaves.greenchaincarbonledger.models.voData.getData.AuthOrganizeRegisterVO;
+import com.frontleaves.greenchaincarbonledger.models.voData.getData.AuthUserRegisterVO;
 import com.frontleaves.greenchaincarbonledger.services.AuthService;
 import com.frontleaves.greenchaincarbonledger.utils.BaseResponse;
 import com.frontleaves.greenchaincarbonledger.utils.ErrorCode;
@@ -35,9 +35,9 @@ public class AuthController {
 
     @PostMapping("/admin/register")
     public ResponseEntity<BaseResponse> adminUserRegister(
-            @RequestBody @Validated AuthOrganizeRegisterVO authOrganizeRegisterVO,
-            HttpServletRequest request,
-            @NotNull BindingResult bindingResult
+            @RequestBody @Validated AuthUserRegisterVO authUserRegisterVO,
+            @NotNull BindingResult bindingResult,
+            HttpServletRequest request
     ) {
         log.info("[Controller] 请求 adminUserRegister 接口");
         long timestamp = System.currentTimeMillis();
@@ -46,14 +46,14 @@ public class AuthController {
             return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR, ProcessingUtil.getValidatedErrorList(bindingResult));
         }
         // 业务操作
-        return authService.adminUserRegister(timestamp, request, authOrganizeRegisterVO);
+        return authService.adminUserRegister(timestamp, request, authUserRegisterVO);
     }
 
     @PostMapping("/login")
     public ResponseEntity<BaseResponse> userLogin(
-            @RequestBody @Validated AuthLoginVO authLoginVO,
-            HttpServletRequest request,
-            @NotNull BindingResult bindingResult
+        @RequestBody @Validated AuthLoginVO authLoginVO,
+        @NotNull BindingResult bindingResult,
+        HttpServletRequest request
     ) {
         log.info("[Controller] 请求 userLogin 接口");
         long timestamp = System.currentTimeMillis();

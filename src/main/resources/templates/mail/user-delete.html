@@ -21,6 +21,14 @@
             text-align: left;
         }
 
+        .code-container {
+            background-color: #e8e8e8;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 4px;
+            text-align: center;
+        }
+
         .title {
             padding-bottom: 20px;
             text-align: center;
@@ -48,21 +56,25 @@
 </head>
 <body>
 <div class="container">
-    <h1 class="title">CloudService</h1>
-    <p>您好！ <b th:text="${username}">[用户名]</b></p>
-    <p>感谢您注册筱锋云服务！</p>
+    <h1 class="title" th:text="${title}">绿链碳账本</h1>
+    <p>您好！ <b th:text="${email}">[邮箱]</b></p>
+    <p>感谢您加入绿链碳账本，专注于利用区块链技术进行碳交易的先锋平台！</p>
     <hr/>
-    <p>我们非常高兴地通知您，您的筱锋云服务账户已成功创建。欢迎您加入我们这个不断成长的大家庭！筱锋云服务致力于为您提供安全、可靠、高效的快捷服务，帮助您轻松实现业务创新和增长。</p>
-    <p>在开始使用之前，我们建议您浏览我们的用户指南和FAQ，这将帮助您快速了解如何充分利用我们的服务。同时，我们的客户支持团队随时准备帮助您解决任何问题或疑问。</p>
-    <p>请保持您的联系信息更新，以便我们能够及时向您发送服务更新、维护通知和专属优惠。</p>
-    <p>再次感谢您选择筱锋云服务。我们期待着支持和助力您的成功旅程！</p>
+    <p>请填写以下 <b>6</b> 位验证码，以完成您的注册流程：</p>
+    <div class="code-container">
+        <h2 style="color: #007bff;" th:text="${code}">000000</h2> <!-- 直接写入验证码，删除th:text -->
+    </div>
+    <p>验证码 <b>15</b> 分钟内有效。</p>
+    <p>如果您没有尝试注册绿链碳账本，请忽略此邮件。</p>
+    <p>感谢您对绿链碳账本的支持，祝您在碳交易之旅中取得成功！</p>
     <hr/>
-    <p class="right-aligned">此致，筱锋云服务团队！</p>
+    <p class="right-aligned">此致，绿链碳账本团队！</p>
 </div>
 <div class="footer">
-    <p id="copyright">&copy;️ 2016-2024 筱锋xiao_lfeng. All Rights Reserved.</p>
-    <p>有问题请联系：gm@x-lf.cn</p>
+    <p id="copyright">&copy; 2016-2024 绿链碳账本. All Rights Reserved.</p>
+    <p>有问题请联系：support@greenchain.com</p>
 </div>
+
 </body>
 <script type="application/javascript">
     // 生成当年年
