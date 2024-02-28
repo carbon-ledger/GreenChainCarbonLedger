@@ -1,6 +1,7 @@
 package com.frontleaves.greenchaincarbonledger.controllers;
 
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.AuthLoginVO;
+import com.frontleaves.greenchaincarbonledger.models.voData.getData.AuthOrganizeRegisterVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.AuthUserRegisterVO;
 import com.frontleaves.greenchaincarbonledger.services.AuthService;
 import com.frontleaves.greenchaincarbonledger.utils.BaseResponse;
@@ -66,7 +67,7 @@ public class AuthController {
 
     @PostMapping("/organize/register")
     public ResponseEntity<BaseResponse> organizeRegister(
-            @RequestBody @Validated AuthNewOrganizeRegisterVO authNewOrganizeRegisterVO,
+            @RequestBody @Validated AuthOrganizeRegisterVO authOrganizeRegisterVO,
             HttpServletRequest request,
             @NotNull BindingResult bindingResult
     ){
@@ -77,6 +78,6 @@ public class AuthController {
             return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR, ProcessingUtil.getValidatedErrorList(bindingResult));
         }
         // 业务操作
-        return authService.organizeRegister(timestamp, request, authNewOrganizeRegisterVO);
+        return authService.organizeRegister(timestamp, request, authOrganizeRegisterVO);
     }
 }
