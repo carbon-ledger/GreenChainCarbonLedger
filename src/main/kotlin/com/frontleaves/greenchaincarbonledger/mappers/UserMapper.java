@@ -39,5 +39,5 @@ public interface UserMapper {
     boolean createUser(UserDO newUserDO);
 
     @Update("UPDATE fy_carbon.fy_user SET password = #{password} WHERE uuid = #{uuid}")
-    void updateUser(UserDO getUserDO);
+    boolean updateUserPassword(UserDO getUserDO);
 }
