@@ -125,13 +125,10 @@ public class AuthServiceImpl implements AuthService {
                     } else {
                         return ResultUtil.error(timestamp, ErrorCode.SERVER_INTERNAL_ERROR);
                     }
-
                 } else {
-
                     return ResultUtil.error(timestamp, ErrorCode.USER_PASSWORD_INCONSISTENCY_ERROR);
                 }
             }
-
         } else {
             return ResultUtil.error(timestamp, ErrorCode.USER_PASSWORD_CURRENT_ERROR);
         }
