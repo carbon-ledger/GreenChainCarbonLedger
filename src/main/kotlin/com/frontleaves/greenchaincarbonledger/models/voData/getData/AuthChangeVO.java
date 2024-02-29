@@ -5,7 +5,13 @@ import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 
 /**
- * @author 26473
+ * AuthChangeVO
+ * <hr/>
+ * 用于接收用户修改密码的请求参数，包括当前密码，新密码，再次输入的新密码
+ *
+ * @since v1.0.0-SNAPSHOT
+ * @version v1.0.0-SNAPSHOT
+ * @author FLASHLACK
  */
 @Data
 public class AuthChangeVO {
