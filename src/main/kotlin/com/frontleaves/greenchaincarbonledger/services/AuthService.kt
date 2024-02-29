@@ -1,5 +1,6 @@
 package com.frontleaves.greenchaincarbonledger.services
 
+import com.frontleaves.greenchaincarbonledger.models.voData.getData.AuthChangeVO
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.AuthLoginVO
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.AuthUserRegisterVO
 import com.frontleaves.greenchaincarbonledger.utils.BaseResponse
@@ -37,4 +38,12 @@ interface AuthService {
         request: HttpServletRequest,
         authLoginVO: AuthLoginVO
     ): ResponseEntity<BaseResponse>
+
+    fun userChange(
+        timestamp: Long,
+        request: HttpServletRequest,
+        authChangeVO: AuthChangeVO
+    ): ResponseEntity<BaseResponse>
+
+
 }

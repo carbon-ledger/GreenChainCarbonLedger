@@ -1,5 +1,6 @@
 package com.frontleaves.greenchaincarbonledger.controllers;
 
+import com.frontleaves.greenchaincarbonledger.models.voData.getData.AuthChangeVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.AuthLoginVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.AuthUserRegisterVO;
 import com.frontleaves.greenchaincarbonledger.services.AuthService;
@@ -54,7 +55,7 @@ public class AuthController {
         @NotNull BindingResult bindingResult,
         HttpServletRequest request
     ) {
-        log.info("[Controller] 请求 adminUserRegister 接口");
+        log.info("[Controller] 请求 userLogin 接口");
         long timestamp = System.currentTimeMillis();
         // 对请求参数进行校验
         if (bindingResult.hasErrors()) {
@@ -62,5 +63,23 @@ public class AuthController {
         }
         // 业务操作
         return authService.userLogin(timestamp, request, authLoginVO);
+    }
+
+    @PatchMapping("/change")
+    //创建userChange 并且获取userChange所需要的值
+    public ResponseEntity<BaseResponse> userChange(
+            @RequestBody @Validated AuthChangeVO authChangeVO,
+            @NotNull BindingResult bindingResult,
+            HttpServletRequest request
+
+    ) {
+        log.info("[Controller] 请求 userChange 接口");
+        long timestamp = System.currentTimeMillis();
+        //请求参数进行校验
+        if (bindingResult.hasErrors()) {
+            return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR, ProcessingUtil.getValidatedErrorList(bindingResult));
+        }
+        //业务操作
+        return authService.userChange(timestamp, request, authChangeVO);
     }
 }
