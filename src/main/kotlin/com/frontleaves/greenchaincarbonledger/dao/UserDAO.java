@@ -35,9 +35,9 @@ public class UserDAO {
      * @return {@link UserDO}
      */
     public UserDO getUserByUuid(String uuid) {
-        log.info("[DAO] 执行 getUserByUUID 方法");
+        log.info("[DAO] 执行 getUserByUuid 方法");
+        log.info("\t> Redis 读取");
         if (userRedis.getData(BusinessConstants.NONE, uuid) != null) {
-            log.info("\t> Redis 读取");
             return gson.fromJson(userRedis.getData(BusinessConstants.NONE, uuid), UserDO.class);
         } else {
             log.info("\t> Mysql 读取");
