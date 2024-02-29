@@ -13,8 +13,7 @@ enum class BusinessConstants(
     val value: String,
     val description: String
 ) {
-    BUSINESS_LOGIN("login:", "登陆实现"),
-    ALL_PERMISSION("all:", "所有权限"),
+    ALL("all:", "所有"),
     USER("user:", "用户"),
     EMAIL("email:", "邮箱"),
     PHONE("phone:", "手机"),

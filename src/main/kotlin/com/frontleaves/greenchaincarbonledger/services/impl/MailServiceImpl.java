@@ -59,7 +59,7 @@ public class MailServiceImpl implements MailService {
                 verifyCodeDAO.deleteVerifyCode(email);
             }
         }
-        String verifyCode = ProcessingUtil.makeVerifyCode(6);
+        String verifyCode = ProcessingUtil.createRandomNumbers(6);
         log.debug("\t> 生成的校验码为: {}", verifyCode);
         // 处理数据
         VerifyCodeDO newVerifyCodeDO = new VerifyCodeDO();
