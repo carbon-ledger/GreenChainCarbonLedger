@@ -124,4 +124,18 @@ public class ProcessingUtil {
         String token = request.getHeader("X-Auth-UUID");
         return userDAO.getUserByUuid(token);
     }
+
+    /**
+     * 获取Cookie中的UUID
+     * <hr/>
+     * 用于获取Cookie中的UUID
+     *
+     * @param request 请求对象
+     * @return {@link String}
+     * @since v1.0.0
+     */
+    @NotNull
+    public static String getCookieUuid(@NotNull HttpServletRequest request) {
+        return request.getHeader("X-Auth-UUID");
+    }
 }

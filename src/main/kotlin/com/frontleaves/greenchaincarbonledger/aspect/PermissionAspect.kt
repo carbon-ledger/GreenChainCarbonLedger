@@ -60,19 +60,20 @@ class PermissionAspect(
         val getRole = checkAccountPermission.value
 
         // 获取用户所属角色
-        val getUserRole = userDAO.getUserByUuid(getUserUuid).role
+        val getUserDO = userDAO.getUserByUuid(getUserUuid)
         val hasNeedToCheckRole = getRole.isNotBlank()
-        log.debug("\t> 需求角色: {}，需求权限: {}", getUserRole, getPermissions.joinToString(","))
+        log.debug("\t> 需求角色: {}，需求权限: {}", getRole, getPermissions.joinToString(","))
 
         val getRoleDO = roleDAO.getRoleByName(getRole)
         if (hasNeedToCheckRole) {
-            if (getRoleDO != null) {
-                if (getRoleDO.id != getUserRole) {
+            // TODO: 2021/8/3 从用户获取角色(BUG)
+            /*if (getRoleDO != null) {
+                if (getRoleDO.uuid != getUserDO.role) {
                     throw RoleNotEnoughPermissionException("您没有足够的权限访问该资源")
                 }
             } else {
                 throw RoleNotFoundException("角色未找到")
-            }
+            }*/
         }
         // 从 Role 获取权限列表
         val getRolePermissions = gson.fromJson(getRoleDO.permission, Array<String>::class.java)
