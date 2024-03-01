@@ -1,9 +1,11 @@
 package com.frontleaves.greenchaincarbonledger.config.startup
 
 import com.frontleaves.greenchaincarbonledger.annotations.KotlinSlf4j.Companion.log
+import com.frontleaves.greenchaincarbonledger.common.constants.SqlPrepareData
 import com.frontleaves.greenchaincarbonledger.models.doData.PermissionDO
 import com.frontleaves.greenchaincarbonledger.models.doData.RoleDO
 import com.frontleaves.greenchaincarbonledger.utils.ProcessingUtil
+import com.google.gson.Gson
 import org.springframework.jdbc.core.JdbcTemplate
 import java.sql.Timestamp
 
@@ -111,6 +113,48 @@ class PrepareData(private val jdbcTemplate: JdbcTemplate) {
                         null
                     )
                 }
+        }
+    }
+
+    fun prepareCheckRoleHasPermission(roleList: List<RoleDO>) {
+        val gson = Gson()
+        // 获取角色权限
+        roleList.forEach { role ->
+            val getRolePermissions = gson.fromJson(role.permission, Array<String>::class.java)
+            // 构建角色权限列表
+            if (role.name.equals("console")) {
+                if (getRolePermissions.isNullOrEmpty()) {
+                    log.debug("\t> 角色 console 未设置权限，开始初始化默认权限")
+                    val createPermission = SqlPrepareData.SQL_ROLE_CONSOLE_PERMISSION_LIST
+                    jdbcTemplate.update(
+                        "UPDATE fy_role SET permission = ? WHERE name = ?",
+                        gson.toJson(createPermission),
+                        "console"
+                    )
+                }
+            }
+            if (role.name.equals("admin")) {
+                if (getRolePermissions.isNullOrEmpty()) {
+                    log.debug("\t> 角色 admin 未设置权限，开始初始化默认权限")
+                    val createPermission = SqlPrepareData.SQL_ROLE_ADMIN_PERMISSION_LIST
+                    jdbcTemplate.update(
+                        "UPDATE fy_role SET permission = ? WHERE name = ?",
+                        gson.toJson(createPermission),
+                        "admin"
+                    )
+                }
+            }
+            if (role.name.equals("organize")) {
+                if (getRolePermissions.isNullOrEmpty()) {
+                    log.debug("\t> 角色 organize 未设置权限，开始初始化默认权限")
+                    val createPermission = SqlPrepareData.SQL_ROLE_ORGANIZE_PERMISSION_LIST
+                    jdbcTemplate.update(
+                        "UPDATE fy_role SET permission = ? WHERE name = ?",
+                        gson.toJson(createPermission),
+                        "organize"
+                    )
+                }
+            }
         }
     }
 }

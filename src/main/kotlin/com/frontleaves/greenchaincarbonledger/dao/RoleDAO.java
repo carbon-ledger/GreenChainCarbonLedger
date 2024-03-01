@@ -66,7 +66,7 @@ public class RoleDAO {
         log.info("[DAO] 执行 getRoleByName 方法");
         log.info("\t> Redis 读取");
         ArrayList<String> getRedisRolesDO = (ArrayList<String>) roleRedis.getList(BusinessConstants.ALL);
-        if (getRedisRolesDO != null) {
+        if (getRedisRolesDO != null && !getRedisRolesDO.isEmpty()) {
             // 遍历获取角色信息
             for (String getRedisData : getRedisRolesDO) {
                 RoleDO getRedisRoleDO = gson.fromJson(getRedisData, RoleDO.class);
@@ -74,13 +74,11 @@ public class RoleDAO {
                     return getRedisRoleDO;
                 }
             }
-        } else {
-            log.info("\t> Mysql 读取");
-            RoleDO getRoleDO = roleMapper.getRoleByName(roleName);
-            log.info("\t> Redis 写入");
-            roleRedis.setData(BusinessConstants.ALL, getRoleDO.getUuid(), gson.toJson(getRoleDO), RedisExpiration.DAY);
-            return getRoleDO;
         }
-        return null;
+        log.info("\t> Mysql 读取");
+        RoleDO getRoleDO = roleMapper.getRoleByName(roleName);
+        log.info("\t> Redis 写入");
+        roleRedis.setData(BusinessConstants.ALL, getRoleDO.getUuid(), gson.toJson(getRoleDO), RedisExpiration.DAY);
+        return getRoleDO;
     }
 }
