@@ -17,11 +17,11 @@ import lombok.Data;
 public class AuthChangeVO {
     @NotBlank(message = "当前密码不能为空")
     @Pattern(regexp = "^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z]).{6,30}$", message = "当前密码根式不正确")
-    public String currentPassword;
+    String currentPassword;
     @NotBlank(message = "新密码不能为空")
     @Pattern(regexp = "^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z]).{6,30}$", message = "新密码密码根式不正确")
-    public String newPassword;
+    String newPassword;
     @NotBlank(message = "再次输入的新密码不能为空")
     @Pattern(regexp = "^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z]).{6,30}$", message = "再次输入的新密码根式不正确")
-    public String newPasswordConfirm;
+    String newPasswordConfirm;
 }

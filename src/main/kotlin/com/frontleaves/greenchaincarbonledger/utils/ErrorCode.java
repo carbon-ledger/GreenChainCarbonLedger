@@ -37,7 +37,8 @@ public enum ErrorCode {
     REQUEST_METHOD_NOT_SUPPORTED("RequestMethodNotSupported", 40500, "请求方法不支持"),
     SERVER_INTERNAL_ERROR("ServerInternalError", 50000, "服务器内部错误"),
     ORGANIZE_NOT_EXISTED("OrganizeNotExist", 40399, "组织不存在"),
-    INVITE_CODE_ERROR("VerifyCodeError", 40398, "邀请码错误");
+    INVITE_CODE_ERROR("VerifyCodeError", 40398, "邀请码错误"),
+    CODE_NOT_EXISTED("CodeNotExisted", 40397, "校验码不存在");
     final String output;
     final Integer code;
     final String message;
