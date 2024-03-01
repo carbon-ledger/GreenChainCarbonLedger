@@ -30,6 +30,7 @@ public enum ErrorCode {
     USER_NOT_EXISTED("UsernameNotExist", 40305, "用户不存在"),
     VERIFY_CODE_ERROR("VerifyCodeError", 40306, "验证码错误"),
     VERIFY_CODE_VALID("VerifyCodeValid", 40307, "验证码有效"),
+    VERIFY_CODE_NOT_EXISTED("VerifyCodeNotExisted", 40397, "校验码不存在"),
     PATH_VARIABLE_ERROR("PathVariableError", 40308, "路径变量错误"),
     TEMPLATE_PARSE_ERROR("TemplateParseError", 40309, "模板解析错误"),
     CAN_T_RESET_MY_PASSWORD("CanTResetMyPassword", 40310, "不能重置自己的密码"),
@@ -38,8 +39,8 @@ public enum ErrorCode {
     SERVER_INTERNAL_ERROR("ServerInternalError", 50000, "服务器内部错误"),
     MAIL_TEMPLATE_NOT_EXIST("MailTemplateNotExist", 50001, "邮箱模板不存在"),
     ORGANIZE_NOT_EXISTED("OrganizeNotExist", 40399, "组织不存在"),
-    INVITE_CODE_ERROR("VerifyCodeError", 40398, "邀请码错误"),
-    CODE_NOT_EXISTED("CodeNotExisted", 40397, "校验码不存在");
+    INVITE_CODE_ERROR("VerifyCodeError", 40398, "邀请码错误");
+
     final String output;
     final Integer code;
     final String message;
