@@ -11,6 +11,7 @@ public class BackAuthLoginVO {
     String role;
     String token;
     PermissionVO permission;
+    Boolean recover;
 
     @Data
     @Accessors(chain = true)

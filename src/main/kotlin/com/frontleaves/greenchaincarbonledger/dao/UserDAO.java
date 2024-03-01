@@ -164,6 +164,11 @@ public class UserDAO {
         log.info("\t> Mysql  软删除");
         return userMapper.userAccountDeletion(getUserDO.getUuid());
     }
+    public boolean userAccountDistanceDeletion(UserDO getUserDO){
+        log.info("[DAO] 执行 userAccountDistanceDeletion 方法");
+        log.info("\t> Mysql 更新");
+        return userMapper.userAccountDistanceDeletion(getUserDO.getUuid());
+    }
 
 
 
