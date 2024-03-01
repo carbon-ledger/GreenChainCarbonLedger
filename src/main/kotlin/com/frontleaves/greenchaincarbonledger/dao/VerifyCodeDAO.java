@@ -1,6 +1,7 @@
 package com.frontleaves.greenchaincarbonledger.dao;
 
 import com.frontleaves.greenchaincarbonledger.common.BusinessConstants;
+import com.frontleaves.greenchaincarbonledger.common.constants.RedisExpiration;
 import com.frontleaves.greenchaincarbonledger.models.doData.VerifyCodeDO;
 import com.frontleaves.greenchaincarbonledger.utils.redis.ContactCodeRedis;
 import com.google.gson.Gson;
@@ -89,6 +90,6 @@ public class VerifyCodeDAO {
     public boolean insertVerifyCodeByEmail(@NotNull VerifyCodeDO newVerifyCodeDO) {
         log.info("[DAO] 执行 insertVerifyCodeByEmail 方法");
         log.info("\t> Redis 保存");
-        return contactCodeRedis.setData(BusinessConstants.EMAIL, newVerifyCodeDO.getContent(), gson.toJson(newVerifyCodeDO), 15L);
+        return contactCodeRedis.setData(BusinessConstants.EMAIL, newVerifyCodeDO.getContent(), gson.toJson(newVerifyCodeDO), RedisExpiration.MINUTE_15);
     }
 }

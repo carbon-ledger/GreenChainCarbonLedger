@@ -1,5 +1,6 @@
 package com.frontleaves.greenchaincarbonledger.services.impl;
 
+import com.frontleaves.greenchaincarbonledger.dao.RoleDAO;
 import com.frontleaves.greenchaincarbonledger.dao.UserDAO;
 import com.frontleaves.greenchaincarbonledger.models.doData.UserDO;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.AuthChangeVO;
@@ -36,6 +37,7 @@ import java.util.regex.Pattern;
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
     private final UserDAO userDAO;
+    private final RoleDAO roleDAO;
 
     @NotNull
     @Override
@@ -48,14 +50,15 @@ public class AuthServiceImpl implements AuthService {
         }
         // 保存用户
         UserDO newUserDO = new UserDO();
+        // 获取默认 Role
         newUserDO
                 .setUuid(ProcessingUtil.createUuid())
                 .setUserName(authUserRegisterVO.getUsername())
                 .setRealName(authUserRegisterVO.getRealname())
                 .setEmail(authUserRegisterVO.getEmail())
                 .setPhone(authUserRegisterVO.getPhone())
-                .setPassword(ProcessingUtil.passwordEncrypt(authUserRegisterVO.getPassword()))
-                .setRole((short) 2);
+                .setRole(roleDAO.getRoleByName("admin").getUuid())
+                .setPassword(ProcessingUtil.passwordEncrypt(authUserRegisterVO.getPassword()));
         if (userDAO.createUser(newUserDO)) {
             return ResultUtil.success(timestamp, "管理用户注册成功");
         } else {

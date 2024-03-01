@@ -10,6 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
@@ -37,6 +38,7 @@ public class MailTemplateServiceImpl implements MailTemplateService {
     private String from;
 
     @Override
+    @Async
     public void sendMail(@NotNull String email, @NotNull HashMap<String, Object> prepareData, @NotNull String template) {
         try {
             MimeMessage message = javaMailSender.createMimeMessage();
