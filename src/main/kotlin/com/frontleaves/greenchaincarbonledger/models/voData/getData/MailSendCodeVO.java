@@ -16,7 +16,7 @@ import lombok.Data;
 @Data
 public class MailSendCodeVO {
     @Email(message = "邮箱格式不正确")
-    String email;
+    public String email;
     @NotBlank(message = "模板不能为空")
-    String template;
+    public String template;
 }

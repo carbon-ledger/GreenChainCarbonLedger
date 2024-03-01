@@ -31,13 +31,15 @@ open class ShiroConfig(
         val map = HashMap<String, String>()
             .also {
                 it["/**"] = "cors"
-                it["/auth/**"] = "cors,time"
+                it["/auth/change"] = "cors,time,jwt"
+                it["/auth/login"] = "cors,time"
+                it["/auth/organize/register"] = "cors,time"
             }
         shiroFactory.filterChainDefinitionMap = map
 
         // 自定义拦截器
         val customFilter = HashMap<String, Filter>()
-            .also { it["authc"] = JwtFilter(jwtUtil) }
+            .also { it["jwt"] = JwtFilter(jwtUtil) }
             .also { it["cors"] = CorsFilter() }
             .also { it["time"] = TimestampFilter() }
         shiroFactory.filters = customFilter

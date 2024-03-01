@@ -26,13 +26,15 @@ class JwtFilter(
     private val gson = Gson()
 
     override fun onPreHandle(request: ServletRequest, response: ServletResponse, mappedValue: Any?): Boolean {
+        val req = request as HttpServletRequest
         log.debug("[Filter] 执行 JwtFilter 方法 | 处理登陆权限认证")
         // 获取请求头中的 token 及 uuid 进行验证
-        val token = getAuthzHeader(request)
-        val uuid = request.getParameter("X-Auth-UUID")
-        log.debug("\tUUID: $uuid | TOKEN: $token")
+        var token = getAuthzHeader(request)
+        val uuid = req.getHeader("X-Auth-UUID")
+        log.debug("\tUUID: $uuid")
         // 从数据库获取uuid进行解密检查
         if (uuid != null && token != null) {
+            token = token.replace("Bearer ", "")
             if (uuid.isNotBlank() && token.isNotBlank()) {
                 return this.isAccessAllowed(request, response, mappedValue)
             }
@@ -45,12 +47,20 @@ class JwtFilter(
         servletResponse: ServletResponse,
         mappedValue: Any?
     ): Boolean {
+        val request = servletRequest as HttpServletRequest
         log.debug("\tOverride Function isAccessAllowed")
+        val timestamp = System.currentTimeMillis()
         // 获取请求头中的 token 及 uuid 进行验证
         val token = getAuthzHeader(servletRequest)
-        val uuid = servletRequest.getParameter("X-Auth-UUID")
+        val uuid = request.getHeader("X-Auth-UUID")
         // token 解密
-        return jwtUtil.verifyToken(uuid!!, token!!)
+        if (jwtUtil.verifyToken(uuid!!, token!!.replace("Bearer ", ""))) {
+            return true
+        } else {
+            servletResponse.contentType = "application/json;charset=UTF-8"
+            servletResponse.writer.println(gson.toJson(ResultUtil.error(timestamp, ErrorCode.TOKEN_VERIFY_ERROR).body))
+            return false
+        }
     }
 
     override fun onAccessDenied(servletRequest: ServletRequest, servletResponse: ServletResponse): Boolean {
@@ -63,12 +73,12 @@ class JwtFilter(
         servletResponse.contentType = "application/json;charset=UTF-8"
         if (token.isNullOrEmpty()) {
             log.info("\t\t> token 为空或不存在")
-            servletResponse.writer.println(gson.toJson(ResultUtil.error(timestamp, ErrorCode.TOKEN_NOT_EXIST)))
+            servletResponse.writer.println(gson.toJson(ResultUtil.error(timestamp, ErrorCode.TOKEN_NOT_EXIST).body))
         } else if (uuid.isNullOrEmpty()) {
             log.info("\t\t> uuid 为空或不存在")
-            servletResponse.writer.println(gson.toJson(ResultUtil.error(timestamp, ErrorCode.UUID_NOT_EXIST)))
+            servletResponse.writer.println(gson.toJson(ResultUtil.error(timestamp, ErrorCode.UUID_NOT_EXIST).body))
         } else {
-            servletResponse.writer.println(gson.toJson(ResultUtil.error(timestamp, ErrorCode.SERVER_INTERNAL_ERROR)))
+            servletResponse.writer.println(gson.toJson(ResultUtil.error(timestamp, ErrorCode.SERVER_INTERNAL_ERROR).body))
         }
         return false
     }
