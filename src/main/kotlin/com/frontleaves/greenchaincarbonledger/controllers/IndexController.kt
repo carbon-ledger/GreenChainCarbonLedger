@@ -1,6 +1,7 @@
 package com.frontleaves.greenchaincarbonledger.controllers
 
 import com.frontleaves.greenchaincarbonledger.common.constants.ProjectConstants
+import com.frontleaves.greenchaincarbonledger.services.MailTemplateService
 import com.frontleaves.greenchaincarbonledger.utils.BaseResponse
 import com.frontleaves.greenchaincarbonledger.utils.ResultUtil
 import org.springframework.http.ResponseEntity
@@ -17,7 +18,10 @@ import org.springframework.web.bind.annotation.RestController
  * @author xiao_lfeng
  */
 @RestController
-class IndexController(private val getConfig: ProjectConstants) {
+class IndexController(
+    private val getConfig: ProjectConstants,
+    private val mailTemplateService: MailTemplateService
+) {
 
     /**
      * index
@@ -31,6 +35,7 @@ class IndexController(private val getConfig: ProjectConstants) {
     @GetMapping("/info")
     fun index(): ResponseEntity<BaseResponse> {
         val timestamp = System.currentTimeMillis()
+        mailTemplateService.mailSendWithTemplate("lfengzeng@vip.qq.com", "user-delete")
         return ResultUtil.custom(
             timestamp,
             "Success",
