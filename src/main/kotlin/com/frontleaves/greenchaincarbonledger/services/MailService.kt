@@ -27,4 +27,16 @@ interface MailService {
      * @return 发送结果
      */
     fun sendMailByCode(timestamp: Long, request: HttpServletRequest, email: String, template: String): ResponseEntity<BaseResponse>
+
+    /**
+     * ## sendMail
+     * ### 发送邮件
+     * 根据模板发送邮件，不包含验证码，仅发送对应邮件
+     *
+     * @param request 请求
+     * @param email 用户邮箱
+     * @param template 邮件模板
+     * @return 发送结果
+     */
+    fun sendMail(timestamp: Long, email: String, template: String): ResponseEntity<BaseResponse>
 }

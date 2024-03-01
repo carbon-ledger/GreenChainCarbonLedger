@@ -59,7 +59,7 @@ public class MailServiceImpl implements MailService {
                 verifyCodeDAO.deleteVerifyCode(email);
             }
         }
-        String verifyCode = ProcessingUtil.makeVerifyCode(6);
+        String verifyCode = ProcessingUtil.createRandomNumbers(6);
         log.debug("\t> 生成的校验码为: {}", verifyCode);
         // 处理数据
         VerifyCodeDO newVerifyCodeDO = new VerifyCodeDO();
@@ -79,5 +79,13 @@ public class MailServiceImpl implements MailService {
             log.error("\t> 邮箱校验码存入数据库失败");
             return ResultUtil.error(timestamp, ErrorCode.SERVER_INTERNAL_ERROR);
         }
+    }
+
+    @NotNull
+    @Override
+    public ResponseEntity<BaseResponse> sendMail(long timestamp, @NotNull String email, @NotNull String template) {
+        log.info("[Service] 执行 sendMail 方法");
+        mailTemplateService.mailSendWithTemplate(email, template);
+        return ResultUtil.success(timestamp, "邮件发送成功");
     }
 }

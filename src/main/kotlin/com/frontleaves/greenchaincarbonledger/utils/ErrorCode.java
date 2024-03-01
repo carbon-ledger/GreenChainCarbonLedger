@@ -25,17 +25,20 @@ public enum ErrorCode {
     USER_PASSWORD_REPEAT_ERROR("UsePasswordRepeatError", 40010, "新密码与当前密码重复"),
     REQUEST_BODY_ERROR("RequestBodyError", 40301, "请求体参数错误"),
     TOKEN_VERIFY_ERROR("TokenVerifyError", 40302, "Token 验证错误"),
-    REQUEST_BODY_MISSING("RequestBodyMissing", 40302, "请求体缺失(请求体不能为空)"),
-    USER_EXISTED("UsernameExisted", 40303, "用户已存在"),
-    USER_NOT_EXISTED("UsernameNotExist", 40304, "用户不存在"),
-    VERIFY_CODE_ERROR("VerifyCodeError", 40305, "验证码错误"),
-    VERIFY_CODE_VALID("VerifyCodeValid", 40306, "验证码有效"),
-    PATH_VARIABLE_ERROR("PathVariableError", 40307, "路径变量错误"),
-    TEMPLATE_PARSE_ERROR("TemplateParseError", 40308, "模板解析错误"),
+    REQUEST_BODY_MISSING("RequestBodyMissing", 40303, "请求体缺失(请求体不能为空)"),
+    USER_EXISTED("UsernameExisted", 40304, "用户已存在"),
+    USER_NOT_EXISTED("UsernameNotExist", 40305, "用户不存在"),
+    VERIFY_CODE_ERROR("VerifyCodeError", 40306, "验证码错误"),
+    VERIFY_CODE_VALID("VerifyCodeValid", 40307, "验证码有效"),
+    PATH_VARIABLE_ERROR("PathVariableError", 40308, "路径变量错误"),
+    TEMPLATE_PARSE_ERROR("TemplateParseError", 40309, "模板解析错误"),
+    CAN_T_RESET_MY_PASSWORD("CanTResetMyPassword", 40310, "不能重置自己的密码"),
     PAGE_NOT_FOUNDED("PageNotFounded", 40401, "页面不存在"),
     REQUEST_METHOD_NOT_SUPPORTED("RequestMethodNotSupported", 40500, "请求方法不支持"),
-    SERVER_INTERNAL_ERROR("ServerInternalError", 50000, "服务器内部错误");
-
+    SERVER_INTERNAL_ERROR("ServerInternalError", 50000, "服务器内部错误"),
+    MAIL_TEMPLATE_NOT_EXIST("MailTemplateNotExist", 50001, "邮箱模板不存在"),
+    ORGANIZE_NOT_EXISTED("OrganizeNotExist", 40399, "组织不存在"),
+    INVITE_CODE_ERROR("VerifyCodeError", 40398, "邀请码错误");
     final String output;
     final Integer code;
     final String message;

@@ -16,9 +16,9 @@ import lombok.Data;
 @Data
 public class AuthLoginVO {
     @NotBlank(message = "用户名不能为空")
-    String user;
+    public String user;
     @NotBlank(message = "密码不能为空")
     //若密码格式错误则密码肯定错误
     @Pattern(regexp = "(?=.*\\d)(?=.*[a-z])(?=.*[A-Z]).{6,30}$",message = "密码错误")
-    String password;
+    public String password;
 }

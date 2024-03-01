@@ -35,3 +35,4 @@ build/
 ### Customize ###
 /src/main/resources/application-dev.yml
 /logs/
+.DS_Store

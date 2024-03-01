@@ -17,11 +17,11 @@ import java.sql.Timestamp;
 @Data
 @Accessors(chain = true)
 public class VerifyCodeDO {
-    Boolean type;
-    String content;
-    String code;
-    Timestamp createdAt;
-    Timestamp expiredAt;
-    String userAgent;
-    String userIp;
+    public Boolean type;
+    public String content;
+    public String code;
+    public Timestamp createdAt;
+    public Timestamp expiredAt;
+    public String userAgent;
+    public String userIp;
 }
