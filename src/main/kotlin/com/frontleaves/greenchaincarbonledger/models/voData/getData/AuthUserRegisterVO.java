@@ -16,7 +16,7 @@ import lombok.Data;
  */
 @Data
 public class AuthUserRegisterVO {
-    @Pattern(regexp = "^[a-zA-Z0-9_-]{4,40}$", message = "用户名格式不正确")
+    @Pattern(regexp = "^[a-zA-Z0-9_-]{4,40}$", message = "用户名格式不正确【用户名长度在4-40之间，只能包含字母、数字、下划线、减号】")
     public String username;
     @NotBlank(message = "真实信息不能为空")
     public String realname;
