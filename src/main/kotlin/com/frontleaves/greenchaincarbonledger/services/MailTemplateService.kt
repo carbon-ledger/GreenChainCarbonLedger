@@ -45,6 +45,16 @@ interface MailTemplateService {
     fun mailSendWithTemplate(email: String, template: String)
 
     /**
+     * ## mailSendWithCustom
+     * ### 发送邮件(自定义)
+     * 发送邮件, 用于发送邮件, 自定义发送内容（根据模板进行自定义）
+     *
+     * @param email 用户邮箱
+     * @param template 邮件模板
+     */
+    fun mailSendWithCustom(email: String, prepareData: java.util.HashMap<String?, Any?>, template: String)
+
+    /**
      * ## mailSend
      * ### 发送邮件
      * 发送邮件, 用于发送邮件, 根据模板进行邮件内容发送，发送的内容不是验证码类型
