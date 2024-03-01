@@ -151,4 +151,20 @@ public class UserDAO {
         log.info("\t> Mysql 更新");
         return userMapper.updateUserPassword(getUserDO);
     }
+
+    /**
+     * 数据库用户账号软删除（只设置了时间戳）
+     * </hr>
+     *数据库用户账号注销，只设置了时间戳
+     * @param getUserDO 用户
+     * @return 注销操作成功返回ture，失败则返回false
+     */
+    public boolean userAccountDeletion (UserDO getUserDO) {
+        log.info("[DAO] 执行 deleteUserAccount 方法");
+        log.info("\t> Mysql  软删除");
+        return userMapper.userAccountDeletion(getUserDO.getUuid());
+    }
+
+
+
 }

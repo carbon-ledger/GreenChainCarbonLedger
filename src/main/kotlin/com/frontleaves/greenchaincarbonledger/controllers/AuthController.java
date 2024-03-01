@@ -1,6 +1,7 @@
 package com.frontleaves.greenchaincarbonledger.controllers;
 
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.AuthChangeVO;
+import com.frontleaves.greenchaincarbonledger.models.voData.getData.AuthDeleteVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.AuthLoginVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.AuthUserRegisterVO;
 import com.frontleaves.greenchaincarbonledger.services.AuthService;
@@ -49,11 +50,18 @@ public class AuthController {
         return authService.adminUserRegister(timestamp, request, authUserRegisterVO);
     }
 
+    /**
+     * 用户登录
+     * @param authLoginVO 登录获取信息
+     * @param bindingResult 结果
+     * @param request 请求
+     * @return 成功则去业务层操作，失败则返回错误信息
+     */
     @PostMapping("/login")
     public ResponseEntity<BaseResponse> userLogin(
-        @RequestBody @Validated AuthLoginVO authLoginVO,
-        @NotNull BindingResult bindingResult,
-        HttpServletRequest request
+            @RequestBody @Validated AuthLoginVO authLoginVO,
+            @NotNull BindingResult bindingResult,
+            HttpServletRequest request
     ) {
         log.info("[Controller] 请求 userLogin 接口");
         long timestamp = System.currentTimeMillis();
@@ -65,8 +73,14 @@ public class AuthController {
         return authService.userLogin(timestamp, request, authLoginVO);
     }
 
+    /**
+     * 用户密码修改
+     * @param authChangeVO 密码修改获取的信息
+     * @param bindingResult 结果
+     * @param request 请求
+     * @return 成功则去业务层操作，失败则返回错误信息
+     */
     @PatchMapping("/change")
-    //创建userChange 并且获取userChange所需要的值
     public ResponseEntity<BaseResponse> userChange(
             @RequestBody @Validated AuthChangeVO authChangeVO,
             @NotNull BindingResult bindingResult,
@@ -81,5 +95,28 @@ public class AuthController {
         }
         //业务操作
         return authService.userChange(timestamp, request, authChangeVO);
+    }
+
+    /**
+     * 用户账户注销
+     * @param authDeleteVO 账号注销获取的信息
+     * @param bindingResult 结果
+     * @param request 请求
+     * @return 成功则去业务层操作，失败则返回错误信息
+     */
+    @DeleteMapping("/delete")
+    public ResponseEntity<BaseResponse> userDelete(
+            @RequestBody @Validated AuthDeleteVO authDeleteVO,
+            @NotNull BindingResult bindingResult,
+            HttpServletRequest request
+    ) {
+        log.info("[Controller] 请求 userDelete 接口");
+        long timestamp = System.currentTimeMillis();
+        //请求参数进行校验
+        if (bindingResult.hasErrors()) {
+            return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR, ProcessingUtil.getValidatedErrorList(bindingResult));
+        }
+        //业务操作
+        return authService.userDelete(timestamp, request, authDeleteVO);
     }
 }
