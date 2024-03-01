@@ -1,8 +1,10 @@
 package com.frontleaves.greenchaincarbonledger.services.impl;
 
 import com.frontleaves.greenchaincarbonledger.dao.UserDAO;
+import com.frontleaves.greenchaincarbonledger.dao.VerifyCodeDAO;
 import com.frontleaves.greenchaincarbonledger.models.doData.UserDO;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.AuthChangeVO;
+import com.frontleaves.greenchaincarbonledger.models.voData.getData.AuthDeleteVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.AuthLoginVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.AuthUserRegisterVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.returnData.BackAuthLoginVO;
@@ -36,6 +38,7 @@ import java.util.regex.Pattern;
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
     private final UserDAO userDAO;
+    private final VerifyCodeDAO verifyCodeDAO;
 
     @NotNull
     @Override
@@ -116,22 +119,45 @@ public class AuthServiceImpl implements AuthService {
             if (authChangeVO.getCurrentPassword().equals(authChangeVO.getNewPassword())) {
                 return ResultUtil.error(timestamp, ErrorCode.USER_PASSWORD_REPEAT_ERROR);
             } else {
-                //将用户输入的重复新密码进行检查
-                if (authChangeVO.getNewPassword().equals(authChangeVO.getNewPasswordConfirm())) {
-                    //新密码更新到数据库中
-                    getUserDO.setPassword(ProcessingUtil.passwordEncrypt(authChangeVO.getNewPassword()));
-                    if (userDAO.updateUserPassword(getUserDO)) {
-                        return ResultUtil.success(timestamp, "密码更新完毕");
-                    } else {
-                        return ResultUtil.error(timestamp, ErrorCode.SERVER_INTERNAL_ERROR);
-                    }
+                //新密码更新到数据库中
+                getUserDO.setPassword(ProcessingUtil.passwordEncrypt(authChangeVO.getNewPassword()));
+                if (userDAO.updateUserPassword(getUserDO)) {
+                    // TODO: 还没有加上邮箱发送提醒
+                    return ResultUtil.success(timestamp, "密码更新完毕");
                 } else {
-                    return ResultUtil.error(timestamp, ErrorCode.USER_PASSWORD_INCONSISTENCY_ERROR);
+                    return ResultUtil.error(timestamp, ErrorCode.SERVER_INTERNAL_ERROR);
                 }
             }
         } else {
             return ResultUtil.error(timestamp, ErrorCode.USER_PASSWORD_CURRENT_ERROR);
         }
+    }
+
+    @NotNull
+    @Override
+    public ResponseEntity<BaseResponse> userDelete(long timestamp, @NotNull HttpServletRequest request, @NotNull AuthDeleteVO authDeleteVO) {
+        //获取用户UUID再将用户的UUID与数据库中的UUID进行校验，取出数据库中的实例
+        String getUuid = request.getHeader("X-Auth-UUID");
+        UserDO getUserDO = userDAO.getUserByUuid(getUuid);
+        //进行邮箱验证码的判断，成功进行密码的校验，不成功则返回错误信息
+        if (getUserDO != null &&verifyCodeDAO.getVerifyCodeByContact(getUserDO.getEmail()).getCode().equals(authDeleteVO.getCode())) {
+            //进行密码的校验,成功进行软删除
+            if (ProcessingUtil.passwordCheck(authDeleteVO.getPassword(), getUserDO.getPassword())) {
+                // 邮箱验证码和密码验证成功，进行软删除
+                boolean deletionResult = userDAO.userAccountDeletion(getUserDO);
+                if (deletionResult) {
+                    return ResultUtil.success(timestamp, "账号注销成功（账号注销缓冲期为7天）");
+                } else {
+                    return ResultUtil.error(timestamp, ErrorCode.SERVER_INTERNAL_ERROR);
+                }
+
+            } else {
+                return ResultUtil.error(timestamp, ErrorCode.USER_PASSWORD_CURRENT_ERROR);
+            }
+        } else {
+            return ResultUtil.error(timestamp, ErrorCode.VERIFY_CODE_ERROR);
+        }
+
     }
 }
 
