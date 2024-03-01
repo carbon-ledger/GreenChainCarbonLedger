@@ -229,7 +229,7 @@ public class AuthServiceImpl implements AuthService {
                 // 删除缓存
                 verifyCodeDAO.deleteVerifyCode(authForgetCodeVO.getCode());
                 // 验证密码和确认密码是否相同
-                if (authForgetCodeVO.getPassword().equals(authForgetCodeVO.getCode())) {
+                if (authForgetCodeVO.getPassword().equals(authForgetCodeVO.getConfirmPassword())) {
                     // 先对密码进行加密再将新密码存入数据库
                     UserDO userDO = new UserDO();
                     userDO.setPassword(ProcessingUtil.passwordEncrypt(authForgetCodeVO.getPassword()));
@@ -244,7 +244,7 @@ public class AuthServiceImpl implements AuthService {
                 return ResultUtil.error(timestamp, ErrorCode.VERIFY_CODE_ERROR);
             }
         } else {
-            return ResultUtil.error(timestamp, ErrorCode.CODE_NOT_EXISTED);
+            return ResultUtil.error(timestamp, ErrorCode.VERIFY_CODE_NOT_EXISTED);
         }
 
     }
