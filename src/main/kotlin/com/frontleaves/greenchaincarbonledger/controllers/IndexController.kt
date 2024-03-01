@@ -17,7 +17,9 @@ import org.springframework.web.bind.annotation.RestController
  * @author xiao_lfeng
  */
 @RestController
-class IndexController(private val getConfig: ProjectConstants) {
+class IndexController(
+    private val getConfig: ProjectConstants,
+) {
 
     /**
      * index
@@ -38,19 +40,5 @@ class IndexController(private val getConfig: ProjectConstants) {
             "欢迎使用 GreenChainCarbonLedger 系统，当您看到此状态时系统正常运行中",
             getConfig.getProjectInfoMap
         )
-    }
-
-    /**
-     * front
-     *
-     * 前端
-     *
-     * 返回前端页面, 用于前端页面访问
-     *
-     * @return 前端页面
-     */
-    //@GetMapping("/public/**")
-    fun front(): String {
-        return "index"
     }
 }

@@ -1,11 +1,14 @@
 package com.frontleaves.greenchaincarbonledger.services.impl;
 
+import com.frontleaves.greenchaincarbonledger.dao.RoleDAO;
 import com.frontleaves.greenchaincarbonledger.dao.UserDAO;
 import com.frontleaves.greenchaincarbonledger.dao.VerifyCodeDAO;
 import com.frontleaves.greenchaincarbonledger.models.doData.UserDO;
+import com.frontleaves.greenchaincarbonledger.models.doData.VerifyCodeDO;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.AuthChangeVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.AuthDeleteVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.AuthLoginVO;
+import com.frontleaves.greenchaincarbonledger.models.voData.getData.AuthOrganizeRegisterVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.AuthUserRegisterVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.returnData.BackAuthLoginVO;
 import com.frontleaves.greenchaincarbonledger.services.AuthService;
@@ -38,6 +41,7 @@ import java.util.regex.Pattern;
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
     private final UserDAO userDAO;
+    private final RoleDAO roleDAO;
     private final VerifyCodeDAO verifyCodeDAO;
 
     @NotNull
@@ -51,14 +55,15 @@ public class AuthServiceImpl implements AuthService {
         }
         // 保存用户
         UserDO newUserDO = new UserDO();
+        // 获取默认 Role
         newUserDO
                 .setUuid(ProcessingUtil.createUuid())
                 .setUserName(authUserRegisterVO.getUsername())
                 .setRealName(authUserRegisterVO.getRealname())
                 .setEmail(authUserRegisterVO.getEmail())
                 .setPhone(authUserRegisterVO.getPhone())
-                .setPassword(ProcessingUtil.passwordEncrypt(authUserRegisterVO.getPassword()))
-                .setRole((short) 2);
+                .setRole(roleDAO.getRoleByName("admin").getUuid())
+                .setPassword(ProcessingUtil.passwordEncrypt(authUserRegisterVO.getPassword()));
         if (userDAO.createUser(newUserDO)) {
             return ResultUtil.success(timestamp, "管理用户注册成功");
         } else {
@@ -120,6 +125,43 @@ public class AuthServiceImpl implements AuthService {
             return ResultUtil.error(timestamp, ErrorCode.USER_NOT_EXISTED);
         }
 
+
+    }
+
+    @NotNull
+    @Override
+    public ResponseEntity<BaseResponse> organizeRegister(
+            long timestamp,
+            @NotNull HttpServletRequest request,
+            @NotNull AuthOrganizeRegisterVO authOrganizeRegisterVO) {
+        // 检索组织是否唯一存在
+        String checkUserExist = userDAO.checkUserExist(authOrganizeRegisterVO.getUsername(), authOrganizeRegisterVO.getEmail(), authOrganizeRegisterVO.getPhone(), authOrganizeRegisterVO.getOrganize());
+        if (checkUserExist != null) {
+            return ResultUtil.error(timestamp, checkUserExist, ErrorCode.ORGANIZE_NOT_EXISTED);
+        }
+        String invite = authOrganizeRegisterVO.getInvite();
+        // 验证组织注册填写的验证码是否有效
+        if (! userDAO.getUserByInvite(invite)) {
+            return ResultUtil.error(timestamp, ErrorCode.INVITE_CODE_ERROR);
+        } else {
+            // 密码加密
+            String newPassword = ProcessingUtil.passwordEncrypt(authOrganizeRegisterVO.getPassword());
+            // 保存组织
+            UserDO newUserDO = new UserDO();
+            newUserDO
+                    .setUuid(ProcessingUtil.createUuid())
+                    .setRealName(authOrganizeRegisterVO.getOrganize())
+                    .setUserName(authOrganizeRegisterVO.getUsername())
+                    .setPhone(authOrganizeRegisterVO.getPhone())
+                    .setEmail(authOrganizeRegisterVO.getEmail())
+                    .setInvite(authOrganizeRegisterVO.getInvite())
+                    .setPassword(newPassword);
+            if (userDAO.createUser(newUserDO)){
+                return ResultUtil.success(timestamp, "组织账户注册成功");
+            } else {
+                return ResultUtil.error(timestamp, ErrorCode.SERVER_INTERNAL_ERROR);
+            }
+        }
 
     }
 

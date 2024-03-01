@@ -26,7 +26,7 @@ public class UserDO {
     public String phone;
     public String avatar;
     public String password;
-    public Short role;
+    public String role;
     public String permission;
     public Timestamp createdAt;
     public Timestamp updatedAt;

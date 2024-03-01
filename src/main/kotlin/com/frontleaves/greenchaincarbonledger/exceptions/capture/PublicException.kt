@@ -1,6 +1,7 @@
-package com.frontleaves.greenchaincarbonledger.exceptions
+package com.frontleaves.greenchaincarbonledger.exceptions.capture
 
 import com.frontleaves.greenchaincarbonledger.annotations.KotlinSlf4j.Companion.log
+import com.frontleaves.greenchaincarbonledger.exceptions.UserDoesNotExistException
 import com.frontleaves.greenchaincarbonledger.utils.BaseResponse
 import com.frontleaves.greenchaincarbonledger.utils.ErrorCode
 import com.frontleaves.greenchaincarbonledger.utils.ResultUtil
@@ -22,7 +23,7 @@ import org.thymeleaf.exceptions.TemplateInputException
  * @author xiao_lfeng
  */
 @RestControllerAdvice
-class BusinessException {
+class PublicException {
     @ExceptionHandler(value = [Exception::class])
     fun exception(e: Exception): ResponseEntity<BaseResponse> {
         val timestamp = System.currentTimeMillis()
@@ -61,4 +62,12 @@ class BusinessException {
         log.error("[Exception] 业务异常: 模版不存在")
         return ResultUtil.error(timestamp, "模板 ${e.templateName ?: e.message} 不存在", ErrorCode.TEMPLATE_PARSE_ERROR)
     }
+
+    @ExceptionHandler(value = [UserDoesNotExistException::class])
+    fun mailTemplateInputException(e: UserDoesNotExistException): ResponseEntity<BaseResponse> {
+        val timestamp = System.currentTimeMillis()
+        log.error("[Exception] 业务异常: 用户不存在", e)
+        return ResultUtil.error(timestamp, ErrorCode.USER_NOT_EXISTED)
+    }
+
 }
