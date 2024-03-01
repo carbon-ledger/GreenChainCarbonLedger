@@ -31,6 +31,9 @@ public interface UserMapper {
     @Select("SELECT * FROM fy_user WHERE real_name = #{realname}")
     UserDO getUserByRealname(String realname);
 
+    @Select("SELECT * FROM fy_user WHERE invite = #{invite}")
+    Boolean getUserByInvite(String invite);
+
     @Insert("""
         INSERT INTO fy_user (uuid, user_name, real_name, email, phone, password)
             VALUES (#{uuid}, #{userName}, #{realName}, #{email}, #{phone}, #{password})
