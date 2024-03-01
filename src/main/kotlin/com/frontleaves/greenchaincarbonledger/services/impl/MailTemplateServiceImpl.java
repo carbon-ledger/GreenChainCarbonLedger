@@ -1,6 +1,10 @@
 package com.frontleaves.greenchaincarbonledger.services.impl;
 
 import com.frontleaves.greenchaincarbonledger.common.constants.SystemConstants;
+import com.frontleaves.greenchaincarbonledger.dao.UserDAO;
+import com.frontleaves.greenchaincarbonledger.exceptions.MailTemplateDoesNotExistException;
+import com.frontleaves.greenchaincarbonledger.exceptions.UserDoesNotExistException;
+import com.frontleaves.greenchaincarbonledger.models.doData.UserDO;
 import com.frontleaves.greenchaincarbonledger.services.MailTemplateService;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -33,6 +37,7 @@ import java.util.HashMap;
 public class MailTemplateServiceImpl implements MailTemplateService {
     private final JavaMailSender javaMailSender;
     private final TemplateEngine templateEngine;
+    private final UserDAO userDAO;
 
     @Value("${spring.mail.username}")
     private String from;
@@ -52,6 +57,7 @@ public class MailTemplateServiceImpl implements MailTemplateService {
     }
 
     @Override
+    @Async
     public void mailSendCode(@NotNull String email, @NotNull String code, @NotNull String template) {
         log.info("[Service] 执行 mailSendCode 方法");
         HashMap<String, Object> prepareData = new HashMap<>();
@@ -68,6 +74,36 @@ public class MailTemplateServiceImpl implements MailTemplateService {
     }
 
     @Override
+    @Async
+    public void mailSendWithTemplate(@NotNull String email, @NotNull String template) {
+        log.info("[Service] 执行 mailSendWithTemplate 方法");
+        HashMap<String, Object> prepareData = new HashMap<>();
+        // 获取用户
+        UserDO getUserDO = userDAO.getUserByEmail(email);
+        if (getUserDO != null) {
+            prepareData.put("username", getUserDO.getUserName());
+            switch (template) {
+                case "user-change-password-confirm" -> prepareData.put("title", SystemConstants.SYSTEM_NAME + " - 修改密码确认");
+                case "user-delete" -> prepareData.put("title", SystemConstants.SYSTEM_NAME + " - 账户已删除");
+                default -> throw new MailTemplateDoesNotExistException("模板不存在");
+            }
+            this.sendMail(email, prepareData, "./mail/" + template + ".html");
+        } else {
+            throw new UserDoesNotExistException("用户不存在");
+        }
+    }
+
+    @Override
+    @Async
+    public void mailSendWithCustom(@NotNull String email, @NotNull HashMap<String, Object> prepareData, @NotNull String template) {
+        log.info("[Service] 执行 mailSendWithCustom 方法");
+        UserDO getUserDO = userDAO.getUserByEmail(email);
+        prepareData.put("username", getUserDO.getUserName());
+        this.sendMail(email, prepareData, "./mail/" + template + ".html");
+    }
+
+    @Override
+    @Async
     public void mailSend(@NotNull String email, @NotNull HashMap<String, Object> data, @NotNull String template) {
         log.info("[Service] 执行 mailSend 方法");
         HashMap<String, Object> prepareData = new HashMap<>(data);

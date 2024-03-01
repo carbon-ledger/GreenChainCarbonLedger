@@ -4,14 +4,15 @@ import lombok.Data;
 import lombok.experimental.Accessors;
 
 import java.util.ArrayList;
+
 /**
  * BackAuthLoginVO
  * <hr/>
  * 用于返回用户登录的数据对象, 用于返回用户登录的数据
  *
+ * @author FLASHLACK
  * @version v1.0.0-SNAPSHOT
  * @since v1.0.0-SNAPSHOT
- * @author FLASHLACK
  */
 @Data
 @Accessors(chain = true)
@@ -20,6 +21,7 @@ public class BackAuthLoginVO {
     public String role;
     public String token;
     public PermissionVO permission;
+    public Boolean recover;
 
     @Data
     @Accessors(chain = true)
