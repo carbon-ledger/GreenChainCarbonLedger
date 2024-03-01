@@ -87,8 +87,8 @@ public class AuthController {
     @PostMapping("/organize/register")
     public ResponseEntity<BaseResponse> organizeRegister(
             @RequestBody @Validated AuthOrganizeRegisterVO authOrganizeRegisterVO,
-            HttpServletRequest request,
-            @NotNull BindingResult bindingResult
+            @NotNull BindingResult bindingResult,
+            HttpServletRequest request
     ){
         log.info("[Controller] 请求 organizeRegister 接口");
         long timestamp = System.currentTimeMillis();
