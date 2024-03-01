@@ -42,6 +42,8 @@ public interface UserMapper {
     @Update("UPDATE fy_user SET deleted_at = NOW() WHERE uuid = #{uuid}")
     boolean userAccountDeletion (String uuid);
 
+    @Update("UPDATE fy_user SET deleted_at = null WHERE uuid = #{uuid}")
+    boolean userAccountDistanceDeletion(String uuid);
 
 
     @Delete("DELETE FROM fy_user WHERE uuid = #{uuid}")
