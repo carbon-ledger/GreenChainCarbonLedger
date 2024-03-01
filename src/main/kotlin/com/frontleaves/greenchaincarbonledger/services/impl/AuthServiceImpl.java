@@ -4,11 +4,7 @@ import com.frontleaves.greenchaincarbonledger.dao.RoleDAO;
 import com.frontleaves.greenchaincarbonledger.dao.UserDAO;
 import com.frontleaves.greenchaincarbonledger.dao.VerifyCodeDAO;
 import com.frontleaves.greenchaincarbonledger.models.doData.UserDO;
-import com.frontleaves.greenchaincarbonledger.models.doData.VerifyCodeDO;
-import com.frontleaves.greenchaincarbonledger.models.voData.getData.AuthChangeVO;
-import com.frontleaves.greenchaincarbonledger.models.voData.getData.AuthLoginVO;
-import com.frontleaves.greenchaincarbonledger.models.voData.getData.AuthOrganizeRegisterVO;
-import com.frontleaves.greenchaincarbonledger.models.voData.getData.AuthUserRegisterVO;
+import com.frontleaves.greenchaincarbonledger.models.voData.getData.*;
 import com.frontleaves.greenchaincarbonledger.models.voData.returnData.BackAuthLoginVO;
 import com.frontleaves.greenchaincarbonledger.services.AuthService;
 import com.frontleaves.greenchaincarbonledger.utils.BaseResponse;
@@ -176,6 +172,40 @@ public class AuthServiceImpl implements AuthService {
         } else {
             return ResultUtil.error(timestamp, ErrorCode.USER_PASSWORD_CURRENT_ERROR);
         }
+    }
+
+    @NotNull
+    @Override
+    public ResponseEntity<BaseResponse> forgetCode(
+            long timestamp,
+            @NotNull HttpServletRequest request,
+            @NotNull AuthForgetCodeVO authForgetCodeVO) {
+        // 获取邮箱数据，此处无论用户填入的Email是否真实有效，系统都会返回“密码充值邮件已发送”的信息
+        String email = authForgetCodeVO.getEmail();
+        // 如果校验码与缓存中的数据符合，则满足修改密码的条件
+        if (verifyCodeDAO.getVerifyCodeByContact(email) != null) {
+            if (authForgetCodeVO.getCode().equals(verifyCodeDAO.getVerifyCodeByContact(email).code)) {
+                // 删除缓存
+                verifyCodeDAO.deleteVerifyCode(authForgetCodeVO.getCode());
+                // 验证密码和确认密码是否相同
+                if (authForgetCodeVO.getPassword().equals(authForgetCodeVO.getCode())) {
+                    // 先对密码进行加密再将新密码存入数据库
+                    UserDO userDO = new UserDO();
+                    userDO.setPassword(ProcessingUtil.passwordEncrypt(authForgetCodeVO.getPassword()));
+                    userDAO.updateUserPassword(userDO);
+                    return ResultUtil.success(timestamp, "密码更新完毕");
+
+                } else {
+                    return ResultUtil.error(timestamp, ErrorCode.USER_PASSWORD_INCONSISTENCY_ERROR);
+                }
+            } else {
+                // 不满足修改密码的条件
+                return ResultUtil.error(timestamp, ErrorCode.VERIFY_CODE_ERROR);
+            }
+        } else {
+            return ResultUtil.error(timestamp, ErrorCode.CODE_NOT_EXISTED);
+        }
+
     }
 }
 
