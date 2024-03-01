@@ -1,7 +1,6 @@
 package com.frontleaves.greenchaincarbonledger.controllers
 
 import com.frontleaves.greenchaincarbonledger.common.constants.ProjectConstants
-import com.frontleaves.greenchaincarbonledger.services.MailTemplateService
 import com.frontleaves.greenchaincarbonledger.utils.BaseResponse
 import com.frontleaves.greenchaincarbonledger.utils.ResultUtil
 import org.springframework.http.ResponseEntity
@@ -20,7 +19,6 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 class IndexController(
     private val getConfig: ProjectConstants,
-    private val mailTemplateService: MailTemplateService
 ) {
 
     /**
@@ -35,7 +33,6 @@ class IndexController(
     @GetMapping("/info")
     fun index(): ResponseEntity<BaseResponse> {
         val timestamp = System.currentTimeMillis()
-        mailTemplateService.mailSendWithTemplate("lfengzeng@vip.qq.com", "user-delete")
         return ResultUtil.custom(
             timestamp,
             "Success",
@@ -43,19 +40,5 @@ class IndexController(
             "欢迎使用 GreenChainCarbonLedger 系统，当您看到此状态时系统正常运行中",
             getConfig.getProjectInfoMap
         )
-    }
-
-    /**
-     * front
-     *
-     * 前端
-     *
-     * 返回前端页面, 用于前端页面访问
-     *
-     * @return 前端页面
-     */
-    //@GetMapping("/public/**")
-    fun front(): String {
-        return "index"
     }
 }
