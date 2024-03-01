@@ -57,6 +57,7 @@ public class MailTemplateServiceImpl implements MailTemplateService {
     }
 
     @Override
+    @Async
     public void mailSendCode(@NotNull String email, @NotNull String code, @NotNull String template) {
         log.info("[Service] 执行 mailSendCode 方法");
         HashMap<String, Object> prepareData = new HashMap<>();
@@ -73,6 +74,7 @@ public class MailTemplateServiceImpl implements MailTemplateService {
     }
 
     @Override
+    @Async
     public void mailSendWithTemplate(@NotNull String email, @NotNull String template) {
         log.info("[Service] 执行 mailSendWithTemplate 方法");
         HashMap<String, Object> prepareData = new HashMap<>();
@@ -89,6 +91,15 @@ public class MailTemplateServiceImpl implements MailTemplateService {
         } else {
             throw new UserDoesNotExistException("用户不存在");
         }
+    }
+
+    @Override
+    @Async
+    public void mailSendWithCustom(@NotNull String email, @NotNull HashMap<String, Object> prepareData, @NotNull String template) {
+        log.info("[Service] 执行 mailSendWithCustom 方法");
+        UserDO getUserDO = userDAO.getUserByEmail(email);
+        prepareData.put("username", getUserDO.getUserName());
+        this.sendMail(email, prepareData, "./mail/" + template + ".html");
     }
 
     @Override

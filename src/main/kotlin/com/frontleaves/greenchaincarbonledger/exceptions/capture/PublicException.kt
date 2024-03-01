@@ -67,8 +67,7 @@ class PublicException {
     fun mailTemplateInputException(e: UserDoesNotExistException): ResponseEntity<BaseResponse> {
         val timestamp = System.currentTimeMillis()
         log.error("[Exception] 业务异常: 用户不存在", e)
-        return ResultUtil.error(timestamp, ErrorCode.USER_NOT_EXISTED);
+        return ResultUtil.error(timestamp, ErrorCode.USER_NOT_EXISTED)
     }
-
 
 }
