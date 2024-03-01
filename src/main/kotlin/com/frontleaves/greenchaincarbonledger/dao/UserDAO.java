@@ -1,12 +1,14 @@
 package com.frontleaves.greenchaincarbonledger.dao;
 
 import com.frontleaves.greenchaincarbonledger.common.BusinessConstants;
+import com.frontleaves.greenchaincarbonledger.common.constants.RedisExpiration;
 import com.frontleaves.greenchaincarbonledger.mappers.UserMapper;
 import com.frontleaves.greenchaincarbonledger.models.doData.UserDO;
 import com.frontleaves.greenchaincarbonledger.utils.redis.UserRedis;
 import com.google.gson.Gson;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -35,14 +37,17 @@ public class UserDAO {
      * @return {@link UserDO}
      */
     public UserDO getUserByUuid(String uuid) {
-        log.info("[DAO] 执行 getUserByUUID 方法");
-        if (userRedis.getData(BusinessConstants.NONE, uuid) != null) {
-            log.info("\t> Redis 读取");
-            return gson.fromJson(userRedis.getData(BusinessConstants.NONE, uuid), UserDO.class);
-        } else {
-            log.info("\t> Mysql 读取");
-            return userMapper.getUserByUuid(uuid);
+        log.info("[DAO] 执行 getUserByUuid 方法");
+        log.info("\t> Redis 读取");
+        String getRedisUserDO = userRedis.getData(BusinessConstants.NONE, uuid);
+        if (getRedisUserDO != null && !getRedisUserDO.isEmpty()) {
+            return gson.fromJson(getRedisUserDO, UserDO.class);
         }
+        log.info("\t> Mysql 读取");
+        UserDO getUserDO = userMapper.getUserByUuid(uuid);
+        log.info("\t> Redis 写入");
+        userRedis.setData(BusinessConstants.NONE, uuid, gson.toJson(getUserDO), RedisExpiration.HOUR);
+        return getUserDO;
     }
 
     /**

@@ -17,15 +17,15 @@ import lombok.Data;
 @Data
 public class AuthUserRegisterVO {
     @Pattern(regexp = "^[a-zA-Z0-9_-]{4,40}$", message = "用户名格式不正确")
-    String username;
+    public String username;
     @NotBlank(message = "真实信息不能为空")
-    String realname;
+    public String realname;
     @Pattern(regexp = "^(13[0-9]|14[01456879]|15[0-35-9]|16[2567]|17[0-8]|18[0-9]|19[0-35-9])\\d{8}$", message = "手机号格式不正确")
-    String phone;
+    public String phone;
     @Email(message = "邮箱格式不正确")
-    String email;
+    public String email;
     @Pattern(regexp = "^[a-zA-Z0-9]{6,10}$", message = "验证码不正确")
-    String code;
+    public String code;
     @Pattern(regexp = "^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z]).{6,30}$", message = "密码格式不正确【必须包含大小写字母和数字的组合，可以使用特殊字符，长度在6-30之间】")
-    String password;
+    public String password;
 }

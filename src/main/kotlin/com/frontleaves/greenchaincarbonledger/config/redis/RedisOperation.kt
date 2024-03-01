@@ -1,6 +1,7 @@
 package com.frontleaves.greenchaincarbonledger.config.redis
 
 import com.frontleaves.greenchaincarbonledger.common.BusinessConstants
+import com.frontleaves.greenchaincarbonledger.common.constants.RedisExpiration
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.data.redis.core.StringRedisTemplate
 import java.util.concurrent.TimeUnit
@@ -54,7 +55,7 @@ abstract class RedisOperation<R>(
      * @param time              过期时间
      * @return 返回是否添加成功
      */
-    abstract fun setData(businessConstants: BusinessConstants, field: String, value: R, time: Long): Boolean
+    abstract fun setData(businessConstants: BusinessConstants, field: String, value: R, time: RedisExpiration): Boolean
 
     /**
      * 获取Redis中元素过期时间
@@ -104,7 +105,7 @@ abstract class RedisOperation<R>(
      * @param pattern 正则表达式
      * @return 返回List
      */
-    fun getList(pattern: String): List<R>? {
+    open fun getList(pattern: String): List<R>? {
         // 获取全部匹配的key
         val keys = stringRedisTemplate.keys(pattern)
         // 获取全部匹配的value

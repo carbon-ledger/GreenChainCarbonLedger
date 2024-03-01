@@ -3,6 +3,7 @@ package com.frontleaves.greenchaincarbonledger.utils.redis
 import com.frontleaves.greenchaincarbonledger.annotations.KotlinSlf4j.Companion.log
 import com.frontleaves.greenchaincarbonledger.common.BusinessConstants
 import com.frontleaves.greenchaincarbonledger.common.RedisConstant
+import com.frontleaves.greenchaincarbonledger.common.constants.RedisExpiration
 import com.frontleaves.greenchaincarbonledger.config.redis.RedisOperation
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.data.redis.core.StringRedisTemplate
@@ -79,12 +80,12 @@ class UserRedis(
      * @param time              过期时间(分钟)
      * @return 返回是否添加成功
      */
-    override fun setData(businessConstants: BusinessConstants, field: String, value: String, time: Long): Boolean {
+    override fun setData(businessConstants: BusinessConstants, field: String, value: String, time: RedisExpiration): Boolean {
         val key = (RedisConstant.TYPE_AUTH + RedisConstant.TABLE_USER + businessConstants.value) + field
         log.info("\t\t> 设置 Redis 键为 {} 的数据", key)
         redisTemplate.also {
             it.opsForValue()[key] = value
-            it.expire(key, time, TimeUnit.MINUTES)
+            it.expire(key, time.expirationTime, TimeUnit.MILLISECONDS)
         }
         return true
     }

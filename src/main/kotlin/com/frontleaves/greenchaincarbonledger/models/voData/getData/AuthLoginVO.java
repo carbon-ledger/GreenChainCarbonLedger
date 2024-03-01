@@ -15,7 +15,7 @@ import lombok.Data;
 @Data
 public class AuthLoginVO {
     @NotBlank(message = "用户名不能为空")
-    String user;
+    public String user;
     @NotBlank(message = "密码不能为空")
-    String password;
+    public String password;
 }

@@ -17,7 +17,7 @@ import org.apache.ibatis.annotations.Update;
  */
 @Mapper
 public interface UserMapper {
-    @Select("SELECT * FROM fy_carbon.fy_user WHERE uuid = #{uuid}")
+    @Select("SELECT * FROM fy_carbon.fy_user WHERE uuid = #{uuid} LIMIT 1")
     UserDO getUserByUuid(String uuid);
 
     @Select("SELECT * FROM fy_carbon.fy_user WHERE user_name = #{username}")
@@ -33,8 +33,8 @@ public interface UserMapper {
     UserDO getUserByRealname(String realname);
 
     @Insert("""
-        INSERT INTO fy_carbon.fy_user (uuid, user_name, real_name, email, phone, password)
-            VALUES (#{uuid}, #{userName}, #{realName}, #{email}, #{phone}, #{password})
+        INSERT INTO fy_carbon.fy_user (uuid, user_name, real_name, email, phone, password, role)
+            VALUES (#{uuid}, #{userName}, #{realName}, #{email}, #{phone}, #{password}, #{role})
         """)
     boolean createUser(UserDO newUserDO);
 
