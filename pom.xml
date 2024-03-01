@@ -92,6 +92,18 @@
             <artifactId>jjwt-api</artifactId>
             <version>0.11.3</version>
         </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-impl</artifactId>
+            <version>0.11.3</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-jackson</artifactId>
+            <version>0.11.3</version>
+            <scope>runtime</scope>
+        </dependency>
         <!-- Mysql -->
         <dependency>
             <groupId>com.mysql</groupId>
@@ -169,6 +181,7 @@
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <optional>true</optional>
+            <scope>compile</scope>
         </dependency>
         <!-- Jetbrains -->
         <dependency>

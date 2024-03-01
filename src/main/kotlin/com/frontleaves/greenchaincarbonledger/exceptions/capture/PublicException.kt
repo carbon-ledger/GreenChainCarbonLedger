@@ -1,4 +1,4 @@
-package com.frontleaves.greenchaincarbonledger.exceptions
+package com.frontleaves.greenchaincarbonledger.exceptions.capture
 
 import com.frontleaves.greenchaincarbonledger.annotations.KotlinSlf4j.Companion.log
 import com.frontleaves.greenchaincarbonledger.utils.BaseResponse
@@ -22,7 +22,7 @@ import org.thymeleaf.exceptions.TemplateInputException
  * @author xiao_lfeng
  */
 @RestControllerAdvice
-class BusinessException {
+class PublicException {
     @ExceptionHandler(value = [Exception::class])
     fun exception(e: Exception): ResponseEntity<BaseResponse> {
         val timestamp = System.currentTimeMillis()

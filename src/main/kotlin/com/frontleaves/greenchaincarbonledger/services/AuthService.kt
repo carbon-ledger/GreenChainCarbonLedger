@@ -1,5 +1,6 @@
 package com.frontleaves.greenchaincarbonledger.services
 
+import com.frontleaves.greenchaincarbonledger.models.voData.getData.AuthChangeVO
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.AuthLoginVO
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.AuthOrganizeRegisterVO
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.AuthUserRegisterVO
@@ -45,4 +46,12 @@ interface AuthService {
         // 为了区分用户注册里面使用的形参名，此处加上了NEW
         authOrganizeRegisterVO: AuthOrganizeRegisterVO
     ): ResponseEntity<BaseResponse>
+
+    fun userChange(
+        timestamp: Long,
+        request: HttpServletRequest,
+        authChangeVO: AuthChangeVO
+    ): ResponseEntity<BaseResponse>
+
+
 }
