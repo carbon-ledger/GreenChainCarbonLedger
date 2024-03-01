@@ -4,12 +4,7 @@ import com.frontleaves.greenchaincarbonledger.dao.RoleDAO;
 import com.frontleaves.greenchaincarbonledger.dao.UserDAO;
 import com.frontleaves.greenchaincarbonledger.dao.VerifyCodeDAO;
 import com.frontleaves.greenchaincarbonledger.models.doData.UserDO;
-import com.frontleaves.greenchaincarbonledger.models.doData.VerifyCodeDO;
-import com.frontleaves.greenchaincarbonledger.models.voData.getData.AuthChangeVO;
-import com.frontleaves.greenchaincarbonledger.models.voData.getData.AuthDeleteVO;
-import com.frontleaves.greenchaincarbonledger.models.voData.getData.AuthLoginVO;
-import com.frontleaves.greenchaincarbonledger.models.voData.getData.AuthOrganizeRegisterVO;
-import com.frontleaves.greenchaincarbonledger.models.voData.getData.AuthUserRegisterVO;
+import com.frontleaves.greenchaincarbonledger.models.voData.getData.*;
 import com.frontleaves.greenchaincarbonledger.models.voData.returnData.BackAuthLoginVO;
 import com.frontleaves.greenchaincarbonledger.services.AuthService;
 import com.frontleaves.greenchaincarbonledger.utils.BaseResponse;
@@ -19,6 +14,7 @@ import com.frontleaves.greenchaincarbonledger.utils.ResultUtil;
 import com.frontleaves.greenchaincarbonledger.utils.security.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -37,6 +33,7 @@ import java.util.regex.Pattern;
  * @see com.frontleaves.greenchaincarbonledger.services.AuthService
  * @since v1.0.0-SNAPSHOT
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
@@ -141,7 +138,7 @@ public class AuthServiceImpl implements AuthService {
         }
         String invite = authOrganizeRegisterVO.getInvite();
         // 验证组织注册填写的验证码是否有效
-        if (! userDAO.getUserByInvite(invite)) {
+        if (!userDAO.getUserByInvite(invite)) {
             return ResultUtil.error(timestamp, ErrorCode.INVITE_CODE_ERROR);
         } else {
             // 密码加密
@@ -156,7 +153,7 @@ public class AuthServiceImpl implements AuthService {
                     .setEmail(authOrganizeRegisterVO.getEmail())
                     .setInvite(authOrganizeRegisterVO.getInvite())
                     .setPassword(newPassword);
-            if (userDAO.createUser(newUserDO)){
+            if (userDAO.createUser(newUserDO)) {
                 return ResultUtil.success(timestamp, "组织账户注册成功");
             } else {
                 return ResultUtil.error(timestamp, ErrorCode.SERVER_INTERNAL_ERROR);
@@ -198,7 +195,7 @@ public class AuthServiceImpl implements AuthService {
         String getUuid = request.getHeader("X-Auth-UUID");
         UserDO getUserDO = userDAO.getUserByUuid(getUuid);
         //进行邮箱验证码的判断，成功进行密码的校验，不成功则返回错误信息
-        if (getUserDO != null &&verifyCodeDAO.getVerifyCodeByContact(getUserDO.getEmail()).getCode().equals(authDeleteVO.getCode())) {
+        if (getUserDO != null && verifyCodeDAO.getVerifyCodeByContact(getUserDO.getEmail()).getCode().equals(authDeleteVO.getCode())) {
             //进行密码的校验,成功进行软删除
             if (ProcessingUtil.passwordCheck(authDeleteVO.getPassword(), getUserDO.getPassword())) {
                 // 邮箱验证码和密码验证成功，进行软删除
