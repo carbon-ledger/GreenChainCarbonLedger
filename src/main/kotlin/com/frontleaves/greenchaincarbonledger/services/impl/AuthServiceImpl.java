@@ -111,24 +111,31 @@ public class AuthServiceImpl implements AuthService {
         // 检索组织是否唯一存在
         String checkUserExist = userDAO.checkUserExist(authOrganizeRegisterVO.getUsername(), authOrganizeRegisterVO.getEmail(), authOrganizeRegisterVO.getPhone(), authOrganizeRegisterVO.getOrganize());
         if (checkUserExist != null) {
-            return ResultUtil.error(timestamp, checkUserExist, ErrorCode.Organize_Not_Existed);
+            return ResultUtil.error(timestamp, checkUserExist, ErrorCode.ORGANIZE_NOT_EXISTED);
         }
-        // 保存组织
-        UserDO newUserDO = new UserDO();
-        newUserDO
-                .setUuid(ProcessingUtil.createUuid())
-                .setRealName(authOrganizeRegisterVO.getOrganize())
-                .setUserName(authOrganizeRegisterVO.getUsername())
-                .setPhone(authOrganizeRegisterVO.getPhone())
-                .setEmail(authOrganizeRegisterVO.getEmail())
-                .setInvite(authOrganizeRegisterVO.getInvite())
-                .setPassword(authOrganizeRegisterVO.getPassword());
-        if (userDAO.createUser(newUserDO)){
-            return ResultUtil.success(timestamp, "组织账户注册成功");
+        String invite = authOrganizeRegisterVO.getInvite();
+        // 验证组织注册填写的验证码是否有效
+        if (! userDAO.getUserByInvite(invite)) {
+            return ResultUtil.error(timestamp, ErrorCode.INVITE_CODE_ERROR);
         } else {
-            return ResultUtil.error(timestamp, ErrorCode.SERVER_INTERNAL_ERROR);
+            // 密码加密
+            String newPassword = ProcessingUtil.passwordEncrypt(authOrganizeRegisterVO.getPassword());
+            // 保存组织
+            UserDO newUserDO = new UserDO();
+            newUserDO
+                    .setUuid(ProcessingUtil.createUuid())
+                    .setRealName(authOrganizeRegisterVO.getOrganize())
+                    .setUserName(authOrganizeRegisterVO.getUsername())
+                    .setPhone(authOrganizeRegisterVO.getPhone())
+                    .setEmail(authOrganizeRegisterVO.getEmail())
+                    .setInvite(authOrganizeRegisterVO.getInvite())
+                    .setPassword(newPassword);
+            if (userDAO.createUser(newUserDO)){
+                return ResultUtil.success(timestamp, "组织账户注册成功");
+            } else {
+                return ResultUtil.error(timestamp, ErrorCode.SERVER_INTERNAL_ERROR);
+            }
         }
+
     }
-
-
 }

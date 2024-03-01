@@ -113,4 +113,10 @@ public class UserDAO {
         log.info("\t> Mysql 读取");
         return userMapper.getUserByUsername(user);
     }
+
+    public Boolean getUserByInvite(String invite){
+        log.info("[DAO] 执行 getUserByInvite 方法");
+        log.info("\t> Mysql 读取");
+        return userMapper.getUserByInvite(invite);
+    }
 }
