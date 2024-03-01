@@ -2,6 +2,7 @@ package com.frontleaves.greenchaincarbonledger.controllers;
 
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.AuthChangeVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.AuthLoginVO;
+import com.frontleaves.greenchaincarbonledger.models.voData.getData.AuthOrganizeRegisterVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.AuthUserRegisterVO;
 import com.frontleaves.greenchaincarbonledger.services.AuthService;
 import com.frontleaves.greenchaincarbonledger.utils.BaseResponse;
@@ -81,5 +82,21 @@ public class AuthController {
         }
         //业务操作
         return authService.userChange(timestamp, request, authChangeVO);
+    }
+
+    @PostMapping("/organize/register")
+    public ResponseEntity<BaseResponse> organizeRegister(
+            @RequestBody @Validated AuthOrganizeRegisterVO authOrganizeRegisterVO,
+            @NotNull BindingResult bindingResult,
+            HttpServletRequest request
+    ){
+        log.info("[Controller] 请求 organizeRegister 接口");
+        long timestamp = System.currentTimeMillis();
+        // 对传入参数进行校验
+        if (bindingResult.hasErrors()){
+            return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR, ProcessingUtil.getValidatedErrorList(bindingResult));
+        }
+        // 业务操作
+        return authService.organizeRegister(timestamp, request, authOrganizeRegisterVO);
     }
 }
