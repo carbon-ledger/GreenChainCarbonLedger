@@ -8,7 +8,6 @@ import com.frontleaves.greenchaincarbonledger.utils.redis.UserRedis;
 import com.google.gson.Gson;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -160,40 +159,26 @@ public class UserDAO {
     /**
      * 数据库用户账号软删除（只设置了时间戳）
      * </hr>
-     *数据库用户账号注销，只设置了时间戳
+     * 数据库用户账号注销，只设置了时间戳
+     *
      * @param getUserDO 用户
      * @return 注销操作成功返回ture，失败则返回false
      */
-    public boolean userAccountDeletion (UserDO getUserDO) {
+    public boolean userAccountDeletion(UserDO getUserDO) {
         log.info("[DAO] 执行 deleteUserAccount 方法");
         log.info("\t> Mysql  软删除");
         return userMapper.userAccountDeletion(getUserDO.getUuid());
     }
-    public boolean userAccountDistanceDeletion(UserDO getUserDO){
+
+    public boolean userAccountDistanceDeletion(UserDO getUserDO) {
         log.info("[DAO] 执行 userAccountDistanceDeletion 方法");
         log.info("\t> Mysql 更新");
         return userMapper.userAccountDistanceDeletion(getUserDO.getUuid());
     }
 
-
-
-
-    public Boolean getUserByInvite(String invite){
+    public Boolean getUserByInvite(String invite) {
         log.info("[DAO] 执行 getUserByInvite 方法");
         log.info("\t> Mysql 读取");
         return userMapper.getUserByInvite(invite);
-    }
-
-    /**
-     * 数据库根据user表查询role表用户
-     * <hr/>
-     * 数据库根据user表查询role表用户
-     * @param getUserDO
-     * @return getUserDO
-     */
-    public UserDO getRoleUserByUserRole(UserDO getUserDO){
-        log.info("[DAO] 执行 getRoleUserByUserRole方法");
-        log.info("\t> Mysql 读取");
-        return userMapper.getRoleUserByUserRole(getUserDO);
     }
 }

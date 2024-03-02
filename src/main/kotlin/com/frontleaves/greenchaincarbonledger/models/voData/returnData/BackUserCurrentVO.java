@@ -1,6 +1,9 @@
 package com.frontleaves.greenchaincarbonledger.models.voData.returnData;
 
 import lombok.Data;
+import lombok.experimental.Accessors;
+
+import java.util.ArrayList;
 
 /**
  * 返回当前登录用户的详细信息的值对象。
@@ -13,11 +16,26 @@ import lombok.Data;
  */
 
 @Data
+@Accessors(chain = true)
 public class BackUserCurrentVO {
-    String userName;
-    String realName;
-    String email;
-    String phone;
+    UserVO user;
     String role;
-    String permission;
+    PermissionVO permission;
+
+    @Data
+    @Accessors(chain = true)
+    public static class UserVO {
+        String uuid;
+        String userName;
+        String realName;
+        String email;
+        String phone;
+    }
+
+    @Data
+    @Accessors(chain = true)
+    public static class PermissionVO {
+        public ArrayList<String> rolePermission;
+        public ArrayList<String> userPermission;
+    }
 }
