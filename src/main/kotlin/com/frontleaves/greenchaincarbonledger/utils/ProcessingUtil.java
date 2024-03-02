@@ -1,5 +1,8 @@
 package com.frontleaves.greenchaincarbonledger.utils;
 
+import com.frontleaves.greenchaincarbonledger.dao.UserDAO;
+import com.frontleaves.greenchaincarbonledger.models.doData.UserDO;
+import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.jetbrains.annotations.NotNull;
 import org.mindrot.jbcrypt.BCrypt;
@@ -82,16 +85,16 @@ public class ProcessingUtil {
     }
 
     /**
-     * 生成验证码
+     * 创建随机字符串
      * <hr/>
-     * 用于生成验证码
+     * 用于创建随机字符串
      *
-     * @param size 验证码长度
+     * @param size 字符串长度
      * @return {@link String}
-     * @since v1.0.0
+     * @since v1.0.0-SNAPSHOT
      */
     @NotNull
-    public static String makeVerifyCode(int size) {
+    public static String createRandomNumbers(int size) {
         Random random = new Random();
         StringBuilder stringBuilder = new StringBuilder();
         for (int i = 0; i < size; i++) {
@@ -104,5 +107,35 @@ public class ProcessingUtil {
             stringBuilder.append(code);
         }
         return stringBuilder.toString();
+    }
+
+    /**
+     * 通过Cookie获取用户信息
+     * <hr/>
+     * 用于通过Cookie获取用户信息
+     *
+     * @param request 请求对象
+     * @param userDAO 用户DAO
+     * @return {@link UserDO}
+     * @since v1.0.0
+     */
+    @NotNull
+    public static UserDO getUserByCookie(@NotNull HttpServletRequest request, @NotNull UserDAO userDAO) {
+        String token = request.getHeader("X-Auth-UUID");
+        return userDAO.getUserByUuid(token);
+    }
+
+    /**
+     * 获取Cookie中的UUID
+     * <hr/>
+     * 用于获取Cookie中的UUID
+     *
+     * @param request 请求对象
+     * @return {@link String}
+     * @since v1.0.0
+     */
+    @NotNull
+    public static String getCookieUuid(@NotNull HttpServletRequest request) {
+        return request.getHeader("X-Auth-UUID");
     }
 }

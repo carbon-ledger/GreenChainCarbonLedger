@@ -1,43 +1,56 @@
 package com.frontleaves.greenchaincarbonledger.mappers;
 
 import com.frontleaves.greenchaincarbonledger.models.doData.UserDO;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Select;
-import org.apache.ibatis.annotations.Update;
+import org.apache.ibatis.annotations.*;
 
 /**
  * UserMapper
  * <hr/>
  * 用于用户的数据访问对象, 用于Mybatis
  *
+ * @author xiao_feng
  * @version v1.0.0-SNAPSHOT
  * @since v1.0.0-SNAPSHOT
- * @author xiao_feng
  */
 @Mapper
 public interface UserMapper {
-    @Select("SELECT * FROM fy_carbon.fy_user WHERE uuid = #{uuid}")
+    @Select("SELECT * FROM fy_user WHERE uuid = #{uuid} LIMIT 1")
     UserDO getUserByUuid(String uuid);
 
-    @Select("SELECT * FROM fy_carbon.fy_user WHERE user_name = #{username}")
+    @Select("SELECT * FROM fy_user WHERE user_name = #{username}")
     UserDO getUserByUsername(String username);
 
-    @Select("SELECT * FROM fy_carbon.fy_user WHERE email = #{email}")
+    @Select("SELECT * FROM fy_user WHERE email = #{email}")
     UserDO getUserByEmail(String email);
 
-    @Select("SELECT * FROM fy_carbon.fy_user WHERE phone = #{phone}")
+    @Select("SELECT * FROM fy_user WHERE phone = #{phone}")
     UserDO getUserByPhone(String phone);
 
-    @Select("SELECT * FROM fy_carbon.fy_user WHERE real_name = #{realname}")
+    @Select("SELECT * FROM fy_user WHERE real_name = #{realname}")
     UserDO getUserByRealname(String realname);
 
+    @Select("SELECT * FROM fy_user WHERE invite = #{invite}")
+    Boolean getUserByInvite(String invite);
+
     @Insert("""
-        INSERT INTO fy_carbon.fy_user (uuid, user_name, real_name, email, phone, password)
-            VALUES (#{uuid}, #{userName}, #{realName}, #{email}, #{phone}, #{password})
+        INSERT INTO fy_user (uuid, user_name, real_name, email, phone, password, role)
+            VALUES (#{uuid}, #{userName}, #{realName}, #{email}, #{phone}, #{password}, #{role})
         """)
     boolean createUser(UserDO newUserDO);
 
-    @Update("UPDATE fy_carbon.fy_user SET password = #{password} WHERE uuid = #{uuid}")
+    @Update("UPDATE fy_user SET password = #{password}, updated_at = NOW() WHERE uuid = #{uuid}")
     boolean updateUserPassword(UserDO getUserDO);
+
+    //软删除加上时间戳
+    @Update("UPDATE fy_user SET deleted_at = NOW() WHERE uuid = #{uuid}")
+    boolean userAccountDeletion (String uuid);
+
+    @Update("UPDATE fy_user SET deleted_at = null WHERE uuid = #{uuid}")
+    boolean userAccountDistanceDeletion(String uuid);
+
+
+    @Delete("DELETE FROM fy_user WHERE uuid = #{uuid}")
+    boolean deleteUserAccount(String uuid);
+
+
 }

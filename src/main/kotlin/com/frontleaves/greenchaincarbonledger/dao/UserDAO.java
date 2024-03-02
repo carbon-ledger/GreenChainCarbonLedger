@@ -1,12 +1,14 @@
 package com.frontleaves.greenchaincarbonledger.dao;
 
 import com.frontleaves.greenchaincarbonledger.common.BusinessConstants;
+import com.frontleaves.greenchaincarbonledger.common.constants.RedisExpiration;
 import com.frontleaves.greenchaincarbonledger.mappers.UserMapper;
 import com.frontleaves.greenchaincarbonledger.models.doData.UserDO;
 import com.frontleaves.greenchaincarbonledger.utils.redis.UserRedis;
 import com.google.gson.Gson;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -35,14 +37,17 @@ public class UserDAO {
      * @return {@link UserDO}
      */
     public UserDO getUserByUuid(String uuid) {
-        log.info("[DAO] 执行 getUserByUUID 方法");
-        if (userRedis.getData(BusinessConstants.NONE, uuid) != null) {
-            log.info("\t> Redis 读取");
-            return gson.fromJson(userRedis.getData(BusinessConstants.NONE, uuid), UserDO.class);
-        } else {
-            log.info("\t> Mysql 读取");
-            return userMapper.getUserByUuid(uuid);
+        log.info("[DAO] 执行 getUserByUuid 方法");
+        log.info("\t> Redis 读取");
+        String getRedisUserDO = userRedis.getData(BusinessConstants.NONE, uuid);
+        if (getRedisUserDO != null && !getRedisUserDO.isEmpty()) {
+            return gson.fromJson(getRedisUserDO, UserDO.class);
         }
+        log.info("\t> Mysql 读取");
+        UserDO getUserDO = userMapper.getUserByUuid(uuid);
+        log.info("\t> Redis 写入");
+        userRedis.setData(BusinessConstants.NONE, uuid, gson.toJson(getUserDO), RedisExpiration.HOUR);
+        return getUserDO;
     }
 
     /**
@@ -150,5 +155,32 @@ public class UserDAO {
         log.info("[DAO] 执行 updateUserPassword 方法");
         log.info("\t> Mysql 更新");
         return userMapper.updateUserPassword(getUserDO);
+    }
+
+    /**
+     * 数据库用户账号软删除（只设置了时间戳）
+     * </hr>
+     *数据库用户账号注销，只设置了时间戳
+     * @param getUserDO 用户
+     * @return 注销操作成功返回ture，失败则返回false
+     */
+    public boolean userAccountDeletion (UserDO getUserDO) {
+        log.info("[DAO] 执行 deleteUserAccount 方法");
+        log.info("\t> Mysql  软删除");
+        return userMapper.userAccountDeletion(getUserDO.getUuid());
+    }
+    public boolean userAccountDistanceDeletion(UserDO getUserDO){
+        log.info("[DAO] 执行 userAccountDistanceDeletion 方法");
+        log.info("\t> Mysql 更新");
+        return userMapper.userAccountDistanceDeletion(getUserDO.getUuid());
+    }
+
+
+
+
+    public Boolean getUserByInvite(String invite){
+        log.info("[DAO] 执行 getUserByInvite 方法");
+        log.info("\t> Mysql 读取");
+        return userMapper.getUserByInvite(invite);
     }
 }

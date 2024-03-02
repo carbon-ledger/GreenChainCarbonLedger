@@ -32,6 +32,7 @@ open class ShiroConfig(
             .also {
                 it["/**"] = "cors"
                 it["/auth/change"] = "cors,time,jwt"
+                it["/auth/delete"] = "cors,time,jwt"
                 it["/auth/login"] = "cors,time"
                 it["/auth/organize/register"] = "cors,time"
             }
