@@ -38,7 +38,7 @@ public interface UserMapper {
         """)
     boolean createUser(UserDO newUserDO);
 
-    @Update("UPDATE fy_user SET password = #{password} WHERE uuid = #{uuid}")
+    @Update("UPDATE fy_user SET password = #{password}, updated_at = NOW() WHERE uuid = #{uuid}")
     boolean updateUserPassword(UserDO getUserDO);
 
     //软删除加上时间戳
