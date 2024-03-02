@@ -1,5 +1,6 @@
 package com.frontleaves.greenchaincarbonledger.services.impl;
 
+import com.frontleaves.greenchaincarbonledger.dao.RoleDAO;
 import com.frontleaves.greenchaincarbonledger.dao.UserDAO;
 import com.frontleaves.greenchaincarbonledger.models.doData.UserDO;
 import com.frontleaves.greenchaincarbonledger.models.voData.returnData.BackUserCurrentVO;
@@ -7,11 +8,15 @@ import com.frontleaves.greenchaincarbonledger.services.UserService;
 import com.frontleaves.greenchaincarbonledger.utils.BaseResponse;
 import com.frontleaves.greenchaincarbonledger.utils.ErrorCode;
 import com.frontleaves.greenchaincarbonledger.utils.ResultUtil;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
 
 /**
  * 用户服务实现类，提供处理用户相关业务逻辑的方法。
@@ -27,6 +32,8 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
     private final UserDAO userDAO;
+    private final RoleDAO roleDAO;
+    private final Gson gson;
 
     @Override
     public @NotNull ResponseEntity<BaseResponse> getUserCurrent(long timestamp, HttpServletRequest request) {
@@ -35,15 +42,33 @@ public class UserServiceImpl implements UserService {
         UserDO getUserDO = userDAO.getUserByUuid(getUuid);
         //获取自己的账号详细信息（姓名，联系方式，电子邮件等）
         if (getUserDO != null) {
+            ArrayList<String> getPermissionList = gson.fromJson(getUserDO.getPermission(), new TypeToken<ArrayList<String>>() {
+            }.getType());
+            if (getPermissionList == null) {
+                getPermissionList = new ArrayList<>();
+            }
+            // 数据整理
             BackUserCurrentVO backUserCurrent = new BackUserCurrentVO();
-            backUserCurrent.setUserName(getUserDO.getUserName());
-            backUserCurrent.setRealName(getUserDO.getRealName());
-            backUserCurrent.setEmail(getUserDO.getEmail());
-            backUserCurrent.setPhone(getUserDO.getPhone());
-            backUserCurrent.setPermission(getUserDO.getPermission());
-            //下面需要返回数据库中角色表的UUID来区分用户角色
-            backUserCurrent.setRole(userDAO.getRoleUserByUserRole(getUserDO).getRole());
-            return ResultUtil.success(timestamp, "用户查看的信息已准备完毕");
+            BackUserCurrentVO.UserVO newUserInfo = new BackUserCurrentVO.UserVO();
+            BackUserCurrentVO.PermissionVO newPermissionInfo = new BackUserCurrentVO.PermissionVO();
+
+            newUserInfo
+                    .setUserName(getUserDO.getUserName())
+                    .setRealName(getUserDO.getRealName())
+                    .setEmail(getUserDO.getEmail())
+                    .setPhone(getUserDO.getPhone())
+                    .setUuid(getUserDO.getUuid());
+            // TODO: 权限信息写好后，需要数据库调取
+            newPermissionInfo
+                    .setUserPermission(getPermissionList)
+                    .setRolePermission(getPermissionList);
+
+            backUserCurrent
+                    .setUser(newUserInfo)
+                    .setPermission(newPermissionInfo)
+                    .setRole(roleDAO.getRoleByUuid(getUserDO.getRole()).getName());
+            // 数据输出
+            return ResultUtil.success(timestamp, "用户查看的信息已准备完毕", backUserCurrent);
         } else {
             return ResultUtil.error(timestamp, ErrorCode.USER_NOT_EXISTED);
         }

@@ -29,12 +29,6 @@ public interface UserMapper {
     @Select("SELECT * FROM fy_user WHERE real_name = #{realname}")
     UserDO getUserByRealname(String realname);
 
-    @Select("SELECT * FROM fy_role r " +
-            "JOIN fy_user u ON r.uuid = u.role " +
-            "WHERE r.uuid = #{uuid}")
-    UserDO getRoleUserByUserRole(UserDO getUseDO);
-
-
     @Select("SELECT * FROM fy_user WHERE invite = #{invite}")
     Boolean getUserByInvite(String invite);
 
