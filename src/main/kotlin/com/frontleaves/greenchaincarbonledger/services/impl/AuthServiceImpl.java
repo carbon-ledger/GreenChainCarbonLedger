@@ -130,7 +130,8 @@ public class AuthServiceImpl implements AuthService {
     public ResponseEntity<BaseResponse> organizeRegister(
             long timestamp,
             @NotNull HttpServletRequest request,
-            @NotNull AuthOrganizeRegisterVO authOrganizeRegisterVO) {
+            @NotNull AuthOrganizeRegisterVO authOrganizeRegisterVO
+    ) {
         // 检索组织是否唯一存在
         String checkUserExist = userDAO.checkUserExist(authOrganizeRegisterVO.getUsername(), authOrganizeRegisterVO.getEmail(), authOrganizeRegisterVO.getPhone(), authOrganizeRegisterVO.getOrganize());
         if (checkUserExist != null) {
@@ -211,6 +212,39 @@ public class AuthServiceImpl implements AuthService {
             }
         } else {
             return ResultUtil.error(timestamp, ErrorCode.VERIFY_CODE_ERROR);
+        }
+
+    }
+
+    @NotNull
+    @Override
+    public ResponseEntity<BaseResponse> forgetCode(
+            long timestamp,
+            @NotNull HttpServletRequest request,
+            @NotNull AuthForgetCodeVO authForgetCodeVO) {
+        // 获取邮箱数据，此处无论用户填入的Email是否真实有效，系统都会返回“密码充值邮件已发送”的信息
+        String email = authForgetCodeVO.getEmail();
+        // 如果校验码与缓存中的数据符合，则满足修改密码的条件
+        if (verifyCodeDAO.getVerifyCodeByContact(email) != null) {
+            if (authForgetCodeVO.getCode().equals(verifyCodeDAO.getVerifyCodeByContact(email).code)) {
+                // 删除缓存
+                verifyCodeDAO.deleteVerifyCode(authForgetCodeVO.getEmail());
+                // 验证密码和确认密码是否相同
+                if (authForgetCodeVO.getPassword().equals(authForgetCodeVO.getConfirmPassword())) {
+                    // 先对密码进行加密再将新密码存入数据库
+                    UserDO userDO = new UserDO();
+                    userDO.setPassword(ProcessingUtil.passwordEncrypt(authForgetCodeVO.getPassword()));
+                    userDAO.updateUserPassword(userDO);
+                    return ResultUtil.success(timestamp, "密码更新完毕");
+                } else {
+                    return ResultUtil.error(timestamp, ErrorCode.USER_PASSWORD_INCONSISTENCY_ERROR);
+                }
+            } else {
+                // 不满足修改密码的条件
+                return ResultUtil.error(timestamp, ErrorCode.VERIFY_CODE_ERROR);
+            }
+        } else {
+            return ResultUtil.error(timestamp, ErrorCode.VERIFY_CODE_NOT_EXISTED);
         }
 
     }
