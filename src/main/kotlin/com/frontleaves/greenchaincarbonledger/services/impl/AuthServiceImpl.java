@@ -112,7 +112,8 @@ public class AuthServiceImpl implements AuthService {
     public ResponseEntity<BaseResponse> organizeRegister(
             long timestamp,
             @NotNull HttpServletRequest request,
-            @NotNull AuthOrganizeRegisterVO authOrganizeRegisterVO) {
+            @NotNull AuthOrganizeRegisterVO authOrganizeRegisterVO
+    ) {
         // 检索组织是否唯一存在
         String checkUserExist = userDAO.checkUserExist(authOrganizeRegisterVO.getUsername(), authOrganizeRegisterVO.getEmail(), authOrganizeRegisterVO.getPhone(), authOrganizeRegisterVO.getOrganize());
         if (checkUserExist != null) {
@@ -188,7 +189,7 @@ public class AuthServiceImpl implements AuthService {
                 // 删除缓存
                 verifyCodeDAO.deleteVerifyCode(authForgetCodeVO.getCode());
                 // 验证密码和确认密码是否相同
-                if (authForgetCodeVO.getPassword().equals(authForgetCodeVO.getCode())) {
+                if (authForgetCodeVO.getPassword().equals(authForgetCodeVO.getConfirmPassword())) {
                     // 先对密码进行加密再将新密码存入数据库
                     UserDO userDO = new UserDO();
                     userDO.setPassword(ProcessingUtil.passwordEncrypt(authForgetCodeVO.getPassword()));
