@@ -80,4 +80,12 @@ public class MailServiceImpl implements MailService {
             return ResultUtil.error(timestamp, ErrorCode.SERVER_INTERNAL_ERROR);
         }
     }
+
+    @NotNull
+    @Override
+    public ResponseEntity<BaseResponse> sendMail(long timestamp, @NotNull String email, @NotNull String template) {
+        log.info("[Service] 执行 sendMail 方法");
+        mailTemplateService.mailSendWithTemplate(email, template);
+        return ResultUtil.success(timestamp, "邮件发送成功");
+    }
 }
