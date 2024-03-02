@@ -97,7 +97,7 @@ public class AuthController {
         return authService.organizeRegister(timestamp, request, authOrganizeRegisterVO);
     }
 
-    @PutMapping("/auth/forget")
+    @PutMapping("/forget")
     public ResponseEntity<BaseResponse> forgetCode(
             @RequestBody @Validated AuthForgetCodeVO authForgetCodeVO,
             @NotNull BindingResult bindingResult,
