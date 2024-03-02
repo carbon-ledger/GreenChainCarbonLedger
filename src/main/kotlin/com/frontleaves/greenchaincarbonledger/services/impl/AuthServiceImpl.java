@@ -228,7 +228,7 @@ public class AuthServiceImpl implements AuthService {
         if (verifyCodeDAO.getVerifyCodeByContact(email) != null) {
             if (authForgetCodeVO.getCode().equals(verifyCodeDAO.getVerifyCodeByContact(email).code)) {
                 // 删除缓存
-                verifyCodeDAO.deleteVerifyCode(authForgetCodeVO.getCode());
+                verifyCodeDAO.deleteVerifyCode(authForgetCodeVO.getEmail());
                 // 验证密码和确认密码是否相同
                 if (authForgetCodeVO.getPassword().equals(authForgetCodeVO.getConfirmPassword())) {
                     // 先对密码进行加密再将新密码存入数据库
@@ -236,7 +236,6 @@ public class AuthServiceImpl implements AuthService {
                     userDO.setPassword(ProcessingUtil.passwordEncrypt(authForgetCodeVO.getPassword()));
                     userDAO.updateUserPassword(userDO);
                     return ResultUtil.success(timestamp, "密码更新完毕");
-
                 } else {
                     return ResultUtil.error(timestamp, ErrorCode.USER_PASSWORD_INCONSISTENCY_ERROR);
                 }
