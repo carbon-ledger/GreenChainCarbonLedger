@@ -183,4 +183,17 @@ public class UserDAO {
         log.info("\t> Mysql 读取");
         return userMapper.getUserByInvite(invite);
     }
+
+    /**
+     * 数据库根据user表查询role表用户
+     * <hr/>
+     * 数据库根据user表查询role表用户
+     * @param getUserDO
+     * @return getUserDO
+     */
+    public UserDO getRoleUserByUserRole(UserDO getUserDO){
+        log.info("[DAO] 执行 getRoleUserByUserRole方法");
+        log.info("\t> Mysql 读取");
+        return userMapper.getRoleUserByUserRole(getUserDO);
+    }
 }
