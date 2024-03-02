@@ -1,10 +1,6 @@
 package com.frontleaves.greenchaincarbonledger.services
 
-import com.frontleaves.greenchaincarbonledger.models.voData.getData.AuthChangeVO
-import com.frontleaves.greenchaincarbonledger.models.voData.getData.AuthDeleteVO
-import com.frontleaves.greenchaincarbonledger.models.voData.getData.AuthLoginVO
-import com.frontleaves.greenchaincarbonledger.models.voData.getData.AuthOrganizeRegisterVO
-import com.frontleaves.greenchaincarbonledger.models.voData.getData.AuthUserRegisterVO
+import com.frontleaves.greenchaincarbonledger.models.voData.getData.*
 import com.frontleaves.greenchaincarbonledger.utils.BaseResponse
 import jakarta.servlet.http.HttpServletRequest
 import org.springframework.http.ResponseEntity
@@ -82,5 +78,9 @@ interface AuthService {
         authDeleteVO: AuthDeleteVO
     ): ResponseEntity<BaseResponse>
 
-
+    fun forgetCode(
+        timestamp: Long,
+        request: HttpServletRequest,
+        authForgetCodeVO: AuthForgetCodeVO
+    ): ResponseEntity<BaseResponse>
 }

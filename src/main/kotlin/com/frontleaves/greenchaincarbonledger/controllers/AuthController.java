@@ -133,4 +133,20 @@ public class AuthController {
         // 业务操作
         return authService.organizeRegister(timestamp, request, authOrganizeRegisterVO);
     }
+
+    @PutMapping("/forget")
+    public ResponseEntity<BaseResponse> forgetCode(
+            @RequestBody @Validated AuthForgetCodeVO authForgetCodeVO,
+            @NotNull BindingResult bindingResult,
+            HttpServletRequest request
+    ){
+        log.info("[Controller] 请求 forgetCode 接口");
+        long timestamp = System.currentTimeMillis();
+        // 对传入参数进行校验
+        if (bindingResult.hasErrors()){
+            return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR, ProcessingUtil.getValidatedErrorList(bindingResult));
+        }
+        // 业务操作
+        return authService.forgetCode(timestamp, request, authForgetCodeVO);
+    }
 }
