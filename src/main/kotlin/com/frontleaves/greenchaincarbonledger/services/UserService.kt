@@ -9,4 +9,14 @@ interface UserService {
         timestamp: Long,
         request: HttpServletRequest
     ): ResponseEntity<BaseResponse>
+
+    fun getUserList(
+        timestamp: Long,
+        request: HttpServletRequest,
+        type: String,
+        search: String?,
+        limit: Int?,
+        page: Int?,
+        order: String?
+    ): ResponseEntity<BaseResponse>
 }
