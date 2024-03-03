@@ -2,14 +2,22 @@ package com.frontleaves.greenchaincarbonledger.controllers;
 
 import com.frontleaves.greenchaincarbonledger.services.UserService;
 import com.frontleaves.greenchaincarbonledger.utils.BaseResponse;
+import com.frontleaves.greenchaincarbonledger.utils.ErrorCode;
+import com.frontleaves.greenchaincarbonledger.utils.ResultUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
+
+/**
+ * @author 32841
+ */
 @Slf4j
 @RestController
 @RequestMapping("/user")
@@ -28,13 +36,41 @@ public class UserController {
      */
     @GetMapping("/current")
     public ResponseEntity<BaseResponse> getUserCurrent(HttpServletRequest request) {
-        {
-            log.info("[Controller] 请求 getUserCurrent 接口");
-            long timestamp = System.currentTimeMillis();
-            request.getHeader("X-Auth-UUID");
-            // 业务操作
-            return userService.getUserCurrent(timestamp, request);
+        log.info("[Controller] 请求 getUserCurrent 接口");
+        long timestamp = System.currentTimeMillis();
+        request.getHeader("X-Auth-UUID");
+        // 业务操作
+        return userService.getUserCurrent(timestamp, request);
+    }
+
+    @GetMapping("/list")
+    public ResponseEntity<BaseResponse> getUserList(
+            // 此处根据用户的操作需求自动传入对应参数，除了type都是可选项
+            @RequestParam String type,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) Integer limit,
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) String order,
+            HttpServletRequest request
+    ){
+        log.info("[Controller] 请求getUserList 接口");
+        long timestamp = System.currentTimeMillis();
+        if (limit != null && !limit.toString().matches("^[0-9]+$")) {
+            return ResultUtil.error(timestamp, "limit 参数错误", ErrorCode.QUERY_PARAM_ERROR);
         }
+        if (page != null && page.toString().matches("^[0-9]+$")){
+            return ResultUtil.error(timestamp, "page 参数错误", ErrorCode.QUERY_PARAM_ERROR);
+        }
+        ArrayList<String> list = new ArrayList<>();
+        list.add("DESC");
+        list.add("desc");
+        list.add("ASC");
+        list.add("asd");
+        if (order != null && list.contains(order)){
+            return ResultUtil.error(timestamp, "order 参数错误", ErrorCode.QUERY_PARAM_ERROR);
+        }
+        // 业务操作
+        return userService.getUserList(timestamp, request, type, search , limit, page, order);
     }
 }
 

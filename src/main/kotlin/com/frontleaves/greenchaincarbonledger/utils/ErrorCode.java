@@ -39,7 +39,8 @@ public enum ErrorCode {
     SERVER_INTERNAL_ERROR("ServerInternalError", 50000, "服务器内部错误"),
     MAIL_TEMPLATE_NOT_EXIST("MailTemplateNotExist", 50001, "邮箱模板不存在"),
     ORGANIZE_NOT_EXISTED("OrganizeNotExist", 40399, "组织不存在"),
-    INVITE_CODE_ERROR("VerifyCodeError", 40398, "邀请码错误");
+    INVITE_CODE_ERROR("VerifyCodeError", 40398, "邀请码错误"),
+    QUERY_PARAM_ERROR("RequestBodyError", 40396, "查询参数错误");
 
     final String output;
     final Integer code;

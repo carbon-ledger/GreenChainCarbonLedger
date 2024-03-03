@@ -10,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 /**
  * 用户DAO
  * <hr/>
@@ -180,5 +182,39 @@ public class UserDAO {
         log.info("[DAO] 执行 getUserByInvite 方法");
         log.info("\t> Mysql 读取");
         return userMapper.getUserByInvite(invite);
+    }
+
+    public List<UserDO> getUserFuzzy(String search, Integer limit, Integer page, String order) {
+        log.info("[DAO] 执行 getUserFuzzy 方法");
+        log.info("\t> Mysql 读取");
+
+
+        return userMapper.getUserFuzzy(search, limit, page, order);
+    }
+
+    public List<UserDO> getUserByUnbanlist(Integer limit, Integer page, String order) {
+        log.info("[DAO] 执行 getUserByUnbanlist 方法");
+        log.info("\t> Mysql 读取");
+
+        return userMapper.getUserByUnbanlist(limit, page, order);
+    }
+
+    public List<UserDO> getUserByBanlist(Integer limit, Integer page, String order) {
+        log.info("[DAO] 执行 getUserByBanlist 方法");
+        log.info("\t> Mysql 读取");
+        return userMapper.getUserByBanlist(limit, page, order);
+
+    }
+
+    public List<UserDO> getUserByAvailablelist(Integer limit, Integer page, String order) {
+        log.info("[DAO] 执行 getUserByAvailablelist 方法");
+        log.info("\t> Mysql 读取");
+        return userMapper.getUserByAvailablelist(limit, page, order);
+    }
+
+    public List<UserDO> getUserByAlllist(Integer limit, Integer page, String order) {
+        log.info("[DAO] 执行 getUserByAlllist 方法");
+        log.info("\t> Mysql 读取");
+        return userMapper.getUserByAlllist(limit, page, order);
     }
 }
