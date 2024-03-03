@@ -218,6 +218,7 @@ public class AuthServiceImpl implements AuthService {
 
     @NotNull
     @Override
+    @Transactional
     public ResponseEntity<BaseResponse> forgetCode(
             long timestamp,
             @NotNull HttpServletRequest request,
