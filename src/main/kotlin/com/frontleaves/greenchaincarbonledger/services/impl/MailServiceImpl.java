@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 
@@ -36,6 +37,7 @@ public class MailServiceImpl implements MailService {
 
     @NotNull
     @Override
+    @Transactional
     public ResponseEntity<BaseResponse> sendMailByCode(long timestamp, @NotNull HttpServletRequest request, @NotNull String email, @NotNull String template) {
         log.info("[Service] 执行 sendMailByCode 方法");
         // 检查UserAgent与UserIp是否存在

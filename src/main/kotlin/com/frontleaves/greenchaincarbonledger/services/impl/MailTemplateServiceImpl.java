@@ -2,6 +2,7 @@ package com.frontleaves.greenchaincarbonledger.services.impl;
 
 import com.frontleaves.greenchaincarbonledger.common.constants.SystemConstants;
 import com.frontleaves.greenchaincarbonledger.dao.UserDAO;
+import com.frontleaves.greenchaincarbonledger.dao.VerifyCodeDAO;
 import com.frontleaves.greenchaincarbonledger.exceptions.MailTemplateDoesNotExistException;
 import com.frontleaves.greenchaincarbonledger.exceptions.UserDoesNotExistException;
 import com.frontleaves.greenchaincarbonledger.models.doData.UserDO;
@@ -35,6 +36,7 @@ import java.util.HashMap;
 @Service
 @RequiredArgsConstructor
 public class MailTemplateServiceImpl implements MailTemplateService {
+    private final VerifyCodeDAO verifyCodeDAO;
     private final JavaMailSender javaMailSender;
     private final TemplateEngine templateEngine;
     private final UserDAO userDAO;
@@ -57,7 +59,6 @@ public class MailTemplateServiceImpl implements MailTemplateService {
     }
 
     @Override
-    @Async
     public void mailSendCode(@NotNull String email, @NotNull String code, @NotNull String template) {
         log.info("[Service] 执行 mailSendCode 方法");
         HashMap<String, Object> prepareData = new HashMap<>();
@@ -68,13 +69,15 @@ public class MailTemplateServiceImpl implements MailTemplateService {
             case "user-login" -> prepareData.put("title", SystemConstants.SYSTEM_NAME + " - 用户登陆");
             case "user-register" -> prepareData.put("title", SystemConstants.SYSTEM_NAME + " - 用户注册");
             case "user-forget-password" -> prepareData.put("title", SystemConstants.SYSTEM_NAME + " - 忘记密码");
-            default -> prepareData.put("title", SystemConstants.SYSTEM_NAME + " - 验证码");
+            default -> {
+                verifyCodeDAO.deleteVerifyCode(email);
+                throw new MailTemplateDoesNotExistException("模板不存在");
+            }
         }
         this.sendMail(email, prepareData, "./mail/" + template + ".html");
     }
 
     @Override
-    @Async
     public void mailSendWithTemplate(@NotNull String email, @NotNull String template) {
         log.info("[Service] 执行 mailSendWithTemplate 方法");
         HashMap<String, Object> prepareData = new HashMap<>();
