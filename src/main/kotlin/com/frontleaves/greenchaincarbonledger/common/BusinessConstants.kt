@@ -17,5 +17,8 @@ enum class BusinessConstants(
     USER("user:", "用户"),
     EMAIL("email:", "邮箱"),
     PHONE("phone:", "手机"),
+    ONE("1:","1"),
+    TWO("2:", "2"),
+    THREE("3:", "3"),
     NONE("", "null")
 }

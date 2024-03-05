@@ -1,9 +1,11 @@
 package com.frontleaves.greenchaincarbonledger.services.impl;
 
+import com.frontleaves.greenchaincarbonledger.dao.AuthDAO;
 import com.frontleaves.greenchaincarbonledger.dao.RoleDAO;
 import com.frontleaves.greenchaincarbonledger.dao.UserDAO;
 import com.frontleaves.greenchaincarbonledger.dao.VerifyCodeDAO;
 import com.frontleaves.greenchaincarbonledger.models.doData.UserDO;
+import com.frontleaves.greenchaincarbonledger.models.doData.UserLoginDO;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.*;
 import com.frontleaves.greenchaincarbonledger.models.voData.returnData.BackAuthLoginVO;
 import com.frontleaves.greenchaincarbonledger.services.AuthService;
@@ -40,6 +42,7 @@ public class AuthServiceImpl implements AuthService {
     private final UserDAO userDAO;
     private final RoleDAO roleDAO;
     private final VerifyCodeDAO verifyCodeDAO;
+    private final AuthDAO authDAO;
 
     @NotNull
     @Override
@@ -73,6 +76,7 @@ public class AuthServiceImpl implements AuthService {
     public ResponseEntity<BaseResponse> userLogin(long timestamp, @NotNull HttpServletRequest request, @NotNull AuthLoginVO authLoginVO) {
         // 检索用户
         UserDO getUserDO;
+        UserLoginDO getUserLoginDO = new UserLoginDO();
         if (Pattern.matches("^\\w+([-+.]\\w+)*@\\w+([-.]\\w+)*\\.\\w+([-.]\\w+)*$", authLoginVO.getUser())) {
             getUserDO = userDAO.getUserByEmail(authLoginVO.getUser());
         } else if (Pattern.matches("^(13[0-9]|14[01456879]|15[0-35-9]|16[2567]|17[0-8]|18[0-9]|19[0-35-9])\\d{8}$", authLoginVO.getUser())) {
@@ -82,6 +86,7 @@ public class AuthServiceImpl implements AuthService {
         }
         // 检查用户是否存在
         if (getUserDO != null) {
+            String newToken = new JwtUtil(userDAO).signToken(getUserDO.getUuid());
             boolean recover = false;
             if (getUserDO.getDeletedAt() != null) {
                 //用户存在并且处于注销状态，再进行判断是否在7天以内
@@ -94,7 +99,6 @@ public class AuthServiceImpl implements AuthService {
                     return ResultUtil.error(timestamp, ErrorCode.USER_NOT_EXISTED);
                 }
             }
-
             // 用户存在（密码检查）且不在注销状态
             if (ProcessingUtil.passwordCheck(authLoginVO.getPassword(), getUserDO.getPassword())) {
                 BackAuthLoginVO newBackAuthLoginVO = new BackAuthLoginVO();
@@ -110,10 +114,18 @@ public class AuthServiceImpl implements AuthService {
                         .setUserPermission(new ArrayList<>())
                         .setRolePermission(new ArrayList<>());
                 newBackAuthLoginVO
-                        .setToken(new JwtUtil(userDAO).signToken(getUserDO.getUuid()))
+                        .setToken(newToken)
                         .setUser(newUserVO)
                         .setPermission(newPermission)
                         .setRecover(recover);
+                //存入了getUserLoginDO类
+                getUserLoginDO
+                        .setUuid(getUserDO.getUuid())
+                        .setToken(newToken)
+                        .setUserAgent(request.getHeader("User-Agent"))
+                        .setUserIp(request.getRemoteAddr());
+                //将信息转为缓存
+                authDAO.saveAuthInfo(getUserLoginDO);
                 return ResultUtil.success(timestamp, "登录成功", newBackAuthLoginVO);
             } else {
                 return ResultUtil.error(timestamp, ErrorCode.USER_PASSWORD_ERROR);
@@ -248,6 +260,22 @@ public class AuthServiceImpl implements AuthService {
             return ResultUtil.error(timestamp, ErrorCode.VERIFY_CODE_NOT_EXISTED);
         }
 
+    }
+
+    @NotNull
+    @Override
+    public ResponseEntity<BaseResponse> userLogout(long timestamp, @NotNull HttpServletRequest request) {
+        // 首先获取此时用户的 UUID
+        String getUuid = request.getHeader("X-Auth-UUID");
+        // 获取用户本地的 Token
+        String getToken = request.getHeader("Authorization");
+        // 需要删除 Token 里面的 "Bearer " 前缀
+        if (getToken != null && getToken.startsWith("Bearer ")) {
+            getToken = getToken.substring(7);
+        }
+        //转到AuthDAO操作
+        authDAO.userLogout(getUuid, getToken);
+        return ResultUtil.success(timestamp, "用户成功登出");
     }
 }
 
