@@ -139,28 +139,28 @@ public class AuthServiceImpl implements AuthService {
         }
         String invite = authOrganizeRegisterVO.getInvite();
         // 验证组织注册填写的验证码是否有效
-        if (!userDAO.getUserByInvite(invite)) {
-            return ResultUtil.error(timestamp, ErrorCode.INVITE_CODE_ERROR);
-        } else {
-            // 密码加密
-            String newPassword = ProcessingUtil.passwordEncrypt(authOrganizeRegisterVO.getPassword());
-            // 保存组织
-            UserDO newUserDO = new UserDO();
-            newUserDO
-                    .setUuid(ProcessingUtil.createUuid())
-                    .setRealName(authOrganizeRegisterVO.getOrganize())
-                    .setUserName(authOrganizeRegisterVO.getUsername())
-                    .setPhone(authOrganizeRegisterVO.getPhone())
-                    .setEmail(authOrganizeRegisterVO.getEmail())
-                    .setInvite(authOrganizeRegisterVO.getInvite())
-                    .setPassword(newPassword);
-            if (userDAO.createUser(newUserDO)) {
-                return ResultUtil.success(timestamp, "组织账户注册成功");
-            } else {
-                return ResultUtil.error(timestamp, ErrorCode.SERVER_INTERNAL_ERROR);
+        if (invite != null) {
+            if (!userDAO.getUserByInvite(invite)) {
+                return ResultUtil.error(timestamp, ErrorCode.INVITE_CODE_ERROR);
             }
         }
-
+        // 密码加密
+        String newPassword = ProcessingUtil.passwordEncrypt(authOrganizeRegisterVO.getPassword());
+        // 保存组织
+        UserDO newUserDO = new UserDO();
+        newUserDO
+                .setUuid(ProcessingUtil.createUuid())
+                .setRealName(authOrganizeRegisterVO.getOrganize())
+                .setUserName(authOrganizeRegisterVO.getUsername())
+                .setPhone(authOrganizeRegisterVO.getPhone())
+                .setEmail(authOrganizeRegisterVO.getEmail())
+                .setInvite(authOrganizeRegisterVO.getInvite())
+                .setPassword(newPassword);
+        if (userDAO.createUser(newUserDO)) {
+            return ResultUtil.success(timestamp, "组织账户注册成功");
+        } else {
+            return ResultUtil.error(timestamp, ErrorCode.SERVER_INTERNAL_ERROR);
+        }
     }
 
     @NotNull
