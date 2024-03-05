@@ -149,4 +149,14 @@ public class AuthController {
         // 业务操作
         return authService.forgetCode(timestamp, request, authForgetCodeVO);
     }
+
+    @GetMapping("/logout")
+    public ResponseEntity<BaseResponse> userLogout(HttpServletRequest request) {
+        log.info("[Controller] 请求 userLogout接口");
+        long timestamp = System.currentTimeMillis();
+        request.getHeader("X-Auth-UUID");
+        // 业务操作
+        return authService.userLogout(timestamp, request);
+    }
+
 }

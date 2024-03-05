@@ -83,4 +83,9 @@ interface AuthService {
         request: HttpServletRequest,
         authForgetCodeVO: AuthForgetCodeVO
     ): ResponseEntity<BaseResponse>
+
+    fun userLogout(
+        timestamp: Long,
+        request: HttpServletRequest
+    ): ResponseEntity<BaseResponse>
 }
