@@ -10,6 +10,10 @@ import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer
 import org.springframework.data.redis.serializer.RedisSerializer
 import org.springframework.data.redis.serializer.StringRedisSerializer
+import org.springframework.jdbc.datasource.DataSourceTransactionManager
+import org.springframework.transaction.PlatformTransactionManager
+import javax.sql.DataSource
+
 
 @Configuration
 open class RedisConfiguration(env: Environment) {
@@ -42,6 +46,12 @@ open class RedisConfiguration(env: Environment) {
             it.valueSerializer = jsonSerializer
             it.hashKeySerializer = stringSerializer
             it.hashValueSerializer = jsonSerializer
+            it.setEnableTransactionSupport(true)
         }
+    }
+
+    @Bean
+    open fun transactionManager(dataSource: DataSource): PlatformTransactionManager {
+        return DataSourceTransactionManager(dataSource)
     }
 }
