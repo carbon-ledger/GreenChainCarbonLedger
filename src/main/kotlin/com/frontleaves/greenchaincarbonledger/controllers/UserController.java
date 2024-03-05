@@ -16,7 +16,10 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.ArrayList;
 
 /**
- * @author 32841
+ * 用于获取用户登录信息（
+ * <hr/>
+ * 用于获取用户登录信息如（查询当前用户信息）
+ * @author FLASHLACK AND DC_DC
  */
 @Slf4j
 @RestController
