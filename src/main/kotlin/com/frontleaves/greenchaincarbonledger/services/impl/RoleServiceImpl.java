@@ -39,7 +39,7 @@ public class RoleServiceImpl implements RoleService {
             //这里已经获取了用户此时的Role
             RoleDO getUserRole = roleDAO.getRoleByUuid(getUserDO.getRole());
             //判断用户此时Role是否获取成功
-            if (getUserRole.getUuid() != null && getUserRole.getName() != null && getUserRole.getDisplayName() != null && getUserRole.getPermission() != null) {
+            if (getUserRole != null) {
                 //现在进行值的输出，先将其存入返回值VO里面
                 //先对取出来的Permission进行解析并且放入链表里面
                 ArrayList<String> getPermissionList = gson.fromJson(getUserDO.getPermission(), new TypeToken<ArrayList<String>>() {
@@ -48,14 +48,11 @@ public class RoleServiceImpl implements RoleService {
                     getPermissionList = new ArrayList<>();
                 }
                 BackRoleCurrentVO backRoleCurrent = new BackRoleCurrentVO();
-                BackRoleCurrentVO.Permission newPermissionInfo = new BackRoleCurrentVO.Permission();
                 //将DO数据传入VO中
                 backRoleCurrent.setUuid(getUserRole.getUuid())
                         .setName(getUserRole.getName())
-                        .setDisplayName(getUserRole.getDisplayName());
-                newPermissionInfo.setRolePermission(getPermissionList);
-                backRoleCurrent
-                        .setPermission(newPermissionInfo);
+                        .setDisplayName(getUserRole.getDisplayName())
+                        .setPermission(getPermissionList);
                 //数据进行输出
                 return ResultUtil.success(timestamp, "当前角色信息已准备完毕", backRoleCurrent);
             } else {

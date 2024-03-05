@@ -18,13 +18,5 @@ public class BackRoleCurrentVO {
     String uuid;
     String name;
     String displayName;
-    Permission permission;
-
-    @Data
-    @Accessors (chain = true)
-    public static class Permission{
-        public ArrayList<String> rolePermission;
-    }
-
-
+    ArrayList<String> permission;
 }
