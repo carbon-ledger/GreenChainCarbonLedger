@@ -19,4 +19,15 @@ interface RoleService {
         timestamp: Long,
         request: HttpServletRequest
     ): ResponseEntity<BaseResponse>
+
+    fun getRoleList(
+        timestamp: Long,
+        request: HttpServletRequest,
+        type: String,
+        search: String?,
+        limit: Int?,
+        page: Int?,
+        order: String?
+    ): ResponseEntity<BaseResponse>
+
 }

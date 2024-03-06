@@ -72,6 +72,7 @@ public class UserServiceImpl implements UserService {
 
     @NotNull
     @Override
+    //TODO:还未进行权限验证（接口未写好）
     public ResponseEntity<BaseResponse> getUserList(long timestamp, @NotNull HttpServletRequest request, @NotNull String type, String search, Integer limit, Integer page, String order) {
         log.info("[Service] 执行 getUserList 方法");
         // 检查参数，如果未设置（即为null），则使用默认值
@@ -80,7 +81,7 @@ public class UserServiceImpl implements UserService {
         if (order == null || order.isBlank()) {
             order = "uid ASC";
         } else {
-            order = "uid " + order;
+            order = "uuid " + order;
         }
         log.debug("\t> limit: {}, page: {}, order: {}", limit, page, order);
         // 1. 对type类型进行判断

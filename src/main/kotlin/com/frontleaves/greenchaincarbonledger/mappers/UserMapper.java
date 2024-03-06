@@ -33,8 +33,6 @@ public interface UserMapper {
 
     @Select("SELECT * FROM fy_user WHERE invite = #{invite}")
     Boolean getUserByInvite(String invite);
-    @Select("SELECT role FROM fy_user WHERE uuid=#{uuid}")
-    UserDO getRoleByUuid(String getuuid);
 
     @Insert("""
             INSERT INTO fy_user (uuid, user_name, real_name, email, phone, password, role)
@@ -88,4 +86,20 @@ public interface UserMapper {
         // limit 代表查询结果的最大返回记录数
         // offset 表示跳过开始的N条记录
     List<UserDO> getUserByAlllist(Integer limit, Integer page, String order);
+
+    @Select("""
+            SELECT role FROM fy_user
+            WHERE user_name LIKE CONCAT('%', #{search}, '%')
+            OR nick_name LIKE CONCAT('%', #{search}, '%')
+            OR real_name LIKE CONCAT('%', #{search}, '%')
+            OR email LIKE CONCAT('%', #{search}, '%')
+            OR phone LIKE CONCAT('%', #{search}, '%')
+            OR role LIKE CONCAT('%', #{search}, '%')
+            OR uuid LIKE CONCAT('%', #{search}, '%')
+            OR avatar LIKE CONCAT('%', #{search}, '%')
+            OR invite LIKE CONCAT('%', #{search}, '%')
+            ORDER BY ${order} LIMIT #{limit} OFFSET ${(page-1) * limit}
+                        """)
+    List<String> getRoleByAllList(String search, Integer limit, Integer page, String order);
+
 }

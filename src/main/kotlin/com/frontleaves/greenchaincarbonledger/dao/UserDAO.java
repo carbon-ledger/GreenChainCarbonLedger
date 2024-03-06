@@ -217,4 +217,20 @@ public class UserDAO {
         log.info("\t> Mysql 读取");
         return userMapper.getUserByAlllist(limit, page, order);
     }
+
+    /**
+     * 通过search在user表中查询出role的链表
+     * <hr/>
+     * 通过search在user表中查询出role的链表
+     * @param search 关键字查询
+     * @param limit 限制
+     * @param page 页数
+     * @param order 顺序
+     * @return role链表
+     */
+    public List<String> getRoleByAllList(String search,Integer limit,Integer page,String order) {
+        log.info("[DAO] 执行 getRoleByAllList 方法");
+        log.info("\t> Mysql 读取");
+        return userMapper.getRoleByAllList(search,limit,page,order);
+    }
 }
