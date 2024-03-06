@@ -6,6 +6,7 @@ import com.frontleaves.greenchaincarbonledger.utils.BaseResponse;
 import com.frontleaves.greenchaincarbonledger.utils.ErrorCode;
 import com.frontleaves.greenchaincarbonledger.utils.ResultUtil;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.websocket.server.PathParam;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -52,8 +53,12 @@ public class RoleController {
         return roleService.getUserCurrent(timestamp, request);
     }
 
-    @PutMapping("/edit")
-    public ResponseEntity<BaseResponse> editRole(@RequestBody @Validated RoleVO roleVO, @NotNull BindingResult bindingResult, HttpServletRequest request){
+    @PutMapping("/edit/{uuid}")
+    public ResponseEntity<BaseResponse> editRole(
+            @RequestBody @Validated RoleVO roleVO,
+            @NotNull BindingResult bindingResult,
+            @PathVariable("uuid") String roleUuid,
+            HttpServletRequest request){
         request.getHeader("X-Auth-UUID");
         log.info("[Controller] 请求 roleService 接口");
         long timestamp = System.currentTimeMillis();
@@ -62,6 +67,6 @@ public class RoleController {
             return ResultUtil.error(timestamp, ErrorCode.USER_ACCESS_ILLEGAL);
         }
         //此处是否需要对角色名、展示名字、权限进行验证
-        return roleService.editRole(timestamp, request, roleVO);
+        return roleService.editRole(timestamp, request, roleVO, roleUuid);
     }
 }
