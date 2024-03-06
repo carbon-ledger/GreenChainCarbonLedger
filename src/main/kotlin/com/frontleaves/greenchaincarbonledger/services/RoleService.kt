@@ -39,6 +39,7 @@ interface RoleService {
     fun editRole(
         timestamp: Long,
         request: HttpServletRequest,
-        roleVO: RoleVO
+        roleVO: RoleVO,
+        roleUuid: String
     ): ResponseEntity<BaseResponse>
 }
