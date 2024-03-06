@@ -61,7 +61,7 @@ public class UserController {
         if (limit != null && !limit.toString().matches("^[0-9]+$")) {
             return ResultUtil.error(timestamp, "limit 参数错误", ErrorCode.QUERY_PARAM_ERROR);
         }
-        if (page != null && page.toString().matches("^[0-9]+$")){
+        if (page != null && !page.toString().matches("^[0-9]+$")){
             return ResultUtil.error(timestamp, "page 参数错误", ErrorCode.QUERY_PARAM_ERROR);
         }
         ArrayList<String> list = new ArrayList<>();
