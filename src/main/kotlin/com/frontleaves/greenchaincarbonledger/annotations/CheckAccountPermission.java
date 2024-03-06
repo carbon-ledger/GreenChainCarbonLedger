@@ -18,8 +18,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface CheckAccountPermission {
     // 用户角色（支持 "console, admin, organize"）
-    String value() default "";
 
     // 所需要权限
-    String[] permissions();
+    String[] value();
 }

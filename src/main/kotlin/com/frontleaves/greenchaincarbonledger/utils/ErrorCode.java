@@ -23,6 +23,7 @@ public enum ErrorCode {
     USER_PASSWORD_INCONSISTENCY_ERROR("UserPasswordInconsistencyError", 40008, "新密码与确认密码不一致"),
     USER_PASSWORD_CURRENT_ERROR("UserOldError", 40009, "当前密码错误"),
     USER_PASSWORD_REPEAT_ERROR("UsePasswordRepeatError", 40010, "新密码与当前密码重复"),
+    NO_PERMISSION_ERROR("NoPermissionError", 40011, "无权限"),
     REQUEST_BODY_ERROR("RequestBodyError", 40301, "请求体参数错误"),
     TOKEN_VERIFY_ERROR("TokenVerifyError", 40302, "Token 验证错误"),
     REQUEST_BODY_MISSING("RequestBodyMissing", 40303, "请求体缺失(请求体不能为空)"),
