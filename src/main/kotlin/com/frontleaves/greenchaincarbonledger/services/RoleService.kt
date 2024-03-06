@@ -19,6 +19,7 @@ interface RoleService {
     fun getUserCurrent(
         timestamp: Long,
         request: HttpServletRequest
+    ): ResponseEntity<BaseResponse>
 
 /**
  * AuthService - 角色服务
@@ -29,7 +30,6 @@ interface RoleService {
  * @version v1.0.0-SNAPSHOT
  * @author DC_DC
  */
-interface RoleService {
     fun addRole(
         timestamp: Long,
         request: HttpServletRequest,

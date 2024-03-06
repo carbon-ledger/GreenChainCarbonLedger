@@ -2,14 +2,18 @@ package com.frontleaves.greenchaincarbonledger.dao;
 
 import com.frontleaves.greenchaincarbonledger.common.BusinessConstants;
 import com.frontleaves.greenchaincarbonledger.common.constants.RedisExpiration;
+import com.frontleaves.greenchaincarbonledger.mappers.RoleMapper;
 import com.frontleaves.greenchaincarbonledger.mappers.UserMapper;
+import com.frontleaves.greenchaincarbonledger.models.doData.RoleDO;
 import com.frontleaves.greenchaincarbonledger.models.doData.UserDO;
+import com.frontleaves.greenchaincarbonledger.utils.redis.RoleRedis;
 import com.frontleaves.greenchaincarbonledger.utils.redis.UserRedis;
 import com.google.gson.Gson;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
+import javax.management.relation.Role;
 import java.util.List;
 
 /**
@@ -26,7 +30,9 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserDAO {
     private final UserMapper userMapper;
+    private final RoleMapper roleMapper;
     private final UserRedis userRedis;
+    private final RoleRedis roleRedis;
     private final Gson gson;
 
     /**
@@ -216,5 +222,19 @@ public class UserDAO {
         log.info("[DAO] 执行 getUserByAlllist 方法");
         log.info("\t> Mysql 读取");
         return userMapper.getUserByAlllist(limit, page, order);
+    }
+
+    public RoleDO getRoleByName(String name, String uuid){
+        log.info("[DAO] 执行 getRoleByName 方法");
+        log.info("\t> Redis 读取");
+        String getRedisRoleDO = roleRedis.getData(BusinessConstants.NONE, name);
+        if (getRedisRoleDO != null && !getRedisRoleDO.isEmpty()) {
+            return gson.fromJson(getRedisRoleDO, RoleDO.class);
+        }
+        log.info("\t> Mysql 读取");
+        RoleDO getroleDO = roleMapper.getRoleByName(name);
+        log.info("\t> Redis 写入");
+        userRedis.setData(BusinessConstants.NONE, uuid, gson.toJson(getroleDO), RedisExpiration.HOUR);
+        return getroleDO;
     }
 }

@@ -3,8 +3,8 @@ package com.frontleaves.greenchaincarbonledger.services.impl;
 import com.frontleaves.greenchaincarbonledger.dao.RoleDAO;
 import com.frontleaves.greenchaincarbonledger.dao.UserDAO;
 import com.frontleaves.greenchaincarbonledger.models.doData.UserDO;
-import com.frontleaves.greenchaincarbonledger.models.voData.returnData.BackUserCurrentVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.returnData.BackDesensitizationVO;
+import com.frontleaves.greenchaincarbonledger.models.voData.returnData.BackUserCurrentVO;
 import com.frontleaves.greenchaincarbonledger.services.UserService;
 import com.frontleaves.greenchaincarbonledger.utils.BaseResponse;
 import com.frontleaves.greenchaincarbonledger.utils.ErrorCode;
@@ -92,7 +92,7 @@ public class UserServiceImpl implements UserService {
             case "available" -> getUserDO = userDAO.getUserByAvailablelist(limit, page, order);
             case "all" -> getUserDO = userDAO.getUserByAlllist(limit, page, order);
             default -> {
-                return ResultUtil.error(timestamp, "type 参数有误",ErrorCode.QUERY_PARAM_ERROR);
+                return ResultUtil.error(timestamp, "type 参数有误", ErrorCode.QUERY_PARAM_ERROR);
             }
         }
         List<BackDesensitizationVO> desensitizationVO = modelMapper.map(getUserDO, new TypeToken<List<BackDesensitizationVO>>() {
