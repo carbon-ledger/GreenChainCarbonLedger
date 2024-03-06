@@ -33,6 +33,8 @@ public interface UserMapper {
 
     @Select("SELECT * FROM fy_user WHERE invite = #{invite}")
     Boolean getUserByInvite(String invite);
+    @Select("SELECT role FROM fy_user WHERE uuid=#{uuid}")
+    UserDO getRoleByUuid(String getuuid);
 
     @Insert("""
             INSERT INTO fy_user (uuid, user_name, real_name, email, phone, password, role)
