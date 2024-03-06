@@ -223,18 +223,4 @@ public class UserDAO {
         log.info("\t> Mysql 读取");
         return userMapper.getUserByAlllist(limit, page, order);
     }
-
-    public RoleDO getRoleByName(String name, String uuid){
-        log.info("[DAO] 执行 getRoleByName 方法");
-        log.info("\t> Redis 读取");
-        String getRedisRoleDO = roleRedis.getData(BusinessConstants.NONE, name);
-        if (getRedisRoleDO != null && !getRedisRoleDO.isEmpty()) {
-            return gson.fromJson(getRedisRoleDO, RoleDO.class);
-        }
-        log.info("\t> Mysql 读取");
-        RoleDO getroleDO = roleMapper.getRoleByName(name);
-        log.info("\t> Redis 写入");
-        userRedis.setData(BusinessConstants.NONE, uuid, gson.toJson(getroleDO), RedisExpiration.HOUR);
-        return getroleDO;
-    }
 }
