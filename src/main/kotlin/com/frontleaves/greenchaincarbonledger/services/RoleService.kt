@@ -42,4 +42,10 @@ interface RoleService {
         roleVO: RoleVO,
         roleUuid: String
     ): ResponseEntity<BaseResponse>
+
+    fun deleteRole(
+        timestamp: Long,
+        request: HttpServletRequest,
+        roleUuid: String
+    ): ResponseEntity<BaseResponse>
 }
