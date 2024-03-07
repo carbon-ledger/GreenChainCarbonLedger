@@ -46,7 +46,7 @@ class PermissionAspect(
      * @throws RoleNotFoundException 角色未找到异常
      */
     @Around("@annotation(com.frontleaves.greenchaincarbonledger.annotations.CheckAccountPermission)")
-    fun checkPermission(pjp: ProceedingJoinPoint) {
+    fun checkPermission(pjp: ProceedingJoinPoint): Any? {
         log.info("[AOP] 检查用户权限 CheckAccountPermission")
         // 从ServletRequest中获取用户信息
         val servletRequestAttributes = RequestContextHolder.getRequestAttributes() as ServletRequestAttributes
@@ -62,35 +62,39 @@ class PermissionAspect(
 
         // 获取用户所属角色
         val getUserDO = userDAO.getUserByUuid(getUserUuid)
-        val getRoleWithUser = roleDAO.getRoleByUuid(getUserDO.role)
-        log.debug("\t> 需求权限: {}", getPermission.joinToString(","))
+        if (getUserDO != null) {
+            val getRoleWithUser = roleDAO.getRoleByUuid(getUserDO.role)
+            log.debug("\t> 需求权限: {}", getPermission.joinToString(","))
 
-        // 从 Role 获取权限列表
-        val getRolePermissions = gson.fromJson(getRoleWithUser.permission, Array<String>::class.java)
-        val getUserPermissions = gson.fromJson(getUserDO.permission, Array<String>::class.java)
-        var hasPermission = false
+            // 从 Role 获取权限列表
+            val getRolePermissions = gson.fromJson(getRoleWithUser.permission, Array<String>::class.java)
+            val getUserPermissions = gson.fromJson(getUserDO.permission, Array<String>::class.java)
+            var hasPermission = false
 
-        // 权限匹配
-        getRolePermissions.forEach {
-            if (getRolePermissions.toList().contains(it)) {
-                log.debug("\t> 权限已匹配")
-                hasPermission = true
-                return@forEach
-            }
-        }
-        if (!hasPermission && getUserPermissions != null) {
-            getUserPermissions.forEach {
-                if (getUserPermissions.toList().contains(it)) {
+            // 权限匹配
+            getRolePermissions.forEach {
+                if (getRolePermissions.toList().contains(it)) {
                     log.debug("\t> 权限已匹配")
                     hasPermission = true
                     return@forEach
                 }
             }
-        }
+            if (!hasPermission && getUserPermissions != null) {
+                getUserPermissions.forEach {
+                    if (getUserPermissions.toList().contains(it)) {
+                        log.debug("\t> 权限已匹配")
+                        hasPermission = true
+                        return@forEach
+                    }
+                }
+            }
 
-        // 匹配校验
-        if (hasPermission) {
-            pjp.proceed()
+            // 匹配校验
+            if (hasPermission) {
+                return pjp.proceed()
+            } else {
+                throw NotEnoughPermissionException("您没有足够的权限访问该资源", getPermission)
+            }
         } else {
             throw NotEnoughPermissionException("您没有足够的权限访问该资源", getPermission)
         }
