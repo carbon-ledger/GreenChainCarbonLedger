@@ -1,5 +1,6 @@
 package com.frontleaves.greenchaincarbonledger.controllers;
 
+import com.frontleaves.greenchaincarbonledger.annotations.CheckAccountPermission;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.*;
 import com.frontleaves.greenchaincarbonledger.services.AuthService;
 import com.frontleaves.greenchaincarbonledger.utils.BaseResponse;
@@ -78,13 +79,14 @@ public class AuthController {
      * @return 成功则去业务层操作，失败则返回错误信息
      */
     @PatchMapping("/change")
-    public ResponseEntity<BaseResponse> userChange(
+    @CheckAccountPermission({"auth:userChangePassword"})
+    public ResponseEntity<BaseResponse> userChangePassword(
             @RequestBody @Validated AuthChangeVO authChangeVO,
             @NotNull BindingResult bindingResult,
             HttpServletRequest request
 
     ) {
-        log.info("[Controller] 请求 userChange 接口");
+        log.info("[Controller] 请求 userChangePassword 接口");
         long timestamp = System.currentTimeMillis();
         //请求参数进行校验
         if (bindingResult.hasErrors()) {
@@ -102,6 +104,7 @@ public class AuthController {
      * @return 成功则去业务层操作，失败则返回错误信息
      */
     @DeleteMapping("/delete")
+    @CheckAccountPermission({"auth:userDelete"})
     public ResponseEntity<BaseResponse> userDelete(
             @RequestBody @Validated AuthDeleteVO authDeleteVO,
             @NotNull BindingResult bindingResult,
@@ -151,7 +154,8 @@ public class AuthController {
     }
 
     @GetMapping("/logout")
-    public ResponseEntity<BaseResponse> userLogout(HttpServletRequest request) {
+    @CheckAccountPermission({"auth:userLogout"})
+    public ResponseEntity<BaseResponse> userLogout(@NotNull HttpServletRequest request) {
         log.info("[Controller] 请求 userLogout接口");
         long timestamp = System.currentTimeMillis();
         request.getHeader("X-Auth-UUID");
