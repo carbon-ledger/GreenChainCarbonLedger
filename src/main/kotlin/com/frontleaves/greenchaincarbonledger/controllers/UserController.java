@@ -1,5 +1,7 @@
 package com.frontleaves.greenchaincarbonledger.controllers;
 
+import com.frontleaves.greenchaincarbonledger.models.voData.getData.AuthChangeVO;
+import com.frontleaves.greenchaincarbonledger.models.voData.getData.UserForceEditVO;
 import com.frontleaves.greenchaincarbonledger.annotations.CheckAccountPermission;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.UserEditVO;
 import com.frontleaves.greenchaincarbonledger.services.UserService;
@@ -120,6 +122,24 @@ public class UserController {
         }
         // 业务操作
         return userService.editUser(timestamp, request, userEditVO);
+    }
+
+    @PutMapping("/force-edit/{uuid}")
+    @CheckAccountPermission("user:putUserForceEdit")
+    public ResponseEntity<BaseResponse> putUserForceEdit(
+            @RequestBody @Validated UserForceEditVO userForceEditVO,
+            @NotNull BindingResult bindingResult,
+            @PathVariable("uuid") String userUuid,
+            HttpServletRequest request
+    ) {
+        log.info("[Controller] 请求 putUserForceEdit 接口");
+        long timestamp = System.currentTimeMillis();
+        //请求参数进行校验
+        if (bindingResult.hasErrors()) {
+            return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR, ProcessingUtil.getValidatedErrorList(bindingResult));
+        }
+        //返回业务操作
+        return userService.putUserForceEdit(timestamp, request, userUuid,userForceEditVO);
     }
 }
 

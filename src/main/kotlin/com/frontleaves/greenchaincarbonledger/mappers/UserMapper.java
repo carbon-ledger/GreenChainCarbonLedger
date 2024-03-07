@@ -2,6 +2,7 @@ package com.frontleaves.greenchaincarbonledger.mappers;
 
 import com.frontleaves.greenchaincarbonledger.models.doData.UserDO;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.UserEditVO;
+import com.frontleaves.greenchaincarbonledger.models.voData.getData.UserForceEditVO;
 import org.apache.ibatis.annotations.*;
 
 import java.util.List;
@@ -97,4 +98,11 @@ public interface UserMapper {
             WHERE uuid = #{getAuthorizeUserUuid}
             """)
     boolean updateUserByUuid(String getAuthorizeUserUuid, UserEditVO userEditVO);
+    @Update("""
+            UPDATE fy_user
+            SET user_name = #{userName},fy_user.nick_name =#{nickName},real_name = #{realName},avatar =#{avatar},email=#{email},phone =#{phone},updated_at = NOW()
+            WHERE uuid =#{userUuid}
+    """)
+    boolean updateUserForceByUuid(String userUuid, UserForceEditVO userForceEditVO);
+
 }

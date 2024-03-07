@@ -5,6 +5,7 @@ import com.frontleaves.greenchaincarbonledger.common.constants.RedisExpiration;
 import com.frontleaves.greenchaincarbonledger.mappers.UserMapper;
 import com.frontleaves.greenchaincarbonledger.models.doData.UserDO;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.UserEditVO;
+import com.frontleaves.greenchaincarbonledger.models.voData.getData.UserForceEditVO;
 import com.frontleaves.greenchaincarbonledger.utils.redis.UserRedis;
 import com.google.gson.Gson;
 import lombok.RequiredArgsConstructor;
@@ -223,5 +224,13 @@ public class UserDAO {
         log.info("[DAO] 执行 updateUserByUuid 方法");
         log.info("\t> Mysql 更新");
         return userMapper.updateUserByUuid(getAuthorizeUserUuid, userEditVO);
+    }
+
+    public boolean updateUserForceByUuid(String userUuid, UserForceEditVO userForceEditVO) {
+        log.info("[Dao] 执行 updateUserForceByUuid 方法");
+        log.info("\t> Redis 删除 ");
+        userRedis.delData(BusinessConstants.NONE, userUuid);
+        log.info("\t> Mysql 更新");
+        return userMapper.updateUserForceByUuid(userUuid, userForceEditVO);
     }
 }
