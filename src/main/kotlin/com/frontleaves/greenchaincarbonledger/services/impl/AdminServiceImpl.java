@@ -42,7 +42,7 @@ public class AdminServiceImpl implements AdminService {
         if (getUserDO != null) {
             log.debug("\t> 用户信息: {}", getUserDO.userName);
             // 检查修改UUID是否为自己
-            if (getUserDO.getUuid().equals(ProcessingUtil.getCookieUuid(request))) {
+            if (getUserDO.getUuid().equals(ProcessingUtil.getAuthorizeUserUuid(request))) {
                 return ResultUtil.error(timestamp, ErrorCode.CAN_T_RESET_MY_PASSWORD);
             }
             // 重置用户密码

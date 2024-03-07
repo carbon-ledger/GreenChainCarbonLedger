@@ -1,6 +1,7 @@
 package com.frontleaves.greenchaincarbonledger.exceptions.capture
 
 import com.frontleaves.greenchaincarbonledger.annotations.KotlinSlf4j.Companion.log
+import com.frontleaves.greenchaincarbonledger.exceptions.NotEnoughPermissionException
 import com.frontleaves.greenchaincarbonledger.exceptions.RoleNotFoundException
 import com.frontleaves.greenchaincarbonledger.utils.BaseResponse
 import com.frontleaves.greenchaincarbonledger.utils.ErrorCode
@@ -17,5 +18,16 @@ class PermissionException {
         val timestamp = System.currentTimeMillis()
         log.error("[Exception] 权限异常: {}", e.message)
         return ResultUtil.error(timestamp, e.message, ErrorCode.SERVER_INTERNAL_ERROR)
+    }
+
+    @ExceptionHandler(value = [NotEnoughPermissionException::class])
+    fun notEnoughPermissionException(e: NotEnoughPermissionException): ResponseEntity<BaseResponse> {
+        val timestamp = System.currentTimeMillis()
+        log.error("[Exception] 权限异常: {}", e.message)
+        val returnData = HashMap<String, Any>().apply {
+            put("errorMessage", e.message!!)
+            put("permission", e.permission)
+        }
+        return ResultUtil.error(timestamp, ErrorCode.NO_PERMISSION_ERROR, returnData)
     }
 }

@@ -47,7 +47,7 @@ public class AdminController {
      * @return 返回重置用户密码的结果
      */
     @PatchMapping("/user/reset/password")
-    @CheckAccountPermission(value = "console", permissions = {"admin:resetUserPassword"})
+    @CheckAccountPermission({"admin:resetUserPassword"})
     public ResponseEntity<BaseResponse> resetUserPassword(@RequestBody @Validated AdminUserChangeVO adminUserChangeVO, @NotNull BindingResult bindingResult, HttpServletRequest request) {
         log.info("[Controller] 请求 resetUserPassword 接口");
         long timestamp = System.currentTimeMillis();

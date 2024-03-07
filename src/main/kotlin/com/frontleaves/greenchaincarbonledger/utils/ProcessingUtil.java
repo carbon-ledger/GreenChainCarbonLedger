@@ -126,16 +126,16 @@ public class ProcessingUtil {
     }
 
     /**
-     * 获取Cookie中的UUID
+     * 获取用户UUID
      * <hr/>
-     * 用于获取Cookie中的UUID
+     * 用于获取用户UUID, 从请求头 X-Auth-UUID 获取信息, 一般用于获取用户信息（即通过UUID获取当前登陆用户）
      *
      * @param request 请求对象
      * @return {@link String}
      * @since v1.0.0
      */
     @NotNull
-    public static String getCookieUuid(@NotNull HttpServletRequest request) {
+    public static String getAuthorizeUserUuid(@NotNull HttpServletRequest request) {
         return request.getHeader("X-Auth-UUID");
     }
 }
