@@ -63,7 +63,7 @@ class PermissionAspect(
         // 获取用户所属角色
         val getUserDO = userDAO.getUserByUuid(getUserUuid)
         if (getUserDO != null) {
-            val getRoleWithUser = roleDAO.getRoleByUuid(getUserDO.role)
+            val getRoleWithUser = roleDAO.getRoleUuid(getUserDO.role)
             log.debug("\t> 需求权限: {}", getPermission.joinToString(","))
 
             // 从 Role 获取权限列表

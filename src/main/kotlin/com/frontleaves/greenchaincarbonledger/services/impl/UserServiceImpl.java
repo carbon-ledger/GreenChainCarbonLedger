@@ -73,7 +73,7 @@ public class UserServiceImpl implements UserService {
             // TODO: 权限信息写好后，需要数据库调取
             newPermissionInfo.setUserPermission(getPermissionList).setRolePermission(getPermissionList);
 
-            backUserCurrent.setUser(newUserInfo).setPermission(newPermissionInfo).setRole(roleDAO.getRoleByUuid(getUserDO.getRole()).getName());
+            backUserCurrent.setUser(newUserInfo).setPermission(newPermissionInfo).setRole(roleDAO.getRoleUuid(getUserDO.getRole()).getName());
             // 数据输出
             return ResultUtil.success(timestamp, "用户查看的信息已准备完毕", backUserCurrent);
         } else {

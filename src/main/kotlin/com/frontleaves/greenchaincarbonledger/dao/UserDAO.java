@@ -31,9 +31,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserDAO {
     private final UserMapper userMapper;
-    private final RoleMapper roleMapper;
     private final UserRedis userRedis;
-    private final RoleRedis roleRedis;
     private final Gson gson;
 
     /**
