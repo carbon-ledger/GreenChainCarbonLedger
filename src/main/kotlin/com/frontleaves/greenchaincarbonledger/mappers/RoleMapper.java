@@ -2,10 +2,7 @@ package com.frontleaves.greenchaincarbonledger.mappers;
 
 import com.frontleaves.greenchaincarbonledger.models.doData.RoleDO;
 import com.google.gson.Gson;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Select;
-import org.apache.ibatis.annotations.Update;
+import org.apache.ibatis.annotations.*;
 
 /**
  * RoleMapper
@@ -29,4 +26,7 @@ public interface RoleMapper {
 
     @Update("Update fy_role SET name = #{name}, display_name = #{displayName}, permission = #{permission} WHERE uuid = #{roleUuid}")
     Boolean updateRole(String name, String displayName, String permission, String roleUuid);
+
+    @Delete("DELETE FROM fy_role WHERE uuid = #{uuid}")
+    Boolean deleteRole(String uuid);
 }
