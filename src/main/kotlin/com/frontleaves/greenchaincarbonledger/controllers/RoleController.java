@@ -7,7 +7,6 @@ import com.frontleaves.greenchaincarbonledger.utils.BaseResponse;
 import com.frontleaves.greenchaincarbonledger.utils.ErrorCode;
 import com.frontleaves.greenchaincarbonledger.utils.ResultUtil;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.websocket.server.PathParam;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -21,9 +20,9 @@ import org.springframework.web.bind.annotation.*;
  * <hr/>
  * 用于处理用户角色相关的请求, 包括获取当前用户角色等
  *
- * @since v1.0.0-SNAPSHOT
- * @version v1.0.0-SNAPSHOT
  * @author xiao_lfeng AND DC_DC AND FLASHLACK
+ * @version v1.0.0-SNAPSHOT
+ * @since v1.0.0-SNAPSHOT
  */
 @Slf4j
 @RestController
@@ -70,7 +69,7 @@ public class RoleController {
             @RequestBody @Validated RoleVO roleVO,
             @NotNull BindingResult bindingResult,
             @PathVariable("uuid") String roleUuid,
-            HttpServletRequest request){
+            @NotNull HttpServletRequest request) {
         request.getHeader("X-Auth-UUID");
         log.info("[Controller] 请求 roleService 接口");
         long timestamp = System.currentTimeMillis();
