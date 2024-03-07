@@ -3,7 +3,7 @@ package com.frontleaves.greenchaincarbonledger.mappers;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 
-import java.util.ArrayList;
+import java.util.List;
 
 /**
  * PermissionMapper
@@ -17,5 +17,5 @@ import java.util.ArrayList;
 @Mapper
 public interface PermissionMapper {
     @Select("SELECT name from fy_permission")
-    ArrayList<String> getPermissionByName();
+    List<String> getPermissionByName();
 }
