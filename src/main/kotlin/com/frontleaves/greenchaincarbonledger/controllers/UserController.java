@@ -1,9 +1,8 @@
 package com.frontleaves.greenchaincarbonledger.controllers;
 
-import com.frontleaves.greenchaincarbonledger.models.voData.getData.AuthChangeVO;
-import com.frontleaves.greenchaincarbonledger.models.voData.getData.UserForceEditVO;
 import com.frontleaves.greenchaincarbonledger.annotations.CheckAccountPermission;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.UserEditVO;
+import com.frontleaves.greenchaincarbonledger.models.voData.getData.UserForceEditVO;
 import com.frontleaves.greenchaincarbonledger.services.UserService;
 import com.frontleaves.greenchaincarbonledger.utils.BaseResponse;
 import com.frontleaves.greenchaincarbonledger.utils.ErrorCode;
@@ -83,7 +82,7 @@ public class UserController {
         if (limit != null && !limit.toString().matches("^[0-9]+$")) {
             return ResultUtil.error(timestamp, "limit 参数错误", ErrorCode.REQUEST_BODY_ERROR);
         }
-        if (page != null && !page.toString().matches("^[0-9]+$")){
+        if (page != null && !page.toString().matches("^[0-9]+$")) {
             return ResultUtil.error(timestamp, "page 参数错误", ErrorCode.REQUEST_BODY_ERROR);
         }
         ArrayList<String> list = new ArrayList<>();
@@ -127,7 +126,7 @@ public class UserController {
     @PostMapping("/add")
     public ResponseEntity<BaseResponse> addAccount(
 
-    ){
+    ) {
         return null;
     }
 
@@ -145,8 +144,11 @@ public class UserController {
         if (bindingResult.hasErrors()) {
             return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR, ProcessingUtil.getValidatedErrorList(bindingResult));
         }
+        if (!userUuid.matches("^[0-9A-Za-z-]{36}")) {
+            return ResultUtil.error(timestamp, "uuid 参数错误", ErrorCode.REQUEST_BODY_ERROR);
+        }
         //返回业务操作
-        return userService.putUserForceEdit(timestamp, request, userUuid,userForceEditVO);
+        return userService.putUserForceEdit(timestamp, request, userUuid, userForceEditVO);
     }
 }
 

@@ -110,10 +110,10 @@ public interface UserMapper {
     List<String> getRoleByAllList(String search, Integer limit, Integer page, String order);
 
     @Update("""
-            UPDATE fy_user
-            SET user_name = #{userName},fy_user.nick_name =#{nickName},real_name = #{realName},avatar =#{avatar},email=#{email},phone =#{phone},updated_at = NOW()
-            WHERE uuid =#{userUuid}
-    """)
+                    UPDATE fy_user
+                    SET user_name = #{userName}, nick_name = #{nickName}, real_name = #{realName}, avatar = #{avatar}, email = #{email}, phone = #{phone}, updated_at = NOW()
+                    WHERE uuid =#{userUuid}
+            """)
     boolean updateUserForceByUuid(String userUuid, UserForceEditVO userForceEditVO);
 
 }
