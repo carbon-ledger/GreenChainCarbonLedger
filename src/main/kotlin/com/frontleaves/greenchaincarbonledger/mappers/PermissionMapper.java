@@ -17,5 +17,5 @@ import java.util.ArrayList;
 @Mapper
 public interface PermissionMapper {
     @Select("SELECT name from fy_permission")
-    ArrayList<String> getPermissionByName();
+    List<String> getPermissionByName();
 }

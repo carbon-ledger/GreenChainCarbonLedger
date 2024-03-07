@@ -5,6 +5,7 @@ import com.frontleaves.greenchaincarbonledger.models.voData.getData.RoleVO;
 import com.frontleaves.greenchaincarbonledger.services.RoleService;
 import com.frontleaves.greenchaincarbonledger.utils.BaseResponse;
 import com.frontleaves.greenchaincarbonledger.utils.ErrorCode;
+import com.frontleaves.greenchaincarbonledger.utils.ProcessingUtil;
 import com.frontleaves.greenchaincarbonledger.utils.ResultUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -38,7 +39,7 @@ public class RoleController {
         long timestamp = System.currentTimeMillis();
         // 对请求参数进行校验
         if (bindingResult.hasErrors()) {
-            return ResultUtil.error(timestamp, ErrorCode.USER_ACCESS_ILLEGAL);
+            return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR, ProcessingUtil.getValidatedErrorList(bindingResult));
         }
         //此处是否需要对角色名、展示名字、权限进行验证
         return roleService.addRole(timestamp, request, roleVO);
@@ -75,7 +76,7 @@ public class RoleController {
         long timestamp = System.currentTimeMillis();
         // 对请求参数进行校验
         if (bindingResult.hasErrors()) {
-            return ResultUtil.error(timestamp, ErrorCode.USER_ACCESS_ILLEGAL);
+            return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR, ProcessingUtil.getValidatedErrorList(bindingResult));
         }
         //此处是否需要对角色名、展示名字、权限进行验证
         return roleService.editRole(timestamp, request, roleVO, roleUuid);
