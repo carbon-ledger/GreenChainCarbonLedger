@@ -1,5 +1,6 @@
 package com.frontleaves.greenchaincarbonledger.services.impl;
 
+import com.frontleaves.greenchaincarbonledger.common.BusinessConstants;
 import com.frontleaves.greenchaincarbonledger.dao.PermissionDAO;
 import com.frontleaves.greenchaincarbonledger.dao.RoleDAO;
 import com.frontleaves.greenchaincarbonledger.dao.UserDAO;
@@ -14,6 +15,7 @@ import com.frontleaves.greenchaincarbonledger.utils.BaseResponse;
 import com.frontleaves.greenchaincarbonledger.utils.ErrorCode;
 import com.frontleaves.greenchaincarbonledger.utils.ProcessingUtil;
 import com.frontleaves.greenchaincarbonledger.utils.ResultUtil;
+import com.frontleaves.greenchaincarbonledger.utils.redis.RoleRedis;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import jakarta.servlet.http.HttpServletRequest;
@@ -88,7 +90,7 @@ public class RoleServiceImpl implements RoleService {
         UserDO getUserDO = userDAO.getUserByUuid(getUuid);
         if (getUserDO != null) {
             //这里已经获取了用户此时的Role
-            RoleDO getUserRole = roleDAO.getRoleByUuid(getUserDO.getRole());
+            RoleDO getUserRole = roleDAO.getRoleUuid(getUserDO.getRole());
             //判断用户此时Role是否获取成功
             if (getUserRole != null) {
                 //现在进行值的输出，先将其存入返回值VO里面
@@ -218,5 +220,28 @@ public class RoleServiceImpl implements RoleService {
             backRoleCurrentList.add(backRoleCurrentVO);
         }
         return ResultUtil.success(timestamp, "角色列表信息已经准备完毕", backRoleCurrentList);
+    }
+
+    @NotNull
+    @Override
+    public ResponseEntity<BaseResponse> deleteRole(long timestamp, @NotNull HttpServletRequest request, @NotNull String roleUuid) {
+        //用缓存的UUID与数据库UUID进行校对
+        RoleDO roleDO = roleDAO.getRoleUuid(roleUuid);
+        ArrayList<String> arrayList = new ArrayList<>(List.of("default", "organize", "admin", "console"));
+        if (roleDO != null) {
+            if (!arrayList.contains(roleDO.getName())) {
+                // 进行删除操作
+                if (roleMapper.deleteRole(roleUuid)) {
+                    roleRedis.delData(BusinessConstants.NONE, roleDO.uuid);
+                    return ResultUtil.success(timestamp, "角色信息删除成功");
+                } else {
+                    return ResultUtil.error(timestamp, "角色信息删除失败", ErrorCode.USER_NOT_EXISTED);
+                }
+            } else {
+                return ResultUtil.error(timestamp, ErrorCode.USER_CANNOT_BE_DELETED);
+            }
+        } else {
+            return ResultUtil.error(timestamp, "角色不存在", ErrorCode.UUID_NOT_EXIST);
+        }
     }
 }

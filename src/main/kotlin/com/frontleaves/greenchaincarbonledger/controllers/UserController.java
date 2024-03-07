@@ -121,5 +121,12 @@ public class UserController {
         // 业务操作
         return userService.editUser(timestamp, request, userEditVO);
     }
+
+    @PostMapping("/add")
+    public ResponseEntity<BaseResponse> addAccount(
+
+    ){
+        return null;
+    }
 }
 
