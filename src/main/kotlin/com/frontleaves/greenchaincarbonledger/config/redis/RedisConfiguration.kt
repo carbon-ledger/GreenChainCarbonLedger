@@ -40,13 +40,15 @@ open class RedisConfiguration(env: Environment) {
         val stringSerializer: RedisSerializer<String> = StringRedisSerializer()
         val jsonSerializer: RedisSerializer<Any> = GenericJackson2JsonRedisSerializer()
 
+        // 开启事务支持
+        redisTemplate.setEnableTransactionSupport(true)
+
         return redisTemplate.also {
             it.connectionFactory = connectionFactory
             it.keySerializer = stringSerializer
             it.valueSerializer = jsonSerializer
             it.hashKeySerializer = stringSerializer
             it.hashValueSerializer = jsonSerializer
-            it.setEnableTransactionSupport(true)
         }
     }
 

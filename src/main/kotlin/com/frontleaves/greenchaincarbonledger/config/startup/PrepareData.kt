@@ -4,6 +4,7 @@ import com.frontleaves.greenchaincarbonledger.annotations.KotlinSlf4j.Companion.
 import com.frontleaves.greenchaincarbonledger.common.constants.SqlPrepareData
 import com.frontleaves.greenchaincarbonledger.models.doData.PermissionDO
 import com.frontleaves.greenchaincarbonledger.models.doData.RoleDO
+import com.frontleaves.greenchaincarbonledger.models.doData.UserDO
 import com.frontleaves.greenchaincarbonledger.utils.ProcessingUtil
 import com.google.gson.Gson
 import org.springframework.jdbc.core.JdbcTemplate
@@ -19,7 +20,10 @@ import java.sql.Timestamp
  * @param jdbcTemplate JdbcTemplate
  * @author xiao_lfeng
  */
-class PrepareData(private val jdbcTemplate: JdbcTemplate) {
+class PrepareData(
+    private val jdbcTemplate: JdbcTemplate,
+) {
+
     /**
      * 准备上传 SQL
      *
@@ -27,38 +31,37 @@ class PrepareData(private val jdbcTemplate: JdbcTemplate) {
      *
      * @param getPermissionList List<RoleDO> 角色列表
      */
-    fun prepareUploadSqlWithPermission(getPermissionList: List<PermissionDO>) {
-        getPermissionList.apply {
-            any { it.name.equals("admin:resetUserPassword") }
-                .takeIf { !it }?.let {
-                    log.debug("\t\t> 权限数据库缺失 admin:resetUserPassword 权限，正在初始化...")
-                    jdbcTemplate.update(
-                        "INSERT INTO fy_permission (name, description) VALUES (?, ?)",
-                        "admin:resetUserPassword",
-                        "重置用户密码"
-                    )
-                }
-            any { it.name.equals("admin:resetUserRole") }
-                .takeIf { !it }?.let {
-                    log.debug("\t\t> 权限数据库缺失 admin:resetUserRole 权限，正在初始化...")
-                    jdbcTemplate.update(
-                        "INSERT INTO fy_permission (name, description) VALUES (?, ?)",
-                        "admin:resetUserRole",
-                        "重置用户角色"
-                    )
-                }
-            any { it.name.equals("admin:resetUserPermission") }
-                .takeIf { !it }?.let {
-                    log.debug("\t\t> 权限数据库缺失 admin:resetUserPermission 权限，正在初始化...")
-                    jdbcTemplate.update(
-                        "INSERT INTO fy_permission (name, description) VALUES (?, ?)",
-                        "admin:resetUserPermission",
-                        "重置用户权限"
-                    )
-                }
+    fun prepareUploadSqlWithPermission(getPermissionList: List<PermissionDO>?) {;
+        val permissionList = getPermissionList?.toTypedArray() ?: arrayOf()
+        SqlPrepareData.PERMISSION_LIST.forEach {permissionName ->
+            if (permissionList.isNotEmpty()) {
+                permissionList.any { permission -> permission.name.equals(permissionName[0]) }
+                    .takeIf { !it }?.let {
+                        log.debug("\t\t> 权限数据库缺失 {} 权限，正在初始化...", permissionName[0])
+                        jdbcTemplate.update(
+                            "INSERT INTO fy_permission (name, description) VALUES (?, ?)",
+                            permissionName[0],
+                            permissionName[1]
+                        )
+                    }
+            } else {
+                log.debug("\t\t> 权限数据库缺失 {} 权限，正在初始化...", permissionName[0])
+                jdbcTemplate.update(
+                    "INSERT INTO fy_permission (name, description) VALUES (?, ?)",
+                    permissionName[0],
+                    permissionName[1]
+                )
+            }
         }
     }
 
+    /**
+     * 准备上传 SQL
+     *
+     * 准备上传 SQL, 用于系统启动时进行数据准备
+     *
+     * @param getRoleList List<RoleDO> 角色列表
+     */
     fun prepareUploadSqlWithRole(getRoleList: List<RoleDO>) {
         getRoleList.apply {
             any { it.name.equals("default") }
@@ -154,6 +157,61 @@ class PrepareData(private val jdbcTemplate: JdbcTemplate) {
                         "organize"
                     )
                 }
+            }
+        }
+    }
+
+    fun prepareCheckDefaultUser() {
+        val getDefaultUser = jdbcTemplate.query("SELECT * FROM fy_user WHERE uid = 1") { rs, _ ->
+            return@query UserDO().also {
+                it.uid = rs.getLong("uid")
+                it.uuid = rs.getString("uuid")
+                it.userName = rs.getString("user_name")
+                it.email = rs.getString("email")
+                it.phone = rs.getString("phone")
+                it.role = rs.getString("role")
+                it.permission = rs.getString("permission")
+            }
+        }
+        if (getDefaultUser.isEmpty()) {
+            log.debug("\t> 默认超级管理员账户不存在，开始初始化默认超级管理员账户")
+            // 获取超级管理员Role
+            val getConsoleRoleUuid = jdbcTemplate.query("SELECT * FROM fy_role WHERE name = 'console'") { rs, _ ->
+                return@query rs.getString("uuid")
+            }
+            // 插入用户
+            jdbcTemplate.update(
+                "INSERT INTO fy_user (uuid, user_name, real_name, email, password, role) VALUES (?, ?, ?, ?, ?, ?)",
+                ProcessingUtil.createUuid(),
+                "console_user",
+                "超级管理员",
+                "admin@admin.com",
+                ProcessingUtil.passwordEncrypt("admin"),
+                getConsoleRoleUuid[0],
+            )
+        }
+    }
+
+    fun sqlGetRoleList(): List<RoleDO> {
+        return jdbcTemplate.query("SELECT * FROM fy_role") { rs, _ ->
+            return@query RoleDO().also {
+                it.id = rs.getShort("id")
+                it.uuid = rs.getString("uuid")
+                it.name = rs.getString("name")
+                it.displayName = rs.getString("display_name")
+                it.permission = rs.getString("permission")
+                it.createdAt = rs.getTimestamp("created_at")
+                it.createdUser = rs.getString("created_user")
+            }
+        }
+    }
+
+    fun sqlGetPermissionList(): List<PermissionDO> {
+        return jdbcTemplate.query("SELECT * FROM fy_permission") { rs, _ ->
+            return@query PermissionDO().also {
+                it.pid = rs.getLong("pid")
+                it.name = rs.getString("name")
+                it.description = rs.getString("description")
             }
         }
     }
