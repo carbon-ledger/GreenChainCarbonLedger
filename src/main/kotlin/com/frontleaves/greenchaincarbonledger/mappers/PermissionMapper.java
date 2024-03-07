@@ -3,7 +3,7 @@ package com.frontleaves.greenchaincarbonledger.mappers;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 
-import java.util.ArrayList;
+import java.util.List;
 
 /**
  * PermissionMapper
