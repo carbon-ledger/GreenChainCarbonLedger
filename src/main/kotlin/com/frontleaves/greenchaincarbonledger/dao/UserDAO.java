@@ -6,6 +6,7 @@ import com.frontleaves.greenchaincarbonledger.mappers.RoleMapper;
 import com.frontleaves.greenchaincarbonledger.mappers.UserMapper;
 import com.frontleaves.greenchaincarbonledger.models.doData.RoleDO;
 import com.frontleaves.greenchaincarbonledger.models.doData.UserDO;
+import com.frontleaves.greenchaincarbonledger.models.voData.getData.UserEditVO;
 import com.frontleaves.greenchaincarbonledger.utils.redis.RoleRedis;
 import com.frontleaves.greenchaincarbonledger.utils.redis.UserRedis;
 import com.google.gson.Gson;
@@ -30,9 +31,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserDAO {
     private final UserMapper userMapper;
-    private final RoleMapper roleMapper;
     private final UserRedis userRedis;
-    private final RoleRedis roleRedis;
     private final Gson gson;
 
     /**
@@ -222,5 +221,11 @@ public class UserDAO {
         log.info("[DAO] 执行 getUserByAlllist 方法");
         log.info("\t> Mysql 读取");
         return userMapper.getUserByAlllist(limit, page, order);
+    }
+
+    public boolean updateUserByUuid(String getAuthorizeUserUuid, UserEditVO userEditVO) {
+        log.info("[DAO] 执行 updateUserByUuid 方法");
+        log.info("\t> Mysql 更新");
+        return userMapper.updateUserByUuid(getAuthorizeUserUuid, userEditVO);
     }
 }
