@@ -8,8 +8,10 @@ import com.frontleaves.greenchaincarbonledger.dao.VerifyCodeDAO;
 import com.frontleaves.greenchaincarbonledger.models.doData.UserDO;
 import com.frontleaves.greenchaincarbonledger.models.doData.VerifyCodeDO;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.UserEditVO;
+import com.frontleaves.greenchaincarbonledger.models.voData.getData.UserForceEditVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.returnData.BackDesensitizationVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.returnData.BackUserCurrentVO;
+import com.frontleaves.greenchaincarbonledger.models.voData.returnData.BackUserForceEditVO;
 import com.frontleaves.greenchaincarbonledger.services.UserService;
 import com.frontleaves.greenchaincarbonledger.utils.BaseResponse;
 import com.frontleaves.greenchaincarbonledger.utils.ErrorCode;
@@ -164,6 +166,30 @@ public class UserServiceImpl implements UserService {
         // 对数据库进行数据操作
         if (userDAO.updateUserByUuid(getAuthorizeUserUuid, userEditVO)) {
             return ResultUtil.success(timestamp, "用户信息修改成功");
+        } else {
+            return ResultUtil.error(timestamp, ErrorCode.SERVER_INTERNAL_ERROR);
+        }
+    }
+
+    @NotNull
+    @Override
+    public ResponseEntity<BaseResponse> putUserForceEdit(long timestamp, @NotNull HttpServletRequest request, @NotNull String userUuid, @NotNull UserForceEditVO userForceEditVO) {
+        if (userDAO.getUserByUuid(userUuid) == null) {
+            return ResultUtil.error(timestamp, ErrorCode.USER_NOT_EXISTED);
+        }
+        //通过UUID进行用户信息匹配进行数据库修改并且删掉此时数据库中缓存
+        if (userDAO.updateUserForceByUuid(userUuid, userForceEditVO)) {
+            UserDO getUserDO = userDAO.getUserByUuid(userUuid);
+            BackUserForceEditVO backUserForceEditVO = new BackUserForceEditVO();
+            backUserForceEditVO.setUuid(userUuid)
+                    .setUserName(getUserDO.getUserName())
+                    .setNickName(getUserDO.getNickName())
+                    .setRealName(getUserDO.getRealName())
+                    .setEmail(getUserDO.getEmail())
+                    .setPhone(getUserDO.getPhone())
+                    .setCreatedAt(getUserDO.getCreatedAt().toString())
+                    .setUpdatedAt(getUserDO.getUpdatedAt().toString());
+            return ResultUtil.success(timestamp, "用户信息修改成功", backUserForceEditVO);
         } else {
             return ResultUtil.error(timestamp, ErrorCode.SERVER_INTERNAL_ERROR);
         }
