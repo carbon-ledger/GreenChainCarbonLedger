@@ -130,7 +130,7 @@ public class RoleServiceImpl implements RoleService {
                 }
                 // 判断角色名不重复、角色权限存在且有效
                 String json = gson.toJson(roleVO.getPermission());
-                if (roleMapper.updateRole(roleVO.getName(), roleVO.getDisplayName(), json, roleUuid)){
+                if (roleMapper.updateRole(roleVO.getName(), roleVO.getDisplayName(), json, roleUuid)) {
                     return ResultUtil.success(timestamp, "修改角色信息成功");
                 } else {
                     return ResultUtil.error(timestamp, ErrorCode.UPDATE_DATA_ERROR);
@@ -154,28 +154,42 @@ public class RoleServiceImpl implements RoleService {
         limit = (limit == null || limit > 100) ? 20 : limit;
         page = (page == null) ? 1 : page;
         if (order == null || order.isBlank()) {
-            order = "uuid ASC";
-        } else {
-            order = "uuid " + order;
+            order = "ASC";
         }
         log.debug("\t> limit: {}, page: {}, order: {}", limit, page, order);
         //开始进行type的值的判断
         List<RoleDO> getRoleList;
         switch (type) {
-            case "all" -> getRoleList = roleDAO.getRoleByAllList(limit, page, order);
-            case "search" -> getRoleList = roleDAO.getRoleByFuzzy(search, limit, page, order);
+            case "all" -> {
+                order = "id " + order;
+                getRoleList = roleDAO.getRoleByAllList(limit, page, order);
+            }
+            case "search" -> {
+                order = "id " + order;
+                getRoleList = roleDAO.getRoleByFuzzy(search, limit, page, order);
+            }
             case "permission" -> {
+                order = "pid " + order;
                 //首先去Permission表中模糊查询得到Name
-                List<String> getNameListByPermission = permissionDAO.getNameBySearch(search, limit, page, order);
+                List<String> getNameListByPermission = permissionDAO.getNameBySearch(search, order);
                 getRoleList = new ArrayList<>();
                 for (String namePermission : getNameListByPermission) {
-                    RoleDO getRoleDO = roleDAO.getRoleByPermissionName(namePermission);
-                    if (!getRoleList.contains(getRoleDO)) {
-                        getRoleList.add(getRoleDO);
+                    ArrayList<RoleDO> getRoleDO = (ArrayList<RoleDO>) roleDAO.getRoleByPermissionName(namePermission);
+                    // 这里的链表只存role数据
+                    for (RoleDO roleDO : getRoleDO) {
+                        if (!getRoleList.contains(roleDO)) {
+                            getRoleList.add(roleDO);
+                        }
                     }
+                }
+                if (!getRoleList.isEmpty() && getRoleList.size() >= limit * page) {
+                    getRoleList = getRoleList.subList(limit * (page - 1), limit * page);
+                } else {
+                    getRoleList = new ArrayList<>();
                 }
             }
             case "user" -> {
+                order = "uid " + order;
                 //首先去User表中模糊查询得到role链表
                 //这里的链表只存role数据
                 List<String> getRoleListByUser = userDAO.getRoleByAllList(search, limit, page, order);
@@ -189,7 +203,7 @@ public class RoleServiceImpl implements RoleService {
                 }
             }
             default -> {
-                return ResultUtil.error(timestamp, "type 参数有误", ErrorCode.QUERY_PARAM_ERROR);
+                return ResultUtil.error(timestamp, "type 参数有误", ErrorCode.REQUEST_BODY_ERROR);
             }
         }
         // 整理数据

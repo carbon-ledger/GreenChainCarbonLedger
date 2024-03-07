@@ -1,7 +1,6 @@
 package com.frontleaves.greenchaincarbonledger.mappers;
 
 import com.frontleaves.greenchaincarbonledger.models.doData.RoleDO;
-import com.google.gson.Gson;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
@@ -35,8 +34,7 @@ public interface RoleMapper {
 
     @Select("""
             SELECT * FROM fy_role
-            WHERE uuid LIKE CONCAT('%',#{search},'%')
-            OR name LIKE CONCAT('%',#{search},'%')
+            WHERE name LIKE CONCAT('%',#{search},'%')
             OR display_name LIKE CONCAT('%',#{search},'%')
             OR permission LIKE CONCAT('%',#{search},'%')
             OR created_at LIKE CONCAT('%',#{search},'%')
@@ -47,7 +45,7 @@ public interface RoleMapper {
     List<RoleDO> getRoleByFuzzy(String search, Integer limit, Integer page, String order);
 
     @Select(" SELECT * FROM fy_role WHERE permission LIKE CONCAT('%',#{otherSearch}, '%') ")
-    RoleDO getRoleByPermissionName(String name);
+    List<RoleDO> getRoleByPermissionName(String name);
 
     @Insert("INSERT INTO fy_role (uuid, name, display_name, permission, created_user) VALUES (#{uuid}, #{name}, #{displayName}, #{permission}, #{userUuid})")
     Boolean insertRole(String uuid, String name, String displayName, String permission, String userUuid);

@@ -28,10 +28,10 @@ public class PermissionDAO {
      * @param search 关键字查询
      * @return getNameBySearch String
      */
-    public List<String> getNameBySearch(String search, Integer limit, Integer page, String order) {
+    public List<String> getNameBySearch(String search, String order) {
         log.info("[DAO] 执行 getNameBy");
         log.info("\t> Mysql 读取");
-        return permissionMapper.getNameBySearch(search, limit, page, order);
+        return permissionMapper.getNameBySearch(search, order);
 
 
     }

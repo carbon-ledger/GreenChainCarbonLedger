@@ -19,7 +19,9 @@ public interface PermissionMapper {
     @Select("SELECT name from fy_permission")
     List<String> getPermissionByName();
 
-    @Select("SELECT name FROM fy_permission WHERE description LIKE CONCAT('%',#{search},'%')" +
-            "ORDER BY ${order} LIMIT #{limit} OFFSET ${(page-1) * limit}")
-    List<String> getNameBySearch(String search, Integer limit, Integer page, String order);
+    @Select("""
+            SELECT name FROM fy_permission WHERE description LIKE CONCAT('%',#{search},'%')
+                ORDER BY ${order}
+            """)
+    List<String> getNameBySearch(String search, String order);
 }
