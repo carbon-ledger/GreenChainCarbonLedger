@@ -16,6 +16,8 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+
 /**
  * RoleController
  * <hr/>
@@ -31,6 +33,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class RoleController {
     private final RoleService roleService;
+
 
     @PostMapping("/add")
     public ResponseEntity<BaseResponse> addRole(@RequestBody @Validated RoleVO roleVO, @NotNull BindingResult bindingResult, HttpServletRequest request) {
@@ -63,6 +66,39 @@ public class RoleController {
         request.getHeader("X-Auth-UUID");
         // 业务操作
         return roleService.getUserCurrent(timestamp, request);
+    }
+
+    @GetMapping("/list")
+    public ResponseEntity<BaseResponse> getRoleList(
+            //需要Query参数
+            @RequestParam String type,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) Integer limit,
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) String order,
+            HttpServletRequest request) {
+        log.info("[Controller] 请求 getRoleList 接口");
+        long timestamp = System.currentTimeMillis();
+        if (limit != null && !limit.toString().matches("^[0-9]+$")) {
+            return ResultUtil.error(timestamp, "limit 参数错误", ErrorCode.REQUEST_BODY_ERROR);
+        }
+        if (page != null && !page.toString().matches("^[0-9]+$")) {
+            return ResultUtil.error(timestamp, "page 参数错误", ErrorCode.REQUEST_BODY_ERROR);
+        }
+        request.getHeader("X-Auth-UUID");
+        ArrayList<String> list = new ArrayList<>();
+        list.add("desc");
+        list.add("asc");
+        if (order != null && !list.contains(order)) {
+            return ResultUtil.error(timestamp, "order 参数错误", ErrorCode.REQUEST_BODY_ERROR);
+        }
+        if ("all".equals(type) || "search".equals(type) || "user".equals(type) || "permission".equals(type)) {
+            //业务操作
+            return roleService.getRoleList(timestamp, request, type, search, limit, page, order);
+        } else {
+            return ResultUtil.error(timestamp, "type 参数错误", ErrorCode.REQUEST_BODY_ERROR);
+        }
+
     }
 
     @PutMapping("/edit/{uuid}")
