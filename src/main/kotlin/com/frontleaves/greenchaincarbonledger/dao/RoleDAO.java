@@ -78,8 +78,10 @@ public class RoleDAO {
         }
         log.info("\t> Mysql 读取");
         RoleDO getRoleDO = roleMapper.getRoleByName(roleName);
-        log.info("\t> Redis 写入");
-        roleRedis.setData(BusinessConstants.ALL, getRoleDO.getUuid(), gson.toJson(getRoleDO), RedisExpiration.DAY);
+        if (getRoleDO != null) {
+            log.info("\t> Redis 写入");
+            roleRedis.setData(BusinessConstants.ALL, getRoleDO.getUuid(), gson.toJson(getRoleDO), RedisExpiration.DAY);
+        }
         return getRoleDO;
     }
 

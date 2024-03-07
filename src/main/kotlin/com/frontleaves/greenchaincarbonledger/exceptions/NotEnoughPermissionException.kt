@@ -9,4 +9,4 @@ package com.frontleaves.greenchaincarbonledger.exceptions
  * @version v1.0.0-SNAPSHOT
  * @author xiao_lfeng
  */
-class NotEnoughPermissionException(message: String) : RuntimeException(message)
+class NotEnoughPermissionException(message: String, val permission: Array<String>) : RuntimeException(message)

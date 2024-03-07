@@ -1,6 +1,7 @@
 package com.frontleaves.greenchaincarbonledger.mappers;
 
 import com.frontleaves.greenchaincarbonledger.models.doData.UserDO;
+import com.frontleaves.greenchaincarbonledger.models.voData.getData.UserEditVO;
 import org.apache.ibatis.annotations.*;
 
 import java.util.List;
@@ -86,6 +87,13 @@ public interface UserMapper {
         // limit 代表查询结果的最大返回记录数
         // offset 表示跳过开始的N条记录
     List<UserDO> getUserByAlllist(Integer limit, Integer page, String order);
+
+    @Update("""
+            UPDATE fy_user
+            SET nick_name = #{nickName}, avatar = #{avatar}, email = #{email}, phone = #{phone}, updated_at = NOW()
+            WHERE uuid = #{getAuthorizeUserUuid}
+            """)
+    boolean updateUserByUuid(String getAuthorizeUserUuid, UserEditVO userEditVO);
 
     @Select("""
             SELECT role FROM fy_user
