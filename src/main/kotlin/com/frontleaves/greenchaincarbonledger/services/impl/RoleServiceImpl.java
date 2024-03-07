@@ -55,7 +55,7 @@ public class RoleServiceImpl implements RoleService {
             RoleDO roleDO = roleDAO.getRoleByName(roleVO.getName());
             if (roleDO == null) {
                 ArrayList<String> arrayList1 = roleVO.getPermission();
-                ArrayList<String> arrayList2 = permissionMapper.getPermissionByName();
+                ArrayList<String> arrayList2 = new ArrayList<>(permissionMapper.getPermissionByName());
                 for (String s : arrayList1) {
                     if (!(arrayList2.contains(s))) {
                         return ResultUtil.error(timestamp, "权限无效", ErrorCode.REQUEST_BODY_ERROR);
@@ -119,7 +119,7 @@ public class RoleServiceImpl implements RoleService {
             RoleDO roleDO = roleDAO.getRoleByName(roleVO.getName());
             if (roleDO == null) {
                 ArrayList<String> arrayList1 = roleVO.getPermission();
-                ArrayList<String> arrayList2 = permissionMapper.getPermissionByName();
+                ArrayList<String> arrayList2 = new ArrayList<>(permissionMapper.getPermissionByName());
                 for (String s : arrayList1) {
                     if (!(arrayList2.contains(s))) {
                         return ResultUtil.error(timestamp, "权限无效", ErrorCode.REQUEST_BODY_ERROR);
