@@ -7,8 +7,6 @@ import com.frontleaves.greenchaincarbonledger.utils.BaseResponse;
 import com.frontleaves.greenchaincarbonledger.utils.ErrorCode;
 import com.frontleaves.greenchaincarbonledger.utils.ProcessingUtil;
 import com.frontleaves.greenchaincarbonledger.utils.ResultUtil;
-import com.frontleaves.greenchaincarbonledger.utils.ErrorCode;
-import com.frontleaves.greenchaincarbonledger.utils.ResultUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +15,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
 
 /**
  * RoleController
@@ -80,25 +80,23 @@ public class RoleController {
         log.info("[Controller] 请求 getRoleList 接口");
         long timestamp = System.currentTimeMillis();
         if (limit != null && !limit.toString().matches("^[0-9]+$")) {
-            return ResultUtil.error(timestamp, "limit 参数错误", ErrorCode.QUERY_PARAM_ERROR);
+            return ResultUtil.error(timestamp, "limit 参数错误", ErrorCode.REQUEST_BODY_ERROR);
         }
         if (page != null && !page.toString().matches("^[0-9]+$")) {
-            return ResultUtil.error(timestamp, "page 参数错误", ErrorCode.QUERY_PARAM_ERROR);
+            return ResultUtil.error(timestamp, "page 参数错误", ErrorCode.REQUEST_BODY_ERROR);
         }
-        request.getDateHeader("X-Auth-UUID");
+        request.getHeader("X-Auth-UUID");
         ArrayList<String> list = new ArrayList<>();
-        list.add("DESC");
         list.add("desc");
-        list.add("ASC");
-        list.add("asd");
-        if (order != null && list.contains(order)) {
-            return ResultUtil.error(timestamp, "order 参数错误", ErrorCode.QUERY_PARAM_ERROR);
+        list.add("asc");
+        if (order != null && !list.contains(order)) {
+            return ResultUtil.error(timestamp, "order 参数错误", ErrorCode.REQUEST_BODY_ERROR);
         }
         if ("all".equals(type) || "search".equals(type) || "user".equals(type) || "permission".equals(type)) {
             //业务操作
             return roleService.getRoleList(timestamp, request, type, search, limit, page, order);
         } else {
-            return ResultUtil.error(timestamp, "type 参数错误", ErrorCode.QUERY_PARAM_ERROR);
+            return ResultUtil.error(timestamp, "type 参数错误", ErrorCode.REQUEST_BODY_ERROR);
         }
 
     }

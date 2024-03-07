@@ -126,7 +126,7 @@ public class RoleDAO {
      * @param name Permission表中权限的名字
      * @return 角色信息
      */
-    public RoleDO getRoleByPermissionName(String name) {
+    public List<RoleDO> getRoleByPermissionName(String name) {
         log.info("[DAO] 执行 getRoleByPermissionName 方法");
         log.info("\t> Mysql 读取");
         return roleMapper.getRoleByPermissionName(name);

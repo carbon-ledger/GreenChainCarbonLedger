@@ -48,7 +48,6 @@ public class UserServiceImpl implements UserService {
     private final UserDAO userDAO;
     private final RoleDAO roleDAO;
     private final VerifyCodeDAO verifyCodeDAO;
-    private final UserRedis userRedis;
     private final ContactCodeRedis contactCodeRedis;
     private final ModelMapper modelMapper;
     private final Gson gson;
@@ -105,7 +104,7 @@ public class UserServiceImpl implements UserService {
             case "available" -> getUserDO = userDAO.getUserByAvailablelist(limit, page, order);
             case "all" -> getUserDO = userDAO.getUserByAlllist(limit, page, order);
             default -> {
-                return ResultUtil.error(timestamp, "type 参数有误", ErrorCode.QUERY_PARAM_ERROR);
+                return ResultUtil.error(timestamp, "type 参数有误", ErrorCode.REQUEST_BODY_ERROR);
             }
         }
         List<BackDesensitizationVO> desensitizationVO = modelMapper.map(getUserDO, new TypeToken<List<BackDesensitizationVO>>() {

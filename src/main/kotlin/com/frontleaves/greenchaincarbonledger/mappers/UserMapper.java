@@ -63,7 +63,6 @@ public interface UserMapper {
             OR email LIKE CONCAT('%', #{search}, '%')
             OR phone LIKE CONCAT('%', #{search}, '%')
             OR role LIKE CONCAT('%', #{search}, '%')
-            OR uuid LIKE CONCAT('%', #{search}, '%')
             OR avatar LIKE CONCAT('%', #{search}, '%')
             OR invite LIKE CONCAT('%', #{search}, '%')
             ORDER BY ${order} LIMIT #{limit} OFFSET ${(page-1) * limit}
@@ -103,7 +102,6 @@ public interface UserMapper {
             OR email LIKE CONCAT('%', #{search}, '%')
             OR phone LIKE CONCAT('%', #{search}, '%')
             OR role LIKE CONCAT('%', #{search}, '%')
-            OR uuid LIKE CONCAT('%', #{search}, '%')
             OR avatar LIKE CONCAT('%', #{search}, '%')
             OR invite LIKE CONCAT('%', #{search}, '%')
             ORDER BY ${order} LIMIT #{limit} OFFSET ${(page-1) * limit}
