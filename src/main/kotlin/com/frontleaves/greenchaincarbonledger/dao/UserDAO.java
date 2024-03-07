@@ -2,9 +2,12 @@ package com.frontleaves.greenchaincarbonledger.dao;
 
 import com.frontleaves.greenchaincarbonledger.common.BusinessConstants;
 import com.frontleaves.greenchaincarbonledger.common.constants.RedisExpiration;
+import com.frontleaves.greenchaincarbonledger.mappers.RoleMapper;
 import com.frontleaves.greenchaincarbonledger.mappers.UserMapper;
+import com.frontleaves.greenchaincarbonledger.models.doData.RoleDO;
 import com.frontleaves.greenchaincarbonledger.models.doData.UserDO;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.UserEditVO;
+import com.frontleaves.greenchaincarbonledger.utils.redis.RoleRedis;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.UserForceEditVO;
 import com.frontleaves.greenchaincarbonledger.utils.redis.UserRedis;
 import com.google.gson.Gson;
@@ -12,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
+import javax.management.relation.Role;
 import java.util.List;
 
 /**
@@ -224,6 +228,22 @@ public class UserDAO {
         log.info("[DAO] 执行 updateUserByUuid 方法");
         log.info("\t> Mysql 更新");
         return userMapper.updateUserByUuid(getAuthorizeUserUuid, userEditVO);
+    }
+
+    /**
+     * 通过search在user表中查询出role的链表
+     * <hr/>
+     * 通过search在user表中查询出role的链表
+     * @param search 关键字查询
+     * @param limit 限制
+     * @param page 页数
+     * @param order 顺序
+     * @return role链表
+     */
+    public List<String> getRoleByAllList(String search,Integer limit,Integer page,String order) {
+        log.info("[DAO] 执行 getRoleByAllList 方法");
+        log.info("\t> Mysql 读取");
+        return userMapper.getRoleByAllList(search,limit,page,order);
     }
 
     public boolean updateUserForceByUuid(String userUuid, UserForceEditVO userForceEditVO) {
