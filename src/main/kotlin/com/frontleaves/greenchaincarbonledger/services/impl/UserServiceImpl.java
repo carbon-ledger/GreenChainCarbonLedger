@@ -18,7 +18,6 @@ import com.frontleaves.greenchaincarbonledger.utils.ErrorCode;
 import com.frontleaves.greenchaincarbonledger.utils.ProcessingUtil;
 import com.frontleaves.greenchaincarbonledger.utils.ResultUtil;
 import com.frontleaves.greenchaincarbonledger.utils.redis.ContactCodeRedis;
-import com.frontleaves.greenchaincarbonledger.utils.redis.UserRedis;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import jakarta.servlet.http.HttpServletRequest;
@@ -54,8 +53,9 @@ public class UserServiceImpl implements UserService {
     private final ModelMapper modelMapper;
     private final Gson gson;
 
+    @NotNull
     @Override
-    public @NotNull ResponseEntity<BaseResponse> getUserCurrent(long timestamp, HttpServletRequest request) {
+    public ResponseEntity<BaseResponse> getUserCurrent(long timestamp, HttpServletRequest request) {
         //用缓存的UUID与数据库UUID进行校对
         String getUuid = request.getHeader("X-Auth-UUID");
         UserDO getUserDO = userDAO.getUserByUuid(getUuid);
@@ -173,25 +173,33 @@ public class UserServiceImpl implements UserService {
 
     @NotNull
     @Override
-    public ResponseEntity<BaseResponse> putUserForceEdit(long timestamp, @NotNull HttpServletRequest request, @NotNull String userUuid, @NotNull UserForceEditVO userForceEditVO) {
-        if (userDAO.getUserByUuid(userUuid) == null) {
-            return ResultUtil.error(timestamp, ErrorCode.USER_NOT_EXISTED);
-        }
-        //通过UUID进行用户信息匹配进行数据库修改并且删掉此时数据库中缓存
-        if (userDAO.updateUserForceByUuid(userUuid, userForceEditVO)) {
-            UserDO getUserDO = userDAO.getUserByUuid(userUuid);
-            BackUserForceEditVO backUserForceEditVO = new BackUserForceEditVO();
-            backUserForceEditVO.setUuid(userUuid)
-                    .setUserName(getUserDO.getUserName())
-                    .setNickName(getUserDO.getNickName())
-                    .setRealName(getUserDO.getRealName())
-                    .setEmail(getUserDO.getEmail())
-                    .setPhone(getUserDO.getPhone())
-                    .setCreatedAt(getUserDO.getCreatedAt().toString())
-                    .setUpdatedAt(getUserDO.getUpdatedAt().toString());
-            return ResultUtil.success(timestamp, "用户信息修改成功", backUserForceEditVO);
+    @Transactional
+    public ResponseEntity<BaseResponse> putUserForceEdit(
+            long timestamp,
+            @NotNull HttpServletRequest request,
+            @NotNull String userUuid,
+            @NotNull UserForceEditVO userForceEditVO
+    ) {
+        UserDO getUserDO = userDAO.getUserByUuid(userUuid);
+        if (getUserDO != null) {
+            //通过UUID进行用户信息匹配进行数据库修改并且删掉此时数据库中缓存
+            log.info(userForceEditVO.toString());
+            if (userDAO.updateUserForceByUuid(getUserDO.getUuid(), userForceEditVO)) {
+                BackUserForceEditVO backUserForceEditVO = new BackUserForceEditVO();
+                backUserForceEditVO.setUuid(userUuid)
+                        .setUserName(getUserDO.getUserName())
+                        .setNickName(getUserDO.getNickName())
+                        .setRealName(getUserDO.getRealName())
+                        .setEmail(getUserDO.getEmail())
+                        .setPhone(getUserDO.getPhone())
+                        .setCreatedAt(getUserDO.getCreatedAt().toString())
+                        .setUpdatedAt(getUserDO.getUpdatedAt() != null ? getUserDO.getUpdatedAt().toString() : null);
+                return ResultUtil.success(timestamp, "用户信息修改成功", backUserForceEditVO);
+            } else {
+                return ResultUtil.error(timestamp, ErrorCode.SERVER_INTERNAL_ERROR);
+            }
         } else {
-            return ResultUtil.error(timestamp, ErrorCode.SERVER_INTERNAL_ERROR);
+            return ResultUtil.error(timestamp, ErrorCode.USER_NOT_EXISTED);
         }
     }
 }
