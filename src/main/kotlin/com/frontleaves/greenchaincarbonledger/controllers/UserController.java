@@ -79,16 +79,16 @@ public class UserController {
         log.info("[Controller] 请求getUserList 接口");
         long timestamp = System.currentTimeMillis();
         if (limit != null && !limit.toString().matches("^[0-9]+$")) {
-            return ResultUtil.error(timestamp, "limit 参数错误", ErrorCode.QUERY_PARAM_ERROR);
+            return ResultUtil.error(timestamp, "limit 参数错误", ErrorCode.REQUEST_BODY_ERROR);
         }
-        if (page != null && page.toString().matches("^[0-9]+$")) {
-            return ResultUtil.error(timestamp, "page 参数错误", ErrorCode.QUERY_PARAM_ERROR);
+        if (page != null && !page.toString().matches("^[0-9]+$")){
+            return ResultUtil.error(timestamp, "page 参数错误", ErrorCode.REQUEST_BODY_ERROR);
         }
         ArrayList<String> list = new ArrayList<>();
         list.add("desc");
         list.add("asc");
         if (order != null && list.contains(order)) {
-            return ResultUtil.error(timestamp, "order 参数错误", ErrorCode.QUERY_PARAM_ERROR);
+            return ResultUtil.error(timestamp, "order 参数错误", ErrorCode.REQUEST_BODY_ERROR);
         }
         // 业务操作
         return userService.getUserList(timestamp, request, type, search, limit, page, order);

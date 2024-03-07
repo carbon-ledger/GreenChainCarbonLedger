@@ -1,6 +1,7 @@
 package com.frontleaves.greenchaincarbonledger.services.impl;
 
 import com.frontleaves.greenchaincarbonledger.common.BusinessConstants;
+import com.frontleaves.greenchaincarbonledger.dao.PermissionDAO;
 import com.frontleaves.greenchaincarbonledger.dao.RoleDAO;
 import com.frontleaves.greenchaincarbonledger.dao.UserDAO;
 import com.frontleaves.greenchaincarbonledger.mappers.PermissionMapper;
@@ -47,6 +48,7 @@ public class RoleServiceImpl implements RoleService {
     private final UserDAO userDAO;
     private final RoleDAO roleDAO;
     private final RoleRedis roleRedis;
+    private final PermissionDAO permissionDAO;
 
     @NotNull
     @Override
@@ -143,6 +145,82 @@ public class RoleServiceImpl implements RoleService {
         } else {
             return ResultUtil.error(timestamp, ErrorCode.USER_NOT_EXISTED);
         }
+
+    }
+
+    @NotNull
+    @Override
+    //TODO:管理员权限注解
+    public ResponseEntity<BaseResponse> getRoleList(long timestamp, @NotNull HttpServletRequest request, @NotNull String type, String search, Integer limit, Integer page, String order) {
+        log.info("[Service] 执行getRoleList");
+        // 检查参数，如果未设置（即为null），则使用默认值
+        limit = (limit == null || limit > 100) ? 20 : limit;
+        page = (page == null) ? 1 : page;
+        if (order == null || order.isBlank()) {
+            order = "ASC";
+        }
+        log.debug("\t> limit: {}, page: {}, order: {}", limit, page, order);
+        //开始进行type的值的判断
+        List<RoleDO> getRoleList;
+        switch (type) {
+            case "all" -> {
+                order = "id " + order;
+                getRoleList = roleDAO.getRoleByAllList(limit, page, order);
+            }
+            case "search" -> {
+                order = "id " + order;
+                getRoleList = roleDAO.getRoleByFuzzy(search, limit, page, order);
+            }
+            case "permission" -> {
+                order = "pid " + order;
+                //首先去Permission表中模糊查询得到Name
+                List<String> getNameListByPermission = permissionDAO.getNameBySearch(search, order);
+                getRoleList = new ArrayList<>();
+                for (String namePermission : getNameListByPermission) {
+                    ArrayList<RoleDO> getRoleDO = (ArrayList<RoleDO>) roleDAO.getRoleByPermissionName(namePermission);
+                    // 这里的链表只存role数据
+                    for (RoleDO roleDO : getRoleDO) {
+                        if (!getRoleList.contains(roleDO)) {
+                            getRoleList.add(roleDO);
+                        }
+                    }
+                }
+                if (!getRoleList.isEmpty() && getRoleList.size() >= limit * page) {
+                    getRoleList = getRoleList.subList(limit * (page - 1), limit * page);
+                } else {
+                    getRoleList = new ArrayList<>();
+                }
+            }
+            case "user" -> {
+                order = "uid " + order;
+                //首先去User表中模糊查询得到role链表
+                //这里的链表只存role数据
+                List<String> getRoleListByUser = userDAO.getRoleByAllList(search, limit, page, order);
+                getRoleList = new ArrayList<>();
+                for (String roleUuid : getRoleListByUser) {
+                    //已经把role提出
+                    RoleDO getRoleDO = roleDAO.getRoleUuid(roleUuid);
+                    if (!getRoleList.contains(getRoleDO)) {
+                        getRoleList.add(getRoleDO);
+                    }
+                }
+            }
+            default -> {
+                return ResultUtil.error(timestamp, "type 参数有误", ErrorCode.REQUEST_BODY_ERROR);
+            }
+        }
+        // 整理数据
+        ArrayList<BackRoleCurrentVO> backRoleCurrentList = new ArrayList<>();
+        for (RoleDO getRole : getRoleList) {
+            BackRoleCurrentVO backRoleCurrentVO = new BackRoleCurrentVO();
+            backRoleCurrentVO.setName(getRole.getName());
+            backRoleCurrentVO.setUuid(getRole.getUuid());
+            backRoleCurrentVO.setDisplayName(getRole.getDisplayName());
+            backRoleCurrentVO.setPermission(gson.fromJson(getRole.getPermission(), new TypeToken<ArrayList<String>>() {
+            }.getType()));
+            backRoleCurrentList.add(backRoleCurrentVO);
+        }
+        return ResultUtil.success(timestamp, "角色列表信息已经准备完毕", backRoleCurrentList);
     }
 
     @NotNull
@@ -161,7 +239,7 @@ public class RoleServiceImpl implements RoleService {
                     return ResultUtil.error(timestamp, "角色信息删除失败", ErrorCode.USER_NOT_EXISTED);
                 }
             } else {
-                return ResultUtil.error(timestamp, ErrorCode.USER_CANNOT_BE_DELETED);
+                return ResultUtil.error(timestamp, ErrorCode.ROLE_CANNOT_BE_DELETED);
             }
         } else {
             return ResultUtil.error(timestamp, "角色不存在", ErrorCode.UUID_NOT_EXIST);

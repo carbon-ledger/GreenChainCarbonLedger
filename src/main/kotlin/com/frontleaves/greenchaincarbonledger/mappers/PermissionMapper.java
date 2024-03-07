@@ -18,4 +18,10 @@ import java.util.List;
 public interface PermissionMapper {
     @Select("SELECT name from fy_permission")
     List<String> getPermissionByName();
+
+    @Select("""
+            SELECT name FROM fy_permission WHERE description LIKE CONCAT('%',#{search},'%')
+                ORDER BY ${order}
+            """)
+    List<String> getNameBySearch(String search, String order);
 }
