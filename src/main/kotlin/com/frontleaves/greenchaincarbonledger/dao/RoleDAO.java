@@ -12,6 +12,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * RoleDAO
@@ -38,8 +39,8 @@ public class RoleDAO {
      * @param uuid 角色uuid
      * @return 角色信息
      */
-    public RoleDO getRoleByUuid(@NotNull String uuid) {
-        log.info("[DAO] 执行 getRoleByUuid 方法");
+    public RoleDO getRoleUuid(@NotNull String uuid) {
+        log.info("[DAO] 执行 getRoleUuid 方法");
         log.info("\t> Redis 读取");
         String getRedisRoleDO = roleRedis.getData(BusinessConstants.ALL, uuid);
         RoleDO getRoleDO;
@@ -77,8 +78,57 @@ public class RoleDAO {
         }
         log.info("\t> Mysql 读取");
         RoleDO getRoleDO = roleMapper.getRoleByName(roleName);
-        log.info("\t> Redis 写入");
-        roleRedis.setData(BusinessConstants.ALL, getRoleDO.getUuid(), gson.toJson(getRoleDO), RedisExpiration.DAY);
+        if (getRoleDO != null) {
+            log.info("\t> Redis 写入");
+            roleRedis.setData(BusinessConstants.ALL, getRoleDO.getUuid(), gson.toJson(getRoleDO), RedisExpiration.DAY);
+        }
         return getRoleDO;
+    }
+
+    /**
+     * 获取所有角色信息
+     * <hr/>
+     * 获取所有角色信息
+     *
+     * @param limit 限制
+     * @param page 页数
+     * @param order 顺序
+     * @return 角色信息
+     */
+    public List<RoleDO> getRoleByAllList(Integer limit, Integer page, String order) {
+        log.info("[DAO] 执行 getUserByAlllist 方法");
+        log.info("\t> Mysql 读取");
+        return roleMapper.getRoleByAllList(limit, page, order);
+    }
+
+    /**
+     * 模糊查询角色信息
+     * <hr/>
+     * 模糊查询角色信息
+     *
+     * @param search 关键字查询
+     * @param limit 限制
+     * @param page 页数
+     * @param order 顺序
+     * @return 角色信息
+     */
+    public List<RoleDO> getRoleByFuzzy(String search, Integer limit, Integer page, String order) {
+        log.info("[DAO] 执行 getRoleByFuzzy 方法");
+        log.info("\t> Mysql 读取");
+        return roleMapper.getRoleByFuzzy(search, limit, page, order);
+    }
+
+    /**
+     * 从Permission表中获取otherSearch来模糊查询角色信息
+     * <hr/>
+     * 从Permission表中获取otherSearch来模糊查询角色信息
+     *
+     * @param name Permission表中权限的名字
+     * @return 角色信息
+     */
+    public List<RoleDO> getRoleByPermissionName(String name) {
+        log.info("[DAO] 执行 getRoleByPermissionName 方法");
+        log.info("\t> Mysql 读取");
+        return roleMapper.getRoleByPermissionName(name);
     }
 }

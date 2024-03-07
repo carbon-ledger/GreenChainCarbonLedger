@@ -50,7 +50,6 @@ public class UserServiceImpl implements UserService {
     private final UserDAO userDAO;
     private final RoleDAO roleDAO;
     private final VerifyCodeDAO verifyCodeDAO;
-    private final UserRedis userRedis;
     private final ContactCodeRedis contactCodeRedis;
     private final ModelMapper modelMapper;
     private final Gson gson;
@@ -76,7 +75,7 @@ public class UserServiceImpl implements UserService {
             // TODO: 权限信息写好后，需要数据库调取
             newPermissionInfo.setUserPermission(getPermissionList).setRolePermission(getPermissionList);
 
-            backUserCurrent.setUser(newUserInfo).setPermission(newPermissionInfo).setRole(roleDAO.getRoleByUuid(getUserDO.getRole()).getName());
+            backUserCurrent.setUser(newUserInfo).setPermission(newPermissionInfo).setRole(roleDAO.getRoleUuid(getUserDO.getRole()).getName());
             // 数据输出
             return ResultUtil.success(timestamp, "用户查看的信息已准备完毕", backUserCurrent);
         } else {
@@ -86,6 +85,7 @@ public class UserServiceImpl implements UserService {
 
     @NotNull
     @Override
+    //TODO:还未进行权限验证（接口未写好）
     public ResponseEntity<BaseResponse> getUserList(long timestamp, @NotNull HttpServletRequest request, @NotNull String type, String search, Integer limit, Integer page, String order) {
         log.info("[Service] 执行 getUserList 方法");
         // 检查参数，如果未设置（即为null），则使用默认值
@@ -94,7 +94,7 @@ public class UserServiceImpl implements UserService {
         if (order == null || order.isBlank()) {
             order = "uid ASC";
         } else {
-            order = "uid " + order;
+            order = "uuid " + order;
         }
         log.debug("\t> limit: {}, page: {}, order: {}", limit, page, order);
         // 1. 对type类型进行判断
@@ -106,7 +106,7 @@ public class UserServiceImpl implements UserService {
             case "available" -> getUserDO = userDAO.getUserByAvailablelist(limit, page, order);
             case "all" -> getUserDO = userDAO.getUserByAlllist(limit, page, order);
             default -> {
-                return ResultUtil.error(timestamp, "type 参数有误", ErrorCode.QUERY_PARAM_ERROR);
+                return ResultUtil.error(timestamp, "type 参数有误", ErrorCode.REQUEST_BODY_ERROR);
             }
         }
         List<BackDesensitizationVO> desensitizationVO = modelMapper.map(getUserDO, new TypeToken<List<BackDesensitizationVO>>() {

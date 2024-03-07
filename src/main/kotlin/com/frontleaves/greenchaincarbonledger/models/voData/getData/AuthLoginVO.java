@@ -1,7 +1,6 @@
 package com.frontleaves.greenchaincarbonledger.models.voData.getData;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 
 /**
@@ -9,9 +8,9 @@ import lombok.Data;
  * <hr/>
  * 用于接收用户登录的请求参数，包括用户名和密码, 用于登录
  *
- * @since v1.0.0-SNAPSHOT
- * @version v1.0.0-SNAPSHOT
  * @author FLASHLACK
+ * @version v1.0.0-SNAPSHOT
+ * @since v1.0.0-SNAPSHOT
  */
 @Data
 public class AuthLoginVO {

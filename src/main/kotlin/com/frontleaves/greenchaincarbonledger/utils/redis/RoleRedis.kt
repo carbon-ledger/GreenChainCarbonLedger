@@ -19,7 +19,6 @@ class RoleRedis(
      * 获取Redis中元素过期时间
      *
      * 获取Redis中元素过期时间, 通过业务常量和字段
-     *
      * @param businessConstants 业务常量
      * @param field             字段
      * @return 返回过期时间
@@ -88,7 +87,6 @@ class RoleRedis(
         val key = (RedisConstant.TYPE_AUTH + RedisConstant.TABLE_ROLE + businessConstants.value) + field
         log.info("\t\t> 设置 Redis 键为 {} 的数据", key)
         redisTemplate.also {
-            it.opsForValue()[key] = value
             it.expire(key, time.expirationTime, TimeUnit.MILLISECONDS)
         }
         return true

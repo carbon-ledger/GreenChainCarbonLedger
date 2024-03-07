@@ -35,6 +35,10 @@ open class ShiroConfig(
                 it["/auth/delete"] = "cors,time,jwt"
                 it["/auth/login"] = "cors,time"
                 it["/auth/organize/register"] = "cors,time"
+                it["/user/**"] = "cors,time,jwt"
+                it["/role/**"] = "cors,time,jwt"
+                it["/admin/**"] = "cors,time,jwt"
+                it["/mail/**"] = "cors,time"
             }
         shiroFactory.filterChainDefinitionMap = map
 
