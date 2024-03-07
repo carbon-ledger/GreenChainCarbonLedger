@@ -1,8 +1,11 @@
 package com.frontleaves.greenchaincarbonledger.mappers;
 
 import com.frontleaves.greenchaincarbonledger.models.doData.RoleDO;
+import com.google.gson.Gson;
+import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
 /**
  * RoleMapper
@@ -20,4 +23,10 @@ public interface RoleMapper {
 
     @Select("SELECT * FROM fy_role WHERE name = #{name}")
     RoleDO getRoleByName(String name);
+
+    @Insert("INSERT INTO fy_role (uuid, name, display_name, permission, created_user) VALUES (#{uuid}, #{name}, #{displayName}, #{permission}, #{userUuid})")
+    Boolean insertRole(String uuid, String name, String displayName, String permission, String userUuid);
+
+    @Update("Update fy_role SET name = #{name}, display_name = #{displayName}, permission = #{permission} WHERE uuid = #{roleUuid}")
+    Boolean updateRole(String name, String displayName, String permission, String roleUuid);
 }

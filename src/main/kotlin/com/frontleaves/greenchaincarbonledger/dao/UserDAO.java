@@ -2,15 +2,19 @@ package com.frontleaves.greenchaincarbonledger.dao;
 
 import com.frontleaves.greenchaincarbonledger.common.BusinessConstants;
 import com.frontleaves.greenchaincarbonledger.common.constants.RedisExpiration;
+import com.frontleaves.greenchaincarbonledger.mappers.RoleMapper;
 import com.frontleaves.greenchaincarbonledger.mappers.UserMapper;
+import com.frontleaves.greenchaincarbonledger.models.doData.RoleDO;
 import com.frontleaves.greenchaincarbonledger.models.doData.UserDO;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.UserEditVO;
+import com.frontleaves.greenchaincarbonledger.utils.redis.RoleRedis;
 import com.frontleaves.greenchaincarbonledger.utils.redis.UserRedis;
 import com.google.gson.Gson;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
+import javax.management.relation.Role;
 import java.util.List;
 
 /**
@@ -27,7 +31,9 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserDAO {
     private final UserMapper userMapper;
+    private final RoleMapper roleMapper;
     private final UserRedis userRedis;
+    private final RoleRedis roleRedis;
     private final Gson gson;
 
     /**
