@@ -47,6 +47,7 @@ public class RoleServiceImpl implements RoleService {
     private final Gson gson;
     private final UserDAO userDAO;
     private final RoleDAO roleDAO;
+    private final RoleRedis roleRedis;
     private final PermissionDAO permissionDAO;
 
     @NotNull
@@ -198,7 +199,7 @@ public class RoleServiceImpl implements RoleService {
                 getRoleList = new ArrayList<>();
                 for (String roleUuid : getRoleListByUser) {
                     //已经把role提出
-                    RoleDO getRoleDO = roleDAO.getRoleByUuid(roleUuid);
+                    RoleDO getRoleDO = roleDAO.getRoleUuid(roleUuid);
                     if (!getRoleList.contains(getRoleDO)) {
                         getRoleList.add(getRoleDO);
                     }
@@ -238,7 +239,7 @@ public class RoleServiceImpl implements RoleService {
                     return ResultUtil.error(timestamp, "角色信息删除失败", ErrorCode.USER_NOT_EXISTED);
                 }
             } else {
-                return ResultUtil.error(timestamp, ErrorCode.USER_CANNOT_BE_DELETED);
+                return ResultUtil.error(timestamp, ErrorCode.ROLE_CANNOT_BE_DELETED);
             }
         } else {
             return ResultUtil.error(timestamp, "角色不存在", ErrorCode.UUID_NOT_EXIST);
