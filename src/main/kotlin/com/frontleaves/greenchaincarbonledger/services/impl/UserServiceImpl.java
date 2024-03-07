@@ -1,14 +1,22 @@
 package com.frontleaves.greenchaincarbonledger.services.impl;
 
+import com.frontleaves.greenchaincarbonledger.annotations.CheckAccountPermission;
+import com.frontleaves.greenchaincarbonledger.common.BusinessConstants;
 import com.frontleaves.greenchaincarbonledger.dao.RoleDAO;
 import com.frontleaves.greenchaincarbonledger.dao.UserDAO;
+import com.frontleaves.greenchaincarbonledger.dao.VerifyCodeDAO;
 import com.frontleaves.greenchaincarbonledger.models.doData.UserDO;
-import com.frontleaves.greenchaincarbonledger.models.voData.returnData.BackUserCurrentVO;
+import com.frontleaves.greenchaincarbonledger.models.doData.VerifyCodeDO;
+import com.frontleaves.greenchaincarbonledger.models.voData.getData.UserEditVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.returnData.BackDesensitizationVO;
+import com.frontleaves.greenchaincarbonledger.models.voData.returnData.BackUserCurrentVO;
 import com.frontleaves.greenchaincarbonledger.services.UserService;
 import com.frontleaves.greenchaincarbonledger.utils.BaseResponse;
 import com.frontleaves.greenchaincarbonledger.utils.ErrorCode;
+import com.frontleaves.greenchaincarbonledger.utils.ProcessingUtil;
 import com.frontleaves.greenchaincarbonledger.utils.ResultUtil;
+import com.frontleaves.greenchaincarbonledger.utils.redis.ContactCodeRedis;
+import com.frontleaves.greenchaincarbonledger.utils.redis.UserRedis;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import jakarta.servlet.http.HttpServletRequest;
@@ -18,6 +26,7 @@ import org.jetbrains.annotations.NotNull;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,6 +47,9 @@ import java.util.List;
 public class UserServiceImpl implements UserService {
     private final UserDAO userDAO;
     private final RoleDAO roleDAO;
+    private final VerifyCodeDAO verifyCodeDAO;
+    private final UserRedis userRedis;
+    private final ContactCodeRedis contactCodeRedis;
     private final ModelMapper modelMapper;
     private final Gson gson;
 
@@ -93,11 +105,68 @@ public class UserServiceImpl implements UserService {
             case "available" -> getUserDO = userDAO.getUserByAvailablelist(limit, page, order);
             case "all" -> getUserDO = userDAO.getUserByAlllist(limit, page, order);
             default -> {
-                return ResultUtil.error(timestamp, "type 参数有误",ErrorCode.QUERY_PARAM_ERROR);
+                return ResultUtil.error(timestamp, "type 参数有误", ErrorCode.QUERY_PARAM_ERROR);
             }
         }
         List<BackDesensitizationVO> desensitizationVO = modelMapper.map(getUserDO, new TypeToken<List<BackDesensitizationVO>>() {
         }.getType());
         return ResultUtil.success(timestamp, "管理员查看的信息已准备完毕", desensitizationVO);
+    }
+
+    @NotNull
+    @Override
+    @Transactional
+    @CheckAccountPermission({"user:editUserInformation"})
+    public ResponseEntity<BaseResponse> editUser(long timestamp, @NotNull HttpServletRequest request, @NotNull UserEditVO userEditVO) {
+        log.info("[Service] 执行 editUserInformation 方法");
+        String getAuthorizeUserUuid = ProcessingUtil.getAuthorizeUserUuid(request);
+        UserDO getUserDO = userDAO.getUserByUuid(getAuthorizeUserUuid);
+        if (getUserDO == null) {
+            return ResultUtil.error(timestamp, ErrorCode.USER_NOT_EXISTED);
+        }
+        // 校验码进行校验（若修改了手机或者邮箱则需要进行校验）
+        VerifyCodeDO getEmailCode = verifyCodeDAO.getVerifyCodeByContact(userEditVO.getEmailCode());
+        VerifyCodeDO getPhoneCode = verifyCodeDAO.getVerifyCodeByContact(userEditVO.getPhoneCode());
+        if (userEditVO.getEmail() != null) {
+            if (getEmailCode == null) {
+                return ResultUtil.error(timestamp, "邮箱验证码错误", ErrorCode.VERIFY_CODE_NOT_EXISTED);
+            } else {
+                if (!getEmailCode.getCode().equals(userEditVO.getEmailCode())) {
+                    return ResultUtil.error(timestamp, "邮箱验证码错误", ErrorCode.VERIFY_CODE_NOT_EXISTED);
+                } else {
+                    contactCodeRedis.delData(BusinessConstants.EMAIL, userEditVO.getEmailCode());
+                }
+            }
+        }
+        if (userEditVO.getPhone() != null) {
+            if (getPhoneCode == null) {
+                return ResultUtil.error(timestamp, "手机验证码错误", ErrorCode.VERIFY_CODE_NOT_EXISTED);
+            } else {
+                if (!getPhoneCode.getCode().equals(userEditVO.getPhoneCode())) {
+                    return ResultUtil.error(timestamp, "手机验证码错误", ErrorCode.VERIFY_CODE_NOT_EXISTED);
+                } else {
+                    contactCodeRedis.delData(BusinessConstants.PHONE, userEditVO.getPhoneCode());
+                }
+            }
+        }
+        // 对数据进行修改
+        if (userEditVO.getAvatar() == null) {
+            userEditVO.setAvatar(getUserDO.getAvatar());
+        }
+        if (userEditVO.getNickName() == null) {
+            userEditVO.setNickName(getUserDO.getRealName());
+        }
+        if (userEditVO.getPhone() == null) {
+            userEditVO.setPhone(getUserDO.getPhone());
+        }
+        if (userEditVO.getEmail() == null) {
+            userEditVO.setEmail(getUserDO.getEmail());
+        }
+        // 对数据库进行数据操作
+        if (userDAO.updateUserByUuid(getAuthorizeUserUuid, userEditVO)) {
+            return ResultUtil.success(timestamp, "用户信息修改成功");
+        } else {
+            return ResultUtil.error(timestamp, ErrorCode.SERVER_INTERNAL_ERROR);
+        }
     }
 }

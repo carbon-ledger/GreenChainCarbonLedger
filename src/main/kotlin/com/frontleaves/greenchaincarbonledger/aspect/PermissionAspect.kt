@@ -7,6 +7,7 @@ import com.frontleaves.greenchaincarbonledger.dao.UserDAO
 import com.frontleaves.greenchaincarbonledger.exceptions.NotEnoughPermissionException
 import com.frontleaves.greenchaincarbonledger.exceptions.RoleNotEnoughPermissionException
 import com.frontleaves.greenchaincarbonledger.exceptions.RoleNotFoundException
+import com.frontleaves.greenchaincarbonledger.utils.ProcessingUtil
 import com.google.gson.Gson
 import org.aspectj.lang.ProceedingJoinPoint
 import org.aspectj.lang.annotation.Around
@@ -45,50 +46,57 @@ class PermissionAspect(
      * @throws RoleNotFoundException 角色未找到异常
      */
     @Around("@annotation(com.frontleaves.greenchaincarbonledger.annotations.CheckAccountPermission)")
-    fun checkPermission(pjp: ProceedingJoinPoint) {
+    fun checkPermission(pjp: ProceedingJoinPoint): Any? {
         log.info("[AOP] 检查用户权限 CheckAccountPermission")
         // 从ServletRequest中获取用户信息
         val servletRequestAttributes = RequestContextHolder.getRequestAttributes() as ServletRequestAttributes
-        val request = servletRequestAttributes.request
+
         // 获取用户
-        val getUserUuid = request.getHeader("X-Auth-UUID")
-        log.debug("\t> 用户UUID: {}", getUserUuid)
+        val getUserUuid = ProcessingUtil.getAuthorizeUserUuid(servletRequestAttributes.request)
+        log.debug("\t> 登陆用户UUID: {}", getUserUuid)
+
         // 获取方法签名
         val signature = pjp.signature as MethodSignature
         val checkAccountPermission = signature.method.getAnnotation(CheckAccountPermission::class.java)
-        val getPermissions = checkAccountPermission.permissions
-        val getRole = checkAccountPermission.value
+        val getPermission = checkAccountPermission.value
 
         // 获取用户所属角色
         val getUserDO = userDAO.getUserByUuid(getUserUuid)
-        val hasNeedToCheckRole = getRole.isNotBlank()
-        log.debug("\t> 需求角色: {}，需求权限: {}", getRole, getPermissions.joinToString(","))
+        if (getUserDO != null) {
+            val getRoleWithUser = roleDAO.getRoleByUuid(getUserDO.role)
+            log.debug("\t> 需求权限: {}", getPermission.joinToString(","))
 
-        val getRoleDO = roleDAO.getRoleByName(getRole)
-        if (hasNeedToCheckRole) {
-            // TODO: 2021/8/3 从用户获取角色(BUG)
-            /*if (getRoleDO != null) {
-                if (getRoleDO.uuid != getUserDO.role) {
-                    throw RoleNotEnoughPermissionException("您没有足够的权限访问该资源")
+            // 从 Role 获取权限列表
+            val getRolePermissions = gson.fromJson(getRoleWithUser.permission, Array<String>::class.java)
+            val getUserPermissions = gson.fromJson(getUserDO.permission, Array<String>::class.java)
+            var hasPermission = false
+
+            // 权限匹配
+            getRolePermissions.forEach {
+                if (getRolePermissions.toList().contains(it)) {
+                    log.debug("\t> 权限已匹配")
+                    hasPermission = true
+                    return@forEach
                 }
-            } else {
-                throw RoleNotFoundException("角色未找到")
-            }*/
-        }
-        // 从 Role 获取权限列表
-        val getRolePermissions = gson.fromJson(getRoleDO.permission, Array<String>::class.java)
-        var hasPermission = false
-        getPermissions.forEach {
-            if (getRolePermissions.toList().contains(it)) {
-                log.debug("\t> 权限已匹配")
-                hasPermission = true
-                return@forEach
             }
-        }
-        if (hasPermission) {
-            pjp.proceed()
+            if (!hasPermission && getUserPermissions != null) {
+                getUserPermissions.forEach {
+                    if (getUserPermissions.toList().contains(it)) {
+                        log.debug("\t> 权限已匹配")
+                        hasPermission = true
+                        return@forEach
+                    }
+                }
+            }
+
+            // 匹配校验
+            if (hasPermission) {
+                return pjp.proceed()
+            } else {
+                throw NotEnoughPermissionException("您没有足够的权限访问该资源", getPermission)
+            }
         } else {
-            throw NotEnoughPermissionException("您没有足够的权限访问该资源")
+            throw NotEnoughPermissionException("您没有足够的权限访问该资源", getPermission)
         }
     }
 }

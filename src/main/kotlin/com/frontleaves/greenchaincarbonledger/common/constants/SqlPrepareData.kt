@@ -12,14 +12,30 @@ package com.frontleaves.greenchaincarbonledger.common.constants
 object SqlPrepareData {
 
     /**
+     * SQL 权限列表
+     *
+     * 获取本程序的所有权限组的内容信息
+     */
+    val PERMISSION_LIST = ArrayList<ArrayList<String>>().apply {
+        add(ArrayList(listOf("auth:userChangePassword", "用户修改密码")))
+        add(ArrayList(listOf("auth:userDelete", "用户删除")))
+        add(ArrayList(listOf("auth:userLogout", "用户登出")))
+        add(ArrayList(listOf("role:getCurrentRole", "获取当前角色")))
+        add(ArrayList(listOf("user:getUserCurrentInfo", "获取当前用户信息")))
+        add(ArrayList(listOf("user:getUserList", "获取用户列表")))
+        add(ArrayList(listOf("user:editUserInformation", "编辑用户信息")))
+        add(ArrayList(listOf("admin:resetUserPassword", "重置用户密码")))
+    }
+
+    /**
      * SQL 角色列表
      *
      * CONSOLE 控制台角色
      */
     val SQL_ROLE_CONSOLE_PERMISSION_LIST = ArrayList<String>().apply {
-        add("admin:resetUserPassword")
-        add("admin:resetUserRole")
-        add("admin:resetUserPermission")
+        PERMISSION_LIST.forEach{
+            add(it[0])
+        }
     }
 
     /**

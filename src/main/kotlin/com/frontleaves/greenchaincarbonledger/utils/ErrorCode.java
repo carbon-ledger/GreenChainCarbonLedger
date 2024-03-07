@@ -23,6 +23,7 @@ public enum ErrorCode {
     USER_PASSWORD_INCONSISTENCY_ERROR("UserPasswordInconsistencyError", 40008, "新密码与确认密码不一致"),
     USER_PASSWORD_CURRENT_ERROR("UserOldError", 40009, "当前密码错误"),
     USER_PASSWORD_REPEAT_ERROR("UsePasswordRepeatError", 40010, "新密码与当前密码重复"),
+    NO_PERMISSION_ERROR("NoPermissionError", 40011, "无权限"),
     REQUEST_BODY_ERROR("RequestBodyError", 40301, "请求体参数错误"),
     TOKEN_VERIFY_ERROR("TokenVerifyError", 40302, "Token 验证错误"),
     REQUEST_BODY_MISSING("RequestBodyMissing", 40303, "请求体缺失(请求体不能为空)"),
@@ -38,9 +39,10 @@ public enum ErrorCode {
     REQUEST_METHOD_NOT_SUPPORTED("RequestMethodNotSupported", 40500, "请求方法不支持"),
     SERVER_INTERNAL_ERROR("ServerInternalError", 50000, "服务器内部错误"),
     MAIL_TEMPLATE_NOT_EXIST("MailTemplateNotExist", 50001, "邮箱模板不存在"),
-    ORGANIZE_NOT_EXISTED("OrganizeNotExist", 40399, "组织不存在"),
+    ORGANIZE_NOT_EXISTED("OrganizeRegisterFailed", 40399, "账户注册失败"),
     INVITE_CODE_ERROR("VerifyCodeError", 40398, "邀请码错误"),
-    QUERY_PARAM_ERROR("RequestBodyError", 40396, "查询参数错误");
+    QUERY_PARAM_ERROR("RequestBodyError", 40396, "查询参数错误"),
+    INSERT_DATA_ERROR("InsertDataError", 40395, "插入数据失败"), UPDATE_DATA_ERROR("UpdateDataError", 40394, "更新数据失败");
 
     final String output;
     final Integer code;
