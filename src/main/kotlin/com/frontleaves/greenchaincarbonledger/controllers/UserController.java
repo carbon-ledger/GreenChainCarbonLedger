@@ -10,6 +10,7 @@ import com.frontleaves.greenchaincarbonledger.utils.ResultUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.ibatis.annotations.Delete;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -81,7 +82,7 @@ public class UserController {
         if (limit != null && !limit.toString().matches("^[0-9]+$")) {
             return ResultUtil.error(timestamp, "limit 参数错误", ErrorCode.REQUEST_BODY_ERROR);
         }
-        if (page != null && !page.toString().matches("^[0-9]+$")){
+        if (page != null && !page.toString().matches("^[0-9]+$")) {
             return ResultUtil.error(timestamp, "page 参数错误", ErrorCode.REQUEST_BODY_ERROR);
         }
         ArrayList<String> list = new ArrayList<>();
@@ -122,11 +123,14 @@ public class UserController {
         return userService.editUser(timestamp, request, userEditVO);
     }
 
-    @PostMapping("/add")
-    public ResponseEntity<BaseResponse> addAccount(
-
-    ){
-        return null;
+    @DeleteMapping("/force-logout/{uuid}")
+    public ResponseEntity<BaseResponse> forceLogout(
+            HttpServletRequest request,
+            @PathVariable("uuid") String roleUuid) {
+        request.getHeader("X-Auth-UUID");
+        log.info("[Controller] 请求userService接口");
+        long timestamp = System.currentTimeMillis();
+        return userService.forceLogout(timestamp, request, roleUuid);
     }
 }
 
