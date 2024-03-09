@@ -5,6 +5,7 @@ import com.frontleaves.greenchaincarbonledger.common.BusinessConstants;
 import com.frontleaves.greenchaincarbonledger.dao.RoleDAO;
 import com.frontleaves.greenchaincarbonledger.dao.UserDAO;
 import com.frontleaves.greenchaincarbonledger.dao.VerifyCodeDAO;
+import com.frontleaves.greenchaincarbonledger.mappers.UserMapper;
 import com.frontleaves.greenchaincarbonledger.models.doData.UserDO;
 import com.frontleaves.greenchaincarbonledger.models.doData.VerifyCodeDO;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.UserEditVO;
@@ -50,6 +51,7 @@ public class UserServiceImpl implements UserService {
     private final VerifyCodeDAO verifyCodeDAO;
     private final ContactCodeRedis contactCodeRedis;
     private final ModelMapper modelMapper;
+    private final UserMapper userMapper;
     private final Gson gson;
 
     @Override
@@ -166,6 +168,18 @@ public class UserServiceImpl implements UserService {
             return ResultUtil.success(timestamp, "用户信息修改成功");
         } else {
             return ResultUtil.error(timestamp, ErrorCode.SERVER_INTERNAL_ERROR);
+        }
+    }
+
+    @NotNull
+    @Override
+    public ResponseEntity<BaseResponse> forceLogout(long timestamp, @NotNull HttpServletRequest request, @NotNull String roleUuid) {
+        log.info("[Service] 执行 forceLogout 方法");
+        // 满足条件，直接进行数据库删除
+        if (userMapper.forceLogout(roleUuid)){
+            return ResultUtil.success(timestamp, "账户已强制注销");
+        } else {
+            return ResultUtil.error(timestamp, ErrorCode.UUID_NOT_EXIST);
         }
     }
 }

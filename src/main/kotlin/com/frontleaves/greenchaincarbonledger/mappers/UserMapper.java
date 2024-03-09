@@ -108,4 +108,6 @@ public interface UserMapper {
                         """)
     List<String> getRoleByAllList(String search, Integer limit, Integer page, String order);
 
+    @Delete("DELETE FROM fy_user WHERE uuid = #{uuid}")
+    Boolean forceLogout(String uuid);
 }

@@ -45,4 +45,20 @@ interface UserService {
         request: HttpServletRequest,
         userEditVO: UserEditVO
     ): ResponseEntity<BaseResponse>
+
+
+    /**
+     * 强制注销用户
+     *
+     * 通过用户UUID强制注销用户
+     *
+     * @param timestamp 时间戳
+     * @param request   请求
+     * @return 返回响应实体
+     */
+    fun forceLogout(
+        timestamp: Long,
+        request: HttpServletRequest,
+        roleUuid: String
+    ): ResponseEntity<BaseResponse>
 }
