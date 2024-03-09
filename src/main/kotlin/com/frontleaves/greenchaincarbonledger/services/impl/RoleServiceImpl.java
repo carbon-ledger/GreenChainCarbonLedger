@@ -6,6 +6,7 @@ import com.frontleaves.greenchaincarbonledger.dao.RoleDAO;
 import com.frontleaves.greenchaincarbonledger.dao.UserDAO;
 import com.frontleaves.greenchaincarbonledger.mappers.PermissionMapper;
 import com.frontleaves.greenchaincarbonledger.mappers.RoleMapper;
+import com.frontleaves.greenchaincarbonledger.mappers.UserMapper;
 import com.frontleaves.greenchaincarbonledger.models.doData.RoleDO;
 import com.frontleaves.greenchaincarbonledger.models.doData.UserDO;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.RoleVO;
@@ -44,6 +45,7 @@ import java.util.List;
 public class RoleServiceImpl implements RoleService {
     private final RoleMapper roleMapper;
     private final PermissionMapper permissionMapper;
+    private final UserMapper userMapper;
     private final Gson gson;
     private final UserDAO userDAO;
     private final RoleDAO roleDAO;
@@ -226,7 +228,6 @@ public class RoleServiceImpl implements RoleService {
     @NotNull
     @Override
     public ResponseEntity<BaseResponse> deleteRole(long timestamp, @NotNull HttpServletRequest request, @NotNull String roleUuid) {
-        //用缓存的UUID与数据库UUID进行校对
         RoleDO roleDO = roleDAO.getRoleUuid(roleUuid);
         ArrayList<String> arrayList = new ArrayList<>(List.of("default", "organize", "admin", "console"));
         if (roleDO != null) {
@@ -245,4 +246,6 @@ public class RoleServiceImpl implements RoleService {
             return ResultUtil.error(timestamp, "角色不存在", ErrorCode.UUID_NOT_EXIST);
         }
     }
+
+
 }

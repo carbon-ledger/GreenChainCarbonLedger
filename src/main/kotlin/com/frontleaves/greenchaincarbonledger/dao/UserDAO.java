@@ -244,4 +244,10 @@ public class UserDAO {
         log.info("\t> Mysql 读取");
         return userMapper.getRoleByAllList(search,limit,page,order);
     }
+
+    public Boolean banUser(String roleUuid){
+        log.info("[DAO] 执行 banUser 方法");
+        log.info("\t> Mysql 更新");
+        return userMapper.banUser(roleUuid);
+    }
 }

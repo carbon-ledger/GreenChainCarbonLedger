@@ -32,6 +32,7 @@ import java.util.ArrayList;
 public class UserController {
     private final UserService userService;
 
+
     /**
      * 获取当前登录用户的个人信息。
      * <p>
@@ -87,7 +88,7 @@ public class UserController {
         ArrayList<String> list = new ArrayList<>();
         list.add("desc");
         list.add("asc");
-        if (order != null && list.contains(order)) {
+        if (order != null && !list.contains(order)) {
             return ResultUtil.error(timestamp, "order 参数错误", ErrorCode.REQUEST_BODY_ERROR);
         }
         // 业务操作
@@ -122,11 +123,13 @@ public class UserController {
         return userService.editUser(timestamp, request, userEditVO);
     }
 
-    @PostMapping("/add")
-    public ResponseEntity<BaseResponse> addAccount(
-
-    ){
-        return null;
+    @PatchMapping("/ban/{uuid}")
+    @CheckAccountPermission("user:banUser")
+    public ResponseEntity<BaseResponse> banUser(@PathVariable("uuid") String roleUuid, @NotNull HttpServletRequest request){
+        request.getHeader("X-Auth-uuid");
+        log.info("[Controller] 请求 roleService 接口");
+        long timestamp = System.currentTimeMillis();
+        return userService.banUser(timestamp, request, roleUuid);
     }
 }
 
