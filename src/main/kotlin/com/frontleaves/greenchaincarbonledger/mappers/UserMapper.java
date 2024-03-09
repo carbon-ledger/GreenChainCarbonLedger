@@ -76,8 +76,15 @@ public interface UserMapper {
     @Select("SELECT * FROM fy_user WHERE ban = 1 ORDER BY ${order} LIMIT #{limit} OFFSET ${(page-1) * limit}")
     List<UserDO> getUserByBanlist(Integer limit, Integer page, String order);
 
-    @Select("SELECT * FROM fy_user WHERE deleted_at IS NULL ORDER BY ${order} LIMIT #{limit} OFFSET ${(page-1) * limit}")
-        // 如果删除时间不为空，则该用户存在
+    /**
+     *
+     * @param limit
+     * @param page
+     * @param order
+     * @return
+     */
+    @Select("SELECT * FROM fy_user WHERE deleted_at IS NULL and ban = 0 ORDER BY ${order} LIMIT #{limit} OFFSET ${(page-1) * limit}")
+        // 如果删除时间不为空，则该用户存在或者没有被封禁
     List<UserDO> getUserByAvailablelist(Integer limit, Integer page, String order);
 
     @Select("SELECT * FROM fy_user ORDER BY ${order} LIMIT #{limit} OFFSET ${(page-1) * limit}")
@@ -108,4 +115,6 @@ public interface UserMapper {
                         """)
     List<String> getRoleByAllList(String search, Integer limit, Integer page, String order);
 
+    @Update("UPDATE fy_user SET ban = 1 WHERE uuid = #{uuid}")
+    Boolean banUser(String uuid);
 }

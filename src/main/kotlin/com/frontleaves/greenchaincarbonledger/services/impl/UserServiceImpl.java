@@ -168,4 +168,16 @@ public class UserServiceImpl implements UserService {
             return ResultUtil.error(timestamp, ErrorCode.SERVER_INTERNAL_ERROR);
         }
     }
+    @NotNull
+    @Override
+    public ResponseEntity<BaseResponse> banUser(long timestamp, @NotNull HttpServletRequest request, @NotNull String roleUuid) {
+//        return userMapper.banUser(roleUuid) ? ResultUtil.success(timestamp, "用户封禁成功"): ResultUtil.error(timestamp, ErrorCode.ROLE_CANNOT_BE_BANED);
+        // 直接指定uuid设置ban参数
+        if (userDAO.banUser(roleUuid)){
+            return ResultUtil.success(timestamp, "用户封禁成功");
+        } else {
+            return ResultUtil.error(timestamp, ErrorCode.ROLE_CANNOT_BE_BANED);
+        }
+    }
+
 }
