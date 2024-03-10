@@ -8,6 +8,7 @@ class GreenChainCarbonLedgerApplicationTests {
 
     @Test
     fun contextLoads() {
+
     }
 
 }
