@@ -184,7 +184,7 @@ public class UserServiceImpl implements UserService {
         if (getUserDO != null) {
             //通过UUID进行用户信息匹配进行数据库修改并且删掉此时数据库中缓存
             log.info(userForceEditVO.toString());
-            if (userDAO.updateUserForceByUuid(getUserDO.getUuid(), userForceEditVO)) {
+            if (userDAO.updateUserForceByUuid(getUserDO.getUuid(),userForceEditVO.getUserName(),userForceEditVO.getNickName(),userForceEditVO.getRealName(),userForceEditVO.getAvatar(),userForceEditVO.getEmail(),userForceEditVO.getPhone())){
                 BackUserForceEditVO backUserForceEditVO = new BackUserForceEditVO();
                 backUserForceEditVO.setUuid(userUuid)
                         .setUserName(getUserDO.getUserName())
