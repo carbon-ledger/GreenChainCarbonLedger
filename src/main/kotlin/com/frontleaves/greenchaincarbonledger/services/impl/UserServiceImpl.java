@@ -9,15 +9,16 @@ import com.frontleaves.greenchaincarbonledger.mappers.UserMapper;
 import com.frontleaves.greenchaincarbonledger.models.doData.UserDO;
 import com.frontleaves.greenchaincarbonledger.models.doData.VerifyCodeDO;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.UserEditVO;
+import com.frontleaves.greenchaincarbonledger.models.voData.getData.UserForceEditVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.returnData.BackDesensitizationVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.returnData.BackUserCurrentVO;
+import com.frontleaves.greenchaincarbonledger.models.voData.returnData.BackUserForceEditVO;
 import com.frontleaves.greenchaincarbonledger.services.UserService;
 import com.frontleaves.greenchaincarbonledger.utils.BaseResponse;
 import com.frontleaves.greenchaincarbonledger.utils.ErrorCode;
 import com.frontleaves.greenchaincarbonledger.utils.ProcessingUtil;
 import com.frontleaves.greenchaincarbonledger.utils.ResultUtil;
 import com.frontleaves.greenchaincarbonledger.utils.redis.ContactCodeRedis;
-import com.frontleaves.greenchaincarbonledger.utils.redis.UserRedis;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import jakarta.servlet.http.HttpServletRequest;
@@ -40,7 +41,7 @@ import java.util.List;
  *
  * @author FLASHALCK
  * @version 1.0
- * @since 2024-4-1
+ * @since 2024-3-1
  */
 @Slf4j
 @Service
@@ -54,8 +55,9 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
     private final Gson gson;
 
+    @NotNull
     @Override
-    public @NotNull ResponseEntity<BaseResponse> getUserCurrent(long timestamp, HttpServletRequest request) {
+    public ResponseEntity<BaseResponse> getUserCurrent(long timestamp, HttpServletRequest request) {
         //用缓存的UUID与数据库UUID进行校对
         String getUuid = request.getHeader("X-Auth-UUID");
         UserDO getUserDO = userDAO.getUserByUuid(getUuid);
@@ -168,6 +170,38 @@ public class UserServiceImpl implements UserService {
             return ResultUtil.success(timestamp, "用户信息修改成功");
         } else {
             return ResultUtil.error(timestamp, ErrorCode.SERVER_INTERNAL_ERROR);
+        }
+    }
+
+    @NotNull
+    @Override
+    @Transactional
+    public ResponseEntity<BaseResponse> putUserForceEdit(
+            long timestamp,
+            @NotNull HttpServletRequest request,
+            @NotNull String userUuid,
+            @NotNull UserForceEditVO userForceEditVO
+    ) {
+        UserDO getUserDO = userDAO.getUserByUuid(userUuid);
+        if (getUserDO != null) {
+            //通过UUID进行用户信息匹配进行数据库修改并且删掉此时数据库中缓存
+            log.info(userForceEditVO.toString());
+            if (userDAO.updateUserForceByUuid(getUserDO.getUuid(), userForceEditVO)) {
+                BackUserForceEditVO backUserForceEditVO = new BackUserForceEditVO();
+                backUserForceEditVO.setUuid(userUuid)
+                        .setUserName(getUserDO.getUserName())
+                        .setNickName(getUserDO.getNickName())
+                        .setRealName(getUserDO.getRealName())
+                        .setEmail(getUserDO.getEmail())
+                        .setPhone(getUserDO.getPhone())
+                        .setCreatedAt(getUserDO.getCreatedAt().toString())
+                        .setUpdatedAt(getUserDO.getUpdatedAt() != null ? getUserDO.getUpdatedAt().toString() : null);
+                return ResultUtil.success(timestamp, "用户信息修改成功", backUserForceEditVO);
+            } else {
+                return ResultUtil.error(timestamp, ErrorCode.SERVER_INTERNAL_ERROR);
+            }
+        } else {
+            return ResultUtil.error(timestamp, ErrorCode.USER_NOT_EXISTED);
         }
     }
 

@@ -2,6 +2,7 @@ package com.frontleaves.greenchaincarbonledger.mappers;
 
 import com.frontleaves.greenchaincarbonledger.models.doData.UserDO;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.UserEditVO;
+import com.frontleaves.greenchaincarbonledger.models.voData.getData.UserForceEditVO;
 import org.apache.ibatis.annotations.*;
 
 import java.util.List;
@@ -107,6 +108,13 @@ public interface UserMapper {
             ORDER BY ${order} LIMIT #{limit} OFFSET ${(page-1) * limit}
                         """)
     List<String> getRoleByAllList(String search, Integer limit, Integer page, String order);
+
+    @Update("""
+            UPDATE fy_user
+            SET nick_name = #{nickName}, real_name = #{realName}, avatar = #{avatar}, email = #{email}, phone = #{phone}, updated_at = NOW()
+            WHERE uuid = #{userUuid}
+            """)
+    boolean updateUserForceByUuid(String userUuid, UserForceEditVO userForceEditVO);
 
     @Delete("DELETE FROM fy_user WHERE uuid = #{uuid}")
     Boolean forceLogout(String uuid);

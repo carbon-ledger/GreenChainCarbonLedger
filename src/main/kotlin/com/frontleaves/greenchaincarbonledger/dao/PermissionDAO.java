@@ -1,6 +1,7 @@
 package com.frontleaves.greenchaincarbonledger.dao;
 
 import com.frontleaves.greenchaincarbonledger.mappers.PermissionMapper;
+import com.frontleaves.greenchaincarbonledger.models.doData.PermissionDO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
@@ -32,7 +33,20 @@ public class PermissionDAO {
         log.info("[DAO] 执行 getNameBy");
         log.info("\t> Mysql 读取");
         return permissionMapper.getNameBySearch(search, order);
+    }
 
-
+    /**
+     * 获取权限列表
+     * <hr/>
+     * 获取权限列表
+     * @param limit 单页个数
+     * @param page 页数
+     * @param order 顺序
+     * @return 权限列表
+     */
+    public  List<PermissionDO> getPermissionListByAll(Integer limit,Integer page,String order){
+        log.info("[DAO] 执行getPermissionListByAll");
+        log.info("\t>Mysql 读取 ");
+        return permissionMapper.getPermissionListByAll(limit,page,order);
     }
 }
