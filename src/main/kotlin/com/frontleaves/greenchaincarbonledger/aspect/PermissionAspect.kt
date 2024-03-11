@@ -73,7 +73,7 @@ class PermissionAspect(
 
             // 权限匹配
             getRolePermissions.forEach {
-                if (getRolePermissions.toList().contains(it)) {
+                if (getPermission.toList().contains(it)) {
                     log.debug("\t> 权限已匹配")
                     hasPermission = true
                     return@forEach
@@ -81,7 +81,7 @@ class PermissionAspect(
             }
             if (!hasPermission && getUserPermissions != null) {
                 getUserPermissions.forEach {
-                    if (getUserPermissions.toList().contains(it)) {
+                    if (getPermission.toList().contains(it)) {
                         log.debug("\t> 权限已匹配")
                         hasPermission = true
                         return@forEach

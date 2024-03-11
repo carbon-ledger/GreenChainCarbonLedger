@@ -8,16 +8,15 @@
         <version>3.2.2</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>com.frontleaves</groupId>
-    <artifactId>GreenChainCarbonLedger</artifactId>
-    <version>${app.version}</version>
-    <name>GreenChainCarbonLedger</name>
-    <description>GreenChainCarbonLedger</description>
     <properties>
         <java.version>17</java.version>
         <kotlin.version>1.9.22</kotlin.version>
-        <app.version>1.0.0-SNAPSHOT</app.version>
     </properties>
+    <groupId>com.frontleaves</groupId>
+    <artifactId>GreenChainCarbonLedger</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <name>GreenChainCarbonLedger</name>
+    <description>GreenChainCarbonLedger</description>
 
     <dependencyManagement>
         <dependencies>
