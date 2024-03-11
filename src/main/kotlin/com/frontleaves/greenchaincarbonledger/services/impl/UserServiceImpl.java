@@ -85,7 +85,7 @@ public class UserServiceImpl implements UserService {
 
     @NotNull
     @Override
-    //TODO:还未进行权限验证（接口未写好）
+    @CheckAccountPermission({"user:getUserList"})
     public ResponseEntity<BaseResponse> getUserList(long timestamp, @NotNull HttpServletRequest request, @NotNull String type, String search, Integer limit, Integer page, String order) {
         log.info("[Service] 执行 getUserList 方法");
         // 检查参数，如果未设置（即为null），则使用默认值
@@ -182,9 +182,8 @@ public class UserServiceImpl implements UserService {
     ) {
         UserDO getUserDO = userDAO.getUserByUuid(userUuid);
         if (getUserDO != null) {
-            //通过UUID进行用户信息匹配进行数据库修改并且删掉此时数据库中缓存
-            log.info(userForceEditVO.toString());
             if (userDAO.updateUserForceByUuid(getUserDO.getUuid(),userForceEditVO.getUserName(),userForceEditVO.getNickName(),userForceEditVO.getRealName(),userForceEditVO.getAvatar(),userForceEditVO.getEmail(),userForceEditVO.getPhone())){
+                getUserDO = userDAO.getUserByUuid(userUuid);
                 BackUserForceEditVO backUserForceEditVO = new BackUserForceEditVO();
                 backUserForceEditVO.setUuid(userUuid)
                         .setUserName(getUserDO.getUserName())
