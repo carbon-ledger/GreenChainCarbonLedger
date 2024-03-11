@@ -24,6 +24,7 @@ object SqlPrepareData {
         add(ArrayList(listOf("user:getUserCurrentInfo", "获取当前用户信息")))
         add(ArrayList(listOf("user:getUserList", "获取用户列表")))
         add(ArrayList(listOf("user:editUserInformation", "编辑用户信息")))
+        add(ArrayList(listOf("user:putUserForceEdit", "强制编辑用户信息")))
         add(ArrayList(listOf("user:banUser", "封禁用户")))
         add(ArrayList(listOf("admin:resetUserPassword", "重置用户密码")))
     }

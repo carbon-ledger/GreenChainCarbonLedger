@@ -1,5 +1,6 @@
 package com.frontleaves.greenchaincarbonledger.services
 
+import com.frontleaves.greenchaincarbonledger.models.voData.getData.UserForceEditVO
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.UserEditVO
 import com.frontleaves.greenchaincarbonledger.utils.BaseResponse
 import jakarta.servlet.http.HttpServletRequest
@@ -45,6 +46,24 @@ interface UserService {
         request: HttpServletRequest,
         userEditVO: UserEditVO
     ): ResponseEntity<BaseResponse>
+
+    /**
+     * 强制修改账户信息
+     * <hr/>
+     * 强制修改账户信息
+     * @param timestamp 时间戳
+     * @param request 请求
+     * @param userUuid 用户UUID
+     * @param UserForceEditvo 用户账户信息
+     * @return 返回响应实体
+     */
+    fun putUserForceEdit(
+        timestamp: Long,
+        request: HttpServletRequest,
+        userUuid:String,
+        userForceEditVO: UserForceEditVO
+    ): ResponseEntity<BaseResponse>
+
     fun banUser(
         timestamp: Long,
         request: HttpServletRequest,
