@@ -10,6 +10,7 @@
     </parent>
     <properties>
         <java.version>17</java.version>
+        <app.version>1.0.0-SNAPSHOT</app.version>
         <kotlin.version>1.9.22</kotlin.version>
     </properties>
     <groupId>com.frontleaves</groupId>
