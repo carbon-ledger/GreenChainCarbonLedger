@@ -2,7 +2,6 @@ package com.frontleaves.greenchaincarbonledger.mappers;
 
 import com.frontleaves.greenchaincarbonledger.models.doData.UserDO;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.UserEditVO;
-import com.frontleaves.greenchaincarbonledger.models.voData.getData.UserForceEditVO;
 import org.apache.ibatis.annotations.*;
 
 import java.util.List;
@@ -118,10 +117,10 @@ public interface UserMapper {
 
     @Update("""
             UPDATE fy_user
-            SET nick_name = #{nickName}, real_name = #{realName}, avatar = #{avatar}, email = #{email}, phone = #{phone}, updated_at = NOW()
+            SET user_name = #{userName},nick_name = #{nickName}, real_name = #{realName}, avatar = #{avatar}, email = #{email}, phone = #{phone}, updated_at = NOW()
             WHERE uuid = #{userUuid}
             """)
-    boolean updateUserForceByUuid(String userUuid, UserForceEditVO userForceEditVO);
+    boolean updateUserForceByUuid(String userUuid, String userName,String realName,String nickName, String avatar,String email, String phone);
 
     @Update("UPDATE fy_user SET ban = 1 WHERE uuid = #{uuid} and uuid != (SELECT role FROM fy_user WHERE uuid = #{uuid})")
     Boolean banUser(String uuid);

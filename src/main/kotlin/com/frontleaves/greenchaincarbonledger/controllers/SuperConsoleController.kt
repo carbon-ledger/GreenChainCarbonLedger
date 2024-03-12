@@ -1,5 +1,6 @@
 package com.frontleaves.greenchaincarbonledger.controllers
 
+import com.frontleaves.greenchaincarbonledger.annotations.CheckAccountPermission
 import com.frontleaves.greenchaincarbonledger.context
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.jdbc.core.JdbcTemplate
@@ -15,11 +16,13 @@ class SuperConsoleController(
 ) {
 
     @GetMapping("/closeServer")
+    @CheckAccountPermission("auth:closeServer")
     fun closeServer() {
         context.close()
     }
 
     @GetMapping("/resetSql")
+    @CheckAccountPermission("auth:resetSql")
     fun resetSql() {
         // 删除Redis所有数据
         redisTemplate.keys("*").forEach {

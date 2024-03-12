@@ -28,7 +28,7 @@ public class PermissionServiceImpl implements PermissionService {
     private final PermissionDAO permissionDAO;
     @NotNull
     @Override
-    public ResponseEntity<BaseResponse> getPermissionList(long timestamp, @Nullable Integer limit, @Nullable Integer page, @NotNull String order) {
+    public ResponseEntity<BaseResponse> getPermissionList(long timestamp, @Nullable Integer limit, @Nullable Integer page, String order) {
         log.info("[Service] 执行 getPermissionList");
         // 检查参数，如果未设置（即为null），则使用默认值
         limit = (limit == null || limit > 100) ? 20 : limit;

@@ -8,6 +8,6 @@ interface PermissionService {
         timestamp: Long,
         limit: Int?,
         page: Int?,
-        order: String
+        order: String?
     ): ResponseEntity<BaseResponse>
 }

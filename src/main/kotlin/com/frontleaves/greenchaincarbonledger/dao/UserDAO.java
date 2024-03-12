@@ -248,12 +248,12 @@ public class UserDAO {
         return userMapper.getRoleByAllList(search,limit,page,order);
     }
 
-    public boolean updateUserForceByUuid(String userUuid, UserForceEditVO userForceEditVO) {
+    public boolean updateUserForceByUuid(String userUuid,String userName,String nickName,String realName,String avatar,String email,String phone){
         log.info("[Dao] 执行 updateUserForceByUuid 方法");
         log.info("\t> Redis 删除 ");
         userRedis.delData(BusinessConstants.NONE, userUuid);
         log.info("\t> Mysql 更新");
-        return userMapper.updateUserForceByUuid(userUuid, userForceEditVO);
+        return userMapper.updateUserForceByUuid(userUuid,userName,nickName,realName,avatar,email,phone);
     }
 
     public Boolean banUser(String roleUuid){
