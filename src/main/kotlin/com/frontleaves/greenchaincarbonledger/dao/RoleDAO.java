@@ -96,7 +96,7 @@ public class RoleDAO {
      * @return 角色信息
      */
     public List<RoleDO> getRoleByAllList(Integer limit, Integer page, String order) {
-        log.info("[DAO] 执行 getUserByAlllist 方法");
+        log.info("[DAO] 执行 getUserByAllList 方法");
         log.info("\t> Mysql 读取");
         return roleMapper.getRoleByAllList(limit, page, order);
     }
