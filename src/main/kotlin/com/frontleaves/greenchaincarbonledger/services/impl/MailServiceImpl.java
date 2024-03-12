@@ -90,4 +90,23 @@ public class MailServiceImpl implements MailService {
         mailTemplateService.mailSendWithTemplate(email, template);
         return ResultUtil.success(timestamp, "邮件发送成功");
     }
+
+    @Override
+    public boolean checkMailCode(@NotNull String email) {
+        log.info("[Service] 执行 checkMailCode 方法");
+        VerifyCodeDO getVerifyCodeDO = verifyCodeDAO.getVerifyCodeByContact(email);
+        if (getVerifyCodeDO != null) {
+            if (getVerifyCodeDO.getExpiredAt().getTime() > System.currentTimeMillis()) {
+                log.debug("\t> 邮箱校验码校验通过");
+                return true;
+            } else {
+                log.debug("\t> 邮箱校验码已过期");
+                verifyCodeDAO.deleteVerifyCode(email);
+                return false;
+            }
+        } else {
+            log.debug("\t> 邮箱校验码不存在");
+            return false;
+        }
+    }
 }

@@ -154,7 +154,6 @@ public class UserController {
      * @return 包含用户信息的响应实体
      */
     @PutMapping("/force-edit/{uuid}")
-    @CheckAccountPermission("user:putUserForceEdit")
     public ResponseEntity<BaseResponse> putUserForceEdit(
             @RequestBody @Validated UserForceEditVO userForceEditVO,
             @NotNull BindingResult bindingResult,

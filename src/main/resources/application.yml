@@ -6,7 +6,7 @@ project:
     time: @build.time@
 spring:
   profiles:
-    active: dev
+    active: @profile.active@
 mybatis:
   configuration:
     map-underscore-to-camel-case: true

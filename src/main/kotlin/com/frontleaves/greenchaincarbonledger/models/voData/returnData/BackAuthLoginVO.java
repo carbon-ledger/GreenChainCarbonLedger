@@ -18,7 +18,7 @@ import java.util.ArrayList;
 @Accessors(chain = true)
 public class BackAuthLoginVO {
     public UserVO user;
-    public String role;
+    public RoleVO role;
     public String token;
     public PermissionVO permission;
     public Boolean recover;
@@ -35,8 +35,16 @@ public class BackAuthLoginVO {
 
     @Data
     @Accessors(chain = true)
+    public static class RoleVO {
+        public String name;
+        public String displayName;
+    }
+
+    @Data
+    @Accessors(chain = true)
     public static class PermissionVO {
         public ArrayList<String> rolePermission;
         public ArrayList<String> userPermission;
     }
+
 }
