@@ -4,6 +4,7 @@ import com.frontleaves.greenchaincarbonledger.dao.AuthDAO;
 import com.frontleaves.greenchaincarbonledger.dao.RoleDAO;
 import com.frontleaves.greenchaincarbonledger.dao.UserDAO;
 import com.frontleaves.greenchaincarbonledger.dao.VerifyCodeDAO;
+import com.frontleaves.greenchaincarbonledger.models.doData.RoleDO;
 import com.frontleaves.greenchaincarbonledger.models.doData.UserDO;
 import com.frontleaves.greenchaincarbonledger.models.doData.UserLoginDO;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.*;
@@ -15,6 +16,8 @@ import com.frontleaves.greenchaincarbonledger.utils.ErrorCode;
 import com.frontleaves.greenchaincarbonledger.utils.ProcessingUtil;
 import com.frontleaves.greenchaincarbonledger.utils.ResultUtil;
 import com.frontleaves.greenchaincarbonledger.utils.security.JwtUtil;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -40,6 +43,7 @@ import java.util.regex.Pattern;
 @Service
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
+    private final Gson gson;
     private final UserDAO userDAO;
     private final RoleDAO roleDAO;
     private final VerifyCodeDAO verifyCodeDAO;
@@ -66,6 +70,7 @@ public class AuthServiceImpl implements AuthService {
                     .setRealName(authUserRegisterVO.getRealname())
                     .setEmail(authUserRegisterVO.getEmail())
                     .setPhone(authUserRegisterVO.getPhone())
+                    .setPermission("[]")
                     .setRole(roleDAO.getRoleByName("admin").getUuid())
                     .setPassword(ProcessingUtil.passwordEncrypt(authUserRegisterVO.getPassword()));
             if (userDAO.createUser(newUserDO)) {
@@ -108,6 +113,7 @@ public class AuthServiceImpl implements AuthService {
             }
             // 用户存在（密码检查）且不在注销状态
             if (ProcessingUtil.passwordCheck(authLoginVO.getPassword(), getUserDO.getPassword())) {
+                RoleDO getUserRole = roleDAO.getRoleUuid(getUserDO.getRole());
 
                 BackAuthLoginVO newBackAuthLoginVO = new BackAuthLoginVO();
                 BackAuthLoginVO.UserVO newUserVO = new BackAuthLoginVO.UserVO();
@@ -120,12 +126,11 @@ public class AuthServiceImpl implements AuthService {
                         .setEmail(getUserDO.getEmail())
                         .setRealName(getUserDO.getRealName());
                 newPermission
-                        .setUserPermission(new ArrayList<>())
-                        .setRolePermission(new ArrayList<>());
+                        .setUserPermission(gson.fromJson(getUserDO.getPermission(), new TypeToken<ArrayList<String>>() {}.getType()))
+                        .setRolePermission(gson.fromJson(getUserRole.getPermission(), new TypeToken<ArrayList<String>>() {}.getType()));
                 newRole
-                        .setUuid(userDAO.getUserByUuid(getUserDO.getUuid()).getRole())
-                        .setName(roleDAO.getRoleUuid(userDAO.getUserByUuid(getUserDO.getUuid()).getRole()).getName())
-                        .setDisplayName(roleDAO.getRoleUuid(userDAO.getUserByUuid(getUserDO.getUuid()).getRole()).getDisplayName());
+                        .setName(getUserRole.getName())
+                        .setDisplayName(getUserRole.getDisplayName());
                 newBackAuthLoginVO
                         .setToken(newToken)
                         .setUser(newUserVO)
@@ -183,6 +188,7 @@ public class AuthServiceImpl implements AuthService {
                     .setPhone(authOrganizeRegisterVO.getPhone())
                     .setEmail(authOrganizeRegisterVO.getEmail())
                     .setInvite(authOrganizeRegisterVO.getInvite())
+                    .setPermission("[]")
                     .setPassword(newPassword);
             if (userDAO.createUser(newUserDO)) {
                 return ResultUtil.success(timestamp, "组织账户注册成功");
