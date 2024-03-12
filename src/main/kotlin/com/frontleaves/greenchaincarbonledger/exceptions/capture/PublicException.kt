@@ -10,6 +10,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException
 import org.springframework.web.HttpRequestMethodNotSupportedException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
+import org.springframework.web.servlet.resource.NoResourceFoundException
 //import org.springframework.web.servlet.resource.NoResourceFoundException
 import org.thymeleaf.exceptions.TemplateInputException
 
@@ -31,12 +32,12 @@ class PublicException {
         return ResultUtil.error(timestamp, ErrorCode.SERVER_INTERNAL_ERROR)
     }
 
-//    @ExceptionHandler(value = [NoResourceFoundException::class])
-//    fun noResourceFound(e: NoResourceFoundException): ResponseEntity<BaseResponse> {
-//        val timestamp = System.currentTimeMillis()
-//        log.error("[Exception] 业务异常: 页面未找到<{}>", e.resourcePath)
-//        return ResultUtil.error(timestamp, "页面 /${e.resourcePath} 不存在", ErrorCode.PAGE_NOT_FOUNDED)
-//    }
+    @ExceptionHandler(value = [NoResourceFoundException::class])
+    fun noResourceFound(e: NoResourceFoundException): ResponseEntity<BaseResponse> {
+        val timestamp = System.currentTimeMillis()
+        log.error("[Exception] 业务异常: 页面未找到<{}>", e.resourcePath)
+        return ResultUtil.error(timestamp, "页面 /${e.resourcePath} 不存在", ErrorCode.PAGE_NOT_FOUNDED)
+    }
 
     @ExceptionHandler(value = [HttpMessageNotReadableException::class])
     fun httpMessageNotReadable(e: HttpMessageNotReadableException): ResponseEntity<BaseResponse> {

@@ -9,6 +9,7 @@ import com.frontleaves.greenchaincarbonledger.models.doData.UserLoginDO;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.*;
 import com.frontleaves.greenchaincarbonledger.models.voData.returnData.BackAuthLoginVO;
 import com.frontleaves.greenchaincarbonledger.services.AuthService;
+import com.frontleaves.greenchaincarbonledger.services.MailService;
 import com.frontleaves.greenchaincarbonledger.utils.BaseResponse;
 import com.frontleaves.greenchaincarbonledger.utils.ErrorCode;
 import com.frontleaves.greenchaincarbonledger.utils.ProcessingUtil;
@@ -43,6 +44,7 @@ public class AuthServiceImpl implements AuthService {
     private final RoleDAO roleDAO;
     private final VerifyCodeDAO verifyCodeDAO;
     private final AuthDAO authDAO;
+    private final MailService mailService;
 
     @NotNull
     @Override
@@ -53,21 +55,26 @@ public class AuthServiceImpl implements AuthService {
         if (checkUserExist != null) {
             return ResultUtil.error(timestamp, checkUserExist, ErrorCode.USER_NOT_EXISTED);
         }
-        // 保存用户
-        UserDO newUserDO = new UserDO();
-        // 获取默认 Role
-        newUserDO
-                .setUuid(ProcessingUtil.createUuid())
-                .setUserName(authUserRegisterVO.getUsername())
-                .setRealName(authUserRegisterVO.getRealname())
-                .setEmail(authUserRegisterVO.getEmail())
-                .setPhone(authUserRegisterVO.getPhone())
-                .setRole(roleDAO.getRoleByName("admin").getUuid())
-                .setPassword(ProcessingUtil.passwordEncrypt(authUserRegisterVO.getPassword()));
-        if (userDAO.createUser(newUserDO)) {
-            return ResultUtil.success(timestamp, "管理用户注册成功");
+        // 校验邮箱验证码
+        if (mailService.checkMailCode(authUserRegisterVO.getEmail())) {
+            // 保存用户
+            UserDO newUserDO = new UserDO();
+            // 获取默认 Role
+            newUserDO
+                    .setUuid(ProcessingUtil.createUuid())
+                    .setUserName(authUserRegisterVO.getUsername())
+                    .setRealName(authUserRegisterVO.getRealname())
+                    .setEmail(authUserRegisterVO.getEmail())
+                    .setPhone(authUserRegisterVO.getPhone())
+                    .setRole(roleDAO.getRoleByName("admin").getUuid())
+                    .setPassword(ProcessingUtil.passwordEncrypt(authUserRegisterVO.getPassword()));
+            if (userDAO.createUser(newUserDO)) {
+                return ResultUtil.success(timestamp, "管理用户注册成功");
+            } else {
+                return ResultUtil.error(timestamp, ErrorCode.SERVER_INTERNAL_ERROR);
+            }
         } else {
-            return ResultUtil.error(timestamp, ErrorCode.SERVER_INTERNAL_ERROR);
+            return ResultUtil.error(timestamp, ErrorCode.VERIFY_CODE_ERROR);
         }
     }
 
@@ -149,29 +156,34 @@ public class AuthServiceImpl implements AuthService {
         if (checkUserExist != null) {
             return ResultUtil.error(timestamp, checkUserExist, ErrorCode.ORGANIZE_NOT_EXISTED);
         }
-        String invite = authOrganizeRegisterVO.getInvite();
-        // 验证组织注册填写的验证码是否有效
-        if (invite != null) {
-            if (!userDAO.getUserByInvite(invite)) {
-                return ResultUtil.error(timestamp, ErrorCode.INVITE_CODE_ERROR);
+        // 验证邮箱验证码
+        if (mailService.checkMailCode(authOrganizeRegisterVO.getEmail())) {
+            String invite = authOrganizeRegisterVO.getInvite();
+            // 验证组织注册填写的验证码是否有效
+            if (invite != null) {
+                if (!userDAO.getUserByInvite(invite)) {
+                    return ResultUtil.error(timestamp, ErrorCode.INVITE_CODE_ERROR);
+                }
             }
-        }
-        // 密码加密
-        String newPassword = ProcessingUtil.passwordEncrypt(authOrganizeRegisterVO.getPassword());
-        // 保存组织
-        UserDO newUserDO = new UserDO();
-        newUserDO
-                .setUuid(ProcessingUtil.createUuid())
-                .setRealName(authOrganizeRegisterVO.getOrganize())
-                .setUserName(authOrganizeRegisterVO.getUsername())
-                .setPhone(authOrganizeRegisterVO.getPhone())
-                .setEmail(authOrganizeRegisterVO.getEmail())
-                .setInvite(authOrganizeRegisterVO.getInvite())
-                .setPassword(newPassword);
-        if (userDAO.createUser(newUserDO)) {
-            return ResultUtil.success(timestamp, "组织账户注册成功");
+            // 密码加密
+            String newPassword = ProcessingUtil.passwordEncrypt(authOrganizeRegisterVO.getPassword());
+            // 保存组织
+            UserDO newUserDO = new UserDO();
+            newUserDO
+                    .setUuid(ProcessingUtil.createUuid())
+                    .setRealName(authOrganizeRegisterVO.getOrganize())
+                    .setUserName(authOrganizeRegisterVO.getUsername())
+                    .setPhone(authOrganizeRegisterVO.getPhone())
+                    .setEmail(authOrganizeRegisterVO.getEmail())
+                    .setInvite(authOrganizeRegisterVO.getInvite())
+                    .setPassword(newPassword);
+            if (userDAO.createUser(newUserDO)) {
+                return ResultUtil.success(timestamp, "组织账户注册成功");
+            } else {
+                return ResultUtil.error(timestamp, ErrorCode.SERVER_INTERNAL_ERROR);
+            }
         } else {
-            return ResultUtil.error(timestamp, ErrorCode.SERVER_INTERNAL_ERROR);
+            return ResultUtil.error(timestamp, ErrorCode.VERIFY_CODE_ERROR);
         }
     }
 
