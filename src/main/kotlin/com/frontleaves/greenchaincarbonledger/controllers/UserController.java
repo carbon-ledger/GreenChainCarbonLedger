@@ -90,7 +90,7 @@ public class UserController {
         ArrayList<String> list = new ArrayList<>();
         list.add("desc");
         list.add("asc");
-        if (order != null && list.contains(order)) {
+        if (order != null && !list.contains(order)) {
             return ResultUtil.error(timestamp, "order 参数错误", ErrorCode.REQUEST_BODY_ERROR);
         }
         // 业务操作

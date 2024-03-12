@@ -36,6 +36,7 @@ public class RoleController {
 
 
     @PostMapping("/add")
+    @CheckAccountPermission({"role:addRole"})
     public ResponseEntity<BaseResponse> addRole(@RequestBody @Validated RoleVO roleVO, @NotNull BindingResult bindingResult, HttpServletRequest request) {
         request.getHeader("X-Auth-UUID");
         log.info("[Controller] 请求 roleService 接口");
@@ -60,7 +61,7 @@ public class RoleController {
      */
     @GetMapping("/current")
     @CheckAccountPermission({"role:getCurrentRole"})
-    public ResponseEntity<BaseResponse> getCurrentRole (@NotNull HttpServletRequest request){
+    public ResponseEntity<BaseResponse> getCurrentRole(@NotNull HttpServletRequest request) {
         log.info("[Controller] 请求 getCurrentRole 接口");
         long timestamp = System.currentTimeMillis();
         request.getHeader("X-Auth-UUID");
@@ -102,11 +103,13 @@ public class RoleController {
     }
 
     @PutMapping("/edit/{uuid}")
+    @CheckAccountPermission({"role:editRole"})
     public ResponseEntity<BaseResponse> editRole(
             @RequestBody @Validated RoleVO roleVO,
             @NotNull BindingResult bindingResult,
             @PathVariable("uuid") String roleUuid,
-            @NotNull HttpServletRequest request) {
+            @NotNull HttpServletRequest request
+    ) {
         request.getHeader("X-Auth-UUID");
         log.info("[Controller] 请求 roleService 接口");
         long timestamp = System.currentTimeMillis();
@@ -119,7 +122,8 @@ public class RoleController {
     }
 
     @DeleteMapping("/delete/{uuid}")
-    public ResponseEntity<BaseResponse> deleteRole(@PathVariable("uuid") String roleUuid, HttpServletRequest request){
+    @CheckAccountPermission({"role:deleteRole"})
+    public ResponseEntity<BaseResponse> deleteRole(@PathVariable("uuid") String roleUuid, HttpServletRequest request) {
         request.getHeader("X-Auth-UUID");
         log.info("[Controller] 请求 roleService 接口");
         long timestamp = System.currentTimeMillis();
