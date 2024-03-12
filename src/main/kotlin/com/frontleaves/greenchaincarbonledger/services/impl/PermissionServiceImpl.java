@@ -33,7 +33,7 @@ public class PermissionServiceImpl implements PermissionService {
         // 检查参数，如果未设置（即为null），则使用默认值
         limit = (limit == null || limit > 100) ? 20 : limit;
         page = (page == null) ? 1 : page;
-        if (order == null || order.isBlank()) {
+        if (order.isBlank()) {
             order = "asc";
         }
         log.debug("\t> limit: {}, page: {}, order: {}", limit, page, order);

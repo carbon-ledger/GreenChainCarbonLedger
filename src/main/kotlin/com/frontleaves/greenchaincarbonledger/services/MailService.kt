@@ -39,4 +39,16 @@ interface MailService {
      * @return 发送结果
      */
     fun sendMail(timestamp: Long, email: String, template: String): ResponseEntity<BaseResponse>
+
+    /**
+     * ## checkMailCode
+     * ### 验证邮件验证码
+     * 验证邮件验证码
+     *
+     * @param timestamp 时间戳
+     * @param email 用户邮箱
+     * @param code 验证码
+     * @return 验证结果
+     */
+    fun checkMailCode(email: String): Boolean
 }
