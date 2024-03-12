@@ -108,21 +108,28 @@ public class AuthServiceImpl implements AuthService {
             }
             // 用户存在（密码检查）且不在注销状态
             if (ProcessingUtil.passwordCheck(authLoginVO.getPassword(), getUserDO.getPassword())) {
+
                 BackAuthLoginVO newBackAuthLoginVO = new BackAuthLoginVO();
                 BackAuthLoginVO.UserVO newUserVO = new BackAuthLoginVO.UserVO();
                 BackAuthLoginVO.PermissionVO newPermission = new BackAuthLoginVO.PermissionVO();
+                BackAuthLoginVO.RoleVO newRole = new BackAuthLoginVO.RoleVO();
                 newUserVO
                         .setUuid(getUserDO.getUuid())
-                        .setUserName(getUserDO.getUuid())
+                        .setUserName(getUserDO.getUserName())
                         .setPhone(getUserDO.getPhone())
-                        .setEmail(newUserVO.getEmail())
+                        .setEmail(getUserDO.getEmail())
                         .setRealName(getUserDO.getRealName());
                 newPermission
                         .setUserPermission(new ArrayList<>())
                         .setRolePermission(new ArrayList<>());
+                newRole
+                        .setUuid(userDAO.getUserByUuid(getUserDO.getUuid()).getRole())
+                        .setName(roleDAO.getRoleUuid(userDAO.getUserByUuid(getUserDO.getUuid()).getRole()).getName())
+                        .setDisplayName(roleDAO.getRoleUuid(userDAO.getUserByUuid(getUserDO.getUuid()).getRole()).getDisplayName());
                 newBackAuthLoginVO
                         .setToken(newToken)
                         .setUser(newUserVO)
+                        .setRole(newRole)
                         .setPermission(newPermission)
                         .setRecover(recover);
                 //存入了getUserLoginDO类
