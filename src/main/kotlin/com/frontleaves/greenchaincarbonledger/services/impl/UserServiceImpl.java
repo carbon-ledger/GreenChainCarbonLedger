@@ -190,7 +190,7 @@ public class UserServiceImpl implements UserService {
             if ("console".equals(roleDAO.getRoleUuid(getUserDO.getRole()).getName())) {
                 return ResultUtil.error(timestamp, ErrorCode.CAN_T_OPERATE_ONESELF);
             } else {
-                if (userDAO.updateUserForceByUuid(getUserDO.getUuid(), userForceEditVO)) {
+                if (userDAO.updateUserForceByUuid(getUserDO.getUuid(), userForceEditVO.getUserName(), userForceEditVO.getRealName(), userForceEditVO.getNickName(), userForceEditVO.getAvatar(), userForceEditVO.getEmail(), userForceEditVO.getPhone())) {
                     BackUserForceEditVO backUserForceEditVO = new BackUserForceEditVO();
                     backUserForceEditVO.setUuid(userUuid)
                             .setUserName(getUserDO.getUserName())
