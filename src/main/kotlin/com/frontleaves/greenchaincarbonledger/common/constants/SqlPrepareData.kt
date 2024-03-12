@@ -32,8 +32,8 @@ object SqlPrepareData {
         add(ArrayList(listOf("user:banUser", "封禁用户")))
         add(ArrayList(listOf("permission:getPermissionList", "获取权限列表")))
         add(ArrayList(listOf("admin:resetUserPassword", "重置用户密码")))
-        add(ArrayList(listOf("auth:closeServer", "关闭服务器")))
-        add(ArrayList(listOf("auth:resetSql", "重置数据库")))
+        add(ArrayList(listOf("super:closeServer", "关闭服务器")))
+        add(ArrayList(listOf("super:resetSql", "重置数据库")))
     }
 
     /**
