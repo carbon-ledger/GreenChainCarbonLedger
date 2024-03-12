@@ -184,21 +184,26 @@ public class UserServiceImpl implements UserService {
         if (getUserDO != null) {
             //通过UUID进行用户信息匹配进行数据库修改并且删掉此时数据库中缓存
             log.info(userForceEditVO.toString());
-            if (userDAO.updateUserForceByUuid(getUserDO.getUuid(), userForceEditVO)) {
-                BackUserForceEditVO backUserForceEditVO = new BackUserForceEditVO();
-                backUserForceEditVO.setUuid(userUuid)
-                        .setUserName(getUserDO.getUserName())
-                        .setNickName(getUserDO.getNickName())
-                        .setRealName(getUserDO.getRealName())
-                        .setEmail(getUserDO.getEmail())
-                        .setPhone(getUserDO.getPhone())
-                        .setCreatedAt(getUserDO.getCreatedAt().toString())
-                        .setUpdatedAt(getUserDO.getUpdatedAt() != null ? getUserDO.getUpdatedAt().toString() : null);
-                return ResultUtil.success(timestamp, "用户信息修改成功", backUserForceEditVO);
+            //校验修改的用户是否为超级管理员
+            if ("console".equals(roleDAO.getRoleUuid(getUserDO.getRole()).getName())) {
+                return ResultUtil.error(timestamp, ErrorCode.REQUEST_METHOD_NOT_SUPPORTED);
             } else {
-                return ResultUtil.error(timestamp, ErrorCode.SERVER_INTERNAL_ERROR);
+                if (userDAO.updateUserForceByUuid(getUserDO.getUuid(), userForceEditVO)) {
+                    BackUserForceEditVO backUserForceEditVO = new BackUserForceEditVO();
+                    backUserForceEditVO.setUuid(userUuid)
+                            .setUserName(getUserDO.getUserName())
+                            .setNickName(getUserDO.getNickName())
+                            .setRealName(getUserDO.getRealName())
+                            .setEmail(getUserDO.getEmail())
+                            .setPhone(getUserDO.getPhone())
+                            .setCreatedAt(getUserDO.getCreatedAt().toString())
+                            .setUpdatedAt(getUserDO.getUpdatedAt() != null ? getUserDO.getUpdatedAt().toString() : null);
+                    return ResultUtil.success(timestamp, "用户信息修改成功", backUserForceEditVO);
+                } else {
+                    return ResultUtil.error(timestamp, ErrorCode.SERVER_INTERNAL_ERROR);
+                }
             }
-        } else {
+        }else {
             return ResultUtil.error(timestamp, ErrorCode.USER_NOT_EXISTED);
         }
     }
