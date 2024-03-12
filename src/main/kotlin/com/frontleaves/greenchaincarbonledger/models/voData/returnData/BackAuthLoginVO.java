@@ -1,6 +1,5 @@
 package com.frontleaves.greenchaincarbonledger.models.voData.returnData;
 
-import com.frontleaves.greenchaincarbonledger.models.voData.getData.RoleVO;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -33,10 +32,10 @@ public class BackAuthLoginVO {
         public String email;
         public String phone;
     }
+
     @Data
     @Accessors(chain = true)
-    public  static class  RoleVO{
-        public String uuid;
+    public static class RoleVO {
         public String name;
         public String displayName;
     }
