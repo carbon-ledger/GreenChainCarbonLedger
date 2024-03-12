@@ -54,6 +54,7 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public ResponseEntity<BaseResponse> adminUserRegister(long timestamp, @NotNull HttpServletRequest request, @NotNull AuthUserRegisterVO authUserRegisterVO) {
+        log.info("[Service] 执行 adminUserRegister 方法");
         // 检查用户是否存在
         String checkUserExist = userDAO.checkUserExist(authUserRegisterVO.getUsername(), authUserRegisterVO.getEmail(), authUserRegisterVO.getPhone(), authUserRegisterVO.getRealname());
         if (checkUserExist != null) {
@@ -86,6 +87,7 @@ public class AuthServiceImpl implements AuthService {
     @NotNull
     @Override
     public ResponseEntity<BaseResponse> userLogin(long timestamp, @NotNull HttpServletRequest request, @NotNull AuthLoginVO authLoginVO) {
+        log.info("[Service] 执行 userLogin 方法");
         // 检索用户
         UserDO getUserDO;
         UserLoginDO getUserLoginDO = new UserLoginDO();
@@ -163,6 +165,7 @@ public class AuthServiceImpl implements AuthService {
             @NotNull HttpServletRequest request,
             @NotNull AuthOrganizeRegisterVO authOrganizeRegisterVO
     ) {
+        log.info("[Service] 执行 organizeRegister 方法");
         // 检索组织是否唯一存在
         String checkUserExist = userDAO.checkUserExist(authOrganizeRegisterVO.getUsername(), authOrganizeRegisterVO.getEmail(), authOrganizeRegisterVO.getPhone(), authOrganizeRegisterVO.getOrganize());
         if (checkUserExist != null) {
@@ -203,6 +206,7 @@ public class AuthServiceImpl implements AuthService {
     @NotNull
     @Override
     public ResponseEntity<BaseResponse> userChange(long timestamp, @NotNull HttpServletRequest request, @NotNull AuthChangeVO authChangeVO) {
+        log.info("[Service] 执行 userChange 方法");
         //获取用户的UUID再将用户的UUID与数据库中的UUID进行校验，取出数据库的实例
         String getUuid = request.getHeader("X-Auth-UUID");
         UserDO getUserDO = userDAO.getUserByUuid(getUuid);
@@ -229,6 +233,7 @@ public class AuthServiceImpl implements AuthService {
     @NotNull
     @Override
     public ResponseEntity<BaseResponse> userDelete(long timestamp, @NotNull HttpServletRequest request, @NotNull AuthDeleteVO authDeleteVO) {
+        log.info("[Service] 执行 userDelete 方法");
         //获取用户UUID再将用户的UUID与数据库中的UUID进行校验，取出数据库中的实例
         String getUuid = request.getHeader("X-Auth-UUID");
         UserDO getUserDO = userDAO.getUserByUuid(getUuid);
@@ -259,7 +264,9 @@ public class AuthServiceImpl implements AuthService {
     public ResponseEntity<BaseResponse> forgetCode(
             long timestamp,
             @NotNull HttpServletRequest request,
-            @NotNull AuthForgetCodeVO authForgetCodeVO) {
+            @NotNull AuthForgetCodeVO authForgetCodeVO
+    ) {
+        log.info("[Service] 执行 forgetCode 方法");
         // 获取邮箱数据，此处无论用户填入的Email是否真实有效，系统都会返回“密码充值邮件已发送”的信息
         String email = authForgetCodeVO.getEmail();
         // 如果校验码与缓存中的数据符合，则满足修改密码的条件
@@ -290,6 +297,7 @@ public class AuthServiceImpl implements AuthService {
     @NotNull
     @Override
     public ResponseEntity<BaseResponse> userLogout(long timestamp, @NotNull HttpServletRequest request) {
+        log.info("[Service] 执行 userLogout 方法");
         // 首先获取此时用户的 UUID
         String getUuid = request.getHeader("X-Auth-UUID");
         // 获取用户本地的 Token
