@@ -188,7 +188,7 @@ public class UserServiceImpl implements UserService {
             if ("console".equals(roleDAO.getRoleUuid(getUserDO.getRole()).getName())) {
                 return ResultUtil.error(timestamp, ErrorCode.CAN_T_OPERATE_ONESELF);
             } else {
-                if (userDAO.updateUserForceByUuid(getUserDO.getUuid(), userForceEditVO)) {
+                if (userDAO.updateUserForceByUuid(getUserDO.getUuid(), userForceEditVO.getUserName(), userForceEditVO.getNickName(), userForceEditVO.getRealName(), userForceEditVO.getAvatar(), userForceEditVO.getEmail(), userForceEditVO.getPhone())) {
                     BackUserForceEditVO backUserForceEditVO = new BackUserForceEditVO();
                     backUserForceEditVO.setUuid(userUuid)
                             .setUserName(getUserDO.getUserName())
@@ -203,7 +203,7 @@ public class UserServiceImpl implements UserService {
                     return ResultUtil.error(timestamp, ErrorCode.SERVER_INTERNAL_ERROR);
                 }
             }
-        }else {
+        } else {
             return ResultUtil.error(timestamp, ErrorCode.USER_NOT_EXISTED);
         }
     }
@@ -214,11 +214,11 @@ public class UserServiceImpl implements UserService {
         // 直接指定uuid设置ban参数
         // 判断用户是否为超级管理员
         String uuid = ProcessingUtil.getAuthorizeUserUuid(request);
-        if (userDAO.checkConsole(uuid)){
+        if (userDAO.checkConsole(uuid)) {
             userDAO.banUser(roleUuid);
             return ResultUtil.success(timestamp, "用户封禁成功");
         } else {
-            if (userDAO.checkUserPermission(roleUuid)){
+            if (userDAO.checkUserPermission(roleUuid)) {
                 if (userDAO.banUser(roleUuid)) {
                     return ResultUtil.success(timestamp, "用户封禁成功");
                 } else {

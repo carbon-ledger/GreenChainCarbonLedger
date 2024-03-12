@@ -4,18 +4,14 @@ import com.frontleaves.greenchaincarbonledger.common.BusinessConstants;
 import com.frontleaves.greenchaincarbonledger.common.constants.RedisExpiration;
 import com.frontleaves.greenchaincarbonledger.mappers.RoleMapper;
 import com.frontleaves.greenchaincarbonledger.mappers.UserMapper;
-import com.frontleaves.greenchaincarbonledger.models.doData.RoleDO;
 import com.frontleaves.greenchaincarbonledger.models.doData.UserDO;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.UserEditVO;
-import com.frontleaves.greenchaincarbonledger.utils.redis.RoleRedis;
-import com.frontleaves.greenchaincarbonledger.models.voData.getData.UserForceEditVO;
 import com.frontleaves.greenchaincarbonledger.utils.redis.UserRedis;
 import com.google.gson.Gson;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
-import javax.management.relation.Role;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -236,27 +232,28 @@ public class UserDAO {
      * 通过search在user表中查询出role的链表
      * <hr/>
      * 通过search在user表中查询出role的链表
+     *
      * @param search 关键字查询
-     * @param limit 限制
-     * @param page 页数
-     * @param order 顺序
+     * @param limit  限制
+     * @param page   页数
+     * @param order  顺序
      * @return role链表
      */
-    public List<String> getRoleByAllList(String search,Integer limit,Integer page,String order) {
+    public List<String> getRoleByAllList(String search, Integer limit, Integer page, String order) {
         log.info("[DAO] 执行 getRoleByAllList 方法");
         log.info("\t> Mysql 读取");
-        return userMapper.getRoleByAllList(search,limit,page,order);
+        return userMapper.getRoleByAllList(search, limit, page, order);
     }
 
-    public boolean updateUserForceByUuid(String userUuid,String userName,String nickName,String realName,String avatar,String email,String phone){
+    public boolean updateUserForceByUuid(String userUuid, String userName, String nickName, String realName, String avatar, String email, String phone) {
         log.info("[Dao] 执行 updateUserForceByUuid 方法");
         log.info("\t> Redis 删除 ");
         userRedis.delData(BusinessConstants.NONE, userUuid);
         log.info("\t> Mysql 更新");
-        return userMapper.updateUserForceByUuid(userUuid,userName,nickName,realName,avatar,email,phone);
+        return userMapper.updateUserForceByUuid(userUuid, userName, nickName, realName, avatar, email, phone);
     }
 
-    public Boolean banUser(String roleUuid){
+    public Boolean banUser(String roleUuid) {
         log.info("[DAO] 执行 banUser 方法");
         log.info("\t> Mysql 更新");
         return userMapper.banUser(roleUuid);
