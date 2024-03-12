@@ -206,13 +206,22 @@ public class UserServiceImpl implements UserService {
     @NotNull
     @Override
     public ResponseEntity<BaseResponse> banUser(long timestamp, @NotNull HttpServletRequest request, @NotNull String roleUuid) {
-//        return userMapper.banUser(roleUuid) ? ResultUtil.success(timestamp, "用户封禁成功"): ResultUtil.error(timestamp, ErrorCode.ROLE_CANNOT_BE_BANED);
         // 直接指定uuid设置ban参数
-        if (userDAO.banUser(roleUuid)){
+        // 判断用户是否为超级管理员
+        String uuid = ProcessingUtil.getAuthorizeUserUuid(request);
+        if (userDAO.checkConsole(uuid)){
+            userDAO.banUser(roleUuid);
             return ResultUtil.success(timestamp, "用户封禁成功");
         } else {
-            return ResultUtil.error(timestamp, ErrorCode.ROLE_CANNOT_BE_BANED);
+            if (userDAO.checkUserPermission(roleUuid)){
+                if (userDAO.banUser(roleUuid)) {
+                    return ResultUtil.success(timestamp, "用户封禁成功");
+                } else {
+                    return ResultUtil.error(timestamp, ErrorCode.ROLE_CANNOT_BE_BANED);
+                }
+            } else {
+                return ResultUtil.error(timestamp, "管理员不能被封禁", ErrorCode.ROLE_CANNOT_BE_BANED);
+            }
         }
     }
-
 }
