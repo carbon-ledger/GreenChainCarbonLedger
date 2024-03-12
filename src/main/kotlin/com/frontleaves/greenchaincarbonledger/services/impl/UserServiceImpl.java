@@ -85,7 +85,7 @@ public class UserServiceImpl implements UserService {
 
     @NotNull
     @Override
-    @CheckAccountPermission({"user:getUserList"})
+    //TODO:还未进行权限验证（接口未写好）
     public ResponseEntity<BaseResponse> getUserList(long timestamp, @NotNull HttpServletRequest request, @NotNull String type, String search, Integer limit, Integer page, String order) {
         log.info("[Service] 执行 getUserList 方法");
         // 检查参数，如果未设置（即为null），则使用默认值
@@ -182,20 +182,26 @@ public class UserServiceImpl implements UserService {
     ) {
         UserDO getUserDO = userDAO.getUserByUuid(userUuid);
         if (getUserDO != null) {
-            if (userDAO.updateUserForceByUuid(getUserDO.getUuid(),userForceEditVO.getUserName(),userForceEditVO.getNickName(),userForceEditVO.getRealName(),userForceEditVO.getAvatar(),userForceEditVO.getEmail(),userForceEditVO.getPhone())){
-                getUserDO = userDAO.getUserByUuid(userUuid);
-                BackUserForceEditVO backUserForceEditVO = new BackUserForceEditVO();
-                backUserForceEditVO.setUuid(userUuid)
-                        .setUserName(getUserDO.getUserName())
-                        .setNickName(getUserDO.getNickName())
-                        .setRealName(getUserDO.getRealName())
-                        .setEmail(getUserDO.getEmail())
-                        .setPhone(getUserDO.getPhone())
-                        .setCreatedAt(getUserDO.getCreatedAt().toString())
-                        .setUpdatedAt(getUserDO.getUpdatedAt() != null ? getUserDO.getUpdatedAt().toString() : null);
-                return ResultUtil.success(timestamp, "用户信息修改成功", backUserForceEditVO);
-            } else {
-                return ResultUtil.error(timestamp, ErrorCode.SERVER_INTERNAL_ERROR);
+            //通过UUID进行用户信息匹配进行数据库修改并且删掉此时数据库中缓存
+            log.info(userForceEditVO.toString());
+            //校验是否为超级管理员
+            if ("console".equals(roleDAO.getRoleUuid(getUserDO.getRole()).getName())) {
+                return ResultUtil.error(timestamp,ErrorCode.REQUEST_METHOD_NOT_SUPPORTED);
+            }else {
+                if (userDAO.updateUserForceByUuid(getUserDO.getUuid(), userForceEditVO.getUserName(), userForceEditVO.getNickName(), userForceEditVO.getRealName(), userForceEditVO.getAvatar(), userForceEditVO.getEmail(), userForceEditVO.getPhone())) {
+                    BackUserForceEditVO backUserForceEditVO = new BackUserForceEditVO();
+                    backUserForceEditVO.setUuid(userUuid)
+                            .setUserName(getUserDO.getUserName())
+                            .setNickName(getUserDO.getNickName())
+                            .setRealName(getUserDO.getRealName())
+                            .setEmail(getUserDO.getEmail())
+                            .setPhone(getUserDO.getPhone())
+                            .setCreatedAt(getUserDO.getCreatedAt().toString())
+                            .setUpdatedAt(getUserDO.getUpdatedAt() != null ? getUserDO.getUpdatedAt().toString() : null);
+                    return ResultUtil.success(timestamp, "用户信息修改成功", backUserForceEditVO);
+                } else {
+                    return ResultUtil.error(timestamp, ErrorCode.SERVER_INTERNAL_ERROR);
+                }
             }
         } else {
             return ResultUtil.error(timestamp, ErrorCode.USER_NOT_EXISTED);
