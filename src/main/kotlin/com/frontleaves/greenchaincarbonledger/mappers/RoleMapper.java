@@ -53,4 +53,7 @@ public interface RoleMapper {
 
     @Delete("DELETE FROM fy_role WHERE uuid = #{uuid}")
     Boolean deleteRole(String uuid);
+
+    @Select("SELECT name FROM fy_role WHERE uuid = #{role}")
+    String getDisplayNameByRole(String role);
 }

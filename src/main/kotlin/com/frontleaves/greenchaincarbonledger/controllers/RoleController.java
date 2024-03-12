@@ -125,7 +125,4 @@ public class RoleController {
         long timestamp = System.currentTimeMillis();
         return roleService.deleteRole(timestamp, request, roleUuid);
     }
-
-
-
 }

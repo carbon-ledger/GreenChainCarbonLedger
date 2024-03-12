@@ -123,6 +123,13 @@ public interface UserMapper {
             """)
     boolean updateUserForceByUuid(String userUuid, UserForceEditVO userForceEditVO);
 
-    @Update("UPDATE fy_user SET ban = 1 WHERE uuid = #{uuid}")
+    @Update("UPDATE fy_user SET ban = 1 WHERE uuid = #{uuid} and uuid != (SELECT role FROM fy_user WHERE uuid = #{uuid})")
     Boolean banUser(String uuid);
+
+    @Select("SELECT role FROM fy_user WHERE uuid = #{roleUuid}")
+    String getRoleByUuid(String roleUuid);
+
+
+    @Select("SELECT name FROM fy_role WHERE uuid = (SELECT role FROM fy_user WHERE uuid = #{uuid})")
+    boolean judgeConsoleByUuid(String uuid);
 }

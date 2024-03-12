@@ -16,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
 import javax.management.relation.Role;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -32,6 +33,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserDAO {
     private final UserMapper userMapper;
+    private final RoleMapper roleMapper;
     private final UserRedis userRedis;
     private final Gson gson;
 
@@ -258,5 +260,25 @@ public class UserDAO {
         log.info("[DAO] 执行 banUser 方法");
         log.info("\t> Mysql 更新");
         return userMapper.banUser(roleUuid);
+    }
+
+    public boolean checkUserPermission(String roleUuid) {
+        log.info("[DAO] 执行 checkUserPermission 方法");
+        log.info("\t> Mysql 读取");
+        String role = userMapper.getRoleByUuid(roleUuid);
+        String displayName = roleMapper.getDisplayNameByRole(role);
+        log.info(displayName);
+        ArrayList<String> arrayList = new ArrayList<>();
+        arrayList.add("default");
+        arrayList.add("organize");
+        arrayList.add("admin");
+        arrayList.add("console");
+        return !arrayList.contains(displayName);
+    }
+
+    public boolean checkConsole(String uuid) {
+        log.info("[DAO] 执行 checkConsole 方法");
+        log.info("\t> Mysql 读取");
+        return userMapper.judgeConsoleByUuid(uuid);
     }
 }

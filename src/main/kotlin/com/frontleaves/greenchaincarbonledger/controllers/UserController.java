@@ -136,7 +136,6 @@ public class UserController {
     @PatchMapping("/ban/{uuid}")
     @CheckAccountPermission("user:banUser")
     public ResponseEntity<BaseResponse> banUser(@PathVariable("uuid") String roleUuid, @NotNull HttpServletRequest request){
-        request.getHeader("X-Auth-uuid");
         log.info("[Controller] 请求 roleService 接口");
         long timestamp = System.currentTimeMillis();
         return userService.banUser(timestamp, request, roleUuid);
