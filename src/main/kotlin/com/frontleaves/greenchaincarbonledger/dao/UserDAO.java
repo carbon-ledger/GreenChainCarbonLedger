@@ -253,16 +253,16 @@ public class UserDAO {
         return userMapper.updateUserForceByUuid(userUuid, userName, nickName, realName, avatar, email, phone);
     }
 
-    public Boolean banUser(String roleUuid) {
+    public Boolean banUser(String banUuid) {
         log.info("[DAO] 执行 banUser 方法");
         log.info("\t> Mysql 更新");
-        return userMapper.banUser(roleUuid);
+        return userMapper.banUser(banUuid);
     }
 
-    public boolean checkUserPermission(String roleUuid) {
+    public boolean checkUserPermission(String banUuid) {
         log.info("[DAO] 执行 checkUserPermission 方法");
         log.info("\t> Mysql 读取");
-        String role = userMapper.getRoleByUuid(roleUuid);
+        String role = userMapper.getUserByUuid(banUuid).getRole();
         String displayName = roleMapper.getDisplayNameByRole(role);
         log.info(displayName);
         ArrayList<String> arrayList = new ArrayList<>();
@@ -276,6 +276,6 @@ public class UserDAO {
     public boolean checkConsole(String uuid) {
         log.info("[DAO] 执行 checkConsole 方法");
         log.info("\t> Mysql 读取");
-        return userMapper.judgeConsoleByUuid(uuid);
+        return !("console".equals(userMapper.judgeConsoleByUuid(uuid)));
     }
 }

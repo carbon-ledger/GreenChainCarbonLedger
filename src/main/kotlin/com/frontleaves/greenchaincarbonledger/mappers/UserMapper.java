@@ -122,13 +122,13 @@ public interface UserMapper {
             """)
     boolean updateUserForceByUuid(String userUuid, String userName,String realName,String nickName, String avatar,String email, String phone);
 
-    @Update("UPDATE fy_user SET ban = 1 WHERE uuid = #{uuid} and uuid != (SELECT role FROM fy_user WHERE uuid = #{uuid})")
-    Boolean banUser(String uuid);
+    @Update("UPDATE fy_user SET ban = 1 WHERE uuid = #{uuid} and uuid != (SELECT role FROM fy_user WHERE uuid = #{banUuid})")
+    Boolean banUser(String banUuid);
 
     @Select("SELECT role FROM fy_user WHERE uuid = #{roleUuid}")
     String getRoleByUuid(String roleUuid);
 
 
     @Select("SELECT name FROM fy_role WHERE uuid = (SELECT role FROM fy_user WHERE uuid = #{uuid})")
-    boolean judgeConsoleByUuid(String uuid);
+    String judgeConsoleByUuid(String uuid);
 }
