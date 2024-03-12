@@ -55,7 +55,8 @@ public class UserServiceImpl implements UserService {
 
     @NotNull
     @Override
-    public ResponseEntity<BaseResponse> getUserCurrent(long timestamp, HttpServletRequest request) {
+    public ResponseEntity<BaseResponse> getUserCurrent(long timestamp, @NotNull HttpServletRequest request) {
+        log.info("[Service] 执行 getUserCurrent 方法");
         //用缓存的UUID与数据库UUID进行校对
         String getUuid = request.getHeader("X-Auth-UUID");
         UserDO getUserDO = userDAO.getUserByUuid(getUuid);
@@ -180,6 +181,7 @@ public class UserServiceImpl implements UserService {
             @NotNull String userUuid,
             @NotNull UserForceEditVO userForceEditVO
     ) {
+        log.info("[Service] 执行 putUserForceEdit 方法");
         UserDO getUserDO = userDAO.getUserByUuid(userUuid);
         if (getUserDO != null) {
             //通过UUID进行用户信息匹配进行数据库修改并且删掉此时数据库中缓存
@@ -188,7 +190,7 @@ public class UserServiceImpl implements UserService {
             if ("console".equals(roleDAO.getRoleUuid(getUserDO.getRole()).getName())) {
                 return ResultUtil.error(timestamp, ErrorCode.CAN_T_OPERATE_ONESELF);
             } else {
-                if (userDAO.updateUserForceByUuid(getUserDO.getUuid(), userForceEditVO)) {
+                if (userDAO.updateUserForceByUuid(getUserDO.getUuid(), userForceEditVO.getUserName(), userForceEditVO.getNickName(), userForceEditVO.getRealName(), userForceEditVO.getAvatar(), userForceEditVO.getEmail(), userForceEditVO.getPhone())) {
                     BackUserForceEditVO backUserForceEditVO = new BackUserForceEditVO();
                     backUserForceEditVO.setUuid(userUuid)
                             .setUserName(getUserDO.getUserName())
@@ -203,7 +205,7 @@ public class UserServiceImpl implements UserService {
                     return ResultUtil.error(timestamp, ErrorCode.SERVER_INTERNAL_ERROR);
                 }
             }
-        }else {
+        } else {
             return ResultUtil.error(timestamp, ErrorCode.USER_NOT_EXISTED);
         }
     }
