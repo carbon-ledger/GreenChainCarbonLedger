@@ -40,7 +40,7 @@ import java.util.List;
  *
  * @author FLASHALCK
  * @version 1.0
- * @since 2024-4-1
+ * @since 2024-3-1
  */
 @Slf4j
 @Service
@@ -184,11 +184,11 @@ public class UserServiceImpl implements UserService {
         if (getUserDO != null) {
             //通过UUID进行用户信息匹配进行数据库修改并且删掉此时数据库中缓存
             log.info(userForceEditVO.toString());
-            //校验是否为超级管理员
+            //校验修改的用户是否为超级管理员
             if ("console".equals(roleDAO.getRoleUuid(getUserDO.getRole()).getName())) {
-                return ResultUtil.error(timestamp,ErrorCode.REQUEST_METHOD_NOT_SUPPORTED);
-            }else {
-                if (userDAO.updateUserForceByUuid(getUserDO.getUuid(), userForceEditVO.getUserName(), userForceEditVO.getNickName(), userForceEditVO.getRealName(), userForceEditVO.getAvatar(), userForceEditVO.getEmail(), userForceEditVO.getPhone())) {
+                return ResultUtil.error(timestamp, ErrorCode.CAN_T_OPERATE_ONESELF);
+            } else {
+                if (userDAO.updateUserForceByUuid(getUserDO.getUuid(), userForceEditVO)) {
                     BackUserForceEditVO backUserForceEditVO = new BackUserForceEditVO();
                     backUserForceEditVO.setUuid(userUuid)
                             .setUserName(getUserDO.getUserName())
@@ -203,7 +203,7 @@ public class UserServiceImpl implements UserService {
                     return ResultUtil.error(timestamp, ErrorCode.SERVER_INTERNAL_ERROR);
                 }
             }
-        } else {
+        }else {
             return ResultUtil.error(timestamp, ErrorCode.USER_NOT_EXISTED);
         }
     }

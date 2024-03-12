@@ -4,16 +4,20 @@ import com.frontleaves.greenchaincarbonledger.dao.AuthDAO;
 import com.frontleaves.greenchaincarbonledger.dao.RoleDAO;
 import com.frontleaves.greenchaincarbonledger.dao.UserDAO;
 import com.frontleaves.greenchaincarbonledger.dao.VerifyCodeDAO;
+import com.frontleaves.greenchaincarbonledger.models.doData.RoleDO;
 import com.frontleaves.greenchaincarbonledger.models.doData.UserDO;
 import com.frontleaves.greenchaincarbonledger.models.doData.UserLoginDO;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.*;
 import com.frontleaves.greenchaincarbonledger.models.voData.returnData.BackAuthLoginVO;
 import com.frontleaves.greenchaincarbonledger.services.AuthService;
+import com.frontleaves.greenchaincarbonledger.services.MailService;
 import com.frontleaves.greenchaincarbonledger.utils.BaseResponse;
 import com.frontleaves.greenchaincarbonledger.utils.ErrorCode;
 import com.frontleaves.greenchaincarbonledger.utils.ProcessingUtil;
 import com.frontleaves.greenchaincarbonledger.utils.ResultUtil;
 import com.frontleaves.greenchaincarbonledger.utils.security.JwtUtil;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,10 +43,12 @@ import java.util.regex.Pattern;
 @Service
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
+    private final Gson gson;
     private final UserDAO userDAO;
     private final RoleDAO roleDAO;
     private final VerifyCodeDAO verifyCodeDAO;
     private final AuthDAO authDAO;
+    private final MailService mailService;
 
     @NotNull
     @Override
@@ -53,21 +59,27 @@ public class AuthServiceImpl implements AuthService {
         if (checkUserExist != null) {
             return ResultUtil.error(timestamp, checkUserExist, ErrorCode.USER_NOT_EXISTED);
         }
-        // 保存用户
-        UserDO newUserDO = new UserDO();
-        // 获取默认 Role
-        newUserDO
-                .setUuid(ProcessingUtil.createUuid())
-                .setUserName(authUserRegisterVO.getUsername())
-                .setRealName(authUserRegisterVO.getRealname())
-                .setEmail(authUserRegisterVO.getEmail())
-                .setPhone(authUserRegisterVO.getPhone())
-                .setRole(roleDAO.getRoleByName("admin").getUuid())
-                .setPassword(ProcessingUtil.passwordEncrypt(authUserRegisterVO.getPassword()));
-        if (userDAO.createUser(newUserDO)) {
-            return ResultUtil.success(timestamp, "管理用户注册成功");
+        // 校验邮箱验证码
+        if (mailService.checkMailCode(authUserRegisterVO.getEmail())) {
+            // 保存用户
+            UserDO newUserDO = new UserDO();
+            // 获取默认 Role
+            newUserDO
+                    .setUuid(ProcessingUtil.createUuid())
+                    .setUserName(authUserRegisterVO.getUsername())
+                    .setRealName(authUserRegisterVO.getRealname())
+                    .setEmail(authUserRegisterVO.getEmail())
+                    .setPhone(authUserRegisterVO.getPhone())
+                    .setPermission("[]")
+                    .setRole(roleDAO.getRoleByName("admin").getUuid())
+                    .setPassword(ProcessingUtil.passwordEncrypt(authUserRegisterVO.getPassword()));
+            if (userDAO.createUser(newUserDO)) {
+                return ResultUtil.success(timestamp, "管理用户注册成功");
+            } else {
+                return ResultUtil.error(timestamp, ErrorCode.SERVER_INTERNAL_ERROR);
+            }
         } else {
-            return ResultUtil.error(timestamp, ErrorCode.SERVER_INTERNAL_ERROR);
+            return ResultUtil.error(timestamp, ErrorCode.VERIFY_CODE_ERROR);
         }
     }
 
@@ -101,21 +113,28 @@ public class AuthServiceImpl implements AuthService {
             }
             // 用户存在（密码检查）且不在注销状态
             if (ProcessingUtil.passwordCheck(authLoginVO.getPassword(), getUserDO.getPassword())) {
+                RoleDO getUserRole = roleDAO.getRoleUuid(getUserDO.getRole());
+
                 BackAuthLoginVO newBackAuthLoginVO = new BackAuthLoginVO();
                 BackAuthLoginVO.UserVO newUserVO = new BackAuthLoginVO.UserVO();
                 BackAuthLoginVO.PermissionVO newPermission = new BackAuthLoginVO.PermissionVO();
+                BackAuthLoginVO.RoleVO newRole = new BackAuthLoginVO.RoleVO();
                 newUserVO
                         .setUuid(getUserDO.getUuid())
-                        .setUserName(getUserDO.getUuid())
+                        .setUserName(getUserDO.getUserName())
                         .setPhone(getUserDO.getPhone())
-                        .setEmail(newUserVO.getEmail())
+                        .setEmail(getUserDO.getEmail())
                         .setRealName(getUserDO.getRealName());
                 newPermission
-                        .setUserPermission(new ArrayList<>())
-                        .setRolePermission(new ArrayList<>());
+                        .setUserPermission(gson.fromJson(getUserDO.getPermission(), new TypeToken<ArrayList<String>>() {}.getType()))
+                        .setRolePermission(gson.fromJson(getUserRole.getPermission(), new TypeToken<ArrayList<String>>() {}.getType()));
+                newRole
+                        .setName(getUserRole.getName())
+                        .setDisplayName(getUserRole.getDisplayName());
                 newBackAuthLoginVO
                         .setToken(newToken)
                         .setUser(newUserVO)
+                        .setRole(newRole)
                         .setPermission(newPermission)
                         .setRecover(recover);
                 //存入了getUserLoginDO类
@@ -149,29 +168,35 @@ public class AuthServiceImpl implements AuthService {
         if (checkUserExist != null) {
             return ResultUtil.error(timestamp, checkUserExist, ErrorCode.ORGANIZE_NOT_EXISTED);
         }
-        String invite = authOrganizeRegisterVO.getInvite();
-        // 验证组织注册填写的验证码是否有效
-        if (invite != null) {
-            if (!userDAO.getUserByInvite(invite)) {
-                return ResultUtil.error(timestamp, ErrorCode.INVITE_CODE_ERROR);
+        // 验证邮箱验证码
+        if (mailService.checkMailCode(authOrganizeRegisterVO.getEmail())) {
+            String invite = authOrganizeRegisterVO.getInvite();
+            // 验证组织注册填写的验证码是否有效
+            if (invite != null) {
+                if (!userDAO.getUserByInvite(invite)) {
+                    return ResultUtil.error(timestamp, ErrorCode.INVITE_CODE_ERROR);
+                }
             }
-        }
-        // 密码加密
-        String newPassword = ProcessingUtil.passwordEncrypt(authOrganizeRegisterVO.getPassword());
-        // 保存组织
-        UserDO newUserDO = new UserDO();
-        newUserDO
-                .setUuid(ProcessingUtil.createUuid())
-                .setRealName(authOrganizeRegisterVO.getOrganize())
-                .setUserName(authOrganizeRegisterVO.getUsername())
-                .setPhone(authOrganizeRegisterVO.getPhone())
-                .setEmail(authOrganizeRegisterVO.getEmail())
-                .setInvite(authOrganizeRegisterVO.getInvite())
-                .setPassword(newPassword);
-        if (userDAO.createUser(newUserDO)) {
-            return ResultUtil.success(timestamp, "组织账户注册成功");
+            // 密码加密
+            String newPassword = ProcessingUtil.passwordEncrypt(authOrganizeRegisterVO.getPassword());
+            // 保存组织
+            UserDO newUserDO = new UserDO();
+            newUserDO
+                    .setUuid(ProcessingUtil.createUuid())
+                    .setRealName(authOrganizeRegisterVO.getOrganize())
+                    .setUserName(authOrganizeRegisterVO.getUsername())
+                    .setPhone(authOrganizeRegisterVO.getPhone())
+                    .setEmail(authOrganizeRegisterVO.getEmail())
+                    .setInvite(authOrganizeRegisterVO.getInvite())
+                    .setPermission("[]")
+                    .setPassword(newPassword);
+            if (userDAO.createUser(newUserDO)) {
+                return ResultUtil.success(timestamp, "组织账户注册成功");
+            } else {
+                return ResultUtil.error(timestamp, ErrorCode.SERVER_INTERNAL_ERROR);
+            }
         } else {
-            return ResultUtil.error(timestamp, ErrorCode.SERVER_INTERNAL_ERROR);
+            return ResultUtil.error(timestamp, ErrorCode.VERIFY_CODE_ERROR);
         }
     }
 
