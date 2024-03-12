@@ -17,8 +17,6 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface CheckAccountPermission {
-    // 用户角色（支持 "console, admin, organize"）
-
     // 所需要权限
     String[] value();
 }
