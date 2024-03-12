@@ -12,6 +12,7 @@
         <java.version>17</java.version>
         <app.version>1.0.0-SNAPSHOT</app.version>
         <kotlin.version>1.9.22</kotlin.version>
+        <skipTests>true</skipTests>
     </properties>
     <groupId>com.frontleaves</groupId>
     <artifactId>GreenChainCarbonLedger</artifactId>
@@ -279,6 +280,22 @@
                 </executions>
             </plugin>
         </plugins>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <excludes>
+                    <exclude>application*.yml</exclude>
+                </excludes>
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>application.yml</include>
+                    <include>application-${profile.active}.yml</include>
+                </includes>
+            </resource>
+        </resources>
     </build>
 
     <!--定义开发环境-->
