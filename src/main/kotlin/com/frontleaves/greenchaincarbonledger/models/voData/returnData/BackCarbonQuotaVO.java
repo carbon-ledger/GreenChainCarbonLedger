@@ -1,20 +1,19 @@
-package com.frontleaves.greenchaincarbonledger.models.doData;
+package com.frontleaves.greenchaincarbonledger.models.voData.returnData;
 
 import lombok.Data;
+import lombok.experimental.Accessors;
 
-import java.sql.Timestamp;
 import java.util.ArrayList;
 
 /**
- * 用于存放fy_carbon_quota的数据库放回的数据
+ * 用于存放返回获取自己组织碳排放配额的信息
  * <hr/>
- * 用于存放fy_carbon_quota的数据库放回的数据
+ * 用于存放返回获取自己组织碳排放配额的信息
  * @author FLASHLACK
- * @since 2024-03-13
+ * @since 2023-03-13
  */
-
 @Data
-public class CarbonQuotaDO {
+public class BackCarbonQuotaVO {
     public String uuid;
     public String organizeUuid;
     public Integer quotaYear;
