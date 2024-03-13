@@ -24,4 +24,6 @@ public class UserAddVO {
     public String phone;
     @Email(message = "邮箱格式不正确")
     public String email;
+    @Pattern(regexp = "^(console|admin|organize)$", message = "角色格式不正确【角色只能是console、admin、organize】")
+    public String role;
 }
