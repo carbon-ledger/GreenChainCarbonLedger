@@ -1,13 +1,16 @@
 package com.frontleaves.greenchaincarbonledger.config.filter
 
 import com.frontleaves.greenchaincarbonledger.annotations.KotlinSlf4j.Companion.log
+import com.frontleaves.greenchaincarbonledger.dao.AuthDAO
 import com.frontleaves.greenchaincarbonledger.utils.ErrorCode
+import com.frontleaves.greenchaincarbonledger.utils.ProcessingUtil
 import com.frontleaves.greenchaincarbonledger.utils.ResultUtil
 import com.frontleaves.greenchaincarbonledger.utils.security.JwtUtil
 import com.google.gson.Gson
 import jakarta.servlet.ServletRequest
 import jakarta.servlet.ServletResponse
 import jakarta.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletResponse
 import org.apache.shiro.web.filter.authc.BasicHttpAuthenticationFilter
 import org.springframework.stereotype.Component
 
@@ -22,24 +25,25 @@ import org.springframework.stereotype.Component
 @Component
 class JwtFilter(
     private val jwtUtil: JwtUtil,
+    private val authDAO: AuthDAO
 ) : BasicHttpAuthenticationFilter() {
     private val gson = Gson()
 
-    override fun onPreHandle(request: ServletRequest, response: ServletResponse, mappedValue: Any?): Boolean {
-        val req = request as HttpServletRequest
+    override fun onPreHandle(servletRequest: ServletRequest, servletResponse: ServletResponse, mappedValue: Any?): Boolean {
+        val request = servletRequest as HttpServletRequest
         log.debug("[Filter] 执行 JwtFilter 方法 | 处理登陆权限认证")
         // 获取请求头中的 token 及 uuid 进行验证
-        var token = getAuthzHeader(request)
-        val uuid = req.getHeader("X-Auth-UUID")
+        var token = getAuthzHeader(servletRequest)
+        val uuid = request.getHeader("X-Auth-UUID")
         log.debug("\tUUID: $uuid")
         // 从数据库获取uuid进行解密检查
         if (uuid != null && token != null) {
             token = token.replace("Bearer ", "")
             if (uuid.isNotBlank() && token.isNotBlank()) {
-                return this.isAccessAllowed(request, response, mappedValue)
+                return this.isAccessAllowed(servletRequest, servletResponse, mappedValue)
             }
         }
-        return this.onAccessDenied(request, response)
+        return this.onAccessDenied(servletRequest, servletResponse)
     }
 
     override fun isAccessAllowed(
@@ -47,6 +51,8 @@ class JwtFilter(
         servletResponse: ServletResponse,
         mappedValue: Any?
     ): Boolean {
+        val response = servletResponse as HttpServletResponse
+        response.contentType = "application/json;charset=UTF-8"
         val request = servletRequest as HttpServletRequest
         log.debug("\tOverride Function isAccessAllowed")
         val timestamp = System.currentTimeMillis()
@@ -55,30 +61,52 @@ class JwtFilter(
         val uuid = request.getHeader("X-Auth-UUID")
         // token 解密
         if (jwtUtil.verifyToken(uuid!!, token!!.replace("Bearer ", ""))) {
-            return true
+            var isExist = false
+            // 从缓存获取登陆信息
+            val getUserLoginList = authDAO.getAuthorize(ProcessingUtil.getAuthorizeUserUuid(request))
+            for (userLoginDO in getUserLoginList) {
+                val getAuthorizeToken = ProcessingUtil.getAuthorizeToken(request)
+                if (userLoginDO.token == getAuthorizeToken) {
+                    log.debug("\t\t> Token 验证成功")
+                    isExist = true
+                    break
+                }
+            }
+            return if (isExist) {
+                true
+            } else {
+                log.info("\t\t> Token 验证失败")
+                response.writer.println(gson.toJson(ResultUtil.error(timestamp, "用户登陆失效", ErrorCode.TOKEN_VERIFY_ERROR).body))
+                response.status = 401
+                false
+            }
         } else {
-            servletResponse.contentType = "application/json;charset=UTF-8"
-            servletResponse.writer.println(gson.toJson(ResultUtil.error(timestamp, ErrorCode.TOKEN_VERIFY_ERROR).body))
+            response.writer.println(gson.toJson(ResultUtil.error(timestamp, "用户登陆失效", ErrorCode.TOKEN_VERIFY_ERROR).body))
+            response.status = 401
             return false
         }
     }
 
     override fun onAccessDenied(servletRequest: ServletRequest, servletResponse: ServletResponse): Boolean {
+        val response = servletResponse as HttpServletResponse
         val timestamp = System.currentTimeMillis()
         log.debug("\tOverride Function onAccessDenied")
         // 获取请求头中的 token 及 uuid 进行验证
         val token = getAuthzHeader(servletRequest)
         val uuid = servletRequest.getParameter("X-Auth-UUID")
         // 检查缺失数据
-        servletResponse.contentType = "application/json;charset=UTF-8"
+        response.contentType = "application/json;charset=UTF-8"
         if (token.isNullOrEmpty()) {
             log.info("\t\t> token 为空或不存在")
-            servletResponse.writer.println(gson.toJson(ResultUtil.error(timestamp, ErrorCode.TOKEN_NOT_EXIST).body))
+            response.writer.println(gson.toJson(ResultUtil.error(timestamp, ErrorCode.TOKEN_NOT_EXIST).body))
+            response.status = 401
         } else if (uuid.isNullOrEmpty()) {
             log.info("\t\t> uuid 为空或不存在")
-            servletResponse.writer.println(gson.toJson(ResultUtil.error(timestamp, ErrorCode.UUID_NOT_EXIST).body))
+            response.writer.println(gson.toJson(ResultUtil.error(timestamp, ErrorCode.UUID_NOT_EXIST).body))
+            response.status = 401
         } else {
-            servletResponse.writer.println(gson.toJson(ResultUtil.error(timestamp, ErrorCode.SERVER_INTERNAL_ERROR).body))
+            response.writer.println(gson.toJson(ResultUtil.error(timestamp, ErrorCode.SERVER_INTERNAL_ERROR).body))
+            response.status = 500
         }
         return false
     }
