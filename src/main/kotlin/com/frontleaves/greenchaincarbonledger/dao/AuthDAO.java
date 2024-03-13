@@ -7,6 +7,7 @@ import com.frontleaves.greenchaincarbonledger.utils.redis.AuthorizeRedis;
 import com.google.gson.Gson;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -32,8 +33,7 @@ public class AuthDAO {
      * @author FLASHLACK
      * @since 2024-03-04
      */
-
-    public void saveAuthInfo(UserLoginDO userLoginDO) {
+    public void saveAuthInfo(@NotNull UserLoginDO userLoginDO) {
         log.info("[DAO] 执行用户登录信息状态存储");
         log.info("\t> Redis 读取");
         //首先判断是否有1，若没有1则进行存储，若有1则返回假不进行if里面内容

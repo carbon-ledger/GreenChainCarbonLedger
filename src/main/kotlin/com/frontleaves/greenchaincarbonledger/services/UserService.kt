@@ -17,11 +17,29 @@ import org.springframework.http.ResponseEntity
  * @author xiao_lfeng AND DC_DC AND FLASHLACK
  */
 interface UserService {
+
+    /**
+     * 获取当前用户角色
+     * @param timestamp 时间戳
+     * @param request 请求
+     * @return 角色列表
+     */
     fun getUserCurrent(
         timestamp: Long,
         request: HttpServletRequest
     ): ResponseEntity<BaseResponse>
 
+    /**
+     * 获取用户列表
+     * @param timestamp 时间戳
+     * @param request 请求
+     * @param type 类型
+     * @param search 搜索
+     * @param limit 限制
+     * @param page 页码
+     * @param order 排序
+     * @return 用户列表
+     */
     fun getUserList(
         timestamp: Long,
         request: HttpServletRequest,
