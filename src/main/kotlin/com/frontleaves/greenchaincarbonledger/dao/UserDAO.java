@@ -2,20 +2,16 @@ package com.frontleaves.greenchaincarbonledger.dao;
 
 import com.frontleaves.greenchaincarbonledger.common.BusinessConstants;
 import com.frontleaves.greenchaincarbonledger.common.constants.RedisExpiration;
-import com.frontleaves.greenchaincarbonledger.mappers.RoleMapper;
 import com.frontleaves.greenchaincarbonledger.mappers.UserMapper;
-import com.frontleaves.greenchaincarbonledger.models.doData.RoleDO;
 import com.frontleaves.greenchaincarbonledger.models.doData.UserDO;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.UserEditVO;
-import com.frontleaves.greenchaincarbonledger.utils.redis.RoleRedis;
-import com.frontleaves.greenchaincarbonledger.models.voData.getData.UserForceEditVO;
 import com.frontleaves.greenchaincarbonledger.utils.redis.UserRedis;
 import com.google.gson.Gson;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Repository;
 
-import javax.management.relation.Role;
 import java.util.List;
 
 /**
@@ -172,32 +168,66 @@ public class UserDAO {
      * @param getUserDO 用户
      * @return 注销操作成功返回ture，失败则返回false
      */
-    public boolean userAccountDeletion(UserDO getUserDO) {
+    public boolean userAccountDeletion(@NotNull UserDO getUserDO) {
         log.info("[DAO] 执行 deleteUserAccount 方法");
         log.info("\t> Mysql  软删除");
         return userMapper.userAccountDeletion(getUserDO.getUuid());
     }
 
-    public boolean userAccountDistanceDeletion(UserDO getUserDO) {
+    /**
+     * 数据库用户账号软删除
+     * </hr>
+     * 数据库用户账号注销
+     *
+     * @param getUserDO 用户
+     * @return 删除操作成功返回ture，失败则返回false
+     */
+    public boolean userAccountDistanceDeletion(@NotNull UserDO getUserDO) {
         log.info("[DAO] 执行 userAccountDistanceDeletion 方法");
         log.info("\t> Mysql 更新");
         return userMapper.userAccountDistanceDeletion(getUserDO.getUuid());
     }
 
+    /**
+     * 获取用户的邀请码
+     * <hr/>
+     * 获取用户的邀请码, 如果用户存在则返回邀请码, 否则返回null
+     *
+     * @param invite 邀请码
+     */
     public Boolean getUserByInvite(String invite) {
         log.info("[DAO] 执行 getUserByInvite 方法");
         log.info("\t> Mysql 读取");
         return userMapper.getUserByInvite(invite);
     }
 
+    /**
+     * 获取用户列表
+     * <hr/>
+     * 获取用户列表
+     *
+     * @param search 关键字查询
+     * @param limit  限制
+     * @param page   页数
+     * @param order  顺序
+     * @return 用户列表
+     */
     public List<UserDO> getUserFuzzy(String search, Integer limit, Integer page, String order) {
         log.info("[DAO] 执行 getUserFuzzy 方法");
         log.info("\t> Mysql 读取");
-
-
         return userMapper.getUserFuzzy(search, limit, page, order);
     }
 
+    /**
+     * 获取用户列表
+     * <hr/>
+     * 获取用户列表
+     *
+     * @param limit 限制
+     * @param page  页数
+     * @param order 顺序
+     * @return 用户列表
+     */
     public List<UserDO> getUserByUnbanlist(Integer limit, Integer page, String order) {
         log.info("[DAO] 执行 getUserByUnbanlist 方法");
         log.info("\t> Mysql 读取");
@@ -205,6 +235,16 @@ public class UserDAO {
         return userMapper.getUserByUnbanlist(limit, page, order);
     }
 
+    /**
+     * 获取用户列表
+     * <hr/>
+     * 获取用户列表
+     *
+     * @param limit 限制
+     * @param page  页数
+     * @param order 顺序
+     * @return 用户列表
+     */
     public List<UserDO> getUserByBanlist(Integer limit, Integer page, String order) {
         log.info("[DAO] 执行 getUserByBanlist 方法");
         log.info("\t> Mysql 读取");
@@ -212,18 +252,47 @@ public class UserDAO {
 
     }
 
+    /**
+     * 获取用户列表
+     * <hr/>
+     * 获取用户列表
+     *
+     * @param limit 限制
+     * @param page  页数
+     * @param order 顺序
+     * @return 用户列表
+     */
     public List<UserDO> getUserByAvailablelist(Integer limit, Integer page, String order) {
         log.info("[DAO] 执行 getUserByAvailablelist 方法");
         log.info("\t> Mysql 读取");
         return userMapper.getUserByAvailablelist(limit, page, order);
     }
 
+    /**
+     * 获取用户列表
+     * <hr/>
+     * 获取用户列表
+     *
+     * @param limit 限制
+     * @param page  页数
+     * @param order 顺序
+     * @return 用户列表
+     */
     public List<UserDO> getUserByAlllist(Integer limit, Integer page, String order) {
         log.info("[DAO] 执行 getUserByAlllist 方法");
         log.info("\t> Mysql 读取");
         return userMapper.getUserByAlllist(limit, page, order);
     }
 
+    /**
+     * 更新用户信息
+     * <hr/>
+     * 更新用户信息
+     *
+     * @param getAuthorizeUserUuid 用户UUID
+     * @param userEditVO           用户编辑信息
+     * @return 更新操作是否成功，成功返回 true，失败返回 false
+     */
     public boolean updateUserByUuid(String getAuthorizeUserUuid, UserEditVO userEditVO) {
         log.info("[DAO] 执行 updateUserByUuid 方法");
         log.info("\t> Mysql 更新");
@@ -234,23 +303,38 @@ public class UserDAO {
      * 通过search在user表中查询出role的链表
      * <hr/>
      * 通过search在user表中查询出role的链表
+     *
      * @param search 关键字查询
-     * @param limit 限制
-     * @param page 页数
-     * @param order 顺序
+     * @param limit  限制
+     * @param page   页数
+     * @param order  顺序
      * @return role链表
      */
-    public List<String> getRoleByAllList(String search,Integer limit,Integer page,String order) {
+    public List<String> getRoleByAllList(String search, Integer limit, Integer page, String order) {
         log.info("[DAO] 执行 getRoleByAllList 方法");
         log.info("\t> Mysql 读取");
-        return userMapper.getRoleByAllList(search,limit,page,order);
+        return userMapper.getRoleByAllList(search, limit, page, order);
     }
 
-    public boolean updateUserForceByUuid(String userUuid,String userName,String nickName,String realName,String avatar,String email,String phone){
+    /**
+     * 更新用户信息
+     * <hr/>
+     * 更新用户信息, 如果用户信息更新成功返回ture,失败则返回false
+     *
+     * @param userUuid 用户UUID
+     * @param userName 用户名
+     * @param nickName 昵称
+     * @param realName 真实姓名
+     * @param avatar   头像
+     * @param email    邮箱
+     * @param phone    手机号
+     * @return 返回更新的结果
+     */
+    public boolean updateUserForceByUuid(String userUuid, String userName, String nickName, String realName, String avatar, String email, String phone) {
         log.info("[Dao] 执行 updateUserForceByUuid 方法");
         log.info("\t> Redis 删除 ");
         userRedis.delData(BusinessConstants.NONE, userUuid);
         log.info("\t> Mysql 更新");
-        return userMapper.updateUserForceByUuid(userUuid,userName,nickName,realName,avatar,email,phone);
+        return userMapper.updateUserForceByUuid(userUuid, userName, nickName, realName, avatar, email, phone);
     }
 }
