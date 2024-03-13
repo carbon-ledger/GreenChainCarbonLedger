@@ -11,12 +11,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 /**
- * @author 26473
+ * @author FLASHLACK
  */
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class CarbonServiceImpl implements CarbonService {
+
     @NotNull
     @Override
     public ResponseEntity<BaseResponse> getOwnCarbonQuota(long timestamp, @NotNull HttpServletRequest request, @Nullable Integer start, @Nullable Integer end) {
