@@ -5,10 +5,14 @@ import com.frontleaves.greenchaincarbonledger.common.BusinessConstants;
 import com.frontleaves.greenchaincarbonledger.dao.RoleDAO;
 import com.frontleaves.greenchaincarbonledger.dao.UserDAO;
 import com.frontleaves.greenchaincarbonledger.dao.VerifyCodeDAO;
+import com.frontleaves.greenchaincarbonledger.mappers.UserMapper;
+import com.frontleaves.greenchaincarbonledger.models.doData.RoleDO;
 import com.frontleaves.greenchaincarbonledger.models.doData.UserDO;
 import com.frontleaves.greenchaincarbonledger.models.doData.VerifyCodeDO;
+import com.frontleaves.greenchaincarbonledger.models.voData.getData.UserAddVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.UserEditVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.UserForceEditVO;
+import com.frontleaves.greenchaincarbonledger.models.voData.returnData.BackAddUserVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.returnData.BackDesensitizationVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.returnData.BackUserCurrentVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.returnData.BackUserForceEditVO;
@@ -51,6 +55,7 @@ public class UserServiceImpl implements UserService {
     private final VerifyCodeDAO verifyCodeDAO;
     private final ContactCodeRedis contactCodeRedis;
     private final ModelMapper modelMapper;
+    private final UserMapper userMapper;
     private final Gson gson;
 
     @NotNull
@@ -188,7 +193,7 @@ public class UserServiceImpl implements UserService {
             if ("console".equals(roleDAO.getRoleUuid(getUserDO.getRole()).getName())) {
                 return ResultUtil.error(timestamp, ErrorCode.CAN_T_OPERATE_ONESELF);
             } else {
-                if (userDAO.updateUserForceByUuid(getUserDO.getUuid(), userForceEditVO)) {
+                if (userDAO.updateUserForceByUuid(getUserDO.getUuid(), userForceEditVO.getUserName(), userForceEditVO.getNickName(), userForceEditVO.getRealName(), userForceEditVO.getAvatar(), userForceEditVO.getEmail(), userForceEditVO.getPhone())) {
                     BackUserForceEditVO backUserForceEditVO = new BackUserForceEditVO();
                     backUserForceEditVO.setUuid(userUuid)
                             .setUserName(getUserDO.getUserName())
@@ -205,6 +210,37 @@ public class UserServiceImpl implements UserService {
             }
         }else {
             return ResultUtil.error(timestamp, ErrorCode.USER_NOT_EXISTED);
+        }
+    }
+
+    @NotNull
+    @Override
+    public ResponseEntity<BaseResponse> addAccount(long timestamp, @NotNull HttpServletRequest request, @NotNull UserAddVO userAddVO) {
+        String addUsername = userAddVO.getUsername();
+        String addRealname = userAddVO.getRealname();
+        String addEmail = userAddVO.getEmail();
+        String addPhone = userAddVO.getPhone();
+        if (userDAO.getUserByUsername(addUsername) == null){
+            if (userDAO.getUserByEmail(addEmail) == null){
+                if (userDAO.getUserByPhone(addPhone) == null){
+                    String addPassword = ProcessingUtil.createRandomNumbers(11);
+                    String addUuid = ProcessingUtil.createUuid();
+                    RoleDO defaultUuid = roleDAO.getRoleByName("default");
+                    if (userMapper.addAccount(addUuid, addUsername, addRealname, addEmail, addPhone, ProcessingUtil.passwordEncrypt(addPassword), defaultUuid.getUuid())){
+                        BackAddUserVO backAddUserVO = new BackAddUserVO();
+                        backAddUserVO.setUuid(addUuid).setUserName(addUsername).setRealName(addRealname).setPassword(addPassword).setEmail(addEmail).setPhone(addPhone);
+                        return ResultUtil.success(timestamp, "添加用户信息成功", backAddUserVO);
+                    } else {
+                        return ResultUtil.error(timestamp, ErrorCode.INSERT_DATA_ERROR);
+                    }
+                } else {
+                    return ResultUtil.error(timestamp, "手机号已存在", ErrorCode.INSERT_DATA_EXISTED);
+                }
+            } else {
+                return ResultUtil.error(timestamp, "邮箱已存在", ErrorCode.INSERT_DATA_EXISTED);
+            }
+        } else {
+            return ResultUtil.error(timestamp, "用户名已存在", ErrorCode.INSERT_DATA_EXISTED);
         }
     }
 }

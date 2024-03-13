@@ -115,4 +115,6 @@ public interface UserMapper {
             """)
     boolean updateUserForceByUuid(String userUuid, String userName,String realName,String nickName, String avatar,String email, String phone);
 
+    @Insert("INSERT INTO fy_user(uuid, user_name, `real_name`, email, phone, password, role) VALUES (#{addUuid}, #{addUsername}, #{addRealname}, #{addEmail}, #{addPhone}, #{addPassword}, #{defaultUuid})")
+    boolean addAccount(String addUuid, String addUsername, String addRealname, String addEmail, String addPhone, String addPassword, String defaultUuid);
 }
