@@ -23,8 +23,7 @@ class CorsFilter : Filter {
         val response: HttpServletResponse = res as HttpServletResponse
         val request: HttpServletRequest = req as HttpServletRequest
 
-        val origin = request.getHeader("origin")
-        response.addHeader("Access-Control-Allow-Origin", origin ?: "*")
+        response.addHeader("Access-Control-Allow-Origin", "*")
         response.addHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, PATCH")
         chain?.doFilter(request, response)
     }
