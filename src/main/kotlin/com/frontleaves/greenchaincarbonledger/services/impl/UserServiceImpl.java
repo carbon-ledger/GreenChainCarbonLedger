@@ -58,8 +58,7 @@ public class UserServiceImpl implements UserService {
     public ResponseEntity<BaseResponse> getUserCurrent(long timestamp, @NotNull HttpServletRequest request) {
         log.info("[Service] 执行 getUserCurrent 方法");
         //用缓存的UUID与数据库UUID进行校对
-        String getUuid = request.getHeader("X-Auth-UUID");
-        UserDO getUserDO = userDAO.getUserByUuid(getUuid);
+        UserDO getUserDO = userDAO.getUserByUuid(ProcessingUtil.getAuthorizeUserUuid(request));
         //获取自己的账号详细信息（姓名，联系方式，电子邮件等）
         if (getUserDO != null) {
             ArrayList<String> getPermissionList = gson.fromJson(getUserDO.getPermission(), new TypeToken<ArrayList<String>>() {

@@ -10,6 +10,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Repository;
 
+import java.util.ArrayList;
+
 /**
  * 用于存放控制器层面的持久性数据
  * <hr/>
@@ -67,6 +69,8 @@ public class AuthDAO {
 
     }
 
+
+
     /**
      * 删除用户缓存
      * <hr/>
@@ -111,6 +115,18 @@ public class AuthDAO {
                 authorizeRedis.delData(BusinessConstants.THREE, getUuid);
             }
         }
+    }
+
+    public ArrayList<UserLoginDO> getAuthorize(String authorizeUserUuid) {
+        // Redis 读取数据
+        String getRedisData = authorizeRedis.getData(BusinessConstants.ONE, authorizeUserUuid);
+        ArrayList<UserLoginDO> getUserLoginList = new ArrayList<>();
+        getUserLoginList.add(gson.fromJson(getRedisData, UserLoginDO.class));
+        getRedisData = authorizeRedis.getData(BusinessConstants.TWO, authorizeUserUuid);
+        getUserLoginList.add(gson.fromJson(getRedisData, UserLoginDO.class));
+        getRedisData = authorizeRedis.getData(BusinessConstants.THREE, authorizeUserUuid);
+        getUserLoginList.add(gson.fromJson(getRedisData, UserLoginDO.class));
+        return getUserLoginList;
     }
 }
 

@@ -44,6 +44,7 @@ public enum ErrorCode {
     ORGANIZE_NOT_EXISTED("OrganizeRegisterFailed", 40399, "账户注册失败"),
     INVITE_CODE_ERROR("VerifyCodeError", 40398, "邀请码错误"),
     INSERT_DATA_ERROR("InsertDataError", 40395, "插入数据失败"),
+    NO_LOGIN("NoLogin", 40110, "未登录"),
     UPDATE_DATA_ERROR("UpdateDataError", 40394, "更新数据失败");
 
     final String output;
