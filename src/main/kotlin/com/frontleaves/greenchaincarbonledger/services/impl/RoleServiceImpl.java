@@ -53,6 +53,7 @@ public class RoleServiceImpl implements RoleService {
     @NotNull
     @Override
     public ResponseEntity<BaseResponse> addRole(long timestamp, @NotNull HttpServletRequest request, @NotNull RoleVO roleVO) {
+        log.info("[Service] 执行 addRole 方法");
         //用缓存的UUID与数据库UUID进行校对
         String getUuid = request.getHeader("X-Auth-UUID");
         UserDO getUserDO = userDAO.getUserByUuid(getUuid);
@@ -86,6 +87,7 @@ public class RoleServiceImpl implements RoleService {
     @NotNull
     @Override
     public ResponseEntity<BaseResponse> getUserCurrent(long timestamp, @NotNull HttpServletRequest request) {
+        log.info("[Service] 执行 getUserCurrent 方法");
         //用缓存的UUID与数据库UUID进行校对
         String getUuid = request.getHeader("X-Auth-UUID");
         UserDO getUserDO = userDAO.getUserByUuid(getUuid);
@@ -117,6 +119,7 @@ public class RoleServiceImpl implements RoleService {
     @NotNull
     @Override
     public ResponseEntity<BaseResponse> editRole(long timestamp, @NotNull HttpServletRequest request, @NotNull RoleVO roleVO, @NotNull String roleUuid) {
+        log.info("[Service] 执行 editRole 方法");
         //用缓存的UUID与数据库UUID进行校对
         String getUuid = request.getHeader("X-Auth-UUID");
         UserDO getUserDO = userDAO.getUserByUuid(getUuid);
@@ -152,7 +155,7 @@ public class RoleServiceImpl implements RoleService {
     @Override
     //TODO:管理员权限注解
     public ResponseEntity<BaseResponse> getRoleList(long timestamp, @NotNull HttpServletRequest request, @NotNull String type, String search, Integer limit, Integer page, String order) {
-        log.info("[Service] 执行getRoleList");
+        log.info("[Service] 执行 getRoleList 方法");
         // 检查参数，如果未设置（即为null），则使用默认值
         limit = (limit == null || limit > 100) ? 20 : limit;
         page = (page == null) ? 1 : page;
@@ -226,6 +229,7 @@ public class RoleServiceImpl implements RoleService {
     @NotNull
     @Override
     public ResponseEntity<BaseResponse> deleteRole(long timestamp, @NotNull HttpServletRequest request, @NotNull String roleUuid) {
+        log.info("[Service] 执行 deleteRole 方法");
         //用缓存的UUID与数据库UUID进行校对
         RoleDO roleDO = roleDAO.getRoleUuid(roleUuid);
         ArrayList<String> arrayList = new ArrayList<>(List.of("default", "organize", "admin", "console"));

@@ -24,49 +24,62 @@ class TimestampFilter : Filter {
     private val gson = Gson()
 
     override fun doFilter(req: ServletRequest, res: ServletResponse, chain: FilterChain?) {
+        // 获取请求类型
+        val request = req as HttpServletRequest
         val response = res as HttpServletResponse
         val timestamp = System.currentTimeMillis()
-        log.info("[Filter] 执行 TimestampFilter 方法 | 时间戳时间检查")
-        val getTimestamp = (req as HttpServletRequest).getHeaders("X-Timestamp")
-        response.contentType = "application/json;charset=UTF-8"
-        if (getTimestamp != null) {
-            if (getTimestamp.hasMoreElements()) {
-                val time = getTimestamp.nextElement()
-                if (time.isNotBlank()) {// 误差在正负2秒内
-                    log.debug("\t> 时间戳: {} | 当前时间: {}", time, System.currentTimeMillis())
-                    if (System.currentTimeMillis() - time.toLong() < 2000 || time.toLong() - System.currentTimeMillis() > 2000) {
-                        log.info("\t> 时间戳检查通过")
-                        chain?.doFilter(req, res)
-                        return
-                    } else {
-                        log.info("\t> 时间戳检查未通过")
-                        response.also {
-                            it.status = 400
-                            it.writer.write(
-                                gson.toJson(
-                                    ResultUtil.error(
-                                        timestamp,
-                                        ErrorCode.TIMESTAMP_INVALID
-                                    ).body
+        if (!request.method.equals("OPTIONS")) {
+            log.info("[Filter] 执行 TimestampFilter 方法 | 时间戳时间检查")
+            val getTimestamp = req.getHeaders("X-Timestamp")
+            response.contentType = "application/json;charset=UTF-8"
+            if (getTimestamp != null) {
+                if (getTimestamp.hasMoreElements()) {
+                    val time = getTimestamp.nextElement()
+                    if (time.isNotBlank()) {// 误差在正负2秒内
+                        log.debug("\t> 时间戳: {} | 当前时间: {}", time, System.currentTimeMillis())
+                        if (System.currentTimeMillis() - time.toLong() < 2000 || time.toLong() - System.currentTimeMillis() > 2000) {
+                            log.info("\t> 时间戳检查通过")
+                            chain?.doFilter(req, res)
+                            return
+                        } else {
+                            log.info("\t> 时间戳检查未通过")
+                            response.also {
+                                it.status = 400
+                                it.writer.write(
+                                    gson.toJson(
+                                        ResultUtil.error(
+                                            timestamp,
+                                            ErrorCode.TIMESTAMP_INVALID
+                                        ).body
+                                    )
                                 )
-                            )
+                            }
+                            return
                         }
-                        return
                     }
                 }
             }
-        }
-        log.warn("\t> 未检测到时间戳")
-        res.also {
-            it.status = 400
-            it.writer.write(
-                gson.toJson(
-                    ResultUtil.error(
-                        timestamp,
-                        ErrorCode.TIMESTAMP_NOT_EXIST
-                    ).body
+            log.warn("\t> 未检测到时间戳")
+            response.also {
+                it.status = 400
+                it.writer.write(
+                    gson.toJson(
+                        ResultUtil.error(
+                            timestamp,
+                            ErrorCode.TIMESTAMP_NOT_EXIST
+                        ).body
+                    )
                 )
-            )
+            }
+        } else {
+            response.also {
+                it.status = 200
+                it.writer.write(
+                    gson.toJson(
+                        ResultUtil.success(timestamp).body
+                    )
+                )
+            }
         }
     }
 }
