@@ -10,16 +10,16 @@ import org.jetbrains.annotations.Nullable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+/**
+ * @author 26473
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class CarbonServiceimpl implements CarbonService {
-
+public class CarbonServiceImpl implements CarbonService {
     @NotNull
     @Override
     public ResponseEntity<BaseResponse> getOwnCarbonQuota(long timestamp, @NotNull HttpServletRequest request, @Nullable Integer start, @Nullable Integer end) {
-        log.info("[Service]执行  getOwnCarbonQuota操作");
-        //先将此UUID进行数据库校验
         return null;
     }
 }

@@ -1,5 +1,6 @@
 package com.frontleaves.greenchaincarbonledger.controllers;
 
+import com.frontleaves.greenchaincarbonledger.annotations.CheckAccountPermission;
 import com.frontleaves.greenchaincarbonledger.services.CarbonService;
 import com.frontleaves.greenchaincarbonledger.utils.BaseResponse;
 import com.frontleaves.greenchaincarbonledger.utils.ErrorCode;
@@ -37,6 +38,7 @@ public class CarbonController {
      * @return
      */
     @GetMapping("/quota/get")
+    @CheckAccountPermission({"Carbon: gteOwnCarbonQuota"})
     public ResponseEntity<BaseResponse> getOwnCarbonQuota (
             @RequestParam(required = false)Integer start,
             @RequestParam(required = false)Integer end,
