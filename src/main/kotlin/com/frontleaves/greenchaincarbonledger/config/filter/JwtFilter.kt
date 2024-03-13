@@ -31,13 +31,13 @@ class JwtFilter(
 
     override fun onPreHandle(servletRequest: ServletRequest, servletResponse: ServletResponse, mappedValue: Any?): Boolean {
         val request = servletRequest as HttpServletRequest
-        log.debug("[Filter] 执行 JwtFilter 方法 | 处理登陆权限认证")
+        log.info("[Filter] 执行 JwtFilter 方法 | 处理登陆权限认证")
         // 获取请求头中的 token 及 uuid 进行验证
         var token = getAuthzHeader(servletRequest)
         val uuid = request.getHeader("X-Auth-UUID")
         log.debug("\tUUID: $uuid")
         // 从数据库获取uuid进行解密检查
-        if (uuid != null && token != null) {
+        if (uuid != null) {
             token = token.replace("Bearer ", "")
             if (uuid.isNotBlank() && token.isNotBlank()) {
                 return this.isAccessAllowed(servletRequest, servletResponse, mappedValue)
@@ -60,16 +60,25 @@ class JwtFilter(
         val token = getAuthzHeader(servletRequest)
         val uuid = request.getHeader("X-Auth-UUID")
         // token 解密
-        if (jwtUtil.verifyToken(uuid!!, token!!.replace("Bearer ", ""))) {
+        if (jwtUtil.verifyToken(uuid!!, token.replace("Bearer ", ""))) {
             var isExist = false
             // 从缓存获取登陆信息
             val getUserLoginList = authDAO.getAuthorize(ProcessingUtil.getAuthorizeUserUuid(request))
             for (userLoginDO in getUserLoginList) {
-                val getAuthorizeToken = ProcessingUtil.getAuthorizeToken(request)
-                if (userLoginDO.token == getAuthorizeToken) {
-                    log.debug("\t\t> Token 验证成功")
-                    isExist = true
-                    break
+                if (userLoginDO != null) {
+                    val getAuthorizeToken = ProcessingUtil.getAuthorizeToken(request)
+                    if (userLoginDO.token == getAuthorizeToken) {
+                        // 检查Ip与UserAgent
+                        if (userLoginDO.userIp.equals(request.remoteAddr, ignoreCase = true)
+                            && userLoginDO.userAgent.equals(request.getHeader("User-Agent"), ignoreCase = true)
+                        ) {
+                            log.info("\t\t> Token 验证成功")
+                            isExist = true
+                            break
+                        } else {
+                            log.info("\t\t> UserAgent 或 IP 不匹配")
+                        }
+                    }
                 }
             }
             return if (isExist) {
@@ -96,7 +105,7 @@ class JwtFilter(
         val uuid = servletRequest.getParameter("X-Auth-UUID")
         // 检查缺失数据
         response.contentType = "application/json;charset=UTF-8"
-        if (token.isNullOrEmpty()) {
+        if (token.isEmpty()) {
             log.info("\t\t> token 为空或不存在")
             response.writer.println(gson.toJson(ResultUtil.error(timestamp, ErrorCode.TOKEN_NOT_EXIST).body))
             response.status = 401
@@ -111,8 +120,8 @@ class JwtFilter(
         return false
     }
 
-    override fun getAuthzHeader(request: ServletRequest?): String? {
+    override fun getAuthzHeader(request: ServletRequest?): String {
         val httpRequest: HttpServletRequest = request as HttpServletRequest
-        return httpRequest.getHeader("Authorization")
+        return httpRequest.getHeader("Authorization").replace("Bearer ", "")
     }
 }

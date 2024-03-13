@@ -36,21 +36,21 @@ public class RoleDAO {
      * <hr/>
      * 根据uuid获取角色信息, 用于获取角色信息
      *
-     * @param uuid 角色uuid
+     * @param roleUuid 角色uuid
      * @return 角色信息
      */
-    public RoleDO getRoleUuid(@NotNull String uuid) {
+    public RoleDO getRoleUuid(@NotNull String roleUuid) {
         log.info("[DAO] 执行 getRoleUuid 方法");
         log.info("\t> Redis 读取");
-        String getRedisRoleDO = roleRedis.getData(BusinessConstants.ALL, uuid);
+        String getRedisRoleDO = roleRedis.getData(BusinessConstants.NONE, roleUuid);
         RoleDO getRoleDO;
         if (getRedisRoleDO != null && !getRedisRoleDO.isEmpty()) {
             getRoleDO = gson.fromJson(getRedisRoleDO, RoleDO.class);
         } else {
             log.info("\t> Mysql 读取");
-            getRoleDO = roleMapper.getRoleByUuid(uuid);
+            getRoleDO = roleMapper.getRoleByUuid(roleUuid);
             log.info("\t> Redis 写入");
-            roleRedis.setData(BusinessConstants.ALL, uuid, gson.toJson(getRoleDO), RedisExpiration.DAY);
+            roleRedis.setData(BusinessConstants.NONE, roleUuid, gson.toJson(getRoleDO), RedisExpiration.DAY);
         }
         return getRoleDO;
     }

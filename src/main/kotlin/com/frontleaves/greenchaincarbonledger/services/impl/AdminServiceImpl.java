@@ -40,7 +40,6 @@ public class AdminServiceImpl implements AdminService {
         // 重置用户密码
         UserDO getUserDO = userDAO.getUserByUuid(adminUserChangeVO.getUuid());
         if (getUserDO != null) {
-            log.debug("\t> 用户信息: {}", getUserDO.userName);
             // 检查修改UUID是否为自己
             if (getUserDO.getUuid().equals(ProcessingUtil.getAuthorizeUserUuid(request))) {
                 return ResultUtil.error(timestamp, ErrorCode.CAN_T_RESET_MY_PASSWORD);
