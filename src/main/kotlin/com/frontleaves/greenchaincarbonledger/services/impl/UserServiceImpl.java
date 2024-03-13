@@ -218,6 +218,7 @@ public class UserServiceImpl implements UserService {
     @NotNull
     @Override
     public ResponseEntity<BaseResponse> addAccount(long timestamp, @NotNull HttpServletRequest request, @NotNull UserAddVO userAddVO) {
+        log.info("[Service] 执行 addAccount 方法");
         String addUsername = userAddVO.getUsername();
         String addRealname = userAddVO.getRealname();
         String addEmail = userAddVO.getEmail();
@@ -227,7 +228,10 @@ public class UserServiceImpl implements UserService {
                 if (userDAO.getUserByPhone(addPhone) == null){
                     String addPassword = ProcessingUtil.createRandomNumbers(11);
                     String addUuid = ProcessingUtil.createUuid();
-                    RoleDO defaultUuid = roleDAO.getRoleByName("default");
+                    if (userAddVO.role == null){
+                        userAddVO.role = "default";
+                    }
+                    RoleDO defaultUuid = roleDAO.getRoleByName(userAddVO.role);
                     if (userMapper.addAccount(addUuid, addUsername, addRealname, addEmail, addPhone, ProcessingUtil.passwordEncrypt(addPassword), defaultUuid.getUuid())){
                         BackAddUserVO backAddUserVO = new BackAddUserVO();
                         backAddUserVO.setUuid(addUuid).setUserName(addUsername).setRealName(addRealname).setPassword(addPassword).setEmail(addEmail).setPhone(addPhone);
