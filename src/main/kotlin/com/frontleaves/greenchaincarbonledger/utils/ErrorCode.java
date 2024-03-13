@@ -46,6 +46,7 @@ public enum ErrorCode {
     INSERT_DATA_ERROR("InsertDataError", 40395, "插入数据失败"),
     UPDATE_DATA_ERROR("UpdateDataError", 40394, "更新数据失败");
 
+
     final String output;
     final Integer code;
     final String message;

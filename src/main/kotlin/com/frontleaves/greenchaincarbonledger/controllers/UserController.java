@@ -135,11 +135,11 @@ public class UserController {
     @DeleteMapping("/force-logout/{uuid}")
     public ResponseEntity<BaseResponse> forceLogout(
             HttpServletRequest request,
-            @PathVariable("uuid") String roleUuid) {
+            @PathVariable("uuid") String userUuid) {
         request.getHeader("X-Auth-UUID");
         log.info("[Controller] 请求userService接口");
         long timestamp = System.currentTimeMillis();
-        return userService.forceLogout(timestamp, request, roleUuid);
+        return userService.forceLogout(timestamp, request, userUuid);
     }
 
     /**
