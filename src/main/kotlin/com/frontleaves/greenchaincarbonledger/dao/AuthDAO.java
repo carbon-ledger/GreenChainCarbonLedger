@@ -16,9 +16,9 @@ import java.util.ArrayList;
  * 用于存放控制器层面的持久性数据
  * <hr/>
  * 用于存放控制器层面的持久性数据
+ *
  * @author FLASHLACK
  * @since 2024-03-04
- *
  */
 @Slf4j
 @Repository
@@ -36,39 +36,36 @@ public class AuthDAO {
      * @since 2024-03-04
      */
     public void saveAuthInfo(@NotNull UserLoginDO userLoginDO) {
-        log.info("[DAO] 执行用户登录信息状态存储");
+        log.info("[DAO] 执行 saveAuthInfo 方法");
         log.info("\t> Redis 读取");
-        //首先判断是否有1，若没有1则进行存储，若有1则返回假不进行if里面内容
-        if (authorizeRedis.getData(BusinessConstants.ONE, userLoginDO.getUuid()) == null) {
-            log.info("\t Redis 存储");
-            authorizeRedis.setData(BusinessConstants.ONE, userLoginDO.getUuid(), gson.toJson(userLoginDO), RedisExpiration.DAY);
-        } else if (authorizeRedis.getData(BusinessConstants.TWO, userLoginDO.getUuid()) == null) {
-            log.info("\t Redis 存储");
-            authorizeRedis.setData(BusinessConstants.TWO, userLoginDO.getUuid(), gson.toJson(userLoginDO), RedisExpiration.DAY);
-        } else if (authorizeRedis.getData(BusinessConstants.THREE, userLoginDO.getUuid()) == null) {
-            log.info("\t Redis 存储");
-            authorizeRedis.setData(BusinessConstants.THREE, userLoginDO.getUuid(), gson.toJson(userLoginDO), RedisExpiration.DAY);
-        } else {
-            // 现在3个设备同时在线，我需要进行时间判断，找到时间最小的序号
-            long t1 = authorizeRedis.getExpiredAt(BusinessConstants.ONE, userLoginDO.getUuid());
-            long t2 = authorizeRedis.getExpiredAt(BusinessConstants.TWO, userLoginDO.getUuid());
-            long t3 = authorizeRedis.getExpiredAt(BusinessConstants.THREE, userLoginDO.getUuid());
-            if (t1 < t2 && t1 < t3) {
-                log.info("\t Redis 存储");
-                authorizeRedis.setData(BusinessConstants.ONE, userLoginDO.getUuid(), gson.toJson(userLoginDO), RedisExpiration.DAY);
-            }
-            if (t2 < t1 && t2 < t3) {
-                log.info("\t Redis 存储");
-                authorizeRedis.setData(BusinessConstants.TWO, userLoginDO.getUuid(), gson.toJson(userLoginDO), RedisExpiration.DAY);
-            }
-            if (t3 < t1 && t3 < t2) {
-                log.info("\t Redis 存储");
-                authorizeRedis.setData(BusinessConstants.THREE, userLoginDO.getUuid(), gson.toJson(userLoginDO), RedisExpiration.DAY);
+        BusinessConstants[] devices = {BusinessConstants.ONE, BusinessConstants.TWO, BusinessConstants.THREE};
+        long minTime = Long.MAX_VALUE;
+        BusinessConstants deviceToSet = BusinessConstants.ONE;
+        boolean isSet = false;
+
+        // 首先尝试找到一个空闲的设备
+        for (BusinessConstants device : devices) {
+            if (authorizeRedis.getData(device, userLoginDO.getUuid()) == null) {
+                log.info("\t> Redis 存储");
+                authorizeRedis.setData(device, userLoginDO.getUuid(), gson.toJson(userLoginDO), RedisExpiration.HOUR);
+                isSet = true;
+                break; // 找到空闲设备，跳出循环
             }
         }
 
+        // 如果没有空闲设备，找到最近过期的设备
+        if (!isSet) {
+            for (BusinessConstants device : devices) {
+                long expiredAt = authorizeRedis.getExpiredAt(device, userLoginDO.getUuid());
+                if (expiredAt < minTime) {
+                    minTime = expiredAt;
+                    deviceToSet = device;
+                }
+                log.info("\t> Redis 存储");
+                authorizeRedis.setData(deviceToSet, userLoginDO.getUuid(), gson.toJson(userLoginDO), RedisExpiration.HOUR);
+            }
+        }
     }
-
 
 
     /**
@@ -80,8 +77,8 @@ public class AuthDAO {
      * @since 2024-03-04
      */
     public void userLogout(String getUuid, String getToken) {
-        log.info("[DAO] 执行用户缓存删除");
-        log.info("\t Redis 读取");
+        log.info("[DAO] 执行 userLogout 方法");
+        log.info("\t> Redis 读取");
         // 先去服务器读取出 1，2，3 的 Redis
         String userRedisOne = authorizeRedis.getData(BusinessConstants.ONE, getUuid);
         String userRedisTwo = authorizeRedis.getData(BusinessConstants.TWO, getUuid);
@@ -93,7 +90,7 @@ public class AuthDAO {
             UserLoginDO userRedisDO = gson.fromJson(userRedisOne, UserLoginDO.class);
             // 再对用户本地缓存是否和服务器中缓存进行对比
             if (userRedisDO.getToken().equals(getToken)) {
-                log.info("\t Redis 删除");
+                log.info("\t> Redis 删除");
                 authorizeRedis.delData(BusinessConstants.ONE, getUuid);
             }
         }
@@ -102,7 +99,7 @@ public class AuthDAO {
         if (userRedisTwo != null) {
             UserLoginDO userRedisDO = gson.fromJson(userRedisTwo, UserLoginDO.class);
             if (userRedisDO.getToken().equals(getToken)) {
-                log.info("\t Redis 删除");
+                log.info("\t> Redis 删除");
                 authorizeRedis.delData(BusinessConstants.TWO, getUuid);
             }
         }
@@ -117,15 +114,22 @@ public class AuthDAO {
         }
     }
 
+    /**
+     * 获取用户授权信息
+     * <hr/>
+     * 获取用户授权信息
+     *
+     * @param authorizeUserUuid 用户UUID
+     * @return {@link ArrayList<UserLoginDO>}
+     */
     public ArrayList<UserLoginDO> getAuthorize(String authorizeUserUuid) {
+        log.info("[DAO] 执行 getAuthorize 方法");
         // Redis 读取数据
-        String getRedisData = authorizeRedis.getData(BusinessConstants.ONE, authorizeUserUuid);
+        log.info("\t> Redis 读取");
         ArrayList<UserLoginDO> getUserLoginList = new ArrayList<>();
-        getUserLoginList.add(gson.fromJson(getRedisData, UserLoginDO.class));
-        getRedisData = authorizeRedis.getData(BusinessConstants.TWO, authorizeUserUuid);
-        getUserLoginList.add(gson.fromJson(getRedisData, UserLoginDO.class));
-        getRedisData = authorizeRedis.getData(BusinessConstants.THREE, authorizeUserUuid);
-        getUserLoginList.add(gson.fromJson(getRedisData, UserLoginDO.class));
+        getUserLoginList.add(gson.fromJson(authorizeRedis.getData(BusinessConstants.ONE, authorizeUserUuid), UserLoginDO.class));
+        getUserLoginList.add(gson.fromJson(authorizeRedis.getData(BusinessConstants.TWO, authorizeUserUuid), UserLoginDO.class));
+        getUserLoginList.add(gson.fromJson(authorizeRedis.getData(BusinessConstants.THREE, authorizeUserUuid), UserLoginDO.class));
         return getUserLoginList;
     }
 }

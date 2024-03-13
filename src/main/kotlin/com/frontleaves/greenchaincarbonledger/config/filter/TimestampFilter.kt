@@ -40,11 +40,9 @@ class TimestampFilter : Filter {
                         if (System.currentTimeMillis() - time.toLong() < 2000 || time.toLong() - System.currentTimeMillis() > 2000) {
                             log.info("\t> 时间戳检查通过")
                             chain?.doFilter(req, res)
-                            return
                         } else {
                             log.info("\t> 时间戳检查未通过")
                             response.also {
-                                it.status = 400
                                 it.writer.write(
                                     gson.toJson(
                                         ResultUtil.error(
@@ -53,9 +51,10 @@ class TimestampFilter : Filter {
                                         ).body
                                     )
                                 )
+                                it.status = 400
                             }
-                            return
                         }
+                        return
                     }
                 }
             }
@@ -72,6 +71,7 @@ class TimestampFilter : Filter {
                 )
             }
         } else {
+            log.info("[OPTION] 预执行请求，不进行时间戳检查")
             response.also {
                 it.status = 200
                 it.writer.write(
