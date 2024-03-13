@@ -87,7 +87,6 @@ public class UserServiceImpl implements UserService {
 
     @NotNull
     @Override
-    //TODO:还未进行权限验证（接口未写好）
     public ResponseEntity<BaseResponse> getUserList(long timestamp, @NotNull HttpServletRequest request, @NotNull String type, String search, Integer limit, Integer page, String order) {
         log.info("[Service] 执行 getUserList 方法");
         // 检查参数，如果未设置（即为null），则使用默认值
@@ -184,8 +183,6 @@ public class UserServiceImpl implements UserService {
     ) {
         UserDO getUserDO = userDAO.getUserByUuid(userUuid);
         if (getUserDO != null) {
-            //通过UUID进行用户信息匹配进行数据库修改并且删掉此时数据库中缓存
-            log.info(userForceEditVO.toString());
             //校验修改的用户是否为超级管理员
             if ("console".equals(roleDAO.getRoleUuid(getUserDO.getRole()).getName())) {
                 return ResultUtil.error(timestamp, ErrorCode.CAN_T_OPERATE_ONESELF);
@@ -212,13 +209,41 @@ public class UserServiceImpl implements UserService {
 
     @NotNull
     @Override
-    public ResponseEntity<BaseResponse> forceLogout(long timestamp, @NotNull HttpServletRequest request, @NotNull String roleUuid) {
+    public ResponseEntity<BaseResponse> forceLogout(long timestamp, @NotNull HttpServletRequest request, @NotNull String userUuid) {
         log.info("[Service] 执行 forceLogout 方法");
-        // 满足条件，直接进行数据库删除
-        if (userMapper.forceLogout(roleUuid)){
-            return ResultUtil.success(timestamp, "账户已强制注销");
+        String uuid = ProcessingUtil.getAuthorizeUserUuid(request);
+        // 先获取自己的身份信息
+        UserDO getUserDO = userDAO.getUserByUuid(uuid);
+        if (getUserDO != null){
+            // 获取自己的角色权限，才能进行相应的操作
+            String role = roleDAO.getRoleUuid(getUserDO.getRole()).getName();
+            // 如果自己是超级管理员（注销除了自己的任何人）
+            if ("console".equals(role)) {
+                // 如果是超级管理员，则可以注销任何人的账户（除了自己）
+                if (userMapper.forceLogout(userUuid, uuid)){
+                    return ResultUtil.success(timestamp, "账户已强制注销");
+                } else {
+                    return ResultUtil.error(timestamp, ErrorCode.CAN_T_OPERATE_ONESELF);
+                }
+            // 如果自己是其他类型的管理员（注销除了超管和自己的任何人）
+            } else if ("default".equals(role) || "organize".equals(role) || "admin".equals(role)){
+                // 判断要被注销的用户是否为超级管理员
+                UserDO userDO = userDAO.getUserByUuid(userUuid);
+                String userRole = roleDAO.getRoleUuid(userDO.getRole()).getName();
+                if ("console".equals(userRole)){
+                    return ResultUtil.error(timestamp, ErrorCode.CAN_T_OPERATE_ONESELF);
+                } else {
+                    if (userMapper.forceLogout(userUuid, uuid)){
+                        return ResultUtil.success(timestamp, "账户已强制注销");
+                    } else {
+                        return ResultUtil.error(timestamp, ErrorCode.UUID_NOT_EXIST);
+                }
+                }
+            } else{
+                return ResultUtil.error(timestamp, ErrorCode.CAN_T_OPERATE_ONESELF);
+            }
         } else {
-            return ResultUtil.error(timestamp, ErrorCode.UUID_NOT_EXIST);
+            return ResultUtil.error(timestamp, ErrorCode.USER_NOT_EXISTED);
         }
     }
 }

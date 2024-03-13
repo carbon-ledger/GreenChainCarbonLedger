@@ -115,6 +115,6 @@ public interface UserMapper {
             """)
     boolean updateUserForceByUuid(String userUuid, String userName,String realName,String nickName, String avatar,String email, String phone);
 
-    @Delete("DELETE FROM fy_user WHERE uuid = #{uuid}")
-    Boolean forceLogout(String uuid);
+    @Update("UPDATE fy_user SET deleted_at = NOW() WHERE uuid = #{userUuid} AND uuid != #{uuid}")
+    Boolean forceLogout(String userUuid, String uuid);
 }
