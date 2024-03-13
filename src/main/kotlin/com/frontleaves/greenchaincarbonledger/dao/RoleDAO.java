@@ -91,7 +91,7 @@ public class RoleDAO {
      * 获取所有角色信息
      *
      * @param limit 限制
-     * @param page 页数
+     * @param page  页数
      * @param order 顺序
      * @return 角色信息
      */
@@ -107,9 +107,9 @@ public class RoleDAO {
      * 模糊查询角色信息
      *
      * @param search 关键字查询
-     * @param limit 限制
-     * @param page 页数
-     * @param order 顺序
+     * @param limit  限制
+     * @param page   页数
+     * @param order  顺序
      * @return 角色信息
      */
     public List<RoleDO> getRoleByFuzzy(String search, Integer limit, Integer page, String order) {

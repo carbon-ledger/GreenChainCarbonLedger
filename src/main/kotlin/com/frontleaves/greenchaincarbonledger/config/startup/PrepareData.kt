@@ -31,7 +31,7 @@ class PrepareData(
      *
      * @param getPermissionList List<RoleDO> 角色列表
      */
-    fun prepareUploadSqlWithPermission(getPermissionList: List<PermissionDO>?) {;
+    fun prepareUploadSqlWithPermission(getPermissionList: List<PermissionDO>?) {
         val permissionList = getPermissionList?.toTypedArray() ?: arrayOf()
         SqlPrepareData.PERMISSION_LIST.forEach {permissionName ->
             if (permissionList.isNotEmpty()) {
@@ -181,13 +181,14 @@ class PrepareData(
             }
             // 插入用户
             jdbcTemplate.update(
-                "INSERT INTO fy_user (uuid, user_name, real_name, email, password, role) VALUES (?, ?, ?, ?, ?, ?)",
+                "INSERT INTO fy_user (uuid, user_name, real_name, email, password, role, permission) VALUES (?, ?, ?, ?, ?, ?, ?)",
                 ProcessingUtil.createUuid(),
                 "console_user",
                 "超级管理员",
                 "admin@admin.com",
                 ProcessingUtil.passwordEncrypt("admin"),
                 getConsoleRoleUuid[0],
+                "[]"
             )
         }
     }
