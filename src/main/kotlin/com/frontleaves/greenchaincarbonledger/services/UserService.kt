@@ -1,5 +1,6 @@
 package com.frontleaves.greenchaincarbonledger.services
 
+import com.frontleaves.greenchaincarbonledger.models.voData.getData.UserAddVO
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.UserForceEditVO
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.UserEditVO
 import com.frontleaves.greenchaincarbonledger.utils.BaseResponse
@@ -62,6 +63,12 @@ interface UserService {
         request: HttpServletRequest,
         userUuid:String,
         userForceEditVO: UserForceEditVO
+    ): ResponseEntity<BaseResponse>
+
+    fun addAccount(
+        timestamp: Long,
+        request: HttpServletRequest,
+        userAddVO: UserAddVO
     ): ResponseEntity<BaseResponse>
 
 }
