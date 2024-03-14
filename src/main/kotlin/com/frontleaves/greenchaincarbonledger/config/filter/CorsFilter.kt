@@ -28,7 +28,10 @@ class CorsFilter : Filter {
 
         // 允许跨域请求
         response.addHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, PATCH")
+        response.addHeader("Access-Control-Allow-Headers", "*")
         response.addHeader("Access-Control-Allow-Origin", "*")
+        response.addHeader("Access-Control-Allow-Credentials", "true")
+        response.addHeader("Access-Control-Max-Age", "3600")
         chain?.doFilter(req, response)
     }
 }
