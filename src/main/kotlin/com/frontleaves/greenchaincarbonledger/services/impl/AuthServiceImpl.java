@@ -175,7 +175,7 @@ public class AuthServiceImpl implements AuthService {
         if (mailService.checkMailCode(authOrganizeRegisterVO.getEmail())) {
             String invite = authOrganizeRegisterVO.getInvite();
             // 验证组织注册填写的验证码是否有效
-            if (invite != null) {
+            if (invite != null && !invite.isEmpty()) {
                 if (!userDAO.getUserByInvite(invite)) {
                     return ResultUtil.error(timestamp, ErrorCode.INVITE_CODE_ERROR);
                 }
