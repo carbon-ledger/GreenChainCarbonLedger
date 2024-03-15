@@ -158,6 +158,17 @@ class PrepareData(
                     )
                 }
             }
+            if (role.name.equals("default")) {
+                if (getRolePermissions.isNullOrEmpty()) {
+                    log.debug("\t> 角色 default 未设置权限，开始初始化默认权限")
+                    val createPermission = SqlPrepareData.SQL_ROLE_DEFAULT_PERMISSION_LIST
+                    jdbcTemplate.update(
+                        "UPDATE fy_role SET permission = ? WHERE name = ?",
+                        gson.toJson(createPermission),
+                        "default"
+                    )
+                }
+            }
         }
     }
 
