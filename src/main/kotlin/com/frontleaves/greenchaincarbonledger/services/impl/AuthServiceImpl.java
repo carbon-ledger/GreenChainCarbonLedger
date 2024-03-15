@@ -58,7 +58,7 @@ public class AuthServiceImpl implements AuthService {
         // 检查用户是否存在
         String checkUserExist = userDAO.checkUserExist(authUserRegisterVO.getUsername(), authUserRegisterVO.getEmail(), authUserRegisterVO.getPhone(), authUserRegisterVO.getRealname());
         if (checkUserExist != null) {
-            return ResultUtil.error(timestamp, checkUserExist, ErrorCode.USER_NOT_EXISTED);
+            return ResultUtil.error(timestamp, checkUserExist, ErrorCode.USER_EXISTED);
         }
         // 校验邮箱验证码
         if (mailService.checkMailCode(authUserRegisterVO.getEmail())) {
