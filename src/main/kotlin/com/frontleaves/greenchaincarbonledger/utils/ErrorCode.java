@@ -37,6 +37,7 @@ public enum ErrorCode {
     CAN_T_RESET_MY_PASSWORD("CanTResetMyPassword", 40310, "不能重置自己的密码"),
     ROLE_CANNOT_BE_DELETED("RoleCannotBeDeleted", 40311, "角色不能被删除"),
     CAN_T_OPERATE_ONESELF("CanTOperateOneself", 40312, "不能操作自己或超级管理"),
+    CAN_T_ACCOUNT_FOR_CARBON("NotAccountedForCarbon",40313,"您为进行碳核算"),
     PAGE_NOT_FOUNDED("PageNotFounded", 40401, "页面不存在"),
     REQUEST_METHOD_NOT_SUPPORTED("RequestMethodNotSupported", 40500, "请求方法不支持"),
     SERVER_INTERNAL_ERROR("ServerInternalError", 50000, "服务器内部错误"),

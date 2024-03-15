@@ -1,0 +1,63 @@
+package com.frontleaves.greenchaincarbonledger.dao;
+
+import com.frontleaves.greenchaincarbonledger.mappers.CarbonMapper;
+import com.frontleaves.greenchaincarbonledger.models.doData.CarbonAccountingDO;
+import com.frontleaves.greenchaincarbonledger.models.doData.CarbonReportDO;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+@Slf4j
+@Repository
+@RequiredArgsConstructor
+public class CarbonDAO {
+    private final CarbonMapper carbonMapper;
+    /**
+     * 根据给定的 uuid,分页参数和排序参数，从数据库中获取符合条件的碳排放报告列表。
+     *
+     * @param uuid   查询所需的 uuid，用于匹配报告的唯一标识符
+     * @param limit  每页限制的结果数，用于分页查询
+     * @param page   要查询的页数，用于分页查询
+     * @param order  排序方式，用于指定查询结果的排序顺序
+     * @return 符合条件的碳排放报告列表
+     */
+
+    public List<CarbonReportDO> getReportByUuid (String uuid ,Integer limit, Integer page, String order){
+        log.info("[DAO] 执行 getReportByUuid 方法");
+        return carbonMapper.getReportByUuid(uuid,  limit, page, order);
+    }
+
+    /**
+     * 通过状态获取碳排放报告列表
+     *
+     * @param uuid   用户 UUID
+     * @param search 搜索关键字
+     * @param limit  每页限制的结果数
+     * @param page   要查询的页数
+     * @param order  排序方式，可选值包括 "asc"（升序）和 "desc"（降序）
+     * @return 包含碳排放报告信息的列表
+     */
+    public List<CarbonReportDO> getReportByStatus(String uuid,String search,Integer limit, Integer page, String order){
+        log.info("[DAO] 执行 getReportByStatus 方法");
+        return carbonMapper.getReportByStatus(uuid,search,limit,page,order);
+    }
+    /**
+     * 从数据库中获取符合给定状态的碳报告列表。
+     *
+     * @param uuid 用户UUID
+     * @param search 搜索关键字
+     * @param limit 单页限制个数
+     * @param page 第几页
+     * @param order 排序顺序
+     * @return 符合条件的碳报告列表
+     */
+    public List<CarbonReportDO> getReportBySearch(String uuid,String search,Integer limit, Integer page, String order){
+        log.info("[DAO] 执行 etReportBySearch 方法");
+        return carbonMapper.getReportBySearch(uuid, search, limit, page, order);
+    }
+    public List<CarbonAccountingDO> getAccountByUuid(String uuid){
+        log.info("[DAO] 执行 getAccountByUuid");
+        return carbonMapper.getAccountByUuid(uuid);
+    }
+}
