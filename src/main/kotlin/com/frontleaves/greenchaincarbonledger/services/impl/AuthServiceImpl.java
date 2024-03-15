@@ -71,8 +71,8 @@ public class AuthServiceImpl implements AuthService {
                     .setRealName(authUserRegisterVO.getRealname())
                     .setEmail(authUserRegisterVO.getEmail())
                     .setPhone(authUserRegisterVO.getPhone())
-                    .setPermission("[]")
                     .setRole(roleDAO.getRoleByName("admin").getUuid())
+                    .setPermission("[]")
                     .setPassword(ProcessingUtil.passwordEncrypt(authUserRegisterVO.getPassword()));
             if (userDAO.createUser(newUserDO)) {
                 return ResultUtil.success(timestamp, "管理用户注册成功");
@@ -180,8 +180,6 @@ public class AuthServiceImpl implements AuthService {
                     return ResultUtil.error(timestamp, ErrorCode.INVITE_CODE_ERROR);
                 }
             }
-            // 密码加密
-            String newPassword = ProcessingUtil.passwordEncrypt(authOrganizeRegisterVO.getPassword());
             // 保存组织
             UserDO newUserDO = new UserDO();
             newUserDO
@@ -191,8 +189,9 @@ public class AuthServiceImpl implements AuthService {
                     .setPhone(authOrganizeRegisterVO.getPhone())
                     .setEmail(authOrganizeRegisterVO.getEmail())
                     .setInvite(authOrganizeRegisterVO.getInvite())
+                    .setRole(roleDAO.getRoleByName("organize").getUuid())
                     .setPermission("[]")
-                    .setPassword(newPassword);
+                    .setPassword(ProcessingUtil.passwordEncrypt(authOrganizeRegisterVO.getPassword()));
             if (userDAO.createUser(newUserDO)) {
                 return ResultUtil.success(timestamp, "组织账户注册成功");
             } else {
