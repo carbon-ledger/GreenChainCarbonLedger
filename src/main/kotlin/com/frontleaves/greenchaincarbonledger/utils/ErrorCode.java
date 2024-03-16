@@ -48,6 +48,7 @@ public enum ErrorCode {
     UPDATE_DATA_ERROR("UpdateDataError", 40394, "更新数据失败"),
     USER_CANNOT_BE_BANED("UserCannotBeDeleted", 40393, "用户不能被封禁");
 
+
     final String output;
     final Integer code;
     final String message;
