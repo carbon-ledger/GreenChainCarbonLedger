@@ -216,25 +216,50 @@ public class UserServiceImpl implements UserService {
         if (ProcessingUtil.checkUserHasSuperConsole(ProcessingUtil.getAuthorizeUserUuid(request), userDAO, roleDAO)) {
             log.info("[Service] console_user 超级管理员");
             if (!banUserUuid.equals(ProcessingUtil.getAuthorizeUserUuid(request))) {
-                if (userDAO.banUser(banUserUuid)) {
-                    return ResultUtil.success(timestamp, "用户封禁成功");
-                } else {
-                    return ResultUtil.error(timestamp, ErrorCode.SERVER_INTERNAL_ERROR);
-                }
+                return getBaseResponseResponseEntity(timestamp, banUserUuid, userDAO);
             } else {
                 return ResultUtil.error(timestamp, "您不能封禁自己", ErrorCode.ROLE_CANNOT_BE_BANED);
             }
         } else {
             log.info("[Service] 普通管理员");
             if (!ProcessingUtil.checkUserHasOtherConsole(banUserUuid, userDAO, roleDAO)) {
+                return getBaseResponseResponseEntity(timestamp, banUserUuid, userDAO);
+            } else {
+                return ResultUtil.error(timestamp, "您不能封禁自己或封禁超级管理员", ErrorCode.ROLE_CANNOT_BE_BANED);
+            }
+        }
+    }
+
+    /**
+     * 获取封禁用户的响应实体
+     * <hr/>
+     * 用于获取封禁用户的响应实体
+     *
+     * @param timestamp    时间戳
+     * @param banUserUuid  被封禁用户的UUID
+     * @param userDAO      用户DAO
+     * @return {@link ResponseEntity<BaseResponse>}
+     * @since v1.0.0
+     */
+    @NotNull
+    private static ResponseEntity<BaseResponse> getBaseResponseResponseEntity(
+            long timestamp,
+            @NotNull String banUserUuid,
+            @NotNull UserDAO userDAO
+    ) {
+        UserDO getBanUser = userDAO.getUserByUuid(banUserUuid);
+        if (getBanUser != null) {
+            if (!getBanUser.getBan()) {
                 if (userDAO.banUser(banUserUuid)) {
                     return ResultUtil.success(timestamp, "用户封禁成功");
                 } else {
                     return ResultUtil.error(timestamp, ErrorCode.SERVER_INTERNAL_ERROR);
                 }
             } else {
-                return ResultUtil.error(timestamp, "您不能封禁自己或封禁超级管理员", ErrorCode.ROLE_CANNOT_BE_BANED);
+                return ResultUtil.error(timestamp, "用户已经被封禁", ErrorCode.USER_HAS_BEEN_BANED);
             }
+        } else {
+            return ResultUtil.error(timestamp, ErrorCode.USER_NOT_EXISTED);
         }
     }
 }
