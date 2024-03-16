@@ -74,7 +74,7 @@ public class RoleServiceImpl implements RoleService {
                 if (roleMapper.insertRole(uuid, roleVO.getName(), roleVO.getDisplayName(), json, getUuid)) {
                     return ResultUtil.success(timestamp, "角色信息已添加");
                 } else {
-                    return ResultUtil.error(timestamp, ErrorCode.INSERT_DATA_ERROR);
+                    return ResultUtil.error(timestamp, ErrorCode.SERVER_INTERNAL_ERROR);
                 }
             } else {
                 return ResultUtil.error(timestamp, "角色名重复", ErrorCode.REQUEST_BODY_ERROR);
