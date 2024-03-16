@@ -105,7 +105,7 @@ public class AuthServiceImpl implements AuthService {
                 if (System.currentTimeMillis() - getUserDO.getDeletedAt().getTime() <= 604800000L) {
                     //用户存在并且在7天以内登录,取消注销状态
                     getUserDO.setDeletedAt(null);
-                    recover = userDAO.userAccountDistanceDeletion(getUserDO);
+                    recover = userDAO.accountDeleteCancel(getUserDO);
                 } else {
                     //用户存在但是在7天之外登录
                     return ResultUtil.error(timestamp, ErrorCode.USER_NOT_EXISTED);
@@ -113,7 +113,7 @@ public class AuthServiceImpl implements AuthService {
             }
             // 用户存在（密码检查）且不在注销状态
             if (ProcessingUtil.passwordCheck(authLoginVO.getPassword(), getUserDO.getPassword())) {
-                RoleDO getUserRole = roleDAO.getRoleUuid(getUserDO.getRole());
+                RoleDO getUserRole = roleDAO.getRoleByUuid(getUserDO.getRole());
 
                 BackAuthLoginVO newBackAuthLoginVO = new BackAuthLoginVO();
                 BackAuthLoginVO.UserVO newUserVO = new BackAuthLoginVO.UserVO();
