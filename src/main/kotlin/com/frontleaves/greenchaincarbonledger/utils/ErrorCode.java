@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
  * <hr/>
  * 用于定义错误码, 用于返回错误信息, 用于返回错误码
  *
- * @author xiao_lfeng
+ * @author xiao_lfeng AND FLASHLACK AND DC_DC
  * @version v1.0.0-SNAPSHOT
  * @since v1.0.0-SNAPSHOT
  */
@@ -44,7 +44,9 @@ public enum ErrorCode {
     ORGANIZE_NOT_EXISTED("OrganizeRegisterFailed", 40399, "账户注册失败"),
     INVITE_CODE_ERROR("VerifyCodeError", 40398, "邀请码错误"),
     INSERT_DATA_ERROR("InsertDataError", 40395, "插入数据失败"),
+    NO_LOGIN("NoLogin", 40110, "未登录"),
     UPDATE_DATA_ERROR("UpdateDataError", 40394, "更新数据失败"),
+    USER_CANNOT_BE_BANED("UserCannotBeDeleted", 40393, "用户不能被封禁"),
     INSERT_DATA_EXISTED("InsertDataExisted", 40392, "添加用户信息失败");
 
     final String output;
