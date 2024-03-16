@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
+
 /**
  * CarbonController
  * <hr/>
@@ -31,30 +33,33 @@ public class CarbonController {
      * 获取自己组织碳排放配额
      * <hr/>
      * 获取自己组织碳排放配额
-     * @param start 开始年份
-     * @param end 结束年份
      * @param request 请求
      * @return
      */
-    @GetMapping("/quota/get")
-    public ResponseEntity<BaseResponse> getOwnCarbonQuota (
-            @RequestParam(required = false)Integer start,
-            @RequestParam(required = false)Integer end,
-            HttpServletRequest request){
-        log.info("[Control] 请求getOwnCarbonQuota接口");
+    @GetMapping("/accounting/get")
+    /*
+    * 检查组织权限，是使用注解还是在服务层里面体现
+    * */
+   public ResponseEntity<BaseResponse> getCarbonAccounting(
+            @RequestParam(required = false) String limit,
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) String order,
+            HttpServletRequest request
+    ){
+        log.info("[Controller] 请求 getCarbonAccounting 接口");
         long timestamp = System.currentTimeMillis();
-        request.getHeader("X-Auth-UUID");
-        //校验输入的是否为正确的年份
-        if (start.toString().matches("^(\\\\d{4})$")|| end.toString().matches("^(\\\\d{4})$")){
-            return ResultUtil.error(timestamp, ErrorCode.PARAM_VARIABLE_ERROR);
-        }else {
-            //校验开始年份和结束年份
-            if (start<end){
-            //返回业务层操作
-                return carbonService.getOwnCarbonQuota(timestamp,request,start,end);
-            }else {
-                return ResultUtil.error(timestamp,ErrorCode.PARAM_VARIABLE_ERROR);
-            }
+        if (limit != null && !limit.toString().matches("^[0-9]+$")) {
+            return ResultUtil.error(timestamp, "limit 参数错误", ErrorCode.REQUEST_BODY_ERROR);
         }
+        if (page != null && !page.toString().matches("^[0-9]+$")) {
+            return ResultUtil.error(timestamp, "page 参数错误", ErrorCode.REQUEST_BODY_ERROR);
         }
+        ArrayList<String> list = new ArrayList<>();
+        list.add("desc");
+        list.add("asc");
+        if (order != null && !list.contains(order)) {
+            return ResultUtil.error(timestamp, "order 参数错误", ErrorCode.REQUEST_BODY_ERROR);
+        }
+       return carbonService.getCarbonAccounting(timestamp, limit, page, order);
+   }
 }
