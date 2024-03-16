@@ -24,7 +24,6 @@ object SqlPrepareData {
         add(ArrayList(listOf("role:getCurrentRole", "获取当前角色")))
         add(ArrayList(listOf("role:editRole", "编辑角色")))
         add(ArrayList(listOf("role:deleteRole", "删除角色")))
-        add(ArrayList(listOf("user:getUserCurrentInfo", "获取当前用户信息")))
         add(ArrayList(listOf("user:getUserList", "获取用户列表")))
         add(ArrayList(listOf("user:editUserInformation", "编辑用户信息")))
         add(ArrayList(listOf("user:putUserForceEdit", "强制编辑用户信息")))
@@ -53,7 +52,12 @@ object SqlPrepareData {
      * ADMIN 管理员角色
      */
     val SQL_ROLE_ADMIN_PERMISSION_LIST = ArrayList<String>().apply {
-
+        add("auth:userChangePassword")
+        add("auth:userDelete")
+        add("auth:userLogout")
+        add("role:getCurrentRole")
+        add("user:editUserInformation")
+        add("user:getUserCurrent")
     }
 
 
@@ -63,6 +67,20 @@ object SqlPrepareData {
      * ORGANIZE 组织角色
      */
     val SQL_ROLE_ORGANIZE_PERMISSION_LIST = ArrayList<String>().apply {
+        add("auth:userChangePassword")
+        add("auth:userDelete")
+        add("auth:userLogout")
+        add("role:getCurrentRole")
+        add("user:editUserInformation")
+        add("user:getUserCurrent")
+    }
 
+    val SQL_ROLE_DEFAULT_PERMISSION_LIST = ArrayList<String>().apply {
+        add("auth:userChangePassword")
+        add("auth:userDelete")
+        add("auth:userLogout")
+        add("role:getCurrentRole")
+        add("user:editUserInformation")
+        add("user:getUserCurrent")
     }
 }

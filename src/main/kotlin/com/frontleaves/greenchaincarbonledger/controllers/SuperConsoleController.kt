@@ -8,6 +8,15 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
+/**
+ * 超级控制台控制器
+ *
+ * 超级控制台控制器, 用于系统超级控制台操作
+ *
+ * @since v1.0.0-SNAPSHOT
+ * @version v1.0.0-SNAPSHOT
+ * @author xiao_lfeng
+ */
 @RestController
 @RequestMapping("/super")
 class SuperConsoleController(
@@ -15,12 +24,22 @@ class SuperConsoleController(
     private val jdbcTemplate: JdbcTemplate,
 ) {
 
+    /**
+     * closeServer
+     *
+     * 关闭服务器, 用于关闭服务器
+     */
     @GetMapping("/closeServer")
     @CheckAccountPermission("super:closeServer")
     fun closeServer() {
         context.close()
     }
 
+    /**
+     * resetSql
+     *
+     * 重置数据库, 用于重置数据库
+     */
     @GetMapping("/resetSql")
     @CheckAccountPermission("super:resetSql")
     fun resetSql() {

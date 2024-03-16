@@ -193,9 +193,9 @@ public class UserDAO {
     }
 
     /**
-     * 通过邀请码获取用户
+     * 获取用户的邀请码
      * <hr/>
-     * 通过邀请码获取用户
+     * 获取用户的邀请码, 如果用户存在则返回邀请码, 否则返回null
      *
      * @param invite 邀请码
      * @return {@link Boolean}
@@ -206,20 +206,49 @@ public class UserDAO {
         return userMapper.getUserByInvite(invite);
     }
 
-
+    /**
+     * 获取用户列表
+     * <hr/>
+     * 获取用户列表
+     *
+     * @param search 关键字查询
+     * @param limit  限制
+     * @param page   页数
+     * @param order  顺序
+     * @return 用户列表
+     */
     public List<UserDO> getUserFuzzy(String search, Integer limit, Integer page, String order) {
         log.info("[DAO] 执行 getUserFuzzy 方法");
         log.info("\t> Mysql 读取");
         return userMapper.getUserFuzzy(search, limit, page, order);
     }
 
-
+    /**
+     * 获取用户列表
+     * <hr/>
+     * 获取用户列表
+     *
+     * @param limit 限制
+     * @param page  页数
+     * @param order 顺序
+     * @return 用户列表
+     */
     public List<UserDO> getUserByUnbanlist(Integer limit, Integer page, String order) {
         log.info("[DAO] 执行 getUserByUnbanlist 方法");
         log.info("\t> Mysql 读取");
         return userMapper.getUserByUnbanlist(limit, page, order);
     }
 
+    /**
+     * 获取用户列表
+     * <hr/>
+     * 获取用户列表
+     *
+     * @param limit 限制
+     * @param page  页数
+     * @param order 顺序
+     * @return 用户列表
+     */
     public List<UserDO> getUserByBanlist(Integer limit, Integer page, String order) {
         log.info("[DAO] 执行 getUserByBanlist 方法");
         log.info("\t> Mysql 读取");
@@ -227,18 +256,47 @@ public class UserDAO {
 
     }
 
+    /**
+     * 获取用户列表
+     * <hr/>
+     * 获取用户列表
+     *
+     * @param limit 限制
+     * @param page  页数
+     * @param order 顺序
+     * @return 用户列表
+     */
     public List<UserDO> getUserByAvailableList(Integer limit, Integer page, String order) {
         log.info("[DAO] 执行 getUserByAvailableList 方法");
         log.info("\t> Mysql 读取");
         return userMapper.getUserByAvailablelist(limit, page, order);
     }
 
+    /**
+     * 获取用户列表
+     * <hr/>
+     * 获取用户列表
+     *
+     * @param limit 限制
+     * @param page  页数
+     * @param order 顺序
+     * @return 用户列表
+     */
     public List<UserDO> getUserByAllList(Integer limit, Integer page, String order) {
         log.info("[DAO] 执行 getUserByAllList 方法");
         log.info("\t> Mysql 读取");
         return userMapper.getUserByAlllist(limit, page, order);
     }
 
+    /**
+     * 更新用户信息
+     * <hr/>
+     * 更新用户信息
+     *
+     * @param userUuid 用户UUID
+     * @param userEditVO           用户编辑信息
+     * @return 更新操作是否成功，成功返回 true，失败返回 false
+     */
     public boolean updateUserByUuid(String userUuid, UserEditVO userEditVO) {
         log.info("[DAO] 执行 updateUserByUuid 方法");
         log.info("\t> Redis 删除");
