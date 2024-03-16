@@ -44,6 +44,13 @@ interface AuthService {
         authLoginVO: AuthLoginVO
     ): ResponseEntity<BaseResponse>
 
+    /**
+     * 用户注册
+     * @param timestamp 时间戳
+     * @param request 请求
+     * @param  authUserRegisterVO 用户注册所提供的信息
+     * @return 注册结果
+     */
     fun organizeRegister(
         timestamp: Long,
         request: HttpServletRequest,
@@ -67,23 +74,35 @@ interface AuthService {
     /**
      * 账号注销
      * @param timestamp
-     * @param requst HttpServletRequest,
+     * @param request HttpServletRequest,
      * @param authDeleteVO 用户注销账号所提供的消息
      * @return 注销结果
      */
-
     fun userDelete(
         timestamp: Long,
         request: HttpServletRequest,
         authDeleteVO: AuthDeleteVO
     ): ResponseEntity<BaseResponse>
 
+    /**
+     * 忘记密码
+     * @param timestamp 时间戳
+     * @param request 请求
+     * @param  authForgetCodeVO 用户忘记密码所提供的信息
+     * @return 忘记密码结果
+     */
     fun forgetCode(
         timestamp: Long,
         request: HttpServletRequest,
         authForgetCodeVO: AuthForgetCodeVO
     ): ResponseEntity<BaseResponse>
 
+    /**
+     * 用户注销
+     * @param timestamp 时间戳
+     * @param request 请求
+     * @return 注销结果
+     */
     fun userLogout(
         timestamp: Long,
         request: HttpServletRequest
