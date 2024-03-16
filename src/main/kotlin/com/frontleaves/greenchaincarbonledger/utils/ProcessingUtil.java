@@ -205,4 +205,21 @@ public class ProcessingUtil {
         }
         return false;
     }
+
+    /**
+     * 获取Token
+     * <hr/>
+     * 用于获取Token, 从请求头 Authorization 获取信息
+     *
+     * @param request 请求对象
+     * @return {@link String}
+     * @since v1.0.0
+     */
+    public static String getAuthorizeToken(@NotNull HttpServletRequest request) {
+        log.info("[Util] 执行 getAuthorizeToken 工具");
+        String getAuthUuid = request.getHeader("Authorization").replace("Bearer ", "");
+        log.debug("\t> 获取Token: {}", getAuthUuid);
+
+        return getAuthUuid;
+    }
 }
