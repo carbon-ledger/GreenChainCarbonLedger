@@ -256,7 +256,7 @@ public class UserServiceImpl implements UserService {
                     return ResultUtil.error(timestamp, ErrorCode.SERVER_INTERNAL_ERROR);
                 }
             } else {
-                return ResultUtil.error(timestamp, "用户已经被封禁", ErrorCode.USER_HAS_BEEN_BANED);
+                return ResultUtil.error(timestamp, "用户已经被封禁", ErrorCode.USER_CANNOT_BE_BANED);
             }
         } else {
             return ResultUtil.error(timestamp, ErrorCode.USER_NOT_EXISTED);
