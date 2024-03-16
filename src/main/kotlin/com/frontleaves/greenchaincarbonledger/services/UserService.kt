@@ -82,4 +82,10 @@ interface UserService {
         userForceEditVO: UserForceEditVO
     ): ResponseEntity<BaseResponse>
 
+    fun banUser(
+        timestamp: Long,
+        request: HttpServletRequest,
+        roleUuid: String
+    ):
+            ResponseEntity<BaseResponse>
 }

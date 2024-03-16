@@ -170,20 +170,24 @@ public class UserDAO {
      */
     public boolean userAccountDeletion(@NotNull UserDO getUserDO) {
         log.info("[DAO] 执行 deleteUserAccount 方法");
-        log.info("\t> Mysql  软删除");
+        log.info("\t> Redis 删除");
+        userRedis.delData(BusinessConstants.NONE, getUserDO.getUuid());
+        log.info("\t> Mysql 更新");
         return userMapper.userAccountDeletion(getUserDO.getUuid());
     }
 
     /**
-     * 数据库用户账号软删除
+     * 数据库用户账号取消注销
      * </hr>
-     * 数据库用户账号注销
+     * 数据库用户账号取消注销
      *
      * @param getUserDO 用户
-     * @return 删除操作成功返回ture，失败则返回false
+     * @return 取消注销操作成功返回ture，失败则返回false
      */
-    public boolean userAccountDistanceDeletion(@NotNull UserDO getUserDO) {
-        log.info("[DAO] 执行 userAccountDistanceDeletion 方法");
+    public boolean accountDeleteCancel(@NotNull UserDO getUserDO) {
+        log.info("[DAO] 执行 accountDeleteCancel 方法");
+        log.info("\t> Redis 删除");
+        userRedis.delData(BusinessConstants.NONE, getUserDO.getUuid());
         log.info("\t> Mysql 更新");
         return userMapper.userAccountDistanceDeletion(getUserDO.getUuid());
     }
@@ -194,6 +198,7 @@ public class UserDAO {
      * 获取用户的邀请码, 如果用户存在则返回邀请码, 否则返回null
      *
      * @param invite 邀请码
+     * @return {@link Boolean}
      */
     public Boolean getUserByInvite(String invite) {
         log.info("[DAO] 执行 getUserByInvite 方法");
@@ -231,7 +236,6 @@ public class UserDAO {
     public List<UserDO> getUserByUnbanlist(Integer limit, Integer page, String order) {
         log.info("[DAO] 执行 getUserByUnbanlist 方法");
         log.info("\t> Mysql 读取");
-
         return userMapper.getUserByUnbanlist(limit, page, order);
     }
 
@@ -262,8 +266,8 @@ public class UserDAO {
      * @param order 顺序
      * @return 用户列表
      */
-    public List<UserDO> getUserByAvailablelist(Integer limit, Integer page, String order) {
-        log.info("[DAO] 执行 getUserByAvailablelist 方法");
+    public List<UserDO> getUserByAvailableList(Integer limit, Integer page, String order) {
+        log.info("[DAO] 执行 getUserByAvailableList 方法");
         log.info("\t> Mysql 读取");
         return userMapper.getUserByAvailablelist(limit, page, order);
     }
@@ -278,8 +282,8 @@ public class UserDAO {
      * @param order 顺序
      * @return 用户列表
      */
-    public List<UserDO> getUserByAlllist(Integer limit, Integer page, String order) {
-        log.info("[DAO] 执行 getUserByAlllist 方法");
+    public List<UserDO> getUserByAllList(Integer limit, Integer page, String order) {
+        log.info("[DAO] 执行 getUserByAllList 方法");
         log.info("\t> Mysql 读取");
         return userMapper.getUserByAlllist(limit, page, order);
     }
@@ -289,14 +293,16 @@ public class UserDAO {
      * <hr/>
      * 更新用户信息
      *
-     * @param getAuthorizeUserUuid 用户UUID
+     * @param userUuid 用户UUID
      * @param userEditVO           用户编辑信息
      * @return 更新操作是否成功，成功返回 true，失败返回 false
      */
-    public boolean updateUserByUuid(String getAuthorizeUserUuid, UserEditVO userEditVO) {
+    public boolean updateUserByUuid(String userUuid, UserEditVO userEditVO) {
         log.info("[DAO] 执行 updateUserByUuid 方法");
+        log.info("\t> Redis 删除");
+        userRedis.delData(BusinessConstants.NONE, userUuid);
         log.info("\t> Mysql 更新");
-        return userMapper.updateUserByUuid(getAuthorizeUserUuid, userEditVO);
+        return userMapper.updateUserByUuid(userUuid, userEditVO);
     }
 
     /**
@@ -317,24 +323,40 @@ public class UserDAO {
     }
 
     /**
-     * 更新用户信息
+     * 强制更新用户信息
      * <hr/>
-     * 更新用户信息, 如果用户信息更新成功返回ture,失败则返回false
+     * 强制更新用户信息，不做任何检查，直接更新，用于管理员修改用户信息
      *
      * @param userUuid 用户UUID
      * @param userName 用户名
      * @param nickName 昵称
-     * @param realName 真实姓名
+     * @param realName 真实信息
      * @param avatar   头像
      * @param email    邮箱
      * @param phone    手机号
-     * @return 返回更新的结果
+     * @return 更新操作是否成功，成功返回 true，失败返回 false
      */
-    public boolean updateUserForceByUuid(String userUuid, String userName, String nickName, String realName, String avatar, String email, String phone) {
+    public Boolean updateUserForceByUuid(String userUuid, String userName, String nickName, String realName, String avatar, String email, String phone) {
         log.info("[Dao] 执行 updateUserForceByUuid 方法");
         log.info("\t> Redis 删除 ");
         userRedis.delData(BusinessConstants.NONE, userUuid);
         log.info("\t> Mysql 更新");
         return userMapper.updateUserForceByUuid(userUuid, userName, nickName, realName, avatar, email, phone);
+    }
+
+    /**
+     * 封禁用户
+     * <hr/>
+     * 封禁用户, 将用户状态设置为封禁状态
+     *
+     * @param banUuid 封禁用户的UUID
+     * @return 封禁操作是否成功，成功返回 true，失败返回 false
+     */
+    public Boolean banUser(String banUuid) {
+        log.info("[DAO] 执行 banUser 方法");
+        log.info("\t> Redis 删除");
+        userRedis.delData(BusinessConstants.NONE, banUuid);
+        log.info("\t> Mysql 更新");
+        return userMapper.banUser(banUuid);
     }
 }
