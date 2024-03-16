@@ -75,7 +75,7 @@ public class UserServiceImpl implements UserService {
             // TODO: 权限信息写好后，需要数据库调取
             newPermissionInfo.setUserPermission(getPermissionList).setRolePermission(getPermissionList);
 
-            backUserCurrent.setUser(newUserInfo).setPermission(newPermissionInfo).setRole(roleDAO.getRoleUuid(getUserDO.getRole()).getName());
+            backUserCurrent.setUser(newUserInfo).setPermission(newPermissionInfo).setRole(roleDAO.getRoleByUuid(getUserDO.getRole()).getName());
             // 数据输出
             return ResultUtil.success(timestamp, "用户查看的信息已准备完毕", backUserCurrent);
         } else {
@@ -103,8 +103,8 @@ public class UserServiceImpl implements UserService {
             case "search" -> getUserDO = userDAO.getUserFuzzy(search, limit, page, order);
             case "unbanlist" -> getUserDO = userDAO.getUserByUnbanlist(limit, page, order);
             case "banlist" -> getUserDO = userDAO.getUserByBanlist(limit, page, order);
-            case "available" -> getUserDO = userDAO.getUserByAvailablelist(limit, page, order);
-            case "all" -> getUserDO = userDAO.getUserByAlllist(limit, page, order);
+            case "available" -> getUserDO = userDAO.getUserByAvailableList(limit, page, order);
+            case "all" -> getUserDO = userDAO.getUserByAllList(limit, page, order);
             default -> {
                 return ResultUtil.error(timestamp, "type 参数有误", ErrorCode.REQUEST_BODY_ERROR);
             }
@@ -186,7 +186,7 @@ public class UserServiceImpl implements UserService {
             //通过UUID进行用户信息匹配进行数据库修改并且删掉此时数据库中缓存
             log.info(userForceEditVO.toString());
             //校验修改的用户是否为超级管理员
-            if ("console".equals(roleDAO.getRoleUuid(getUserDO.getRole()).getName())) {
+            if ("console".equals(roleDAO.getRoleByUuid(getUserDO.getRole()).getName())) {
                 return ResultUtil.error(timestamp, ErrorCode.CAN_T_OPERATE_ONESELF);
             } else {
                 if (userDAO.updateUserForceByUuid(getUserDO.getUuid(), userForceEditVO.getUserName(), userForceEditVO.getNickName(), userForceEditVO.getRealName(), userForceEditVO.getAvatar(), userForceEditVO.getEmail(), userForceEditVO.getPhone())) {
@@ -203,6 +203,60 @@ public class UserServiceImpl implements UserService {
                 } else {
                     return ResultUtil.error(timestamp, ErrorCode.SERVER_INTERNAL_ERROR);
                 }
+            }
+        } else {
+            return ResultUtil.error(timestamp, ErrorCode.USER_NOT_EXISTED);
+        }
+    }
+
+    @NotNull
+    @Override
+    public ResponseEntity<BaseResponse> banUser(long timestamp, @NotNull HttpServletRequest request, @NotNull String banUserUuid) {
+        log.info("[Service] 执行 banUser 方法");
+        if (ProcessingUtil.checkUserHasSuperConsole(ProcessingUtil.getAuthorizeUserUuid(request), userDAO, roleDAO)) {
+            log.info("[Service] console_user 超级管理员");
+            if (!banUserUuid.equals(ProcessingUtil.getAuthorizeUserUuid(request))) {
+                return getBaseResponseResponseEntity(timestamp, banUserUuid, userDAO);
+            } else {
+                return ResultUtil.error(timestamp, "您不能封禁自己", ErrorCode.USER_CANNOT_BE_BANED);
+            }
+        } else {
+            log.info("[Service] 普通管理员");
+            if (!ProcessingUtil.checkUserHasOtherConsole(banUserUuid, userDAO, roleDAO)) {
+                return getBaseResponseResponseEntity(timestamp, banUserUuid, userDAO);
+            } else {
+                return ResultUtil.error(timestamp, "您不能封禁自己或封禁超级管理员", ErrorCode.USER_CANNOT_BE_BANED);
+            }
+        }
+    }
+
+    /**
+     * 获取封禁用户的响应实体
+     * <hr/>
+     * 用于获取封禁用户的响应实体
+     *
+     * @param timestamp    时间戳
+     * @param banUserUuid  被封禁用户的UUID
+     * @param userDAO      用户DAO
+     * @return {@link ResponseEntity<BaseResponse>}
+     * @since v1.0.0
+     */
+    @NotNull
+    private static ResponseEntity<BaseResponse> getBaseResponseResponseEntity(
+            long timestamp,
+            @NotNull String banUserUuid,
+            @NotNull UserDAO userDAO
+    ) {
+        UserDO getBanUser = userDAO.getUserByUuid(banUserUuid);
+        if (getBanUser != null) {
+            if (!getBanUser.getBan()) {
+                if (userDAO.banUser(banUserUuid)) {
+                    return ResultUtil.success(timestamp, "用户封禁成功");
+                } else {
+                    return ResultUtil.error(timestamp, ErrorCode.SERVER_INTERNAL_ERROR);
+                }
+            } else {
+                return ResultUtil.error(timestamp, "用户已经被封禁", ErrorCode.USER_CANNOT_BE_BANED);
             }
         } else {
             return ResultUtil.error(timestamp, ErrorCode.USER_NOT_EXISTED);

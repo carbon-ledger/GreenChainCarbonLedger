@@ -35,6 +35,7 @@ import java.util.ArrayList;
 public class UserController {
     private final UserService userService;
 
+
     /**
      * 获取当前登录用户的个人信息。
      * <hr/>
@@ -130,6 +131,21 @@ public class UserController {
 
     ) {
         return null;
+    }
+
+    @PatchMapping("/ban/{uuid}")
+    @CheckAccountPermission("user:banUser")
+    public ResponseEntity<BaseResponse> banUser(
+            @PathVariable("uuid") @NotNull String userUuid,
+            @NotNull HttpServletRequest request
+    ) {
+        log.info("[Controller] 请求 banUser 接口");
+        long timestamp = System.currentTimeMillis();
+        // 输入 Uuid 校验
+        if (!userUuid.matches("^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$")) {
+            return ResultUtil.error(timestamp, "uuid 参数不正确", ErrorCode.PATH_VARIABLE_ERROR);
+        }
+        return userService.banUser(timestamp, request, userUuid);
     }
 
     /**

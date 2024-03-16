@@ -93,7 +93,7 @@ public class RoleServiceImpl implements RoleService {
         UserDO getUserDO = userDAO.getUserByUuid(getUuid);
         if (getUserDO != null) {
             //这里已经获取了用户此时的Role
-            RoleDO getUserRole = roleDAO.getRoleUuid(getUserDO.getRole());
+            RoleDO getUserRole = roleDAO.getRoleByUuid(getUserDO.getRole());
             //判断用户此时Role是否获取成功
             if (getUserRole != null) {
                 //现在进行值的输出，先将其存入返回值VO里面
@@ -202,7 +202,7 @@ public class RoleServiceImpl implements RoleService {
                 getRoleList = new ArrayList<>();
                 for (String roleUuid : getRoleListByUser) {
                     //已经把role提出
-                    RoleDO getRoleDO = roleDAO.getRoleUuid(roleUuid);
+                    RoleDO getRoleDO = roleDAO.getRoleByUuid(roleUuid);
                     if (!getRoleList.contains(getRoleDO)) {
                         getRoleList.add(getRoleDO);
                     }
@@ -231,7 +231,7 @@ public class RoleServiceImpl implements RoleService {
     public ResponseEntity<BaseResponse> deleteRole(long timestamp, @NotNull HttpServletRequest request, @NotNull String roleUuid) {
         log.info("[Service] 执行 deleteRole 方法");
         //用缓存的UUID与数据库UUID进行校对
-        RoleDO roleDO = roleDAO.getRoleUuid(roleUuid);
+        RoleDO roleDO = roleDAO.getRoleByUuid(roleUuid);
         ArrayList<String> arrayList = new ArrayList<>(List.of("default", "organize", "admin", "console"));
         if (roleDO != null) {
             if (!arrayList.contains(roleDO.getName())) {
