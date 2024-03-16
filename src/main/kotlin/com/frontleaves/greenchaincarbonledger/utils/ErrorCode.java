@@ -47,7 +47,7 @@ public enum ErrorCode {
     INSERT_DATA_ERROR("InsertDataError", 40395, "插入数据失败"),
     NO_LOGIN("NoLogin", 40110, "未登录"),
     UPDATE_DATA_ERROR("UpdateDataError", 40394, "更新数据失败"),
-    ROLE_CANNOT_BE_BANED("RoleCannotBeDeleted", 40393, "角色不能被封禁");
+    USER_CANNOT_BE_BANED("UserCannotBeDeleted", 40393, "用户不能被封禁");
 
     final String output;
     final Integer code;
