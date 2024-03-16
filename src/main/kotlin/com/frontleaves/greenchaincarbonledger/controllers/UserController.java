@@ -1,6 +1,7 @@
 package com.frontleaves.greenchaincarbonledger.controllers;
 
 import com.frontleaves.greenchaincarbonledger.annotations.CheckAccountPermission;
+import com.frontleaves.greenchaincarbonledger.models.voData.getData.UserAddVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.UserEditVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.UserForceEditVO;
 import com.frontleaves.greenchaincarbonledger.services.UserService;
@@ -128,9 +129,18 @@ public class UserController {
 
     @PostMapping("/add")
     public ResponseEntity<BaseResponse> addAccount(
-
+        @RequestBody @Validated UserAddVO userAddVO,
+        @NotNull BindingResult bindingResult,
+        HttpServletRequest request
     ) {
-        return null;
+        log.info("[Controller] 请求 addAccount 接口");
+        long timestamp = System.currentTimeMillis();
+        // 对请求参数进行校验
+        if (bindingResult.hasErrors()) {
+            return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR, ProcessingUtil.getValidatedErrorList(bindingResult));
+        }
+        // 业务操作
+        return userService.addAccount(timestamp, request, userAddVO);
     }
 
     /**

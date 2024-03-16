@@ -127,4 +127,7 @@ public interface UserMapper {
 
     @Update("UPDATE fy_user SET deleted_at = NOW() WHERE uuid = #{userUuid}")
     Boolean forceLogout(String userUuid);
+
+    @Insert("INSERT INTO fy_user(uuid, user_name, `real_name`, email, phone, password, role) VALUES (#{addUuid}, #{addUsername}, #{addRealname}, #{addEmail}, #{addPhone}, #{addPassword}, #{defaultUuid})")
+    boolean addAccount(String addUuid, String addUsername, String addRealname, String addEmail, String addPhone, String addPassword, String defaultUuid);
 }
