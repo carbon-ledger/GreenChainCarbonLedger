@@ -30,7 +30,7 @@ class SuperConsoleController(
      * 关闭服务器, 用于关闭服务器
      */
     @GetMapping("/closeServer")
-    @CheckAccountPermission("auth:closeServer")
+    @CheckAccountPermission("super:closeServer")
     fun closeServer() {
         context.close()
     }
@@ -41,7 +41,7 @@ class SuperConsoleController(
      * 重置数据库, 用于重置数据库
      */
     @GetMapping("/resetSql")
-    @CheckAccountPermission("auth:resetSql")
+    @CheckAccountPermission("super:resetSql")
     fun resetSql() {
         // 删除Redis所有数据
         redisTemplate.keys("*").forEach {

@@ -4,6 +4,7 @@ import com.frontleaves.greenchaincarbonledger.utils.security.JwtUtil
 import com.frontleaves.greenchaincarbonledger.config.filter.CorsFilter
 import com.frontleaves.greenchaincarbonledger.config.filter.JwtFilter
 import com.frontleaves.greenchaincarbonledger.config.filter.TimestampFilter
+import com.frontleaves.greenchaincarbonledger.dao.AuthDAO
 import jakarta.servlet.Filter
 import org.apache.shiro.spring.web.ShiroFilterFactoryBean
 import org.apache.shiro.web.mgt.DefaultWebSecurityManager
@@ -21,7 +22,8 @@ import org.springframework.context.annotation.Configuration
  */
 @Configuration
 open class ShiroConfig(
-    private val jwtUtil: JwtUtil
+    private val jwtUtil: JwtUtil,
+    private val authDAO: AuthDAO
 ) {
 
     @Bean
@@ -45,7 +47,7 @@ open class ShiroConfig(
 
         // 自定义拦截器
         val customFilter = HashMap<String, Filter>()
-            .also { it["jwt"] = JwtFilter(jwtUtil) }
+            .also { it["jwt"] = JwtFilter(jwtUtil, authDAO) }
             .also { it["cors"] = CorsFilter() }
             .also { it["time"] = TimestampFilter() }
         shiroFactory.filters = customFilter
