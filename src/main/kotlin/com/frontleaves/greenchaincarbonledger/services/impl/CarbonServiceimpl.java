@@ -18,8 +18,16 @@ public class CarbonServiceimpl implements CarbonService {
     @NotNull
     @Override
     public ResponseEntity<BaseResponse> getOwnCarbonQuota(long timestamp, @NotNull HttpServletRequest request, @Nullable Integer start, @Nullable Integer end) {
-        log.info("[Service]执行  getOwnCarbonQuota操作");
+        log.info("[Service]执行  getOwnCarbonQuota 操作");
         //先将此UUID进行数据库校验
+        return null;
+    }
+
+    @NotNull
+    @Override
+    public ResponseEntity<BaseResponse> getCarbonAccounting(long timestamp, @NotNull String limit, int page, @NotNull String order) {
+        log.info("[Service] 执行 getCarbonAccounting 方法");
+        
         return null;
     }
 }
