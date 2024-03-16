@@ -53,6 +53,8 @@ public class AdminController {
         long timestamp = System.currentTimeMillis();
         // 对请求参数进行校验
         if (bindingResult.hasErrors()) {
+            log.error("\t> 请求参数校验失败");
+            log.debug("\t\t> 传递数据 {}", ProcessingUtil.getValidatedErrorList(bindingResult));
             return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR, ProcessingUtil.getValidatedErrorList(bindingResult));
         }
         // 业务操作

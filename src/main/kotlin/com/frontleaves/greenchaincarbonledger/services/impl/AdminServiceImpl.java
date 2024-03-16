@@ -47,8 +47,7 @@ public class AdminServiceImpl implements AdminService {
             }
             // 重置用户密码
             String newPassword = ProcessingUtil.createRandomString(10);
-            String passwordEncode = ProcessingUtil.passwordEncrypt(newPassword);
-            getUserDO.setPassword(passwordEncode);
+            getUserDO.setPassword(ProcessingUtil.passwordEncrypt(newPassword));
             if (userDAO.updateUserPassword(getUserDO)) {
                 BackUserVO backUserVO = new BackUserVO();
                 backUserVO

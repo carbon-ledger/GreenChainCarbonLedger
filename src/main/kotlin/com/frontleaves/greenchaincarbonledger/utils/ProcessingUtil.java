@@ -21,9 +21,9 @@ import java.util.UUID;
  * <hr/>
  * 用于处理请求的工具类, 对通用内容进行工具化处理
  *
- * @since v1.0.0-SNAPSHOT
- * @version v1.0.0-SNAPSHOT
  * @author xiao_lfeng
+ * @version v1.0.0-SNAPSHOT
+ * @since v1.0.0-SNAPSHOT
  */
 @Slf4j
 public class ProcessingUtil {
@@ -66,7 +66,7 @@ public class ProcessingUtil {
      * 用于对密码进行校验
      *
      * @param password 密码
-     * @param hash 密码hash
+     * @param hash     密码hash
      * @return {@link Boolean}
      * @since v1.0.0-SNAPSHOT
      */
@@ -118,13 +118,12 @@ public class ProcessingUtil {
     }
 
     /**
-     * 通过Cookie获取用户信息
+     * 获取用户UUID
      * <hr/>
-     * 用于通过Cookie获取用户信息
+     * 用于获取用户UUID, 从请求头 X-Auth-UUID 获取信息, 一般用于获取用户信息（即通过UUID获取当前登陆用户）
      *
      * @param request 请求对象
-     * @param userDAO 用户DAO
-     * @return {@link UserDO}
+     * @return {@link String}
      * @since v1.0.0
      */
     @NotNull
@@ -138,9 +137,9 @@ public class ProcessingUtil {
     }
 
     /**
-     * 获取用户UUID
+     * 获取用户Token
      * <hr/>
-     * 用于获取用户UUID, 从请求头 X-Auth-UUID 获取信息, 一般用于获取用户信息（即通过UUID获取当前登陆用户）
+     * 用于获取用户Token, 从请求头 Authorization 获取信息, 一般用于获取用户信息（即通过Token获取当前登陆用户）
      *
      * @param request 请求对象
      * @return {@link String}

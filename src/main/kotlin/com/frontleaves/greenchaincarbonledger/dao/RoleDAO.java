@@ -36,21 +36,21 @@ public class RoleDAO {
      * <hr/>
      * 根据uuid获取角色信息, 用于获取角色信息
      *
-     * @param uuid 角色uuid
+     * @param roleUuid 角色uuid
      * @return 角色信息
      */
-    public RoleDO getRoleByUuid(@NotNull String uuid) {
+    public RoleDO getRoleByUuid(@NotNull String roleUuid) {
         log.info("[DAO] 执行 getRoleByUuid 方法");
         log.info("\t> Redis 读取");
-        String getRedisRoleDO = roleRedis.getData(BusinessConstants.ALL, uuid);
+        String getRedisRoleDO = roleRedis.getData(BusinessConstants.NONE, roleUuid);
         RoleDO getRoleDO;
         if (getRedisRoleDO != null && !getRedisRoleDO.isEmpty()) {
             getRoleDO = gson.fromJson(getRedisRoleDO, RoleDO.class);
         } else {
             log.info("\t> Mysql 读取");
-            getRoleDO = roleMapper.getRoleByUuid(uuid);
+            getRoleDO = roleMapper.getRoleByUuid(roleUuid);
             log.info("\t> Redis 写入");
-            roleRedis.setData(BusinessConstants.ALL, uuid, gson.toJson(getRoleDO), RedisExpiration.DAY);
+            roleRedis.setData(BusinessConstants.NONE, roleUuid, gson.toJson(getRoleDO), RedisExpiration.DAY);
         }
         return getRoleDO;
     }
@@ -91,7 +91,7 @@ public class RoleDAO {
      * 获取所有角色信息
      *
      * @param limit 限制
-     * @param page 页数
+     * @param page  页数
      * @param order 顺序
      * @return 角色信息
      */
@@ -107,9 +107,9 @@ public class RoleDAO {
      * 模糊查询角色信息
      *
      * @param search 关键字查询
-     * @param limit 限制
-     * @param page 页数
-     * @param order 顺序
+     * @param limit  限制
+     * @param page   页数
+     * @param order  顺序
      * @return 角色信息
      */
     public List<RoleDO> getRoleByFuzzy(String search, Integer limit, Integer page, String order) {
