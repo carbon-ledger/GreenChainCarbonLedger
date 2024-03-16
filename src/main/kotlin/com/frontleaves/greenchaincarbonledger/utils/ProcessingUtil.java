@@ -126,14 +126,17 @@ public class ProcessingUtil {
      * @return {@link String}
      * @since v1.0.0
      */
-    @NotNull
     public static UserDO getUserByHeaderUuid(@NotNull HttpServletRequest request, @NotNull UserDAO userDAO) {
         log.info("[Util] 执行 getUserByHeaderUuid 工具");
         String authUuid = getAuthorizeUserUuid(request);
         UserDO getUserDO = userDAO.getUserByUuid(authUuid);
-        log.debug("\t> 获取用户: {}", getUserDO.getUserName());
+        if (getUserDO != null) {
+            log.debug("\t> 获取用户: {}", getUserDO.getUserName());
 
-        return getUserDO;
+            return getUserDO;
+        } else {
+            return null;
+        }
     }
 
     /**

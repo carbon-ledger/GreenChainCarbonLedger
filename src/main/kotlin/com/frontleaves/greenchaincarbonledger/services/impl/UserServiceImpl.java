@@ -53,6 +53,39 @@ public class UserServiceImpl implements UserService {
     private final ModelMapper modelMapper;
     private final Gson gson;
 
+    /**
+     * 获取封禁用户的响应实体
+     * <hr/>
+     * 用于获取封禁用户的响应实体
+     *
+     * @param timestamp   时间戳
+     * @param banUserUuid 被封禁用户的UUID
+     * @param userDAO     用户DAO
+     * @return {@link ResponseEntity<BaseResponse>}
+     * @since v1.0.0
+     */
+    @NotNull
+    private static ResponseEntity<BaseResponse> getBaseResponseResponseEntity(
+            long timestamp,
+            @NotNull String banUserUuid,
+            @NotNull UserDAO userDAO
+    ) {
+        UserDO getBanUser = userDAO.getUserByUuid(banUserUuid);
+        if (getBanUser != null) {
+            if (!getBanUser.getBan()) {
+                if (userDAO.banUser(banUserUuid)) {
+                    return ResultUtil.success(timestamp, "用户封禁成功");
+                } else {
+                    return ResultUtil.error(timestamp, ErrorCode.SERVER_INTERNAL_ERROR);
+                }
+            } else {
+                return ResultUtil.error(timestamp, "用户已经被封禁", ErrorCode.USER_CANNOT_BE_BANED);
+            }
+        } else {
+            return ResultUtil.error(timestamp, ErrorCode.USER_NOT_EXISTED);
+        }
+    }
+
     @NotNull
     @Override
     public ResponseEntity<BaseResponse> getUserCurrent(long timestamp, @NotNull HttpServletRequest request) {
@@ -85,7 +118,6 @@ public class UserServiceImpl implements UserService {
 
     @NotNull
     @Override
-    //TODO:还未进行权限验证（接口未写好）
     public ResponseEntity<BaseResponse> getUserList(long timestamp, @NotNull HttpServletRequest request, @NotNull String type, String search, Integer limit, Integer page, String order) {
         log.info("[Service] 执行 getUserList 方法");
         // 检查参数，如果未设置（即为null），则使用默认值
@@ -183,8 +215,6 @@ public class UserServiceImpl implements UserService {
         log.info("[Service] 执行 putUserForceEdit 方法");
         UserDO getUserDO = userDAO.getUserByUuid(userUuid);
         if (getUserDO != null) {
-            //通过UUID进行用户信息匹配进行数据库修改并且删掉此时数据库中缓存
-            log.info(userForceEditVO.toString());
             //校验修改的用户是否为超级管理员
             if ("console".equals(roleDAO.getRoleByUuid(getUserDO.getRole()).getName())) {
                 return ResultUtil.error(timestamp, ErrorCode.CAN_T_OPERATE_ONESELF);
@@ -230,33 +260,40 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    /**
-     * 获取封禁用户的响应实体
-     * <hr/>
-     * 用于获取封禁用户的响应实体
-     *
-     * @param timestamp    时间戳
-     * @param banUserUuid  被封禁用户的UUID
-     * @param userDAO      用户DAO
-     * @return {@link ResponseEntity<BaseResponse>}
-     * @since v1.0.0
-     */
     @NotNull
-    private static ResponseEntity<BaseResponse> getBaseResponseResponseEntity(
-            long timestamp,
-            @NotNull String banUserUuid,
-            @NotNull UserDAO userDAO
-    ) {
-        UserDO getBanUser = userDAO.getUserByUuid(banUserUuid);
-        if (getBanUser != null) {
-            if (!getBanUser.getBan()) {
-                if (userDAO.banUser(banUserUuid)) {
-                    return ResultUtil.success(timestamp, "用户封禁成功");
+    @Override
+    public ResponseEntity<BaseResponse> forceLogout(long timestamp, @NotNull HttpServletRequest request, @NotNull String userUuid) {
+        log.info("[Service] 执行 forceLogout 方法");
+        // 先获取自己的身份信息
+        UserDO getUserDO = ProcessingUtil.getUserByHeaderUuid(request, userDAO);
+        if (getUserDO != null) {
+            if (!getUserDO.getUuid().equals(userUuid)) {
+                UserDO getLogoutUserDO = userDAO.getUserByUuid(userUuid);
+                if (getLogoutUserDO != null) {
+                    if (ProcessingUtil.checkUserHasSuperConsole(getUserDO.getUuid(), userDAO, roleDAO)) {
+                        // 如果是超级管理员，则可以注销任何人的账户（除了自己）
+                        if (userDAO.forceLogout(userUuid)) {
+                            return ResultUtil.success(timestamp, "账户已强制注销");
+                        } else {
+                            return ResultUtil.error(timestamp, ErrorCode.SERVER_INTERNAL_ERROR);
+                        }
+                    } else {
+                        // 如果是普通管理员，则只能注销普通用户的账户
+                        if (ProcessingUtil.checkUserHasOtherConsole(userUuid, userDAO, roleDAO)) {
+                            if (userDAO.forceLogout(userUuid)) {
+                                return ResultUtil.success(timestamp, "账户已强制注销");
+                            } else {
+                                return ResultUtil.error(timestamp, ErrorCode.SERVER_INTERNAL_ERROR);
+                            }
+                        } else {
+                            return ResultUtil.error(timestamp, ErrorCode.CAN_T_OPERATE_ONESELF);
+                        }
+                    }
                 } else {
-                    return ResultUtil.error(timestamp, ErrorCode.SERVER_INTERNAL_ERROR);
+                    return ResultUtil.error(timestamp, ErrorCode.USER_NOT_EXISTED);
                 }
             } else {
-                return ResultUtil.error(timestamp, "用户已经被封禁", ErrorCode.USER_CANNOT_BE_BANED);
+                return ResultUtil.error(timestamp, ErrorCode.CAN_T_OPERATE_ONESELF);
             }
         } else {
             return ResultUtil.error(timestamp, ErrorCode.USER_NOT_EXISTED);
