@@ -5,7 +5,6 @@ import com.frontleaves.greenchaincarbonledger.common.BusinessConstants;
 import com.frontleaves.greenchaincarbonledger.dao.RoleDAO;
 import com.frontleaves.greenchaincarbonledger.dao.UserDAO;
 import com.frontleaves.greenchaincarbonledger.dao.VerifyCodeDAO;
-import com.frontleaves.greenchaincarbonledger.mappers.UserMapper;
 import com.frontleaves.greenchaincarbonledger.models.doData.RoleDO;
 import com.frontleaves.greenchaincarbonledger.models.doData.UserDO;
 import com.frontleaves.greenchaincarbonledger.models.doData.VerifyCodeDO;
@@ -55,7 +54,6 @@ public class UserServiceImpl implements UserService {
     private final VerifyCodeDAO verifyCodeDAO;
     private final ContactCodeRedis contactCodeRedis;
     private final ModelMapper modelMapper;
-    private final UserMapper userMapper;
     private final Gson gson;
 
     /**
@@ -309,34 +307,43 @@ public class UserServiceImpl implements UserService {
     @Override
     public ResponseEntity<BaseResponse> addAccount(long timestamp, @NotNull HttpServletRequest request, @NotNull UserAddVO userAddVO) {
         log.info("[Service] 执行 addAccount 方法");
-        String addUsername = userAddVO.getUsername();
-        String addRealname = userAddVO.getRealname();
-        String addEmail = userAddVO.getEmail();
-        String addPhone = userAddVO.getPhone();
-        if (userDAO.getUserByUsername(addUsername) == null){
-            if (userDAO.getUserByEmail(addEmail) == null){
-                if (userDAO.getUserByPhone(addPhone) == null){
-                    String addPassword = ProcessingUtil.createRandomNumbers(11);
-                    String addUuid = ProcessingUtil.createUuid();
-                    if (userAddVO.role == null){
-                        userAddVO.role = "default";
-                    }
-                    RoleDO defaultUuid = roleDAO.getRoleByName(userAddVO.role);
-                    if (userMapper.addAccount(addUuid, addUsername, addRealname, addEmail, addPhone, ProcessingUtil.passwordEncrypt(addPassword), defaultUuid.getUuid())){
-                        BackAddUserVO backAddUserVO = new BackAddUserVO();
-                        backAddUserVO.setUuid(addUuid).setUserName(addUsername).setRealName(addRealname).setPassword(addPassword).setEmail(addEmail).setPhone(addPhone);
-                        return ResultUtil.success(timestamp, "添加用户信息成功", backAddUserVO);
-                    } else {
-                        return ResultUtil.error(timestamp, ErrorCode.INSERT_DATA_ERROR);
-                    }
-                } else {
-                    return ResultUtil.error(timestamp, "手机号已存在", ErrorCode.INSERT_DATA_EXISTED);
-                }
+        String getUserHasExist = userDAO.checkUserExist(userAddVO.getUsername(), userAddVO.getEmail(), userAddVO.getPhone(), userAddVO.getRealname());
+        if (getUserHasExist == null) {
+            String addPassword = ProcessingUtil.createRandomString(10);
+            String addUuid = ProcessingUtil.createUuid();
+            if (userAddVO.getRole() == null) {
+                userAddVO.setRole("default");
+            }
+            RoleDO defaultUuid = roleDAO.getRoleByName(userAddVO.getRole());
+            if (defaultUuid == null) {
+                return ResultUtil.error(timestamp, ErrorCode.ROLE_NOT_EXISTED);
+            }
+            // 新建用户
+            UserDO newUserDO = new UserDO();
+            newUserDO
+                    .setUuid(addUuid)
+                    .setUserName(userAddVO.getUsername())
+                    .setRealName(userAddVO.getRealname())
+                    .setEmail(userAddVO.getEmail())
+                    .setPhone(userAddVO.getPhone())
+                    .setPassword(ProcessingUtil.passwordEncrypt(addPassword))
+                    .setRole(defaultUuid.getUuid())
+                    .setPermission("[]");
+            if (userDAO.createUser(newUserDO)) {
+                BackAddUserVO backAddUserVO = new BackAddUserVO();
+                backAddUserVO
+                        .setUuid(addUuid)
+                        .setUserName(userAddVO.getUsername())
+                        .setRealName(userAddVO.getRealname())
+                        .setPassword(addPassword)
+                        .setEmail(userAddVO.getEmail())
+                        .setPhone(userAddVO.getPhone());
+                return ResultUtil.success(timestamp, "添加用户信息成功", backAddUserVO);
             } else {
-                return ResultUtil.error(timestamp, "邮箱已存在", ErrorCode.INSERT_DATA_EXISTED);
+                return ResultUtil.error(timestamp, ErrorCode.SERVER_INTERNAL_ERROR);
             }
         } else {
-            return ResultUtil.error(timestamp, "用户名已存在", ErrorCode.INSERT_DATA_EXISTED);
+            return ResultUtil.error(timestamp, getUserHasExist, ErrorCode.USER_EXISTED);
         }
     }
 }
