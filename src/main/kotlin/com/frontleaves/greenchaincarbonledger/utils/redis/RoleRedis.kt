@@ -25,7 +25,7 @@ class RoleRedis(
      */
     override fun getExpiredAt(businessConstants: BusinessConstants, field: String): Long {
         val key = (RedisConstant.TYPE_AUTH + RedisConstant.TABLE_ROLE + businessConstants.value) + field
-        log.info("\t\t> 读取 Redis 键为 {} 的过期时间", key)
+        log.debug("\t\t> 读取 Redis 键为 {} 的过期时间", key)
         return redisTemplate.getExpire(key)
     }
 
@@ -40,7 +40,7 @@ class RoleRedis(
      */
     override fun delData(businessConstants: BusinessConstants, field: String): Boolean {
         val key = (RedisConstant.TYPE_AUTH + RedisConstant.TABLE_ROLE + businessConstants.value) + field
-        log.info("\t\t> 删除 Redis 键为 {} 的数据", key)
+        log.debug("\t\t> 删除 Redis 键为 {} 的数据", key)
         return redisTemplate.delete(key)
     }
 
@@ -55,7 +55,7 @@ class RoleRedis(
      */
     override fun getData(businessConstants: BusinessConstants, field: String): String? {
         val key = (RedisConstant.TYPE_AUTH + RedisConstant.TABLE_ROLE + businessConstants.value) + field
-        log.info("\t\t> 读取 Redis 键为 {} 的数据", key)
+        log.debug("\t\t> 读取 Redis 键为 {} 的数据", key)
         return redisTemplate.opsForValue()[key]
     }
 
@@ -85,8 +85,9 @@ class RoleRedis(
      */
     override fun setData(businessConstants: BusinessConstants, field: String, value: String, time: RedisExpiration): Boolean {
         val key = (RedisConstant.TYPE_AUTH + RedisConstant.TABLE_ROLE + businessConstants.value) + field
-        log.info("\t\t> 设置 Redis 键为 {} 的数据", key)
+        log.debug("\t\t> 设置 Redis 键为 {} 的数据", key)
         redisTemplate.also {
+            it.opsForValue()[key] = value
             it.expire(key, time.expirationTime, TimeUnit.MILLISECONDS)
         }
         return true

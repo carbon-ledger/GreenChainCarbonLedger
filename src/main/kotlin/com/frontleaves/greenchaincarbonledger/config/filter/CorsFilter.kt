@@ -18,14 +18,20 @@ import jakarta.servlet.http.HttpServletResponse
  */
 class CorsFilter : Filter {
     override fun doFilter(req: ServletRequest?, res: ServletResponse?, chain: FilterChain?) {
-        log.debug("[Filter] 执行 CorsFilter 方法 | 处理跨域请求")
-        // 请求头处理
+        // 强制类型转换
         val response: HttpServletResponse = res as HttpServletResponse
         val request: HttpServletRequest = req as HttpServletRequest
 
-        val origin = request.getHeader("origin")
-        response.addHeader("Access-Control-Allow-Origin", origin ?: "*")
+        // 打印请求地址
+        log.info("[URI] 请求地址 ${request.requestURI}")
+        log.info("[Filter] 执行 CorsFilter 方法 | 处理跨域请求")
+
+        // 允许跨域请求
         response.addHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, PATCH")
-        chain?.doFilter(request, response)
+        response.addHeader("Access-Control-Allow-Headers", "*")
+        response.addHeader("Access-Control-Allow-Origin", "*")
+        response.addHeader("Access-Control-Allow-Credentials", "true")
+        response.addHeader("Access-Control-Max-Age", "3600")
+        chain?.doFilter(req, response)
     }
 }

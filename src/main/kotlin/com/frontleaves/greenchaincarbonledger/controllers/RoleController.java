@@ -34,7 +34,16 @@ import java.util.ArrayList;
 public class RoleController {
     private final RoleService roleService;
 
-
+    /**
+     * addRole
+     * <hr/>
+     * 用于添加角色，管理员可以通过该接口添加角色
+     *
+     * @param roleVO        添加角色的请求参数
+     * @param bindingResult 请求参数的校验结果
+     * @param request       请求对象
+     * @return 返回添加角色的结果
+     */
     @PostMapping("/add")
     @CheckAccountPermission({"role:addRole"})
     public ResponseEntity<BaseResponse> addRole(@RequestBody @Validated RoleVO roleVO, @NotNull BindingResult bindingResult, HttpServletRequest request) {
@@ -52,7 +61,7 @@ public class RoleController {
 
     /**
      * 获取当前登录用户的角色信息。
-     * <p>
+     * <hr/>
      * 该接口提供当前登录用户的角色信息查询。用户在成功登录后，可以请求此接口来获取自己的角色信息，
      * 包括角色名称、角色权限等。这通常用于个人资料页面，允许用户查看其角色信息。
      *
@@ -69,6 +78,20 @@ public class RoleController {
         return roleService.getUserCurrent(timestamp, request);
     }
 
+    /**
+     * 获取角色列表
+     * <hr/>
+     * 该接口提供角色列表的查询功能。用户在成功登录后，可以请求此接口来获取角色列表，
+     * 包括角色名称、角色描述、角色代码等。这通常用于角色管理页面，允许用户查看角色列表。
+     *
+     * @param type    查询类型
+     * @param search  查询关键字
+     * @param limit   限制返回的角色数量
+     * @param page    页码
+     * @param order   排序方式
+     * @param request HTTP 请求对象
+     * @return 包含角色列表的响应实体
+     */
     @GetMapping("/list")
     public ResponseEntity<BaseResponse> getRoleList(
             //需要Query参数
@@ -102,6 +125,17 @@ public class RoleController {
 
     }
 
+    /**
+     * 编辑角色
+     * <hr/>
+     * 用于编辑角色，管理员可以通过该接口编辑角色
+     *
+     * @param roleVO        编辑角色的请求参数
+     * @param bindingResult 请求参数的校验结果
+     * @param roleUuid      角色的uuid
+     * @param request       请求对象
+     * @return 返回编辑角色的结果
+     */
     @PutMapping("/edit/{uuid}")
     @CheckAccountPermission({"role:editRole"})
     public ResponseEntity<BaseResponse> editRole(
@@ -121,6 +155,15 @@ public class RoleController {
         return roleService.editRole(timestamp, request, roleVO, roleUuid);
     }
 
+    /**
+     * 删除角色
+     * <hr/>
+     * 用于删除角色，管理员可以通过该接口删除角色
+     *
+     * @param roleUuid 角色的uuid
+     * @param request  请求对象
+     * @return 返回删除角色的结果
+     */
     @DeleteMapping("/delete/{uuid}")
     @CheckAccountPermission({"role:deleteRole"})
     public ResponseEntity<BaseResponse> deleteRole(@PathVariable("uuid") String roleUuid, HttpServletRequest request) {

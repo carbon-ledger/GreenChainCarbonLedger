@@ -16,8 +16,8 @@ import org.jetbrains.annotations.NotNull;
 @Data
 @Accessors(chain = true)
 public class UserLoginDO {
-    String uuid;
-    String token;
-    String userAgent;
-    String userIp;
+    public String uuid;
+    public String token;
+    public String userAgent;
+    public String userIp;
 }

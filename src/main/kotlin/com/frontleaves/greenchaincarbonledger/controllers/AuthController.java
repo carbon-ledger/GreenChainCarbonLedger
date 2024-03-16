@@ -21,9 +21,9 @@ import org.springframework.web.bind.annotation.*;
  * <hr/>
  * 用于处理用户认证相关的请求, 包括登录, 注册, 验证码等
  *
- * @since v1.0.0-SNAPSHOT
- * @version v1.0.0
  * @author xiao_lfeng-SNAPSHOT
+ * @version v1.0.0
+ * @since v1.0.0-SNAPSHOT
  */
 @Slf4j
 @RestController
@@ -32,6 +32,16 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
     private final AuthService authService;
 
+    /**
+     * 管理用户注册
+     * <hr/>
+     * 用于管理员注册用户, 管理员可以通过该接口进行注册，注册用户权限为管理用户（但是授予管理员用户权限需要进行审核）
+     *
+     * @param authUserRegisterVO 注册获取的信息
+     * @param bindingResult      结果
+     * @param request            请求
+     * @return 成功则去业务层操作，失败则返回错误信息
+     */
     @PostMapping("/admin/register")
     public ResponseEntity<BaseResponse> adminUserRegister(
             @RequestBody @Validated AuthUserRegisterVO authUserRegisterVO,
@@ -50,9 +60,12 @@ public class AuthController {
 
     /**
      * 用户登录
-     * @param authLoginVO 登录获取信息
+     * <hr/>
+     * 用于用户登录, 用户可以通过该接口进行登录
+     *
+     * @param authLoginVO   登录获取的信息
      * @param bindingResult 结果
-     * @param request 请求
+     * @param request       请求
      * @return 成功则去业务层操作，失败则返回错误信息
      */
     @PostMapping("/login")
@@ -72,10 +85,13 @@ public class AuthController {
     }
 
     /**
-     * 用户密码修改
-     * @param authChangeVO 密码修改获取的信息
+     * 用户注册
+     * <hr/>
+     * 用于用户注册, 用户可以通过该接口进行注册
+     *
+     * @param authChangeVO  注册获取的信息
      * @param bindingResult 结果
-     * @param request 请求
+     * @param request       请求
      * @return 成功则去业务层操作，失败则返回错误信息
      */
     @PatchMapping("/change")
@@ -97,10 +113,13 @@ public class AuthController {
     }
 
     /**
-     * 用户账户注销
-     * @param authDeleteVO 账号注销获取的信息
+     * 用户删除
+     * <hr/>
+     * 用于用户删除, 用户可以通过该接口进行删除
+     *
+     * @param authDeleteVO  删除获取的信息
      * @param bindingResult 结果
-     * @param request 请求
+     * @param request       请求
      * @return 成功则去业务层操作，失败则返回错误信息
      */
     @DeleteMapping("/delete")
@@ -121,38 +140,66 @@ public class AuthController {
     }
 
 
+    /**
+     * 用户注册
+     * <hr/>
+     * 用于用户注册, 用户可以通过该接口进行注册
+     *
+     * @param authOrganizeRegisterVO 注册获取的信息
+     * @param bindingResult          结果
+     * @param request                请求
+     * @return 成功则去业务层操作，失败则返回错误信息
+     */
     @PostMapping("/organize/register")
     public ResponseEntity<BaseResponse> organizeRegister(
             @RequestBody @Validated AuthOrganizeRegisterVO authOrganizeRegisterVO,
             @NotNull BindingResult bindingResult,
             HttpServletRequest request
-    ){
+    ) {
         log.info("[Controller] 请求 organizeRegister 接口");
         long timestamp = System.currentTimeMillis();
         // 对传入参数进行校验
-        if (bindingResult.hasErrors()){
+        if (bindingResult.hasErrors()) {
             return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR, ProcessingUtil.getValidatedErrorList(bindingResult));
         }
         // 业务操作
         return authService.organizeRegister(timestamp, request, authOrganizeRegisterVO);
     }
 
+    /**
+     * 忘记密码
+     * <hr/>
+     * 用于用户忘记密码, 用户可以通过该接口进行忘记密码
+     *
+     * @param authForgetCodeVO 忘记密码获取的信息
+     * @param bindingResult    结果
+     * @param request          请求
+     * @return 成功则去业务层操作，失败则返回错误信息
+     */
     @PutMapping("/forget")
     public ResponseEntity<BaseResponse> forgetCode(
             @RequestBody @Validated AuthForgetCodeVO authForgetCodeVO,
             @NotNull BindingResult bindingResult,
             HttpServletRequest request
-    ){
+    ) {
         log.info("[Controller] 请求 forgetCode 接口");
         long timestamp = System.currentTimeMillis();
         // 对传入参数进行校验
-        if (bindingResult.hasErrors()){
+        if (bindingResult.hasErrors()) {
             return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR, ProcessingUtil.getValidatedErrorList(bindingResult));
         }
         // 业务操作
         return authService.forgetCode(timestamp, request, authForgetCodeVO);
     }
 
+    /**
+     * 用户登出
+     * <hr/>
+     * 用于用户登出, 用户可以通过该接口进行登出
+     *
+     * @param request 请求
+     * @return 成功则去业务层操作，失败则返回错误信息
+     */
     @GetMapping("/logout")
     @CheckAccountPermission({"auth:userLogout"})
     public ResponseEntity<BaseResponse> userLogout(@NotNull HttpServletRequest request) {
