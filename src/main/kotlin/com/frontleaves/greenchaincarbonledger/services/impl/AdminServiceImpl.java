@@ -46,7 +46,7 @@ public class AdminServiceImpl implements AdminService {
                 return ResultUtil.error(timestamp, ErrorCode.CAN_T_RESET_MY_PASSWORD);
             }
             // 重置用户密码
-            String newPassword = ProcessingUtil.createRandomNumbers(10);
+            String newPassword = ProcessingUtil.createRandomString(10);
             String passwordEncode = ProcessingUtil.passwordEncrypt(newPassword);
             getUserDO.setPassword(passwordEncode);
             if (userDAO.updateUserPassword(getUserDO)) {

@@ -51,10 +51,6 @@ public interface UserMapper {
     @Update("UPDATE fy_user SET deleted_at = null WHERE uuid = #{uuid}")
     boolean userAccountDistanceDeletion(String uuid);
 
-
-    @Delete("DELETE FROM fy_user WHERE uuid = #{uuid}")
-    boolean deleteUserAccount(String uuid);
-
     @Select("""
             SELECT * FROM fy_user
             WHERE user_name LIKE CONCAT('%', #{search}, '%')
@@ -76,15 +72,19 @@ public interface UserMapper {
     @Select("SELECT * FROM fy_user WHERE ban = 1 ORDER BY ${order} LIMIT #{limit} OFFSET ${(page-1) * limit}")
     List<UserDO> getUserByBanlist(Integer limit, Integer page, String order);
 
+
     /**
+     * 获取用户可用列表
+     * <hr/>
+     * 获取用户可用列表，即没有被删除的用户，没有被封禁的用户
+     * 如果删除时间不为空，则该用户存在或者没有被封禁
      *
-     * @param limit
-     * @param page
-     * @param order
-     * @return
+     * @param limit 限制
+     * @param page  页数
+     * @param order 排序
+     * @return {@link List<UserDO>}
      */
     @Select("SELECT * FROM fy_user WHERE deleted_at IS NULL and ban = 0 ORDER BY ${order} LIMIT #{limit} OFFSET ${(page-1) * limit}")
-        // 如果删除时间不为空，则该用户存在或者没有被封禁
     List<UserDO> getUserByAvailablelist(Integer limit, Integer page, String order);
 
     @Select("SELECT * FROM fy_user ORDER BY ${order} LIMIT #{limit} OFFSET ${(page-1) * limit}")
@@ -122,13 +122,6 @@ public interface UserMapper {
             """)
     boolean updateUserForceByUuid(String userUuid, String userName,String realName,String nickName, String avatar,String email, String phone);
 
-    @Update("UPDATE fy_user SET ban = 1 WHERE uuid = #{uuid} and uuid != (SELECT role FROM fy_user WHERE uuid = #{banUuid})")
+    @Update("UPDATE fy_user SET ban = 1 WHERE uuid = #{uuid}")
     Boolean banUser(String banUuid);
-
-    @Select("SELECT role FROM fy_user WHERE uuid = #{roleUuid}")
-    String getRoleByUuid(String roleUuid);
-
-
-    @Select("SELECT name FROM fy_role WHERE uuid = (SELECT role FROM fy_user WHERE uuid = #{uuid})")
-    String judgeConsoleByUuid(String uuid);
 }

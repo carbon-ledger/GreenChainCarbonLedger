@@ -135,10 +135,17 @@ public class UserController {
 
     @PatchMapping("/ban/{uuid}")
     @CheckAccountPermission("user:banUser")
-    public ResponseEntity<BaseResponse> banUser(@PathVariable("uuid") String roleUuid, @NotNull HttpServletRequest request){
-        log.info("[Controller] 请求 roleService 接口");
+    public ResponseEntity<BaseResponse> banUser(
+            @PathVariable("uuid") @NotNull String userUuid,
+            @NotNull HttpServletRequest request
+    ) {
+        log.info("[Controller] 请求 banUser 接口");
         long timestamp = System.currentTimeMillis();
-        return userService.banUser(timestamp, request, roleUuid);
+        // 输入 Uuid 校验
+        if (!userUuid.matches("^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$")) {
+            return ResultUtil.error(timestamp, "uuid 参数不正确", ErrorCode.PATH_VARIABLE_ERROR);
+        }
+        return userService.banUser(timestamp, request, userUuid);
     }
 
     /**

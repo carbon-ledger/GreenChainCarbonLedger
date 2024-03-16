@@ -39,8 +39,8 @@ public class RoleDAO {
      * @param uuid 角色uuid
      * @return 角色信息
      */
-    public RoleDO getRoleUuid(@NotNull String uuid) {
-        log.info("[DAO] 执行 getRoleUuid 方法");
+    public RoleDO getRoleByUuid(@NotNull String uuid) {
+        log.info("[DAO] 执行 getRoleByUuid 方法");
         log.info("\t> Redis 读取");
         String getRedisRoleDO = roleRedis.getData(BusinessConstants.ALL, uuid);
         RoleDO getRoleDO;
