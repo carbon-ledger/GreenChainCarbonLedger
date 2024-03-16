@@ -359,4 +359,20 @@ public class UserDAO {
         log.info("\t> Mysql 更新");
         return userMapper.banUser(banUuid);
     }
+
+    /**
+     * 注销用户
+     * <hr/>
+     * 注销用户, 将用户状态设置为解封状态
+     *
+     * @param userUuid 解封用户的UUID
+     * @return 解封操作是否成功，成功返回 true，失败返回 false
+     */
+    public boolean forceLogout(String userUuid) {
+        log.info("[DAO] 执行 forceLogout 方法");
+        log.info("\t> Redis 删除");
+        userRedis.delData(BusinessConstants.NONE, userUuid);
+        log.info("\t> Mysql 更新");
+        return userMapper.forceLogout(userUuid);
+    }
 }
