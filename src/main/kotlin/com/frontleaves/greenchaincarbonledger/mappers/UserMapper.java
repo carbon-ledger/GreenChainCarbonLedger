@@ -125,6 +125,6 @@ public interface UserMapper {
     @Update("UPDATE fy_user SET ban = 1 WHERE uuid = #{uuid}")
     Boolean banUser(String banUuid);
 
-    @Update("UPDATE fy_user SET deleted_at = NOW() WHERE uuid = #{userUuid} AND uuid != #{uuid}")
-    Boolean forceLogout(String userUuid, String uuid);
+    @Update("UPDATE fy_user SET deleted_at = NOW() WHERE uuid = #{userUuid}")
+    Boolean forceLogout(String userUuid);
 }

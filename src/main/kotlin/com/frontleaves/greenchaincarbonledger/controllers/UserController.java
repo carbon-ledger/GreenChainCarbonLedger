@@ -133,6 +133,16 @@ public class UserController {
         return null;
     }
 
+    /**
+     * 禁用用户
+     * <hr/>
+     * 该接口提供用户禁用的功能。用户在成功登录后，可以请求此接口来禁用其他用户，
+     * 包括用户的姓名、联系方式、电子邮件地址等。这通常用于管理员禁用其他用户。
+     *
+     * @param userUuid 用户uuid
+     * @param request  HTTP 请求对象
+     * @return 包含用户信息的响应实体
+     */
     @PatchMapping("/ban/{uuid}")
     @CheckAccountPermission("user:banUser")
     public ResponseEntity<BaseResponse> banUser(
@@ -148,13 +158,27 @@ public class UserController {
         return userService.banUser(timestamp, request, userUuid);
     }
 
+    /**
+     * 强制登出用户
+     * <hr/>
+     * 该接口提供用户强制登出的功能。用户在成功登录后，可以请求此接口来强制登出其他用户，
+     * 包括用户的姓名、联系方式、电子邮件地址等。这通常用于管理员强制登出其他用户。
+     *
+     * @param request  HTTP 请求对象
+     * @param userUuid 用户uuid
+     * @return 包含用户信息的响应实体
+     */
     @DeleteMapping("/force-logout/{uuid}")
     public ResponseEntity<BaseResponse> forceLogout(
             HttpServletRequest request,
-            @PathVariable("uuid") String userUuid) {
+            @PathVariable("uuid") String userUuid
+    ) {
         request.getHeader("X-Auth-UUID");
         log.info("[Controller] 请求userService接口");
         long timestamp = System.currentTimeMillis();
+        if (!userUuid.matches("^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$")) {
+            return ResultUtil.error(timestamp, "uuid 参数不正确", ErrorCode.PATH_VARIABLE_ERROR);
+        }
         return userService.forceLogout(timestamp, request, userUuid);
     }
 
@@ -183,8 +207,8 @@ public class UserController {
         if (bindingResult.hasErrors()) {
             return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR, ProcessingUtil.getValidatedErrorList(bindingResult));
         }
-        if (!userUuid.matches("^[0-9A-Za-z-]{36}")) {
-            return ResultUtil.error(timestamp, "uuid 参数错误", ErrorCode.PATH_VARIABLE_ERROR);
+        if (!userUuid.matches("^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$")) {
+            return ResultUtil.error(timestamp, "uuid 参数不正确", ErrorCode.PATH_VARIABLE_ERROR);
         }
         //返回业务操作
         return userService.putUserForceEdit(timestamp, request, userUuid, userForceEditVO);
