@@ -110,12 +110,13 @@ public class CarbonController {
         if (page != null && !page.toString().matches("^[0-9]+$")) {
             return ResultUtil.error(timestamp, "page 参数错误", ErrorCode.REQUEST_BODY_ERROR);
         }
-        request.getHeader("X-Auth-UUID");
         ArrayList<String> list = new ArrayList<>();
         list.add("desc");
         list.add("asc");
-        if (order != null && !list.contains(order)) {
-            return ResultUtil.error(timestamp, "order 参数错误", ErrorCode.REQUEST_BODY_ERROR);
+        if (order != null && !order.isEmpty()) {
+            if (!list.contains(order)) {
+                return ResultUtil.error(timestamp, "order 参数错误", ErrorCode.REQUEST_BODY_ERROR);
+            }
         }
         if ("all".equals(type) || "search".equals(type) || "draft".equals(type) || "pending_review".equals(type) || "approved".equals(type) || "rejected".equals(type)) {
             // 返回业务操作

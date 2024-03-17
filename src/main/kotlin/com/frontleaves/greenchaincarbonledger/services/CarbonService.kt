@@ -3,7 +3,6 @@ package com.frontleaves.greenchaincarbonledger.services
 import com.frontleaves.greenchaincarbonledger.utils.BaseResponse
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.validation.constraints.NotNull
-import lombok.Data
 import org.springframework.http.ResponseEntity
 
 interface CarbonService {
@@ -25,7 +24,6 @@ interface CarbonService {
         end: String
     ): ResponseEntity<BaseResponse>
 
-interface CarbonService {
     /**
      * 获取碳排放报告
      *
@@ -47,6 +45,6 @@ interface CarbonService {
         search: String,
         limit: Int?,
         page: Int?,
-        order: String
+        order: String?
     ): ResponseEntity<BaseResponse>
 }
