@@ -1,6 +1,7 @@
 package com.frontleaves.greenchaincarbonledger.controllers;
 
 import com.frontleaves.greenchaincarbonledger.annotations.CheckAccountPermission;
+import com.frontleaves.greenchaincarbonledger.models.voData.getData.UserAddVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.UserEditVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.UserForceEditVO;
 import com.frontleaves.greenchaincarbonledger.services.UserService;
@@ -34,6 +35,7 @@ import java.util.ArrayList;
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
+
 
     /**
      * 获取当前登录用户的个人信息。
@@ -127,9 +129,67 @@ public class UserController {
 
     @PostMapping("/add")
     public ResponseEntity<BaseResponse> addAccount(
-
+        @RequestBody @Validated UserAddVO userAddVO,
+        @NotNull BindingResult bindingResult,
+        HttpServletRequest request
     ) {
-        return null;
+        log.info("[Controller] 请求 addAccount 接口");
+        long timestamp = System.currentTimeMillis();
+        // 对请求参数进行校验
+        if (bindingResult.hasErrors()) {
+            return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR, ProcessingUtil.getValidatedErrorList(bindingResult));
+        }
+        // 业务操作
+        return userService.addAccount(timestamp, request, userAddVO);
+    }
+
+    /**
+     * 禁用用户
+     * <hr/>
+     * 该接口提供用户禁用的功能。用户在成功登录后，可以请求此接口来禁用其他用户，
+     * 包括用户的姓名、联系方式、电子邮件地址等。这通常用于管理员禁用其他用户。
+     *
+     * @param userUuid 用户uuid
+     * @param request  HTTP 请求对象
+     * @return 包含用户信息的响应实体
+     */
+    @PatchMapping("/ban/{uuid}")
+    @CheckAccountPermission("user:banUser")
+    public ResponseEntity<BaseResponse> banUser(
+            @PathVariable("uuid") @NotNull String userUuid,
+            @NotNull HttpServletRequest request
+    ) {
+        log.info("[Controller] 请求 banUser 接口");
+        long timestamp = System.currentTimeMillis();
+        // 输入 Uuid 校验
+        if (!userUuid.matches("^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$")) {
+            return ResultUtil.error(timestamp, "uuid 参数不正确", ErrorCode.PATH_VARIABLE_ERROR);
+        }
+        return userService.banUser(timestamp, request, userUuid);
+    }
+
+    /**
+     * 强制登出用户
+     * <hr/>
+     * 该接口提供用户强制登出的功能。用户在成功登录后，可以请求此接口来强制登出其他用户，
+     * 包括用户的姓名、联系方式、电子邮件地址等。这通常用于管理员强制登出其他用户。
+     *
+     * @param request  HTTP 请求对象
+     * @param userUuid 用户uuid
+     * @return 包含用户信息的响应实体
+     */
+    @DeleteMapping("/force-logout/{uuid}")
+    public ResponseEntity<BaseResponse> forceLogout(
+            HttpServletRequest request,
+            @PathVariable("uuid") String userUuid
+    ) {
+        request.getHeader("X-Auth-UUID");
+        log.info("[Controller] 请求userService接口");
+        long timestamp = System.currentTimeMillis();
+        if (!userUuid.matches("^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$")) {
+            return ResultUtil.error(timestamp, "uuid 参数不正确", ErrorCode.PATH_VARIABLE_ERROR);
+        }
+        return userService.forceLogout(timestamp, request, userUuid);
     }
 
     /**
@@ -157,8 +217,8 @@ public class UserController {
         if (bindingResult.hasErrors()) {
             return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR, ProcessingUtil.getValidatedErrorList(bindingResult));
         }
-        if (!userUuid.matches("^[0-9A-Za-z-]{36}")) {
-            return ResultUtil.error(timestamp, "uuid 参数错误", ErrorCode.PATH_VARIABLE_ERROR);
+        if (!userUuid.matches("^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$")) {
+            return ResultUtil.error(timestamp, "uuid 参数不正确", ErrorCode.PATH_VARIABLE_ERROR);
         }
         //返回业务操作
         return userService.putUserForceEdit(timestamp, request, userUuid, userForceEditVO);
