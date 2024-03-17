@@ -100,7 +100,7 @@ public class RoleController {
             @RequestParam(required = false) Integer limit,
             @RequestParam(required = false) Integer page,
             @RequestParam(required = false) String order,
-            HttpServletRequest request) {
+            @NotNull HttpServletRequest request) {
         log.info("[Controller] 请求 getRoleList 接口");
         long timestamp = System.currentTimeMillis();
         if (limit != null && !limit.toString().matches("^[0-9]+$")) {
