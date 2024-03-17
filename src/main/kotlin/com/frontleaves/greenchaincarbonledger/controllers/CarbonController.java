@@ -34,32 +34,20 @@ public class CarbonController {
      * <hr/>
      * 获取自己组织碳排放配额
      * @param request 请求
-     * @return
+     * @return carbonService
      */
     @GetMapping("/accounting/get")
     /*
     * 检查组织权限，是使用注解还是在服务层里面体现
     * */
    public ResponseEntity<BaseResponse> getCarbonAccounting(
-            @RequestParam(required = false) String limit,
+            @RequestParam(required = false) Integer limit,
             @RequestParam(required = false) Integer page,
             @RequestParam(required = false) String order,
             HttpServletRequest request
     ){
         log.info("[Controller] 请求 getCarbonAccounting 接口");
         long timestamp = System.currentTimeMillis();
-        if (limit != null && !limit.toString().matches("^[0-9]+$")) {
-            return ResultUtil.error(timestamp, "limit 参数错误", ErrorCode.REQUEST_BODY_ERROR);
-        }
-        if (page != null && !page.toString().matches("^[0-9]+$")) {
-            return ResultUtil.error(timestamp, "page 参数错误", ErrorCode.REQUEST_BODY_ERROR);
-        }
-        ArrayList<String> list = new ArrayList<>();
-        list.add("desc");
-        list.add("asc");
-        if (order != null && !list.contains(order)) {
-            return ResultUtil.error(timestamp, "order 参数错误", ErrorCode.REQUEST_BODY_ERROR);
-        }
-       return carbonService.getCarbonAccounting(timestamp, limit, page, order);
+        return carbonService.getCarbonAccounting(timestamp,request, limit, page, order);
    }
 }

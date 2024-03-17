@@ -25,8 +25,9 @@ interface CarbonService {
 
     fun getCarbonAccounting(
         timestamp: Long,
-        limit: String,
-        page: Int,
+        request: HttpServletRequest,
+        limit: Integer,
+        page: Integer,
         order: String
     ): ResponseEntity<BaseResponse>
 
