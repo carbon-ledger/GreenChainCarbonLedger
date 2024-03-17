@@ -33,6 +33,7 @@ object SqlPrepareData {
         add(ArrayList(listOf("admin:resetUserPassword", "重置用户密码")))
         add(ArrayList(listOf("super:closeServer", "关闭服务器")))
         add(ArrayList(listOf("super:resetSql", "重置数据库")))
+        add(ArrayList(listOf("carbon:getOwnCarbonQuota", "获取自己的碳配额")))
     }
 
     /**

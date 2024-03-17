@@ -38,6 +38,7 @@ public enum ErrorCode {
     ROLE_CANNOT_BE_DELETED("RoleCannotBeDeleted", 40311, "角色不能被删除"),
     CAN_T_OPERATE_ONESELF("CanTOperateOneself", 40312, "不能操作自己或超级管理"),
     ROLE_NOT_EXISTED("RoleNotExist", 40313, "角色不存在"),
+    PARAM_VARIABLE_ERROR("ParamVariableError", 40314, "参数变量错误"),
     PAGE_NOT_FOUNDED("PageNotFounded", 40401, "页面不存在"),
     REQUEST_METHOD_NOT_SUPPORTED("RequestMethodNotSupported", 40500, "请求方法不支持"),
     SERVER_INTERNAL_ERROR("ServerInternalError", 50000, "服务器内部错误"),
