@@ -19,8 +19,8 @@ interface CarbonService {
     fun getOwnCarbonQuota(
         timestamp: Long,
         request: HttpServletRequest,
-        start: Int?,
-        end: Int?
+        start: String?,
+        end: String
     ): ResponseEntity<BaseResponse>
 
 }
