@@ -53,7 +53,7 @@ public class CarbonDAO {
      * @return 符合条件的碳排放报告列表
      */
 
-    public List<CarbonReportDO> getReportByUuid(String uuid, Integer limit, Integer page, String order) {
+    public List<CarbonReportDO> getReportByUuid(String uuid, String limit, String page, String order) {
         log.info("[DAO] 执行 getReportByUuid 方法");
         return carbonMapper.getReportByUuid(uuid, limit, page, order);
     }
@@ -68,7 +68,7 @@ public class CarbonDAO {
      * @param order  排序方式，可选值包括 "asc"（升序）和 "desc"（降序）
      * @return 包含碳排放报告信息的列表
      */
-    public List<CarbonReportDO> getReportByStatus(String uuid, String search, Integer limit, Integer page, String order) {
+    public List<CarbonReportDO> getReportByStatus(String uuid, String search, String limit, String page, String order) {
         log.info("[DAO] 执行 getReportByStatus 方法");
         return carbonMapper.getReportByStatus(uuid, search, limit, page, order);
     }
@@ -83,7 +83,7 @@ public class CarbonDAO {
      * @param order  排序顺序
      * @return 符合条件的碳报告列表
      */
-    public List<CarbonReportDO> getReportBySearch(String uuid, String search, Integer limit, Integer page, String order) {
+    public List<CarbonReportDO> getReportBySearch(String uuid, String search, String  limit, String page, String order) {
         log.info("[DAO] 执行 etReportBySearch 方法");
         return carbonMapper.getReportBySearch(uuid, search, limit, page, order);
     }

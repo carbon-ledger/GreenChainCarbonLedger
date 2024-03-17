@@ -43,8 +43,8 @@ interface CarbonService {
         request: @NotNull HttpServletRequest,
         type: String,
         search: String,
-        limit: Int?,
-        page: Int?,
+        limit: String,
+        page: String,
         order: String?
     ): ResponseEntity<BaseResponse>
 }

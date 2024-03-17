@@ -73,8 +73,8 @@ public class CarbonServiceImpl implements CarbonService {
     @Override
     public ResponseEntity<BaseResponse> getCarbonReport(
             long timestamp,
-            @NotNull HttpServletRequest request, @NotNull String type, @NotNull String search, @Nullable Integer limit,
-            @Nullable Integer page, String order
+            @NotNull HttpServletRequest request, @NotNull String type, @NotNull String search, @NotNull String limit,
+            @NotNull String page, String order
     ) {
         log.info("[Service] 执行 getCarbonReport 方法");
         String getUuid = ProcessingUtil.getAuthorizeUserUuid(request);
@@ -82,8 +82,8 @@ public class CarbonServiceImpl implements CarbonService {
         List<CarbonAccountingDO> getAccountList = carbonDAO.getAccountByUuid(getUuid);
         if (!getAccountList.isEmpty()) {
             // 检查参数，如果未设置（即为null），则使用默认值
-            limit = (limit == null || limit > 100) ? 20 : limit;
-            page = (page == null) ? 1 : page;
+            limit = (limit.isEmpty() || Integer.parseInt(limit) > 100) ? "20" : limit;
+            page = (page.isEmpty()) ? "1" : page;
             if (order.isBlank()) {
                 order = "ASC";
             }
@@ -94,7 +94,8 @@ public class CarbonServiceImpl implements CarbonService {
             switch (type) {
                 case "all" -> getReportList = carbonDAO.getReportByUuid(getUuid, limit, page, order);
                 case "search" -> getReportList = carbonDAO.getReportBySearch(getUuid, search, limit, page, order);
-                case "draft", "pending_review", "approved", "rejected" -> getReportList = carbonDAO.getReportByStatus(getUuid, search, limit, page, order);
+                case "draft", "pending_review", "approved", "rejected" ->
+                        getReportList = carbonDAO.getReportByStatus(getUuid, search, limit, page, order);
                 default -> {
                     return ResultUtil.error(timestamp, "type 参数有误", ErrorCode.REQUEST_BODY_ERROR);
                 }
