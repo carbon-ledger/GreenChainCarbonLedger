@@ -5,10 +5,7 @@ import com.frontleaves.greenchaincarbonledger.models.voData.getData.UserAddVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.UserEditVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.UserForceEditVO;
 import com.frontleaves.greenchaincarbonledger.services.UserService;
-import com.frontleaves.greenchaincarbonledger.utils.BaseResponse;
-import com.frontleaves.greenchaincarbonledger.utils.ErrorCode;
-import com.frontleaves.greenchaincarbonledger.utils.ProcessingUtil;
-import com.frontleaves.greenchaincarbonledger.utils.ResultUtil;
+import com.frontleaves.greenchaincarbonledger.utils.*;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,8 +14,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.ArrayList;
 
 /**
  * UserController
@@ -35,6 +30,8 @@ import java.util.ArrayList;
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
+
+    private final BusinessUtil businessUtil;
 
 
     /**
@@ -76,27 +73,28 @@ public class UserController {
             // 此处根据用户的操作需求自动传入对应参数，除了type都是可选项
             @RequestParam String type,
             @RequestParam(required = false) String search,
-            @RequestParam(required = false) Integer limit,
-            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) String limit,
+            @RequestParam(required = false) String page,
             @RequestParam(required = false) String order,
             HttpServletRequest request
     ) {
         log.info("[Controller] 请求getUserList 接口");
         long timestamp = System.currentTimeMillis();
-        if (limit != null && !limit.toString().matches("^[0-9]+$")) {
-            return ResultUtil.error(timestamp, "limit 参数错误", ErrorCode.REQUEST_BODY_ERROR);
+        ResponseEntity<BaseResponse> checkResult = businessUtil.checkLimitPageAndOrder(timestamp, limit, page, order);
+        if (checkResult != null) {
+            return checkResult;
+        } else {
+            if (!"all".equals(type) && !"search".equals(type) && !"unbanlist".equals(type) && !"banlist".equals(type) && !"available".equals(type)) {
+                return ResultUtil.error(timestamp, "type 参数错误", ErrorCode.REQUEST_BODY_ERROR);
+            }
+            if (limit == null) {
+                limit = "";
+            }
+            if (page == null) {
+                page = "";
+            }
+            return userService.getUserList(timestamp, request, type, search, limit, page, order);
         }
-        if (page != null && !page.toString().matches("^[0-9]+$")) {
-            return ResultUtil.error(timestamp, "page 参数错误", ErrorCode.REQUEST_BODY_ERROR);
-        }
-        ArrayList<String> list = new ArrayList<>();
-        list.add("desc");
-        list.add("asc");
-        if (order != null && !list.contains(order)) {
-            return ResultUtil.error(timestamp, "order 参数错误", ErrorCode.REQUEST_BODY_ERROR);
-        }
-        // 业务操作
-        return userService.getUserList(timestamp, request, type, search, limit, page, order);
     }
 
     /**
@@ -129,9 +127,9 @@ public class UserController {
 
     @PostMapping("/add")
     public ResponseEntity<BaseResponse> addAccount(
-        @RequestBody @Validated UserAddVO userAddVO,
-        @NotNull BindingResult bindingResult,
-        HttpServletRequest request
+            @RequestBody @Validated UserAddVO userAddVO,
+            @NotNull BindingResult bindingResult,
+            HttpServletRequest request
     ) {
         log.info("[Controller] 请求 addAccount 接口");
         long timestamp = System.currentTimeMillis();

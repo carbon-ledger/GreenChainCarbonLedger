@@ -22,6 +22,7 @@ object SqlPrepareData {
         add(ArrayList(listOf("auth:userLogout", "用户登出")))
         add(ArrayList(listOf("role:addRole", "添加角色")))
         add(ArrayList(listOf("role:getCurrentRole", "获取当前角色")))
+        add(ArrayList(listOf("role:getRoleList", "获取角色列表")))
         add(ArrayList(listOf("role:editRole", "编辑角色")))
         add(ArrayList(listOf("role:deleteRole", "删除角色")))
         add(ArrayList(listOf("user:getUserList", "获取用户列表")))
@@ -34,6 +35,7 @@ object SqlPrepareData {
         add(ArrayList(listOf("super:closeServer", "关闭服务器")))
         add(ArrayList(listOf("super:resetSql", "重置数据库")))
         add(ArrayList(listOf("carbon:getOwnCarbonQuota", "获取自己的碳配额")))
+        add(ArrayList(listOf("carbon:getCarbonReport", "获取碳排放报告")))
     }
 
     /**
@@ -50,15 +52,26 @@ object SqlPrepareData {
     /**
      * SQL 角色列表
      *
-     * ADMIN 管理员角色
+     * DEFAULT 默认角色
      */
-    val SQL_ROLE_ADMIN_PERMISSION_LIST = ArrayList<String>().apply {
+    val SQL_ROLE_DEFAULT_PERMISSION_LIST = ArrayList<String>().apply {
         add("auth:userChangePassword")
         add("auth:userDelete")
         add("auth:userLogout")
         add("role:getCurrentRole")
         add("user:editUserInformation")
         add("user:getUserCurrent")
+    }
+
+    /**
+     * SQL 角色列表
+     *
+     * ADMIN 管理员角色
+     */
+    val SQL_ROLE_ADMIN_PERMISSION_LIST = ArrayList<String>().apply {
+        SQL_ROLE_DEFAULT_PERMISSION_LIST.forEach{
+            add(it)
+        }
     }
 
 
@@ -68,20 +81,8 @@ object SqlPrepareData {
      * ORGANIZE 组织角色
      */
     val SQL_ROLE_ORGANIZE_PERMISSION_LIST = ArrayList<String>().apply {
-        add("auth:userChangePassword")
-        add("auth:userDelete")
-        add("auth:userLogout")
-        add("role:getCurrentRole")
-        add("user:editUserInformation")
-        add("user:getUserCurrent")
-    }
-
-    val SQL_ROLE_DEFAULT_PERMISSION_LIST = ArrayList<String>().apply {
-        add("auth:userChangePassword")
-        add("auth:userDelete")
-        add("auth:userLogout")
-        add("role:getCurrentRole")
-        add("user:editUserInformation")
-        add("user:getUserCurrent")
+        SQL_ROLE_DEFAULT_PERMISSION_LIST.forEach{
+            add(it)
+        }
     }
 }

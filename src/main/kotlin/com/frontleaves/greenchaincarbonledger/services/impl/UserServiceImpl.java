@@ -121,11 +121,14 @@ public class UserServiceImpl implements UserService {
 
     @NotNull
     @Override
-    public ResponseEntity<BaseResponse> getUserList(long timestamp, @NotNull HttpServletRequest request, @NotNull String type, String search, Integer limit, Integer page, String order) {
+    public ResponseEntity<BaseResponse> getUserList(
+            long timestamp, @NotNull HttpServletRequest request,
+            @NotNull String type, String search, @NotNull String limit, @NotNull String page, String order
+    ) {
         log.info("[Service] 执行 getUserList 方法");
         // 检查参数，如果未设置（即为null），则使用默认值
-        limit = (limit == null || limit > 100) ? 20 : limit;
-        page = (page == null) ? 1 : page;
+        limit = (limit.isEmpty() || Integer.parseInt(limit) > 100) ? "20" : limit;
+        page = (page.isEmpty()) ? "1" : page;
         if (order == null || order.isBlank()) {
             order = "uid ASC";
         } else {
@@ -135,11 +138,15 @@ public class UserServiceImpl implements UserService {
         // 1. 对type类型进行判断
         List<UserDO> getUserDO;
         switch (type) {
-            case "search" -> getUserDO = userDAO.getUserFuzzy(search, limit, page, order);
-            case "unbanlist" -> getUserDO = userDAO.getUserByUnbanlist(limit, page, order);
-            case "banlist" -> getUserDO = userDAO.getUserByBanlist(limit, page, order);
-            case "available" -> getUserDO = userDAO.getUserByAvailableList(limit, page, order);
-            case "all" -> getUserDO = userDAO.getUserByAllList(limit, page, order);
+            case "search" ->
+                    getUserDO = userDAO.getUserFuzzy(search, Integer.valueOf(limit), Integer.valueOf(page), order);
+            case "unbanlist" ->
+                    getUserDO = userDAO.getUserByUnbanlist(Integer.valueOf(limit), Integer.valueOf(page), order);
+            case "banlist" ->
+                    getUserDO = userDAO.getUserByBanlist(Integer.valueOf(limit), Integer.valueOf(page), order);
+            case "available" ->
+                    getUserDO = userDAO.getUserByAvailableList(Integer.valueOf(limit), Integer.valueOf(page), order);
+            case "all" -> getUserDO = userDAO.getUserByAllList(Integer.valueOf(limit), Integer.valueOf(page), order);
             default -> {
                 return ResultUtil.error(timestamp, "type 参数有误", ErrorCode.REQUEST_BODY_ERROR);
             }

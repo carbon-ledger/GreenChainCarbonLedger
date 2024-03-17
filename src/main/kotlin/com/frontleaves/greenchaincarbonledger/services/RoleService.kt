@@ -85,8 +85,8 @@ interface RoleService {
         request: HttpServletRequest,
         type: String,
         search: String?,
-        limit: Int?,
-        page: Int?,
+        limit: String,
+        page: String,
         order: String?
     ): ResponseEntity<BaseResponse>
 

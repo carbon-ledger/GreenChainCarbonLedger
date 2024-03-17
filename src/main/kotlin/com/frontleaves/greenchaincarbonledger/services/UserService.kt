@@ -45,8 +45,8 @@ interface UserService {
         request: HttpServletRequest,
         type: String,
         search: String?,
-        limit: Int?,
-        page: Int?,
+        limit: String,
+        page: String,
         order: String?
     ): ResponseEntity<BaseResponse>
 
@@ -73,7 +73,7 @@ interface UserService {
      * @param timestamp 时间戳
      * @param request 请求
      * @param userUuid 用户UUID
-     * @param UserForceEditVO 用户账户信息
+     * @param userForceEditVO 用户账户信息
      * @return 返回响应实体
      */
     fun putUserForceEdit(
