@@ -8,6 +8,7 @@ import com.frontleaves.greenchaincarbonledger.utils.ResultUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -42,64 +43,43 @@ public class CarbonController {
      * @return 若匹配则进入服务，若不匹配则返回错误信息
      */
     @GetMapping("/quota/get")
-    @CheckAccountPermission({"Carbon: gteOwnCarbonQuota"})
+    @CheckAccountPermission({"carbon:getOwnCarbonQuota"})
     public ResponseEntity<BaseResponse> getOwnCarbonQuota(
-            @RequestParam(required = false) Integer start,
-            @RequestParam(required = false) Integer end,
-            HttpServletRequest request) {
-        log.info("[Control] 请求getOwnCarbonQuota接口");
+            @RequestParam(required = false) String start,
+            @RequestParam(required = false) String end,
+            @NotNull HttpServletRequest request) {
+        log.info("[Controller] 执行 getOwnCarbonQuota 方法");
         long timestamp = System.currentTimeMillis();
         SimpleDateFormat thisYear = new SimpleDateFormat("yyyy");
-        request.getHeader("X-Auth-UUID");
-        //校验是否为空
-        if (start != null && end != null) {
-            //校验输入的是否为正确的年份
-            if (start.toString().matches("^(\\d{4})?$") || end.toString().matches("^(\\d{4})?$")) {
-                //检查年份顺序
-                if (start <= end) {
-                    //检查结束年份
-                    if (end - Integer.parseInt(thisYear.format(System.currentTimeMillis())) < 0) {
-                        //返回业务操作
-                        return carbonService.getOwnCarbonQuota(timestamp, request, start, end);
-                    } else {
-                        return ResultUtil.error(timestamp, ErrorCode.PARAM_VARIABLE_ERROR);
-                    }
-                } else {
-                    return ResultUtil.error(timestamp, ErrorCode.PARAM_VARIABLE_ERROR);
-                }
-            } else {
-                return ResultUtil.error(timestamp, ErrorCode.PARAM_SEQUENCE_ERROR);
-            }
-        } else if (start != null && end == null)  {
-            //检查输入是否为正确年份
-            if (start.toString().matches("^(\\d{4})?$")) {
-                //检查开始年份
-                if (start - Integer.parseInt(thisYear.format(System.currentTimeMillis())) < 0) {
-                    //返回业务操作
+        // 数据校验
+        if (start != null && end != null && !start.isEmpty() && !end.isEmpty()) {
+            log.debug("[Controller] start 和 end 数据存在");
+            if (start.matches("^[0-4]{4}") && end.matches("^[0-4]{4}")) {
+                if (Integer.parseInt(start) <= Integer.parseInt(end)) {
                     return carbonService.getOwnCarbonQuota(timestamp, request, start, end);
                 } else {
-                    return ResultUtil.error(timestamp, ErrorCode.PARAM_VARIABLE_ERROR);
+                    return ResultUtil.error(timestamp, "年份起始时间不能大于结束时间", ErrorCode.PARAM_VARIABLE_ERROR);
                 }
             } else {
-                return ResultUtil.error(timestamp, ErrorCode.PARAM_VARIABLE_ERROR);
+                return ResultUtil.error(timestamp, "年份输入格式不正确", ErrorCode.PARAM_VARIABLE_ERROR);
             }
-        }else if (start == null && end != null){
-            //检查输入是否为正确年份
-            if (end.toString().matches("^(\\d{4})?$")){
-                //检查结束年份
-                if (end-Integer.parseInt(thisYear.format(System.currentTimeMillis())) < 0){
-                    //返回业务操作
-                    return carbonService.getOwnCarbonQuota(timestamp, request, start, end);
-                }else {
-                    return ResultUtil.error(timestamp, ErrorCode.PARAM_VARIABLE_ERROR);
+        } else {
+            log.debug("[Controller] start 和 end 数据不存在，或只存在部分");
+            if (start != null && !start.isEmpty()) {
+                if (!start.matches("^[0-4]{4}")) {
+                    return ResultUtil.error(timestamp, "年份输入格式不正确", ErrorCode.PARAM_VARIABLE_ERROR);
                 }
-            }else {
-                return ResultUtil.error(timestamp,ErrorCode.PARAM_VARIABLE_ERROR);
             }
-        }else if (start == null && end == null){
-            //返回业务操作
+            if (end != null && !end.isEmpty()) {
+                if (!end.matches("^[0-4]{4}")) {
+                    return ResultUtil.error(timestamp, "年份输入格式不正确", ErrorCode.PARAM_VARIABLE_ERROR);
+                }
+            }
+            // 对空数据进行相应
+            if (end == null || end.isEmpty()) {
+                end = thisYear.format(System.currentTimeMillis());
+            }
             return carbonService.getOwnCarbonQuota(timestamp, request, start, end);
         }
-        return ResultUtil.error(timestamp,ErrorCode.PARAM_VARIABLE_ERROR);
     }
 }

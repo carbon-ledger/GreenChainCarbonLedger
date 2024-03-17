@@ -13,6 +13,7 @@ import java.util.ArrayList;
  * @since 2023-03-13
  */
 @Data
+@Accessors(chain = true)
 public class BackCarbonQuotaVO {
     public String uuid;
     public String organizeUuid;
