@@ -9,6 +9,7 @@ import com.frontleaves.greenchaincarbonledger.models.doData.UserDO;
 import com.frontleaves.greenchaincarbonledger.models.doData.UserLoginDO;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.*;
 import com.frontleaves.greenchaincarbonledger.models.voData.returnData.BackAuthLoginVO;
+import com.frontleaves.greenchaincarbonledger.models.voData.returnData.BackLoginInfoVO;
 import com.frontleaves.greenchaincarbonledger.services.AuthService;
 import com.frontleaves.greenchaincarbonledger.services.MailService;
 import com.frontleaves.greenchaincarbonledger.utils.BaseResponse;
@@ -18,6 +19,7 @@ import com.frontleaves.greenchaincarbonledger.utils.ResultUtil;
 import com.frontleaves.greenchaincarbonledger.utils.security.JwtUtil;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import eu.bitwalker.useragentutils.UserAgent;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,7 +28,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import java.util.regex.Pattern;
 
 /**
@@ -50,6 +55,16 @@ public class AuthServiceImpl implements AuthService {
     private final AuthDAO authDAO;
     private final MailService mailService;
 
+    /**
+     * 分析 UserAgent
+     * <hr/>
+     * 分析 UserAgent 获取设备类型，对设备进行区分展示给用户
+     */
+    private static String analyzeUserAgent(String userAgent) {
+        UserAgent ua = UserAgent.parseUserAgentString(userAgent);
+        return ua.getOperatingSystem().getDeviceType().getName();
+    }
+
     @NotNull
     @Override
     @Transactional
@@ -65,15 +80,7 @@ public class AuthServiceImpl implements AuthService {
             // 保存用户
             UserDO newUserDO = new UserDO();
             // 获取默认 Role
-            newUserDO
-                    .setUuid(ProcessingUtil.createUuid())
-                    .setUserName(authUserRegisterVO.getUsername())
-                    .setRealName(authUserRegisterVO.getRealname())
-                    .setEmail(authUserRegisterVO.getEmail())
-                    .setPhone(authUserRegisterVO.getPhone())
-                    .setRole(roleDAO.getRoleByName("admin").getUuid())
-                    .setPermission("[]")
-                    .setPassword(ProcessingUtil.passwordEncrypt(authUserRegisterVO.getPassword()));
+            newUserDO.setUuid(ProcessingUtil.createUuid()).setUserName(authUserRegisterVO.getUsername()).setRealName(authUserRegisterVO.getRealname()).setEmail(authUserRegisterVO.getEmail()).setPhone(authUserRegisterVO.getPhone()).setRole(roleDAO.getRoleByName("admin").getUuid()).setPermission("[]").setPassword(ProcessingUtil.passwordEncrypt(authUserRegisterVO.getPassword()));
             if (userDAO.createUser(newUserDO)) {
                 return ResultUtil.success(timestamp, "管理用户注册成功");
             } else {
@@ -121,30 +128,14 @@ public class AuthServiceImpl implements AuthService {
                 BackAuthLoginVO.UserVO newUserVO = new BackAuthLoginVO.UserVO();
                 BackAuthLoginVO.PermissionVO newPermission = new BackAuthLoginVO.PermissionVO();
                 BackAuthLoginVO.RoleVO newRole = new BackAuthLoginVO.RoleVO();
-                newUserVO
-                        .setUuid(getUserDO.getUuid())
-                        .setUserName(getUserDO.getUserName())
-                        .setPhone(getUserDO.getPhone())
-                        .setEmail(getUserDO.getEmail())
-                        .setRealName(getUserDO.getRealName());
-                newPermission
-                        .setUserPermission(gson.fromJson(getUserDO.getPermission(), new TypeToken<ArrayList<String>>() {}.getType()))
-                        .setRolePermission(gson.fromJson(getUserRole.getPermission(), new TypeToken<ArrayList<String>>() {}.getType()));
-                newRole
-                        .setName(getUserRole.getName())
-                        .setDisplayName(getUserRole.getDisplayName());
-                newBackAuthLoginVO
-                        .setToken(newToken)
-                        .setUser(newUserVO)
-                        .setRole(newRole)
-                        .setPermission(newPermission)
-                        .setRecover(recover);
+                newUserVO.setUuid(getUserDO.getUuid()).setUserName(getUserDO.getUserName()).setPhone(getUserDO.getPhone()).setEmail(getUserDO.getEmail()).setRealName(getUserDO.getRealName());
+                newPermission.setUserPermission(gson.fromJson(getUserDO.getPermission(), new TypeToken<ArrayList<String>>() {
+                }.getType())).setRolePermission(gson.fromJson(getUserRole.getPermission(), new TypeToken<ArrayList<String>>() {
+                }.getType()));
+                newRole.setName(getUserRole.getName()).setDisplayName(getUserRole.getDisplayName());
+                newBackAuthLoginVO.setToken(newToken).setUser(newUserVO).setRole(newRole).setPermission(newPermission).setRecover(recover);
                 //存入了getUserLoginDO类
-                getUserLoginDO
-                        .setUuid(getUserDO.getUuid())
-                        .setToken(newToken)
-                        .setUserAgent(request.getHeader("User-Agent"))
-                        .setUserIp(request.getRemoteAddr());
+                getUserLoginDO.setUuid(getUserDO.getUuid()).setToken(newToken).setUserAgent(request.getHeader("User-Agent")).setUserIp(request.getRemoteAddr());
                 //将信息转为缓存
                 authDAO.saveAuthInfo(getUserLoginDO);
                 return ResultUtil.success(timestamp, "登录成功", newBackAuthLoginVO);
@@ -160,11 +151,7 @@ public class AuthServiceImpl implements AuthService {
 
     @NotNull
     @Override
-    public ResponseEntity<BaseResponse> organizeRegister(
-            long timestamp,
-            @NotNull HttpServletRequest request,
-            @NotNull AuthOrganizeRegisterVO authOrganizeRegisterVO
-    ) {
+    public ResponseEntity<BaseResponse> organizeRegister(long timestamp, @NotNull HttpServletRequest request, @NotNull AuthOrganizeRegisterVO authOrganizeRegisterVO) {
         log.info("[Service] 执行 organizeRegister 方法");
         // 检索组织是否唯一存在
         String checkUserExist = userDAO.checkUserExist(authOrganizeRegisterVO.getUsername(), authOrganizeRegisterVO.getEmail(), authOrganizeRegisterVO.getPhone(), authOrganizeRegisterVO.getOrganize());
@@ -182,16 +169,7 @@ public class AuthServiceImpl implements AuthService {
             }
             // 保存组织
             UserDO newUserDO = new UserDO();
-            newUserDO
-                    .setUuid(ProcessingUtil.createUuid())
-                    .setRealName(authOrganizeRegisterVO.getOrganize())
-                    .setUserName(authOrganizeRegisterVO.getUsername())
-                    .setPhone(authOrganizeRegisterVO.getPhone())
-                    .setEmail(authOrganizeRegisterVO.getEmail())
-                    .setInvite(authOrganizeRegisterVO.getInvite())
-                    .setRole(roleDAO.getRoleByName("organize").getUuid())
-                    .setPermission("[]")
-                    .setPassword(ProcessingUtil.passwordEncrypt(authOrganizeRegisterVO.getPassword()));
+            newUserDO.setUuid(ProcessingUtil.createUuid()).setRealName(authOrganizeRegisterVO.getOrganize()).setUserName(authOrganizeRegisterVO.getUsername()).setPhone(authOrganizeRegisterVO.getPhone()).setEmail(authOrganizeRegisterVO.getEmail()).setInvite(authOrganizeRegisterVO.getInvite()).setRole(roleDAO.getRoleByName("organize").getUuid()).setPermission("[]").setPassword(ProcessingUtil.passwordEncrypt(authOrganizeRegisterVO.getPassword()));
             if (userDAO.createUser(newUserDO)) {
                 return ResultUtil.success(timestamp, "组织账户注册成功");
             } else {
@@ -260,11 +238,7 @@ public class AuthServiceImpl implements AuthService {
     @NotNull
     @Override
     @Transactional
-    public ResponseEntity<BaseResponse> forgetCode(
-            long timestamp,
-            @NotNull HttpServletRequest request,
-            @NotNull AuthForgetCodeVO authForgetCodeVO
-    ) {
+    public ResponseEntity<BaseResponse> forgetCode(long timestamp, @NotNull HttpServletRequest request, @NotNull AuthForgetCodeVO authForgetCodeVO) {
         log.info("[Service] 执行 forgetCode 方法");
         // 获取邮箱数据，此处无论用户填入的Email是否真实有效，系统都会返回“密码充值邮件已发送”的信息
         String email = authForgetCodeVO.getEmail();
@@ -308,6 +282,34 @@ public class AuthServiceImpl implements AuthService {
         //转到AuthDAO操作
         authDAO.userLogout(getUuid, getToken);
         return ResultUtil.success(timestamp, "用户成功登出");
+    }
+
+    @NotNull
+    @Override
+    public ResponseEntity<BaseResponse> getLoginIngo(long timestamp, @NotNull HttpServletRequest request) {
+        log.info("[Service] 执行 getLoginIngo 方法");
+        String getUserUuid = ProcessingUtil.getAuthorizeUserUuid(request);
+        ArrayList<UserLoginDO> getUserAuthorizeList = authDAO.getAuthorize(getUserUuid);
+        log.debug(getUserAuthorizeList.toString());
+        List<BackLoginInfoVO> backLoginInfoVOList = new ArrayList<>();
+        // 去除为 null 部分
+        getUserAuthorizeList.removeIf(Objects::isNull);
+        getUserAuthorizeList.forEach(userLoginDO -> {
+            // 获取登陆过期时间
+            long getExpireTime = authDAO.getAuthorizeExpireTime(userLoginDO.getUuid());
+            log.debug("[Service] 过期时间: {}", getExpireTime);
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy年MM月dd日 HH时mm分ss秒");
+            // 对 UserAgent 进行分析出电脑设备以及其他浏览器信息
+            BackLoginInfoVO backLoginInfoVO = new BackLoginInfoVO();
+            backLoginInfoVO
+                    .setUserIp(userLoginDO.getUserIp())
+                    .setDeviceType(analyzeUserAgent(userLoginDO.getUserAgent()))
+                    .setBrowserType(UserAgent.parseUserAgentString(userLoginDO.getUserAgent()).getBrowser().getName())
+                    .setLoginTime(sdf.format(System.currentTimeMillis() + (getExpireTime * 1000L) - 3600000L))
+                    .setExpireTime(sdf.format(System.currentTimeMillis() + (getExpireTime * 1000L)));
+            backLoginInfoVOList.add(backLoginInfoVO);
+        });
+        return ResultUtil.success(timestamp, "用户登陆信息", backLoginInfoVOList);
     }
 }
 
