@@ -62,7 +62,7 @@ public class AuthServiceImpl implements AuthService {
      */
     private static String analyzeUserAgent(String userAgent) {
         UserAgent ua = UserAgent.parseUserAgentString(userAgent);
-        return ua.getOperatingSystem().getDeviceType().getName();
+        return ua.getOperatingSystem().getName();
     }
 
     @NotNull
