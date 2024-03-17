@@ -58,7 +58,7 @@ public class AuthServiceImpl implements AuthService {
         // 检查用户是否存在
         String checkUserExist = userDAO.checkUserExist(authUserRegisterVO.getUsername(), authUserRegisterVO.getEmail(), authUserRegisterVO.getPhone(), authUserRegisterVO.getRealname());
         if (checkUserExist != null) {
-            return ResultUtil.error(timestamp, checkUserExist, ErrorCode.USER_NOT_EXISTED);
+            return ResultUtil.error(timestamp, checkUserExist, ErrorCode.USER_EXISTED);
         }
         // 校验邮箱验证码
         if (mailService.checkMailCode(authUserRegisterVO.getEmail())) {
@@ -71,8 +71,8 @@ public class AuthServiceImpl implements AuthService {
                     .setRealName(authUserRegisterVO.getRealname())
                     .setEmail(authUserRegisterVO.getEmail())
                     .setPhone(authUserRegisterVO.getPhone())
-                    .setPermission("[]")
                     .setRole(roleDAO.getRoleByName("admin").getUuid())
+                    .setPermission("[]")
                     .setPassword(ProcessingUtil.passwordEncrypt(authUserRegisterVO.getPassword()));
             if (userDAO.createUser(newUserDO)) {
                 return ResultUtil.success(timestamp, "管理用户注册成功");
@@ -107,7 +107,7 @@ public class AuthServiceImpl implements AuthService {
                 if (System.currentTimeMillis() - getUserDO.getDeletedAt().getTime() <= 604800000L) {
                     //用户存在并且在7天以内登录,取消注销状态
                     getUserDO.setDeletedAt(null);
-                    recover = userDAO.userAccountDistanceDeletion(getUserDO);
+                    recover = userDAO.accountDeleteCancel(getUserDO);
                 } else {
                     //用户存在但是在7天之外登录
                     return ResultUtil.error(timestamp, ErrorCode.USER_NOT_EXISTED);
@@ -115,7 +115,7 @@ public class AuthServiceImpl implements AuthService {
             }
             // 用户存在（密码检查）且不在注销状态
             if (ProcessingUtil.passwordCheck(authLoginVO.getPassword(), getUserDO.getPassword())) {
-                RoleDO getUserRole = roleDAO.getRoleUuid(getUserDO.getRole());
+                RoleDO getUserRole = roleDAO.getRoleByUuid(getUserDO.getRole());
 
                 BackAuthLoginVO newBackAuthLoginVO = new BackAuthLoginVO();
                 BackAuthLoginVO.UserVO newUserVO = new BackAuthLoginVO.UserVO();
@@ -175,13 +175,11 @@ public class AuthServiceImpl implements AuthService {
         if (mailService.checkMailCode(authOrganizeRegisterVO.getEmail())) {
             String invite = authOrganizeRegisterVO.getInvite();
             // 验证组织注册填写的验证码是否有效
-            if (invite != null) {
+            if (invite != null && !invite.isEmpty()) {
                 if (!userDAO.getUserByInvite(invite)) {
                     return ResultUtil.error(timestamp, ErrorCode.INVITE_CODE_ERROR);
                 }
             }
-            // 密码加密
-            String newPassword = ProcessingUtil.passwordEncrypt(authOrganizeRegisterVO.getPassword());
             // 保存组织
             UserDO newUserDO = new UserDO();
             newUserDO
@@ -191,8 +189,9 @@ public class AuthServiceImpl implements AuthService {
                     .setPhone(authOrganizeRegisterVO.getPhone())
                     .setEmail(authOrganizeRegisterVO.getEmail())
                     .setInvite(authOrganizeRegisterVO.getInvite())
+                    .setRole(roleDAO.getRoleByName("organize").getUuid())
                     .setPermission("[]")
-                    .setPassword(newPassword);
+                    .setPassword(ProcessingUtil.passwordEncrypt(authOrganizeRegisterVO.getPassword()));
             if (userDAO.createUser(newUserDO)) {
                 return ResultUtil.success(timestamp, "组织账户注册成功");
             } else {

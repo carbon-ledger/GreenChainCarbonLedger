@@ -87,6 +87,7 @@ class RoleRedis(
         val key = (RedisConstant.TYPE_AUTH + RedisConstant.TABLE_ROLE + businessConstants.value) + field
         log.debug("\t\t> 设置 Redis 键为 {} 的数据", key)
         redisTemplate.also {
+            it.opsForValue()[key] = value
             it.expire(key, time.expirationTime, TimeUnit.MILLISECONDS)
         }
         return true
