@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
  * <hr/>
  * 用于定义错误码, 用于返回错误信息, 用于返回错误码
  *
- * @author xiao_lfeng
+ * @author xiao_lfeng AND FLASHLACK AND DC_DC
  * @version v1.0.0-SNAPSHOT
  * @since v1.0.0-SNAPSHOT
  */
@@ -37,6 +37,8 @@ public enum ErrorCode {
     CAN_T_RESET_MY_PASSWORD("CanTResetMyPassword", 40310, "不能重置自己的密码"),
     ROLE_CANNOT_BE_DELETED("RoleCannotBeDeleted", 40311, "角色不能被删除"),
     CAN_T_OPERATE_ONESELF("CanTOperateOneself", 40312, "不能操作自己或超级管理"),
+    ROLE_NOT_EXISTED("RoleNotExist", 40313, "角色不存在"),
+    PARAM_VARIABLE_ERROR("ParamVariableError", 40314, "参数变量错误"),
     CAN_T_ACCOUNT_FOR_CARBON("NotAccountedForCarbon",40313,"您未进行碳核算"),
     PAGE_NOT_FOUNDED("PageNotFounded", 40401, "页面不存在"),
     REQUEST_METHOD_NOT_SUPPORTED("RequestMethodNotSupported", 40500, "请求方法不支持"),
@@ -44,9 +46,10 @@ public enum ErrorCode {
     MAIL_TEMPLATE_NOT_EXIST("MailTemplateNotExist", 50001, "邮箱模板不存在"),
     ORGANIZE_NOT_EXISTED("OrganizeRegisterFailed", 40399, "账户注册失败"),
     INVITE_CODE_ERROR("VerifyCodeError", 40398, "邀请码错误"),
-    INSERT_DATA_ERROR("InsertDataError", 40395, "插入数据失败"),
     NO_LOGIN("NoLogin", 40110, "未登录"),
-    UPDATE_DATA_ERROR("UpdateDataError", 40394, "更新数据失败");
+    UPDATE_DATA_ERROR("UpdateDataError", 40394, "更新数据失败"),
+    USER_CANNOT_BE_BANED("UserCannotBeDeleted", 40393, "用户不能被封禁"),
+    INSERT_DATA_EXISTED("InsertDataExisted", 40392, "添加用户信息失败");
 
     final String output;
     final Integer code;
