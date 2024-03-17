@@ -132,6 +132,21 @@ public class AuthDAO {
         getUserLoginList.add(gson.fromJson(authorizeRedis.getData(BusinessConstants.THREE, authorizeUserUuid), UserLoginDO.class));
         return getUserLoginList;
     }
+
+    /**
+     * 获取授权过期时间
+     * <hr/>
+     * 获取授权过期时间
+     *
+     * @param uuid 用户UUID
+     * @return 过期时间
+     */
+    public long getAuthorizeExpireTime(String uuid) {
+        log.info("[DAO] 执行 getAuthorizeExpireTime 方法");
+        // Redis 读取数据
+        log.info("\t> Redis 读取");
+        return authorizeRedis.getExpiredAt(BusinessConstants.ONE, uuid);
+    }
 }
 
 

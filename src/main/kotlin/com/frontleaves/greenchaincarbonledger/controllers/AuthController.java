@@ -210,4 +210,20 @@ public class AuthController {
         return authService.userLogout(timestamp, request);
     }
 
+    /**
+     * 获取登录信息
+     * <hr/>
+     * 用于获取登录信息, 用户可以通过该接口获取登录信息, 登陆多少设备
+     *
+     * @return 成功则去业务层操作，失败则返回错误信息
+     */
+    @GetMapping("/login-info")
+    public ResponseEntity<BaseResponse> getLoginInfo(
+            @NotNull HttpServletRequest request
+    ) {
+        log.info("[Controller] 请求 getLoginInfo 接口");
+        long timestamp = System.currentTimeMillis();
+        // 业务操作
+        return authService.getLoginIngo(timestamp, request);
+    }
 }

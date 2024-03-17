@@ -48,13 +48,12 @@ interface AuthService {
      * 用户注册
      * @param timestamp 时间戳
      * @param request 请求
-     * @param  authUserRegisterVO 用户注册所提供的信息
+     * @param  authOrganizeRegisterVO 用户注册所提供的信息
      * @return 注册结果
      */
     fun organizeRegister(
         timestamp: Long,
         request: HttpServletRequest,
-        // 为了区分用户注册里面使用的形参名，此处加上了NEW
         authOrganizeRegisterVO: AuthOrganizeRegisterVO
     ): ResponseEntity<BaseResponse>
 
@@ -104,6 +103,18 @@ interface AuthService {
      * @return 注销结果
      */
     fun userLogout(
+        timestamp: Long,
+        request: HttpServletRequest
+    ): ResponseEntity<BaseResponse>
+
+    /**
+     * 获取当前用户
+     *
+     * @param timestamp 时间戳
+     * @param request 请求
+     * @return 当前用户信息
+     */
+    fun getLoginIngo(
         timestamp: Long,
         request: HttpServletRequest
     ): ResponseEntity<BaseResponse>
