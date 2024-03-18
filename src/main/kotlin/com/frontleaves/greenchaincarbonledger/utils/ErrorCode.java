@@ -49,7 +49,8 @@ public enum ErrorCode {
     NO_LOGIN("NoLogin", 40110, "未登录"),
     UPDATE_DATA_ERROR("UpdateDataError", 40394, "更新数据失败"),
     USER_CANNOT_BE_BANED("UserCannotBeDeleted", 40393, "用户不能被封禁"),
-    INSERT_DATA_EXISTED("InsertDataExisted", 40392, "添加用户信息失败");
+    INSERT_DATA_EXISTED("InsertDataExisted", 40392, "添加用户信息失败"),
+    RELEASE_TRADE_FAILURE("ReleaseTradeFailure", 40380, "发布碳交易失败");
 
     final String output;
     final Integer code;
