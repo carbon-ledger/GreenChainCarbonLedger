@@ -1,6 +1,5 @@
 package com.frontleaves.greenchaincarbonledger.services
 
-import com.frontleaves.greenchaincarbonledger.models.voData.getData.TradeReleaseVO
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.EditTradeVO
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.TradeReleaseVO
 import com.frontleaves.greenchaincarbonledger.utils.BaseResponse

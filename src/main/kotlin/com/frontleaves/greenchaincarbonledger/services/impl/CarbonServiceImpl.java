@@ -4,16 +4,10 @@ import com.frontleaves.greenchaincarbonledger.dao.CarbonAccountingDAO;
 import com.frontleaves.greenchaincarbonledger.dao.CarbonDAO;
 import com.frontleaves.greenchaincarbonledger.dao.UserDAO;
 import com.frontleaves.greenchaincarbonledger.mappers.CarbonMapper;
-import com.frontleaves.greenchaincarbonledger.models.doData.CarbonAccountingDO;
-import com.frontleaves.greenchaincarbonledger.models.doData.CarbonQuotaDO;
-import com.frontleaves.greenchaincarbonledger.models.doData.CarbonReportDO;
-import com.frontleaves.greenchaincarbonledger.models.doData.UserDO;
-import com.frontleaves.greenchaincarbonledger.models.voData.getData.TradeReleaseVO;
-import com.frontleaves.greenchaincarbonledger.models.voData.returnData.BackCarbonAccountingVO;
-import com.frontleaves.greenchaincarbonledger.mappers.CarbonMapper;
 import com.frontleaves.greenchaincarbonledger.models.doData.*;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.EditTradeVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.TradeReleaseVO;
+import com.frontleaves.greenchaincarbonledger.models.voData.returnData.BackCarbonAccountingVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.returnData.BackCarbonQuotaVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.returnData.BackCarbonReportVO;
 import com.frontleaves.greenchaincarbonledger.services.CarbonService;
@@ -153,7 +147,7 @@ public class CarbonServiceImpl implements CarbonService {
         String organizeUuid = ProcessingUtil.getAuthorizeUserUuid(request);
         List<BackCarbonAccountingVO> carbonAccountinglist = new ArrayList<>();
         List<CarbonAccountingDO> carbonAccountingDOList = carbonAccountingDAO.getCarbonAccountingList(organizeUuid, Integer.parseInt(limit), Integer.parseInt(page), order);
-        if (carbonAccountingDOList != null){
+        if (carbonAccountingDOList != null) {
             for (CarbonAccountingDO carbonAccountingDO : carbonAccountingDOList) {
                 BackCarbonAccountingVO backCarbonAccountingVO = new BackCarbonAccountingVO();
                 backCarbonAccountingVO
@@ -173,6 +167,7 @@ public class CarbonServiceImpl implements CarbonService {
             return ResultUtil.error(timestamp, ErrorCode.SELECT_DATA_ERROR);
         }
     }
+
     @NotNull
     @Override
     public ResponseEntity<BaseResponse> releaseCarbonTrade(long timestamp, @NotNull HttpServletRequest request, @NotNull TradeReleaseVO tradeReleaseVO) {
@@ -188,8 +183,8 @@ public class CarbonServiceImpl implements CarbonService {
         double nowQuota = totalQuota - usedQuota;
         // 3.如果企业的 已使用配额量used_quota 小于 已分配额量allocated_quota 的话，才允许发布碳交易
         // 达到允许条件下，则可发布交易
-        if (nowQuota > 0 && allocatedQuota > usedQuota){
-            if (tradeReleaseVO.getDraft()){
+        if (nowQuota > 0 && allocatedQuota > usedQuota) {
+            if (tradeReleaseVO.getDraft()) {
                 carbonMapper.insertTradeByUuid(getUuid, tradeReleaseVO, "draft");
             } else {
                 carbonMapper.insertTradeByUuid(getUuid, tradeReleaseVO, "pending_review");
@@ -198,7 +193,7 @@ public class CarbonServiceImpl implements CarbonService {
         } else {
             if (nowQuota <= 0) {
                 return ResultUtil.error(timestamp, "当前组织碳配额量小于0，无法发布交易", ErrorCode.RELEASE_TRADE_FAILURE);
-            }else {
+            } else {
                 return ResultUtil.error(timestamp, "无法使用购入的碳配额量进行交易", ErrorCode.RELEASE_TRADE_FAILURE);
             }
         }
@@ -208,14 +203,14 @@ public class CarbonServiceImpl implements CarbonService {
     @Override
     public ResponseEntity<BaseResponse> editCarbonTrade(long timestamp, @NotNull HttpServletRequest request, @NotNull EditTradeVO editTradeVO) {
         log.info("[Service] 执行 releaseCarbonTrade 方法");
-        String getUuid = ProcessingUtil.getAuthorizeUserUuid(request);
+        /*String getUuid = ProcessingUtil.getAuthorizeUserUuid(request);
         // 判断用户是否发布过交易
         // 判断交易是否已经发布
         CarbonTradeDO carbonTradeDO = carbonDAO.getTradeByUuid(getUuid);
         String status = carbonTradeDO.getStatus();
-        if ("draft".equals(status) || "pending_review".equals(status)){
+        if ("draft".equals(status) || "pending_review".equals(status)) {
             // 判断编辑的信息是否合法有效，如果有效则可以提交编辑
-            if (editTradeVO.getDraft()){
+            if (editTradeVO.getDraft()) {
                 carbonMapper.updateTradeByUuid(getUuid, editTradeVO, "draft");
             } else {
                 carbonMapper.updateTradeByUuid(getUuid, editTradeVO, "pending_review");
@@ -223,7 +218,7 @@ public class CarbonServiceImpl implements CarbonService {
             return ResultUtil.success(timestamp, "交易发布信息修改成功");
         } else {
             return ResultUtil.error(timestamp, ErrorCode.EDIT_TRADE_FAILURE);
-        }
-
+        }*/
+        return null;
     }
 }
