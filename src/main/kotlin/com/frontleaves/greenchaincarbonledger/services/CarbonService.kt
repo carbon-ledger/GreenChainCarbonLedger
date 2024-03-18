@@ -25,6 +25,14 @@ interface CarbonService {
         end: String
     ): ResponseEntity<BaseResponse>
 
+    fun getCarbonAccounting(
+        timestamp: Long,
+        request: HttpServletRequest,
+        limit: String?,
+        page: String?,
+        order: String
+    ): ResponseEntity<BaseResponse>
+
     /**
      * 获取碳排放报告
      *
