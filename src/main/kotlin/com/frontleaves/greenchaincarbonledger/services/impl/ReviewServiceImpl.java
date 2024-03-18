@@ -27,7 +27,6 @@ import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.OutputStream;
 import java.sql.Date;
 import java.sql.Timestamp;
@@ -78,7 +77,7 @@ public class ReviewServiceImpl implements ReviewService {
                     idCardBackOutput.write(idCardBack);
                     idCardBackOutput.flush();
                     idCardBackOutput.close();
-                } catch (IOException e) {
+                } catch (Exception e) {
                     log.error("[Service] 文件处理错误: {}", e.getMessage(), e);
                     // 删除文件（处理无关数据）
                     if (!new File("upload/license/" + getUserDO.getUuid() + "_organize.jpg").delete()) {
@@ -90,7 +89,7 @@ public class ReviewServiceImpl implements ReviewService {
                     if (!new File("output/legal_id_card" + getUserDO.getUuid() + "_back.jpg").delete()) {
                         log.debug("[Service] IdCardBack 资料不存在");
                     }
-                    ResultUtil.error(timestamp, "文件处理错误", ErrorCode.SERVER_INTERNAL_ERROR);
+                    return ResultUtil.error(timestamp, "文件处理错误", ErrorCode.SERVER_INTERNAL_ERROR);
                 }
                 // 对数据进行集中化处理
                 ApproveOrganizeDO newApproveOrganizeDO = new ApproveOrganizeDO();
@@ -146,7 +145,7 @@ public class ReviewServiceImpl implements ReviewService {
                     idCardBackOutput.write(idCardBack);
                     idCardBackOutput.flush();
                     idCardBackOutput.close();
-                } catch (IOException e) {
+                } catch (Exception e) {
                     log.error("[Service] 文件处理错误: {}", e.getMessage(), e);
                     // 删除文件（处理无关数据）
                     if (!new File("upload/license/" + getUserDO.getUuid() + "_authorize.jpg").delete()) {
@@ -158,7 +157,7 @@ public class ReviewServiceImpl implements ReviewService {
                     if (!new File("output/legal_id_card" + getUserDO.getUuid() + "_back.jpg").delete()) {
                         log.debug("[Service] IdCardBack 资料不存在");
                     }
-                    ResultUtil.error(timestamp, "文件处理错误", ErrorCode.SERVER_INTERNAL_ERROR);
+                    return ResultUtil.error(timestamp, "文件处理错误", ErrorCode.SERVER_INTERNAL_ERROR);
                 }
 
             } else {
@@ -272,7 +271,7 @@ public class ReviewServiceImpl implements ReviewService {
                             idCardBackOutput.write(idCardBack);
                             idCardBackOutput.flush();
                             idCardBackOutput.close();
-                        } catch (IOException e) {
+                        } catch (Exception e) {
                             log.error("[Service] 文件处理错误: {}", e.getMessage(), e);
                             // 删除文件（处理无关数据）
                             if (!new File("upload/license/" + getUserDO.getUuid() + "_organize.jpg").delete()) {
@@ -284,7 +283,7 @@ public class ReviewServiceImpl implements ReviewService {
                             if (!new File("output/legal_id_card" + getUserDO.getUuid() + "_back.jpg").delete()) {
                                 log.debug("[Service] IdCardBack 资料不存在");
                             }
-                            ResultUtil.error(timestamp, "文件处理错误", ErrorCode.SERVER_INTERNAL_ERROR);
+                            return ResultUtil.error(timestamp, "文件处理错误", ErrorCode.SERVER_INTERNAL_ERROR);
                         }
                         // 资料进行更新
                         getApproveOrganizeDO
@@ -358,7 +357,7 @@ public class ReviewServiceImpl implements ReviewService {
                             idCardBackOutput.write(idCardBack);
                             idCardBackOutput.flush();
                             idCardBackOutput.close();
-                        } catch (IOException e) {
+                        } catch (Exception e) {
                             log.error("[Service] 文件处理错误: {}", e.getMessage(), e);
                             // 删除文件（处理无关数据）
                             if (!new File("upload/license/" + getUserDO.getUuid() + "_authorize.jpg").delete()) {
@@ -370,7 +369,7 @@ public class ReviewServiceImpl implements ReviewService {
                             if (!new File("output/legal_id_card" + getUserDO.getUuid() + "_back.jpg").delete()) {
                                 log.debug("[Service] IdCardBack 资料不存在");
                             }
-                            ResultUtil.error(timestamp, "文件处理错误", ErrorCode.SERVER_INTERNAL_ERROR);
+                            return ResultUtil.error(timestamp, "文件处理错误", ErrorCode.SERVER_INTERNAL_ERROR);
                         }
                         // 资料进行更新
                         getApproveAdminById
@@ -506,6 +505,29 @@ public class ReviewServiceImpl implements ReviewService {
             } else {
                 return ResultUtil.error(timestamp, "审核内容不存在", ErrorCode.REVIEW_ERROR);
             }
+        }
+    }
+
+    @NotNull
+    @Override
+    public ResponseEntity<BaseResponse> getReviewReport(long timestamp, @NotNull HttpServletRequest request) {
+        // 获取用户信息
+        UserDO getUserDO = ProcessingUtil.getUserByHeaderUuid(request, userDAO);
+        if (getUserDO != null) {
+            // 获取自己的审核报告
+            ApproveOrganizeDO getApproveOrganizeDO = reviewDAO.getApproveOrganizeByUuid(getUserDO.getUuid());
+            if (getApproveOrganizeDO != null) {
+                return ResultUtil.success(timestamp, getApproveOrganizeDO);
+            } else {
+                ApproveManageDO getApproveAdminDO = reviewDAO.getApproveAdminByUuid(getUserDO.getUuid());
+                if (getApproveAdminDO != null) {
+                    return ResultUtil.success(timestamp, getApproveAdminDO);
+                } else {
+                    return ResultUtil.error(timestamp, "没有审核报告", ErrorCode.REVIEW_ERROR);
+                }
+            }
+        } else {
+            return ResultUtil.error(timestamp, ErrorCode.USER_NOT_EXISTED);
         }
     }
 }

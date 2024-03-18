@@ -180,4 +180,10 @@ public interface ReviewMapper {
 
     @Select("SELECT * FROM fy_approve_organize WHERE certification_status = 0 ORDER BY ${order} LIMIT #{limit} OFFSET #{offset}")
     ArrayList<ApproveOrganizeDO> getApproveOrganizeList(Integer page, Integer limit, String order);
+
+    @Select("SELECT * FROM fy_approve_organize WHERE account_uuid = #{uuid} LIMIT 1")
+    ApproveOrganizeDO getApproveOrganizeByUuid(String uuid);
+
+    @Select("SELECT * FROM fy_approve_manage WHERE account_uuid = #{uuid} LIMIT 1")
+    ApproveManageDO getApproveAdminByUuid(String uuid);
 }

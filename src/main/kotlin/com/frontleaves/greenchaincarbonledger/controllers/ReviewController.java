@@ -262,6 +262,7 @@ public class ReviewController {
      * @return ResponseEntity<BaseResponse>
      */
     @GetMapping("/get/{type}/{id}")
+    @CheckAccountPermission({"review:getReview"})
     public ResponseEntity<BaseResponse> getReview(
             @PathVariable @NotNull String type,
             @PathVariable String id,
@@ -278,5 +279,23 @@ public class ReviewController {
         }
         // 业务逻辑
         return reviewService.getReview(timestamp, type, id, request);
+    }
+
+    /**
+     * 获取审核报告
+     * <hr/>
+     * 用于获取审核报告，需要组织账户权限
+     *
+     * @return ResponseEntity<BaseResponse>
+     */
+    @GetMapping("/get")
+    @CheckAccountPermission({"review:getReport"})
+    public ResponseEntity<BaseResponse> getReviewReport(
+            @NotNull HttpServletRequest request
+    ) {
+        log.info("[Controller] 执行 getReviewReport 方法");
+        long timestamp = System.currentTimeMillis();
+        // 业务逻辑
+        return reviewService.getReviewReport(timestamp, request);
     }
 }
