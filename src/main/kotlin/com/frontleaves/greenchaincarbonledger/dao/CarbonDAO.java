@@ -4,6 +4,7 @@ import com.frontleaves.greenchaincarbonledger.mappers.CarbonMapper;
 import com.frontleaves.greenchaincarbonledger.models.doData.CarbonAccountingDO;
 import com.frontleaves.greenchaincarbonledger.models.doData.CarbonQuotaDO;
 import com.frontleaves.greenchaincarbonledger.models.doData.CarbonReportDO;
+import com.frontleaves.greenchaincarbonledger.models.doData.CarbonTradeDO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
@@ -96,5 +97,10 @@ public class CarbonDAO {
     public CarbonQuotaDO getQuotaByUuid(String uuid) {
         log.info("[DAO] 执行 getTotalQuotaByUuid 方法");
         return carbonMapper.getQuotaByUuid(uuid);
+    }
+
+    public CarbonTradeDO getTradeByUuid(String getUuid) {
+        log.info("[DAO] 执行 getAccountByUuid");
+        return carbonMapper.getTradeByUuid(getUuid);
     }
 }

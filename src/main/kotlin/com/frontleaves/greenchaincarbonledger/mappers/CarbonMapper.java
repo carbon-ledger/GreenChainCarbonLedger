@@ -3,10 +3,13 @@ package com.frontleaves.greenchaincarbonledger.mappers;
 import com.frontleaves.greenchaincarbonledger.models.doData.CarbonAccountingDO;
 import com.frontleaves.greenchaincarbonledger.models.doData.CarbonQuotaDO;
 import com.frontleaves.greenchaincarbonledger.models.doData.CarbonReportDO;
+import com.frontleaves.greenchaincarbonledger.models.doData.CarbonTradeDO;
+import com.frontleaves.greenchaincarbonledger.models.voData.getData.EditTradeVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.TradeReleaseVO;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,5 +41,11 @@ public interface CarbonMapper {
     CarbonQuotaDO getQuotaByUuid(String uuid);
 
     @Insert("INSERT INTO fy_carbon_trade (organize_uuid, quota_amount, price_per_unit, description, status, created_at) VALUES (#{uuid}, #{amount}, #{unit}, #{text}, #{status}, NOW())")
-    Boolean insertTradeByUuid(String uuid, TradeReleaseVO tradeReleaseVO, String status);
+    void insertTradeByUuid(String uuid, TradeReleaseVO tradeReleaseVO, String status);
+
+    @Select("SELECT * FROM fy_carbon_trade WHERE organize_uuid = #{uuid}")
+    CarbonTradeDO getTradeByUuid(String uuid);
+
+    @Update("UPDATE fy_carbon_trade SET quota_amount = #{amount}, price_per_unit = #{unit}, description = #{text}, status = #{status}, updated_at = NOW() WHERE organize_uuid = #{uuid}")
+    Boolean updateTradeByUuid(String uuid, EditTradeVO editTradeVO, String status);
 }

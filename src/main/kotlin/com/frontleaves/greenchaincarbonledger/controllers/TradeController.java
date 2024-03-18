@@ -1,5 +1,6 @@
 package com.frontleaves.greenchaincarbonledger.controllers;
 
+import com.frontleaves.greenchaincarbonledger.models.voData.getData.EditTradeVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.TradeReleaseVO;
 import com.frontleaves.greenchaincarbonledger.services.CarbonService;
 import com.frontleaves.greenchaincarbonledger.utils.BaseResponse;
@@ -42,5 +43,20 @@ public class TradeController {
         }
         // 业务操作
         return carbonService.releaseCarbonTrade(timestamp, request, tradeReleaseVO);
+    }
+
+    public ResponseEntity<BaseResponse> editCarbonTrade(
+            @RequestBody @Validated EditTradeVO editTradeVO,
+            @NotNull BindingResult bindingResult,
+            HttpServletRequest request
+    ){
+        log.info("[Controller] 请求 editCarbonTrade 接口");
+        long timestamp = System.currentTimeMillis();
+        // 对请求参数进行校验
+        if (bindingResult.hasErrors()) {
+            return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR, ProcessingUtil.getValidatedErrorList(bindingResult));
+        }
+        // 业务操作
+        return carbonService.editCarbonTrade(timestamp, request, editTradeVO);
     }
 }
