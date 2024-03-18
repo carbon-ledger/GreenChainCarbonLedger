@@ -138,8 +138,8 @@ public class CarbonController {
      */
     @GetMapping("/accounting/get")
     public ResponseEntity<BaseResponse> getCarbonAccounting(
-            @RequestParam(required = false) Integer limit,
-            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) String limit,
+            @RequestParam(required = false) String page,
             @RequestParam(required = false) String order,
             HttpServletRequest request
     ) {

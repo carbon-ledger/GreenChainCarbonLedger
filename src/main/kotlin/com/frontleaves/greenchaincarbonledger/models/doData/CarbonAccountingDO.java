@@ -23,6 +23,6 @@ public class CarbonAccountingDO {
     String verificationNotes;
     String carbonReportId;
     Integer blockchainTxId;
-    String creatAt;
-    String updateAt;
+    String createdAt;
+    String updatedAt;
 }
