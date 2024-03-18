@@ -1,5 +1,6 @@
 package com.frontleaves.greenchaincarbonledger.services
 
+import com.frontleaves.greenchaincarbonledger.models.voData.getData.ReviewAdminVO
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.ReviewOrganizeVO
 import com.frontleaves.greenchaincarbonledger.utils.BaseResponse
 import jakarta.servlet.http.HttpServletRequest
@@ -21,11 +22,13 @@ interface ReviewService {
      *
      * 用于组织账户的实名认证审核
      *
+     * @param timestamp 时间戳
      * @param reviewOrganizeVO ReviewOrganizeVO
      * @param request HttpServletRequest
      * @return ResponseEntity<BaseResponse>
      */
     fun addReviewFromOrganize(
+        timestamp: Long,
         reviewOrganizeVO: ReviewOrganizeVO,
         request: HttpServletRequest
     ): ResponseEntity<BaseResponse>
@@ -35,12 +38,14 @@ interface ReviewService {
      *
      * 用于组织账户的组织审核
      *
-     * @param reviewOrganizeVO ReviewOrganizeVO
+     * @param timestamp 时间戳
+     * @param reviewAdminVO ReviewOrganizeVO
      * @param request HttpServletRequest
      * @return ResponseEntity<BaseResponse>
      */
     fun addReviewFromAdmin(
-        reviewOrganizeVO: ReviewOrganizeVO,
+        timestamp: Long,
+        reviewAdminVO: ReviewAdminVO,
         request: HttpServletRequest
     ): ResponseEntity<BaseResponse>
 }

@@ -25,4 +25,5 @@ public class ReviewOrganizeVO {
     public String legalRepresentativeId;
     public String legalIdCardFront;
     public String legalIdCardBack;
+    public String remark;
 }
