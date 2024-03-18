@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.annotation.Order
 import org.springframework.jdbc.core.JdbcTemplate
+import java.io.File
 
 @Configuration
 open class StartupConfiguration(
@@ -54,6 +55,31 @@ open class StartupConfiguration(
         return CommandLineRunner {
             log.info("[Preparation] 检查默认超级管理用户是否存在")
             prepareData.prepareCheckDefaultUser()
+        }
+    }
+
+    @Bean
+    @Order(5)
+    open fun checkFolderExist(): CommandLineRunner {
+        return CommandLineRunner {
+            log.info("[Preparation] 检查文件夹是否存在")
+            if (!File("upload").exists()) {
+                log.debug("\t> 创建文件夹: upload")
+                File("upload").mkdirs()
+            }
+            // 分别检查文件夹内部内容是否存在
+            if (!File("upload/license").exists()) {
+                log.debug("\t> 创建文件夹: upload/license")
+                File("upload/license").mkdirs()
+            }
+            if (!File("upload/legal_id_card").exists()) {
+                log.debug("\t> 创建文件夹: upload/legal_id_card")
+                File("upload/legal_id_card").mkdirs()
+            }
+            if (!File("upload/avatar").exists()) {
+                log.debug("\t> 创建文件夹: upload/avatar")
+                File("upload/avatar").mkdirs()
+            }
         }
     }
 

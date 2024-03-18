@@ -40,6 +40,7 @@ public enum ErrorCode {
     ROLE_NOT_EXISTED("RoleNotExist", 40313, "角色不存在"),
     PARAM_VARIABLE_ERROR("ParamVariableError", 40314, "参数变量错误"),
     CAN_T_ACCOUNT_FOR_CARBON("NotAccountedForCarbon",40313,"您未进行碳核算"),
+    REVIEW_ERROR("ReviewError", 40315, "审核信息错误"),
     PAGE_NOT_FOUNDED("PageNotFounded", 40401, "页面不存在"),
     REQUEST_METHOD_NOT_SUPPORTED("RequestMethodNotSupported", 40500, "请求方法不支持"),
     SERVER_INTERNAL_ERROR("ServerInternalError", 50000, "服务器内部错误"),
@@ -50,6 +51,8 @@ public enum ErrorCode {
     UPDATE_DATA_ERROR("UpdateDataError", 40394, "更新数据失败"),
     USER_CANNOT_BE_BANED("UserCannotBeDeleted", 40393, "用户不能被封禁"),
     INSERT_DATA_EXISTED("InsertDataExisted", 40392, "添加用户信息失败"),
+    INSERT_DATA_ERROR("InsertDataError", 40395, "插入数据失败"),
+    SELECT_DATA_ERROR("SelectDataError", 40389, "查询数据失败"),
     RELEASE_TRADE_FAILURE("ReleaseTradeFailure", 40380, "发布碳交易失败");
 
     final String output;

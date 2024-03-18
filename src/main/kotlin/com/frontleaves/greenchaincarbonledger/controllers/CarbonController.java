@@ -128,4 +128,23 @@ public class CarbonController {
         }
     }
 
+    /**
+     * 获取自己组织碳排放配额
+     * <hr/>
+     * 获取自己组织碳排放配额
+     *
+     * @param request 请求
+     * @return carbonService
+     */
+    @GetMapping("/accounting/get")
+    public ResponseEntity<BaseResponse> getCarbonAccounting(
+            @RequestParam(required = false) String limit,
+            @RequestParam(required = false) String page,
+            @RequestParam(required = false) String order,
+            HttpServletRequest request
+    ) {
+        log.info("[Controller] 请求 getCarbonAccounting 接口");
+        long timestamp = System.currentTimeMillis();
+        return carbonService.getCarbonAccounting(timestamp, request, limit, page, order);
+    }
 }

@@ -2,7 +2,10 @@ package com.frontleaves.greenchaincarbonledger.mappers;
 
 import com.frontleaves.greenchaincarbonledger.models.doData.UserDO;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.UserEditVO;
-import org.apache.ibatis.annotations.*;
+import org.apache.ibatis.annotations.Insert;
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
 import java.util.List;
 
@@ -120,7 +123,7 @@ public interface UserMapper {
             SET user_name = #{userName},nick_name = #{nickName}, real_name = #{realName}, avatar = #{avatar}, email = #{email}, phone = #{phone}, updated_at = NOW()
             WHERE uuid = #{userUuid}
             """)
-    boolean updateUserForceByUuid(String userUuid, String userName,String realName,String nickName, String avatar,String email, String phone);
+    boolean updateUserForceByUuid(String userUuid, String userName, String nickName, String realName, String avatar, String email, String phone);
 
     @Update("UPDATE fy_user SET ban = 1 WHERE uuid = #{uuid}")
     Boolean banUser(String banUuid);
