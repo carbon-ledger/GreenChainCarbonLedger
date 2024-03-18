@@ -3,6 +3,9 @@ package com.frontleaves.greenchaincarbonledger.mappers;
 import com.frontleaves.greenchaincarbonledger.models.doData.CarbonAccountingDO;
 import com.frontleaves.greenchaincarbonledger.models.doData.CarbonQuotaDO;
 import com.frontleaves.greenchaincarbonledger.models.doData.CarbonReportDO;
+import com.frontleaves.greenchaincarbonledger.models.voData.getData.TradeReleaseVO;
+import org.apache.ibatis.annotations.Insert;
+import com.frontleaves.greenchaincarbonledger.models.doData.CarbonTradeDO;
 import com.frontleaves.greenchaincarbonledger.models.doData.CarbonTradeDO;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.EditTradeVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.TradeReleaseVO;
@@ -39,6 +42,11 @@ public interface CarbonMapper {
 
     @Select("SELECT * FROM fy_carbon_quota WHERE uuid = #{uuid}")
     CarbonQuotaDO getQuotaByUuid(String uuid);
+
+    @Select("SELECT * FROM fy_carbon_trade WHERE id=#{id}")
+    CarbonTradeDO getTradeById(String id);
+    @Update("UPDATE fy_carbon_trade SET status=#{status} AND updated_at=now() WHERE id=#{id}")
+    Boolean deleteTrade(String id,String status);
 
     @Insert("INSERT INTO fy_carbon_trade (organize_uuid, quota_amount, price_per_unit, description, status, created_at) VALUES (#{uuid}, #{amount}, #{unit}, #{text}, #{status}, NOW())")
     void insertTradeByUuid(String uuid, TradeReleaseVO tradeReleaseVO, String status);

@@ -7,6 +7,7 @@ import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import java.io.File
 
 /**
  * 超级控制台控制器
@@ -64,6 +65,22 @@ class SuperConsoleController(
             jdbcTemplate.execute(sql)
         }
 
+        context.close()
+    }
+
+    /**
+     * resetUploadFolder
+     *
+     * 重置上传文件夹, 用于重置上传文件夹
+     */
+    @GetMapping("/resetUploadFolder")
+    @CheckAccountPermission("super:resetUploadFolder")
+    fun resetUploadFolder() {
+        // 删除上传文件夹
+        val uploadFolder = File("upload")
+        if (uploadFolder.exists()) {
+            uploadFolder.deleteRecursively()
+        }
         context.close()
     }
 }
