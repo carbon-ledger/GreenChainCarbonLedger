@@ -4,6 +4,7 @@ import com.frontleaves.greenchaincarbonledger.mappers.CarbonMapper;
 import com.frontleaves.greenchaincarbonledger.models.doData.CarbonAccountingDO;
 import com.frontleaves.greenchaincarbonledger.models.doData.CarbonQuotaDO;
 import com.frontleaves.greenchaincarbonledger.models.doData.CarbonReportDO;
+import com.frontleaves.greenchaincarbonledger.models.doData.CarbonTradeDO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
@@ -50,7 +51,7 @@ public class CarbonDAO {
      * @param limit 每页限制的结果数，用于分页查询
      * @param page  要查询的页数，用于分页查询
      * @param order 排序方式，用于指定查询结果的排序顺序
-     * @return 符合条件的碳排放报告列表
+     * @return 符合条件的碳排放报告列表 -List
      */
 
     public List<CarbonReportDO> getReportByUuid(String uuid, String limit, String page, String order) {
@@ -66,7 +67,7 @@ public class CarbonDAO {
      * @param limit  每页限制的结果数
      * @param page   要查询的页数
      * @param order  排序方式，可选值包括 "asc"（升序）和 "desc"（降序）
-     * @return 包含碳排放报告信息的列表
+     * @return 包含碳排放报告信息的列表 -List
      */
     public List<CarbonReportDO> getReportByStatus(String uuid, String search, String limit, String page, String order) {
         log.info("[DAO] 执行 getReportByStatus 方法");
@@ -81,13 +82,18 @@ public class CarbonDAO {
      * @param limit  单页限制个数
      * @param page   第几页
      * @param order  排序顺序
-     * @return 符合条件的碳报告列表
+     * @return 符合条件的碳报告列表 -List
      */
     public List<CarbonReportDO> getReportBySearch(String uuid, String search, String  limit, String page, String order) {
         log.info("[DAO] 执行 etReportBySearch 方法");
         return carbonMapper.getReportBySearch(uuid, search, limit, page, order);
     }
 
+    /**
+     * 通过UUID获取碳核算数据表
+     * @param uuid-用户UUID
+     * @return 符合条件的碳核算数据列表 -List
+     */
     public List<CarbonAccountingDO> getAccountByUuid(String uuid) {
         log.info("[DAO] 执行 getAccountByUuid");
         return carbonMapper.getAccountByUuid(uuid);
@@ -96,5 +102,36 @@ public class CarbonDAO {
     public CarbonQuotaDO getQuotaByUuid(String uuid) {
         log.info("[DAO] 执行 getTotalQuotaByUuid 方法");
         return carbonMapper.getQuotaByUuid(uuid);
+    }
+
+    /**
+     * 通过UUID获取碳交易发布
+     * @param uuid -用户UUID
+     * @return 符合条件的碳交易发布列表 -List
+     */
+    public List<CarbonTradeDO> getTradeByUuid(String uuid){
+        log.info("[DAO] 执行 getTradeByUuid");
+        return carbonMapper.getTradeByUuid(uuid);
+    }
+
+    /**
+     * 通过id来获取碳交易发布
+     * @param id- 交易id
+     * @return 返回CarbonTradeDO
+     */
+    public CarbonTradeDO getTradeById(String id){
+        log.info("[DAO] 执行 getTradeById");
+        return carbonMapper.getTradeById(id);
+    }
+
+    /**
+     * 软删除交易发布
+     * @param id-交易id
+     * @param status-状态（cancelled）
+     * @return 成功返回ture，失败返回false
+     */
+    public Boolean deleteTrade(String id,String status){
+        log.info("[DAO] 执行 deleteTrade");
+        return carbonMapper.deleteTrade(id,status);
     }
 }

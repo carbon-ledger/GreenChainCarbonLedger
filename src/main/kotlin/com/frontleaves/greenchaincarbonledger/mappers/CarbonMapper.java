@@ -5,8 +5,10 @@ import com.frontleaves.greenchaincarbonledger.models.doData.CarbonQuotaDO;
 import com.frontleaves.greenchaincarbonledger.models.doData.CarbonReportDO;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.TradeReleaseVO;
 import org.apache.ibatis.annotations.Insert;
+import com.frontleaves.greenchaincarbonledger.models.doData.CarbonTradeDO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,4 +41,10 @@ public interface CarbonMapper {
 
     @Insert("INSERT INTO fy_carbon_trade (organize_uuid, quota_amount, price_per_unit, description, status, created_at) VALUES (#{uuid}, #{amount}, #{unit}, #{text}, #{status}, NOW())")
     Boolean insertTradeByUuid(String uuid, TradeReleaseVO tradeReleaseVO, String status);
+    @Select("SELECT * FROM fy_carbon_trade WHERE organize_uuid=#{uuid}")
+    List<CarbonTradeDO> getTradeByUuid(String uuid);
+    @Select("SELECT * FROM fy_carbon_trade WHERE id=#{id}")
+    CarbonTradeDO getTradeById(String id);
+    @Update("UPDATE fy_carbon_trade SET status=#{status} AND updated_at=now() WHERE id=#{id}")
+    Boolean deleteTrade(String id,String status);
 }
