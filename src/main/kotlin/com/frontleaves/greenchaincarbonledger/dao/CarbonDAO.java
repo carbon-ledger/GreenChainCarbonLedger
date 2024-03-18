@@ -84,13 +84,14 @@ public class CarbonDAO {
      * @param order  排序顺序
      * @return 符合条件的碳报告列表 -List
      */
-    public List<CarbonReportDO> getReportBySearch(String uuid, String search, String  limit, String page, String order) {
+    public List<CarbonReportDO> getReportBySearch(String uuid, String search, String limit, String page, String order) {
         log.info("[DAO] 执行 etReportBySearch 方法");
         return carbonMapper.getReportBySearch(uuid, search, limit, page, order);
     }
 
     /**
      * 通过UUID获取碳核算数据表
+     *
      * @param uuid-用户UUID
      * @return 符合条件的碳核算数据列表 -List
      */
@@ -106,32 +107,35 @@ public class CarbonDAO {
 
     /**
      * 通过UUID获取碳交易发布
+     *
      * @param uuid -用户UUID
      * @return 符合条件的碳交易发布列表 -List
      */
-    public List<CarbonTradeDO> getTradeByUuid(String uuid){
+    public List<CarbonTradeDO> getTradeByUuid(String uuid) {
         log.info("[DAO] 执行 getTradeByUuid");
         return carbonMapper.getTradeByUuid(uuid);
     }
 
     /**
      * 通过id来获取碳交易发布
+     *
      * @param id- 交易id
      * @return 返回CarbonTradeDO
      */
-    public CarbonTradeDO getTradeById(String id){
+    public CarbonTradeDO getTradeById(String id) {
         log.info("[DAO] 执行 getTradeById");
         return carbonMapper.getTradeById(id);
     }
 
     /**
      * 软删除交易发布
+     *
      * @param id-交易id
      * @param status-状态（cancelled）
      * @return 成功返回ture，失败返回false
      */
-    public Boolean deleteTrade(String id,String status){
+    public Boolean deleteTrade(String id, String status) {
         log.info("[DAO] 执行 deleteTrade");
-        return carbonMapper.deleteTrade(id,status);
+        return carbonMapper.deleteTrade(id, status);
     }
 }
