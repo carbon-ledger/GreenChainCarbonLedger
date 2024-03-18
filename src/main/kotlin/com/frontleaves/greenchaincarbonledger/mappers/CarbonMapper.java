@@ -3,6 +3,8 @@ package com.frontleaves.greenchaincarbonledger.mappers;
 import com.frontleaves.greenchaincarbonledger.models.doData.CarbonAccountingDO;
 import com.frontleaves.greenchaincarbonledger.models.doData.CarbonQuotaDO;
 import com.frontleaves.greenchaincarbonledger.models.doData.CarbonReportDO;
+import com.frontleaves.greenchaincarbonledger.models.voData.getData.TradeReleaseVO;
+import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 
@@ -31,4 +33,10 @@ public interface CarbonMapper {
     List<CarbonReportDO> getReportBySearch(String uuid, String search, String limit, String page, String order);
     @Select("SELECT * FROM fy_carbon_accounting WHERE organize_uuid=#{uuid}")
     List<CarbonAccountingDO> getAccountByUuid(String uuid);
+
+    @Select("SELECT * FROM fy_carbon_quota WHERE uuid = #{uuid}")
+    CarbonQuotaDO getQuotaByUuid(String uuid);
+
+    @Insert("INSERT INTO fy_carbon_trade (organize_uuid, quota_amount, price_per_unit, description, status, created_at) VALUES (#{uuid}, #{amount}, #{unit}, #{text}, #{status}, NOW())")
+    Boolean insertTradeByUuid(String uuid, TradeReleaseVO tradeReleaseVO, String status);
 }
