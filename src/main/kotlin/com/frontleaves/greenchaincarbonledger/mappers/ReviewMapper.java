@@ -35,8 +35,34 @@ public interface ReviewMapper {
      * @param newApproveOrganizeDO ApproveOrganizeDO
      */
     @Insert("""
-    INSERT INTO fy_approve_organize (account_uuid, type, organize_name, organize_license_url, organize_credit_code, organize_registered_capital, organize_establishment_date, legal_representative_name, legal_representative_id, legal_id_card_front_url, legal_id_card_back_url, remarks)
-    VALUES (#{accountUuid}, #{type}, #{organizeName}, #{organizeLicenseUrl}, #{organizeCreditCode}, #{organizeRegisteredCapital}, #{organizeEstablishmentDate}, #{legalRepresentativeName}, #{legalRepresentativeId}, #{legalIdCardFrontUrl}, #{legalIdCardBackUrl}, #{remarks})
+    INSERT INTO fy_approve_organize (
+        account_uuid,
+        type,
+        organize_name,
+        organize_license_url,
+        organize_credit_code,
+        organize_registered_capital,
+        organize_establishment_date,
+        legal_representative_name,
+        legal_representative_id,
+        legal_id_card_front_url,
+        legal_id_card_back_url,
+        remarks
+    )
+    VALUES (
+        #{accountUuid},
+        #{type},
+        #{organizeName},
+        #{organizeLicenseUrl},
+        #{organizeCreditCode},
+        #{organizeRegisteredCapital},
+        #{organizeEstablishmentDate},
+        #{legalRepresentativeName},
+        #{legalRepresentativeId},
+        #{legalIdCardFrontUrl},
+        #{legalIdCardBackUrl},
+        #{remarks}
+    )
     """)
     void setApproveOrganize(ApproveOrganizeDO newApproveOrganizeDO);
 
@@ -55,8 +81,28 @@ public interface ReviewMapper {
      * @param newApproveManageDO ApproveManageDO
      */
     @Insert("""
-    INSERT INTO fy_approve_manage (account_uuid, account_type, organize_name, organize_authorize_url, legal_representative_name, legal_representative_id, legal_id_card_front_url, legal_id_card_back_url, remarks)
-    VALUES (#{accountUuid}, #{accountType}, #{organizeName}, #{organizeAuthorizeUrl}, #{legalRepresentativeName}, #{legalRepresentativeId}, #{legalIdCardFrontUrl}, #{legalIdCardBackUrl}, #{remarks})
+    INSERT INTO fy_approve_manage (
+        account_uuid,
+        account_type,
+        organize_name,
+        organize_authorize_url,
+        legal_representative_name,
+        legal_representative_id,
+        legal_id_card_front_url,
+        legal_id_card_back_url,
+        remarks
+    )
+    VALUES (
+        #{accountUuid},
+        #{accountType},
+        #{organizeName},
+        #{organizeAuthorizeUrl},
+        #{legalRepresentativeName},
+        #{legalRepresentativeId},
+        #{legalIdCardFrontUrl},
+        #{legalIdCardBackUrl},
+        #{remarks}
+    )
     """)
     void setApproveAdmin(ApproveManageDO newApproveManageDO);
 
@@ -88,43 +134,43 @@ public interface ReviewMapper {
     @Update("""
     UPDATE fy_approve_organize SET
         account_uuid = #{accountUuid},
-        type = #{type}, 
-        organize_name = #{organizeName}, 
-        organize_license_url = #{organizeLicenseUrl}, 
-        organize_credit_code = #{organizeCreditCode}, 
-        organize_registered_capital = #{organizeRegisteredCapital}, 
-        organize_establishment_date = #{organizeEstablishmentDate}, 
-        legal_representative_name = #{legalRepresentativeName}, 
-        legal_representative_id = #{legalRepresentativeId}, 
-        legal_id_card_front_url = #{legalIdCardFrontUrl}, 
-        legal_id_card_back_url = #{legalIdCardBackUrl}, 
-        certification_status = #{certificationStatus}, 
-        apply_time = #{applyTime}, 
-        approve_time = #{approveTime}, 
-        updated_at = #{updatedAt}, 
-        remarks = #{remarks}, 
-        approve_uuid = #{approveUuid}, 
+        type = #{type},
+        organize_name = #{organizeName},
+        organize_license_url = #{organizeLicenseUrl},
+        organize_credit_code = #{organizeCreditCode},
+        organize_registered_capital = #{organizeRegisteredCapital},
+        organize_establishment_date = #{organizeEstablishmentDate},
+        legal_representative_name = #{legalRepresentativeName},
+        legal_representative_id = #{legalRepresentativeId},
+        legal_id_card_front_url = #{legalIdCardFrontUrl},
+        legal_id_card_back_url = #{legalIdCardBackUrl},
+        certification_status = #{certificationStatus},
+        apply_time = #{applyTime},
+        approve_time = #{approveTime},
+        updated_at = #{updatedAt},
+        remarks = #{remarks},
+        approve_uuid = #{approveUuid},
         approve_remarks = #{approveRemarks}
     WHERE id = #{id}
     """)
     void updateApproveOrganize(ApproveOrganizeDO getApproveOrganizeDO);
 
     @Update("""
-    UPDATE fy_approve_manage SET 
-        account_uuid = #{accountUuid}, 
-        account_type = #{accountType}, 
-        organize_name = #{organizeName}, 
-        organize_authorize_url = #{organizeAuthorizeUrl}, 
-        legal_representative_name = #{legalRepresentativeName}, 
-        legal_representative_id = #{legalRepresentativeId}, 
-        legal_id_card_front_url = #{legalIdCardFrontUrl}, 
-        legal_id_card_back_url = #{legalIdCardBackUrl}, 
-        certification_status = #{certificationStatus}, 
-        apply_time = #{applyTime}, 
-        approve_time = #{approveTime}, 
-        updated_at = #{updatedAt}, 
-        remarks = #{remarks}, 
-        approve_uuid = #{approveUuid}, 
+    UPDATE fy_approve_manage SET
+        account_uuid = #{accountUuid},
+        account_type = #{accountType},
+        organize_name = #{organizeName},
+        organize_authorize_url = #{organizeAuthorizeUrl},
+        legal_representative_name = #{legalRepresentativeName},
+        legal_representative_id = #{legalRepresentativeId},
+        legal_id_card_front_url = #{legalIdCardFrontUrl},
+        legal_id_card_back_url = #{legalIdCardBackUrl},
+        certification_status = #{certificationStatus},
+        apply_time = #{applyTime},
+        approve_time = #{approveTime},
+        updated_at = #{updatedAt},
+        remarks = #{remarks},
+        approve_uuid = #{approveUuid},
         approve_remarks = #{approveRemarks}
     WHERE id = #{id}
     """)
