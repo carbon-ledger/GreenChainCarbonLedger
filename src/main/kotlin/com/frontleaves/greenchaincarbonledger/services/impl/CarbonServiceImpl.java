@@ -3,10 +3,8 @@ package com.frontleaves.greenchaincarbonledger.services.impl;
 import com.frontleaves.greenchaincarbonledger.dao.CarbonDAO;
 import com.frontleaves.greenchaincarbonledger.dao.UserDAO;
 import com.frontleaves.greenchaincarbonledger.mappers.CarbonMapper;
-import com.frontleaves.greenchaincarbonledger.models.doData.CarbonAccountingDO;
-import com.frontleaves.greenchaincarbonledger.models.doData.CarbonQuotaDO;
-import com.frontleaves.greenchaincarbonledger.models.doData.CarbonReportDO;
-import com.frontleaves.greenchaincarbonledger.models.doData.UserDO;
+import com.frontleaves.greenchaincarbonledger.models.doData.*;
+import com.frontleaves.greenchaincarbonledger.models.voData.getData.EditTradeVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.TradeReleaseVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.returnData.BackCarbonQuotaVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.returnData.BackCarbonReportVO;
@@ -159,5 +157,28 @@ public class CarbonServiceImpl implements CarbonService {
                 return ResultUtil.error(timestamp, "无法使用购入的碳配额量进行交易", ErrorCode.RELEASE_TRADE_FAILURE);
             }
         }
+    }
+
+    @NotNull
+    @Override
+    public ResponseEntity<BaseResponse> editCarbonTrade(long timestamp, @NotNull HttpServletRequest request, @NotNull EditTradeVO editTradeVO) {
+        log.info("[Service] 执行 releaseCarbonTrade 方法");
+        String getUuid = ProcessingUtil.getAuthorizeUserUuid(request);
+        // 判断用户是否发布过交易
+        // 判断交易是否已经发布
+        CarbonTradeDO carbonTradeDO = carbonDAO.getTradeByUuid(getUuid);
+        String status = carbonTradeDO.getStatus();
+        if ("draft".equals(status) || "pending_review".equals(status)){
+            // 判断编辑的信息是否合法有效，如果有效则可以提交编辑
+            if (editTradeVO.getDraft()){
+                carbonMapper.updateTradeByUuid(getUuid, editTradeVO, "draft");
+            } else {
+                carbonMapper.updateTradeByUuid(getUuid, editTradeVO, "pending_review");
+            }
+            return ResultUtil.success(timestamp, "交易发布信息修改成功");
+        } else {
+            return ResultUtil.error(timestamp, ErrorCode.EDIT_TRADE_FAILURE);
+        }
+
     }
 }
