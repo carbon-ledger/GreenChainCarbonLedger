@@ -1,6 +1,7 @@
 package com.frontleaves.greenchaincarbonledger.services
 
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.ReviewAdminVO
+import com.frontleaves.greenchaincarbonledger.models.voData.getData.ReviewCheckVO
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.ReviewOrganizeVO
 import com.frontleaves.greenchaincarbonledger.utils.BaseResponse
 import jakarta.servlet.http.HttpServletRequest
@@ -46,6 +47,42 @@ interface ReviewService {
     fun addReviewFromAdmin(
         timestamp: Long,
         reviewAdminVO: ReviewAdminVO,
+        request: HttpServletRequest
+    ): ResponseEntity<BaseResponse>
+
+    /**
+     * checkReviewFormOrganize
+     *
+     * 用于组织账户的实名认证审核, 由组织账户进行审核
+     *
+     * @param timestamp 时间戳
+     * @param checkId 审核ID
+     * @param reviewCheckVO ReviewCheckVO
+     * @param request HttpServletRequest
+     * @return ResponseEntity<BaseResponse>
+     */
+    fun checkReviewFormOrganize(
+        timestamp: Long,
+        checkId: String,
+        reviewCheckVO: ReviewCheckVO,
+        request: HttpServletRequest
+    ): ResponseEntity<BaseResponse>
+
+    /**
+     * checkReviewFormAdmin
+     *
+     * 用于组织账户的组织审核, 以及监管账户的实名认证审核
+     *
+     * @param timestamp 时间戳
+     * @param checkId 审核ID
+     * @param reviewCheckVO ReviewCheckVO
+     * @param request HttpServletRequest
+     * @return ResponseEntity<BaseResponse>
+     */
+    fun checkReviewFormAdmin(
+        timestamp: Long,
+        checkId: String,
+        reviewCheckVO: ReviewCheckVO,
         request: HttpServletRequest
     ): ResponseEntity<BaseResponse>
 }
