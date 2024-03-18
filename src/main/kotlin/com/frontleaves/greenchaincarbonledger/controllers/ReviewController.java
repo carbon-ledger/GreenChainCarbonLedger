@@ -159,10 +159,23 @@ public class ReviewController {
     @PutMapping("/re-send/organize/{checkId}")
     @CheckAccountPermission({"review:reSendOrganize"})
     public ResponseEntity<BaseResponse> reSendReviewFromOrganize(
-
-            @PathVariable String checkId
+            @RequestBody @Validated ReviewOrganizeVO reviewOrganizeVO,
+            @NotNull BindingResult bindingResult,
+            @PathVariable String checkId,
+            @NotNull HttpServletRequest request
     ) {
-        return null;
+        log.info("[Controller] 执行 reSendReviewFromOrganize 方法");
+        long timestamp = System.currentTimeMillis();
+        // 内容检查
+        if (bindingResult.hasErrors()) {
+            return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR, ProcessingUtil.getValidatedErrorList(bindingResult));
+        }
+        // 检查id是否正确输入
+        if (checkId.isBlank() || !checkId.matches("^[0-9]+$")) {
+            return ResultUtil.error(timestamp, ErrorCode.PATH_VARIABLE_ERROR);
+        }
+        // 业务逻辑
+        return reviewService.reSendReviewFormOrganize(timestamp, checkId, reviewOrganizeVO, request);
     }
 
     /**
@@ -176,10 +189,23 @@ public class ReviewController {
     @PutMapping("/re-send/admin/{checkId}")
     @CheckAccountPermission({"review:reSendAdmin"})
     public ResponseEntity<BaseResponse> reSendReviewFromAdmin(
-
-            @PathVariable String checkId
+            @RequestBody @Validated ReviewAdminVO reviewAdminVO,
+            @NotNull BindingResult bindingResult,
+            @PathVariable String checkId,
+            @NotNull HttpServletRequest request
     ) {
-        return null;
+        log.info("[Controller] 执行 reSendReviewFromAdmin 方法");
+        long timestamp = System.currentTimeMillis();
+        // 内容检查
+        if (bindingResult.hasErrors()) {
+            return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR, ProcessingUtil.getValidatedErrorList(bindingResult));
+        }
+        // 检查id是否正确输入
+        if (checkId.isBlank() || !checkId.matches("^[0-9]+$")) {
+            return ResultUtil.error(timestamp, ErrorCode.PATH_VARIABLE_ERROR);
+        }
+        // 业务逻辑
+        return reviewService.reSendReviewFormAdmin(timestamp, checkId, reviewAdminVO, request);
     }
 
     /**

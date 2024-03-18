@@ -113,4 +113,16 @@ public class ReviewDAO {
         }
         reviewMapper.updateReviewAdminCheck(id, value, remark);
     }
+
+    public void updateReviewOrganizeApprove(ApproveOrganizeDO getApproveOrganizeDO) {
+        log.info("[DAO] 执行 updateReviewOrganizeApprove 方法");
+        log.debug("\t> Mysql 写入");
+        reviewMapper.updateApproveOrganize(getApproveOrganizeDO);
+    }
+
+    public void updateReviewAdminApprove(ApproveManageDO getApproveAdminById) {
+        log.info("[DAO] 执行 updateReviewAdminApprove 方法");
+        log.debug("\t> Mysql 写入");
+        reviewMapper.updateApproveAdmin(getApproveAdminById);
+    }
 }

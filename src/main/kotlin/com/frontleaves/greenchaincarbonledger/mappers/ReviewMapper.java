@@ -79,4 +79,54 @@ public interface ReviewMapper {
 
     @Update("UPDATE fy_approve_manage SET certification_status = #{value}, remarks = #{remark} WHERE id = #{id}")
     void updateReviewAdminCheck(long id, short value, String remark);
+
+    /**
+     * 更新组织审核信息
+     *
+     * @param getApproveOrganizeDO ApproveOrganizeDO
+     */
+    @Update("""
+    UPDATE fy_approve_organize SET
+        account_uuid = #{accountUuid},
+        type = #{type}, 
+        organize_name = #{organizeName}, 
+        organize_license_url = #{organizeLicenseUrl}, 
+        organize_credit_code = #{organizeCreditCode}, 
+        organize_registered_capital = #{organizeRegisteredCapital}, 
+        organize_establishment_date = #{organizeEstablishmentDate}, 
+        legal_representative_name = #{legalRepresentativeName}, 
+        legal_representative_id = #{legalRepresentativeId}, 
+        legal_id_card_front_url = #{legalIdCardFrontUrl}, 
+        legal_id_card_back_url = #{legalIdCardBackUrl}, 
+        certification_status = #{certificationStatus}, 
+        apply_time = #{applyTime}, 
+        approve_time = #{approveTime}, 
+        updated_at = #{updatedAt}, 
+        remarks = #{remarks}, 
+        approve_uuid = #{approveUuid}, 
+        approve_remarks = #{approveRemarks}
+    WHERE id = #{id}
+    """)
+    void updateApproveOrganize(ApproveOrganizeDO getApproveOrganizeDO);
+
+    @Update("""
+    UPDATE fy_approve_manage SET 
+        account_uuid = #{accountUuid}, 
+        account_type = #{accountType}, 
+        organize_name = #{organizeName}, 
+        organize_authorize_url = #{organizeAuthorizeUrl}, 
+        legal_representative_name = #{legalRepresentativeName}, 
+        legal_representative_id = #{legalRepresentativeId}, 
+        legal_id_card_front_url = #{legalIdCardFrontUrl}, 
+        legal_id_card_back_url = #{legalIdCardBackUrl}, 
+        certification_status = #{certificationStatus}, 
+        apply_time = #{applyTime}, 
+        approve_time = #{approveTime}, 
+        updated_at = #{updatedAt}, 
+        remarks = #{remarks}, 
+        approve_uuid = #{approveUuid}, 
+        approve_remarks = #{approveRemarks}
+    WHERE id = #{id}
+    """)
+    void updateApproveAdmin(ApproveManageDO getApproveAdminById);
 }

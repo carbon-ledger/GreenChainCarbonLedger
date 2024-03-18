@@ -85,4 +85,18 @@ interface ReviewService {
         reviewCheckVO: ReviewCheckVO,
         request: HttpServletRequest
     ): ResponseEntity<BaseResponse>
+
+    fun reSendReviewFormOrganize(
+        timestamp: Long,
+        checkId: String,
+        reviewOrganizeVO: ReviewOrganizeVO,
+        request: HttpServletRequest
+    ): ResponseEntity<BaseResponse>
+
+    fun reSendReviewFormAdmin(
+        timestamp: Long,
+        checkId: String,
+        reviewAdminVO: ReviewAdminVO,
+        request: HttpServletRequest
+    ): ResponseEntity<BaseResponse>
 }
