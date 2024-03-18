@@ -16,11 +16,12 @@ import lombok.experimental.Accessors;
 @Data
 @Accessors(chain = true)
 public class ReviewAdminVO {
-    public String type;
+    public Short type;
     public String organizeName;
     public String organizeAuthorize;
     public String legalRepresentativeName;
     public String legalRepresentativeId;
     public String legalIdCardFront;
     public String legalIdCardBack;
+    public String remarks;
 }

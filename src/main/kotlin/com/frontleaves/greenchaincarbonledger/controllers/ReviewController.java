@@ -1,6 +1,7 @@
 package com.frontleaves.greenchaincarbonledger.controllers;
 
 import com.frontleaves.greenchaincarbonledger.annotations.CheckAccountPermission;
+import com.frontleaves.greenchaincarbonledger.models.voData.getData.ReviewAdminVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.ReviewOrganizeVO;
 import com.frontleaves.greenchaincarbonledger.services.ReviewService;
 import com.frontleaves.greenchaincarbonledger.utils.BaseResponse;
@@ -56,7 +57,7 @@ public class ReviewController {
             return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR, ProcessingUtil.getValidatedErrorList(bindingResult));
         }
         // 业务逻辑
-        return reviewService.addReviewFromOrganize(reviewOrganizeVO, request);
+        return reviewService.addReviewFromOrganize(timestamp, reviewOrganizeVO, request);
     }
 
     /**
@@ -64,7 +65,7 @@ public class ReviewController {
      * <hr/>
      * 用于监管账户的实名认证审核，需要监管账户权限, 通过监管账户实名认证审核VO进行审核
      *
-     * @param reviewOrganizeVO 组织账户实名认证审核VO
+     * @param reviewAdminVO 组织账户实名认证审核VO
      * @param bindingResult     数据绑定结果
      * @param request           请求
      * @return ResponseEntity<BaseResponse>
@@ -72,7 +73,7 @@ public class ReviewController {
     @PostMapping("/add/admin")
     @CheckAccountPermission({"review:addAdmin"})
     public ResponseEntity<BaseResponse> addReviewFromAdmin(
-            @RequestBody @Validated ReviewOrganizeVO reviewOrganizeVO,
+            @RequestBody @Validated ReviewAdminVO reviewAdminVO,
             @NotNull BindingResult bindingResult,
             @NotNull HttpServletRequest request
     ) {
@@ -83,7 +84,7 @@ public class ReviewController {
             return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR, ProcessingUtil.getValidatedErrorList(bindingResult));
         }
         // 业务逻辑
-        return reviewService.addReviewFromAdmin(reviewOrganizeVO, request);
+        return reviewService.addReviewFromAdmin(timestamp, reviewAdminVO, request);
     }
 
     /**
