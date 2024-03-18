@@ -25,6 +25,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.sql.Date;
+import java.sql.Timestamp;
 
 /**
  * ReviewServiceImpl
@@ -100,13 +102,8 @@ public class ReviewServiceImpl implements ReviewService {
                         .setLegalIdCardFrontUrl(getUserDO.getUuid() + "_front.jpg")
                         .setLegalIdCardBackUrl(getUserDO.getUuid() + "_back.jpg")
                         .setRemarks(reviewOrganizeVO.getRemark());
-                try {
-                    reviewDAO.setReviewOrganizeApprove(newApproveOrganizeDO);
-                    return ResultUtil.success(timestamp, "申请已提交");
-                } catch (Exception e) {
-                    log.error("[DAO] 数据库写入错误: {}", e.getMessage(), e);
-                    return ResultUtil.error(timestamp, ErrorCode.SERVER_INTERNAL_ERROR);
-                }
+                reviewDAO.setReviewOrganizeApprove(newApproveOrganizeDO);
+                return ResultUtil.success(timestamp, "申请已提交");
             } else {
                 return ResultUtil.error(timestamp, ErrorCode.USER_NOT_EXISTED);
             }
@@ -231,6 +228,175 @@ public class ReviewServiceImpl implements ReviewService {
             return ResultUtil.success(timestamp, "已进行操作");
         } else {
             return ResultUtil.error(timestamp, "审核内容不存在", ErrorCode.REVIEW_ERROR);
+        }
+    }
+
+    @NotNull
+    @Override
+    public ResponseEntity<BaseResponse> reSendReviewFormOrganize(long timestamp, @NotNull String checkId, @NotNull ReviewOrganizeVO reviewOrganizeVO, @NotNull HttpServletRequest request) {
+        log.info("[Service] 执行 reSendReviewFormOrganize 方法");
+        // 获取用户资料
+        UserDO getUserDO = ProcessingUtil.getUserByHeaderUuid(request, userDAO);
+        if (getUserDO != null) {
+            // 获取管理账户资料
+            ApproveOrganizeDO getApproveOrganizeDO = reviewDAO.getApproveOrganizeById(checkId);
+            if (getApproveOrganizeDO != null) {
+                if (getApproveOrganizeDO.getApproveUuid().equals(getUserDO.getUuid())) {
+                    if (getApproveOrganizeDO.getCertificationStatus() != 0) {
+                        // 对资料进行编辑
+                        Base64 base64 = new Base64();
+                        try {
+                            // 对图片数据进行 Base64 解码重命名保存在指定位置
+                            byte[] license = base64.decode(reviewOrganizeVO.getLicense());
+                            OutputStream licenseOutput = new FileOutputStream("upload/license/" + getUserDO.getUuid() + "_organize.jpg");
+                            new File("upload/license/" + getUserDO.getUuid() + "_organize.jpg").delete();
+                            licenseOutput.write(license);
+                            licenseOutput.flush();
+                            licenseOutput.close();
+                            // 对身份证数据进行 Base64 解码重命名保存在指定位置
+                            byte[] idCardFront = base64.decode(reviewOrganizeVO.getLegalIdCardFront());
+                            OutputStream idCardFrontOutput = new FileOutputStream("upload/legal_id_card" + getUserDO.getUuid() + "_front.jpg");
+                            new File("upload/legal_id_card" + getUserDO.getUuid() + "_front.jpg").delete();
+                            idCardFrontOutput.write(idCardFront);
+                            idCardFrontOutput.flush();
+                            idCardFrontOutput.close();
+                            // 对身份证数据进行 Base64 解码重命名保存在指定位置
+                            byte[] idCardBack = base64.decode(reviewOrganizeVO.getLegalIdCardBack());
+                            OutputStream idCardBackOutput = new FileOutputStream("output/legal_id_card" + getUserDO.getUuid() + "_back.jpg");
+                            new File("output/legal_id_card" + getUserDO.getUuid() + "_back.jpg").delete();
+                            idCardBackOutput.write(idCardBack);
+                            idCardBackOutput.flush();
+                            idCardBackOutput.close();
+                        } catch (IOException e) {
+                            log.error("[Service] 文件处理错误: {}", e.getMessage(), e);
+                            // 删除文件（处理无关数据）
+                            if (!new File("upload/license/" + getUserDO.getUuid() + "_organize.jpg").delete()) {
+                                log.debug("[Service] License 资料不存在");
+                            }
+                            if (!new File("upload/legal_id_card" + getUserDO.getUuid() + "_front.jpg").delete()) {
+                                log.debug("[Service] IdCardFront 资料不存在");
+                            }
+                            if (!new File("output/legal_id_card" + getUserDO.getUuid() + "_back.jpg").delete()) {
+                                log.debug("[Service] IdCardBack 资料不存在");
+                            }
+                            ResultUtil.error(timestamp, "文件处理错误", ErrorCode.SERVER_INTERNAL_ERROR);
+                        }
+                        // 资料进行更新
+                        getApproveOrganizeDO
+                                .setAccountUuid(getUserDO.getUuid())
+                                .setType((short) 0)
+                                .setOrganizeName(reviewOrganizeVO.getOrganizeName())
+                                .setOrganizeLicenseUrl(getUserDO.getUuid() + "_organize.jpg")
+                                .setOrganizeCreditCode(reviewOrganizeVO.getCreditCode())
+                                .setOrganizeRegisteredCapital(reviewOrganizeVO.getRegisteredCapital())
+                                .setOrganizeEstablishmentDate(reviewOrganizeVO.getEstablishmentDate())
+                                .setLegalRepresentativeName(reviewOrganizeVO.getLegalRepresentativeName())
+                                .setLegalRepresentativeId(reviewOrganizeVO.getLegalRepresentativeId())
+                                .setLegalIdCardFrontUrl(getUserDO.getUuid() + "_front.jpg")
+                                .setLegalIdCardBackUrl(getUserDO.getUuid() + "_back.jpg")
+                                .setRemarks(reviewOrganizeVO.getRemark())
+                                .setApplyTime(new Date(System.currentTimeMillis()))
+                                .setUpdatedAt(new Timestamp(System.currentTimeMillis()))
+                                .setApproveUuid(null)
+                                .setApproveRemarks(null)
+                                .setApplyTime(null)
+                                .setCertificationStatus((short) 0);
+                        reviewDAO.updateReviewOrganizeApprove(getApproveOrganizeDO);
+                        return ResultUtil.success(timestamp, "申请已提交");
+                    } else {
+                        return ResultUtil.error(timestamp, "您的资料正在等待审核", ErrorCode.REVIEW_ERROR);
+                    }
+                } else {
+                    return ResultUtil.error(timestamp, "您没有权限重新编辑此内容", ErrorCode.REVIEW_ERROR);
+                }
+            } else {
+                return ResultUtil.error(timestamp, "资料不存在", ErrorCode.REVIEW_ERROR);
+            }
+        } else {
+            return ResultUtil.error(timestamp, ErrorCode.USER_NOT_EXISTED);
+        }
+    }
+
+    @NotNull
+    @Override
+    public ResponseEntity<BaseResponse> reSendReviewFormAdmin(long timestamp, @NotNull String checkId, @NotNull ReviewAdminVO reviewAdminVO, @NotNull HttpServletRequest request) {
+        log.info("[Service] 执行 reSendReviewFormOrganize 方法");
+        // 获取用户资料
+        UserDO getUserDO = ProcessingUtil.getUserByHeaderUuid(request, userDAO);
+        if (getUserDO != null) {
+            // 获取管理账户资料
+            ApproveManageDO getApproveAdminById = reviewDAO.getApproveAdminById(checkId);
+            if (getApproveAdminById != null) {
+                if (getApproveAdminById.getApproveUuid().equals(getUserDO.getUuid())) {
+                    if (getApproveAdminById.getCertificationStatus() != 0) {
+                        // 对资料进行编辑
+                        Base64 base64 = new Base64();
+                        try {
+                            // 对图片数据进行 Base64 解码重命名保存在指定位置
+                            byte[] license = base64.decode(reviewAdminVO.getOrganizeAuthorize());
+                            OutputStream licenseOutput = new FileOutputStream("upload/license/" + getUserDO.getUuid() + "_authorize.jpg");
+                            new File("upload/license/" + getUserDO.getUuid() + "_authorize.jpg").delete();
+                            licenseOutput.write(license);
+                            licenseOutput.flush();
+                            licenseOutput.close();
+                            // 对身份证数据进行 Base64 解码重命名保存在指定位置
+                            byte[] idCardFront = base64.decode(reviewAdminVO.getLegalIdCardFront());
+                            OutputStream idCardFrontOutput = new FileOutputStream("upload/legal_id_card" + getUserDO.getUuid() + "_front.jpg");
+                            new File("upload/legal_id_card" + getUserDO.getUuid() + "_front.jpg").delete();
+                            idCardFrontOutput.write(idCardFront);
+                            idCardFrontOutput.flush();
+                            idCardFrontOutput.close();
+                            // 对身份证数据进行 Base64 解码重命名保存在指定位置
+                            byte[] idCardBack = base64.decode(reviewAdminVO.getLegalIdCardBack());
+                            OutputStream idCardBackOutput = new FileOutputStream("output/legal_id_card" + getUserDO.getUuid() + "_back.jpg");
+                            new File("output/legal_id_card" + getUserDO.getUuid() + "_back.jpg").delete();
+                            idCardBackOutput.write(idCardBack);
+                            idCardBackOutput.flush();
+                            idCardBackOutput.close();
+                        } catch (IOException e) {
+                            log.error("[Service] 文件处理错误: {}", e.getMessage(), e);
+                            // 删除文件（处理无关数据）
+                            if (!new File("upload/license/" + getUserDO.getUuid() + "_authorize.jpg").delete()) {
+                                log.debug("[Service] License 资料不存在");
+                            }
+                            if (!new File("upload/legal_id_card" + getUserDO.getUuid() + "_front.jpg").delete()) {
+                                log.debug("[Service] IdCardFront 资料不存在");
+                            }
+                            if (!new File("output/legal_id_card" + getUserDO.getUuid() + "_back.jpg").delete()) {
+                                log.debug("[Service] IdCardBack 资料不存在");
+                            }
+                            ResultUtil.error(timestamp, "文件处理错误", ErrorCode.SERVER_INTERNAL_ERROR);
+                        }
+                        // 资料进行更新
+                        getApproveAdminById
+                                .setAccountUuid(getUserDO.getUuid())
+                                .setAccountType(reviewAdminVO.getType())
+                                .setOrganizeName(reviewAdminVO.getOrganizeName())
+                                .setOrganizeAuthorizeUrl(getUserDO.getUuid() + "_authorize.jpg")
+                                .setLegalRepresentativeName(reviewAdminVO.getLegalRepresentativeName())
+                                .setLegalRepresentativeId(reviewAdminVO.getLegalRepresentativeId())
+                                .setLegalIdCardFrontUrl(getUserDO.getUuid() + "_front.jpg")
+                                .setLegalIdCardBackUrl(getUserDO.getUuid() + "_back.jpg")
+                                .setRemarks(reviewAdminVO.getRemarks())
+                                .setApplyTime(new Date(System.currentTimeMillis()))
+                                .setUpdatedAt(new Timestamp(System.currentTimeMillis()))
+                                .setCertificationStatus((short) 0)
+                                .setApproveTime(null)
+                                .setApproveUuid(null)
+                                .setApproveRemarks(null);
+                        reviewDAO.updateReviewAdminApprove(getApproveAdminById);
+                        return ResultUtil.success(timestamp, "申请已提交");
+                    } else {
+                        return ResultUtil.error(timestamp, "您的资料正在等待审核", ErrorCode.REVIEW_ERROR);
+                    }
+                } else {
+                    return ResultUtil.error(timestamp, "您没有权限重新编辑此内容", ErrorCode.REVIEW_ERROR);
+                }
+            } else {
+                return ResultUtil.error(timestamp, "资料不存在", ErrorCode.REVIEW_ERROR);
+            }
+        } else {
+            return ResultUtil.error(timestamp, ErrorCode.USER_NOT_EXISTED);
         }
     }
 }
