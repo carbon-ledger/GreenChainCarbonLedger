@@ -1,5 +1,6 @@
 package com.frontleaves.greenchaincarbonledger.services
 
+import com.frontleaves.greenchaincarbonledger.models.voData.getData.TradeReleaseVO
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.EditTradeVO
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.TradeReleaseVO
 import com.frontleaves.greenchaincarbonledger.utils.BaseResponse
@@ -24,6 +25,14 @@ interface CarbonService {
         request: HttpServletRequest,
         start: String?,
         end: String
+    ): ResponseEntity<BaseResponse>
+
+    fun getCarbonAccounting(
+        timestamp: Long,
+        request: HttpServletRequest,
+        limit: String?,
+        page: String?,
+        order: String
     ): ResponseEntity<BaseResponse>
 
     /**
