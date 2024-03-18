@@ -22,17 +22,30 @@ object SqlPrepareData {
         add(ArrayList(listOf("auth:userLogout", "用户登出")))
         add(ArrayList(listOf("role:addRole", "添加角色")))
         add(ArrayList(listOf("role:getCurrentRole", "获取当前角色")))
+        add(ArrayList(listOf("role:getRoleList", "获取角色列表")))
         add(ArrayList(listOf("role:editRole", "编辑角色")))
         add(ArrayList(listOf("role:deleteRole", "删除角色")))
-        add(ArrayList(listOf("user:getUserCurrentInfo", "获取当前用户信息")))
         add(ArrayList(listOf("user:getUserList", "获取用户列表")))
         add(ArrayList(listOf("user:editUserInformation", "编辑用户信息")))
         add(ArrayList(listOf("user:putUserForceEdit", "强制编辑用户信息")))
         add(ArrayList(listOf("user:getUserCurrent", "获取当前用户")))
+        add(ArrayList(listOf("user:banUser", "封禁用户")))
         add(ArrayList(listOf("permission:getPermissionList", "获取权限列表")))
         add(ArrayList(listOf("admin:resetUserPassword", "重置用户密码")))
-        add(ArrayList(listOf("auth:closeServer", "关闭服务器")))
-        add(ArrayList(listOf("auth:resetSql", "重置数据库")))
+        add(ArrayList(listOf("super:closeServer", "关闭服务器")))
+        add(ArrayList(listOf("super:resetSql", "重置数据库")))
+        add(ArrayList(listOf("super:resetUploadFolder", "重置上传文件夹")))
+        add(ArrayList(listOf("carbon:getOwnCarbonQuota", "获取自己的碳配额")))
+        add(ArrayList(listOf("carbon:getCarbonReport", "获取碳排放报告")))
+        add(ArrayList(listOf("review:addOrganize", "添加组织账户审核信息")))
+        add(ArrayList(listOf("review:addAdmin", "添加监管账户审核信息")))
+        add(ArrayList(listOf("review:checkOrganize", "审核组织账户")))
+        add(ArrayList(listOf("review:checkAdmin", "审核监管账户")))
+        add(ArrayList(listOf("review:reSendOrganize", "重新发送组织账户审核信息")))
+        add(ArrayList(listOf("review:reSendAdmin", "重新发送监管账户审核信息")))
+        add(ArrayList(listOf("review:getList", "获取审核列表")))
+        add(ArrayList(listOf("review:getReview", "获取审核信息")))
+        add(ArrayList(listOf("review:getReport", "获取审核报告")))
     }
 
     /**
@@ -41,9 +54,23 @@ object SqlPrepareData {
      * CONSOLE 控制台角色
      */
     val SQL_ROLE_CONSOLE_PERMISSION_LIST = ArrayList<String>().apply {
-        PERMISSION_LIST.forEach{
+        PERMISSION_LIST.forEach {
             add(it[0])
         }
+    }
+
+    /**
+     * SQL 角色列表
+     *
+     * DEFAULT 默认角色
+     */
+    val SQL_ROLE_DEFAULT_PERMISSION_LIST = ArrayList<String>().apply {
+        add("auth:userChangePassword")
+        add("auth:userDelete")
+        add("auth:userLogout")
+        add("role:getCurrentRole")
+        add("user:editUserInformation")
+        add("user:getUserCurrent")
     }
 
     /**
@@ -52,7 +79,9 @@ object SqlPrepareData {
      * ADMIN 管理员角色
      */
     val SQL_ROLE_ADMIN_PERMISSION_LIST = ArrayList<String>().apply {
-
+        SQL_ROLE_DEFAULT_PERMISSION_LIST.forEach {
+            add(it)
+        }
     }
 
 
@@ -62,6 +91,8 @@ object SqlPrepareData {
      * ORGANIZE 组织角色
      */
     val SQL_ROLE_ORGANIZE_PERMISSION_LIST = ArrayList<String>().apply {
-
+        SQL_ROLE_DEFAULT_PERMISSION_LIST.forEach {
+            add(it)
+        }
     }
 }

@@ -3,10 +3,7 @@ package com.frontleaves.greenchaincarbonledger.controllers;
 import com.frontleaves.greenchaincarbonledger.annotations.CheckAccountPermission;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.RoleVO;
 import com.frontleaves.greenchaincarbonledger.services.RoleService;
-import com.frontleaves.greenchaincarbonledger.utils.BaseResponse;
-import com.frontleaves.greenchaincarbonledger.utils.ErrorCode;
-import com.frontleaves.greenchaincarbonledger.utils.ProcessingUtil;
-import com.frontleaves.greenchaincarbonledger.utils.ResultUtil;
+import com.frontleaves.greenchaincarbonledger.utils.*;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,8 +12,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.ArrayList;
 
 /**
  * RoleController
@@ -33,6 +28,8 @@ import java.util.ArrayList;
 @RequiredArgsConstructor
 public class RoleController {
     private final RoleService roleService;
+
+    private final BusinessUtil businessUtil;
 
     /**
      * addRole
@@ -93,34 +90,32 @@ public class RoleController {
      * @return 包含角色列表的响应实体
      */
     @GetMapping("/list")
+    @CheckAccountPermission({"role:getRoleList"})
     public ResponseEntity<BaseResponse> getRoleList(
             //需要Query参数
             @RequestParam String type,
             @RequestParam(required = false) String search,
-            @RequestParam(required = false) Integer limit,
-            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) String limit,
+            @RequestParam(required = false) String page,
             @RequestParam(required = false) String order,
-            HttpServletRequest request) {
+            @NotNull HttpServletRequest request) {
         log.info("[Controller] 请求 getRoleList 接口");
         long timestamp = System.currentTimeMillis();
-        if (limit != null && !limit.toString().matches("^[0-9]+$")) {
-            return ResultUtil.error(timestamp, "limit 参数错误", ErrorCode.REQUEST_BODY_ERROR);
-        }
-        if (page != null && !page.toString().matches("^[0-9]+$")) {
-            return ResultUtil.error(timestamp, "page 参数错误", ErrorCode.REQUEST_BODY_ERROR);
-        }
-        request.getHeader("X-Auth-UUID");
-        ArrayList<String> list = new ArrayList<>();
-        list.add("desc");
-        list.add("asc");
-        if (order != null && !list.contains(order)) {
-            return ResultUtil.error(timestamp, "order 参数错误", ErrorCode.REQUEST_BODY_ERROR);
+        ResponseEntity<BaseResponse> checkResult = businessUtil.checkLimitPageAndOrder(timestamp, limit, page, order);
+        if (checkResult != null) {
+            return checkResult;
         }
         if ("all".equals(type) || "search".equals(type) || "user".equals(type) || "permission".equals(type)) {
             //业务操作
+            if (limit == null) {
+                limit = "";
+            }
+            if (page == null) {
+                page = "";
+            }
             return roleService.getRoleList(timestamp, request, type, search, limit, page, order);
         } else {
-            return ResultUtil.error(timestamp, "type 参数错误", ErrorCode.REQUEST_BODY_ERROR);
+            return ResultUtil.error(timestamp, "type 参数错误", ErrorCode.PARAM_VARIABLE_ERROR);
         }
 
     }

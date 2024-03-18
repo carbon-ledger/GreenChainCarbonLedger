@@ -1,5 +1,6 @@
 package com.frontleaves.greenchaincarbonledger.services
 
+import com.frontleaves.greenchaincarbonledger.models.voData.getData.UserAddVO
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.UserForceEditVO
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.UserEditVO
 import com.frontleaves.greenchaincarbonledger.utils.BaseResponse
@@ -44,8 +45,8 @@ interface UserService {
         request: HttpServletRequest,
         type: String,
         search: String?,
-        limit: Int?,
-        page: Int?,
+        limit: String,
+        page: String,
         order: String?
     ): ResponseEntity<BaseResponse>
 
@@ -72,7 +73,7 @@ interface UserService {
      * @param timestamp 时间戳
      * @param request 请求
      * @param userUuid 用户UUID
-     * @param UserForceEditvo 用户账户信息
+     * @param userForceEditVO 用户账户信息
      * @return 返回响应实体
      */
     fun putUserForceEdit(
@@ -82,4 +83,32 @@ interface UserService {
         userForceEditVO: UserForceEditVO
     ): ResponseEntity<BaseResponse>
 
+    fun addAccount(
+        timestamp: Long,
+        request: HttpServletRequest,
+        userAddVO: UserAddVO
+    ): ResponseEntity<BaseResponse>
+
+    fun banUser(
+        timestamp: Long,
+        request: HttpServletRequest,
+        roleUuid: String
+    ):
+            ResponseEntity<BaseResponse>
+
+
+    /**
+     * 强制注销用户
+     *
+     * 通过用户UUID强制注销用户
+     *
+     * @param timestamp 时间戳
+     * @param request   请求
+     * @return 返回响应实体
+     */
+    fun forceLogout(
+        timestamp: Long,
+        request: HttpServletRequest,
+        roleUuid: String
+    ): ResponseEntity<BaseResponse>
 }
