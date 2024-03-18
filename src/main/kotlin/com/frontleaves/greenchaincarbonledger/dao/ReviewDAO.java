@@ -80,12 +80,29 @@ public class ReviewDAO {
         reviewMapper.setApproveAdmin(newApproveManageDO);
     }
 
+    /**
+     * 获取组织审核信息
+     * <hr/>
+     * 用于获取组织审核信息
+     *
+     * @param checkId 审核ID
+     * @return ApproveOrganizeDO
+     */
     public ApproveOrganizeDO getApproveOrganizeById(String checkId) {
         log.info("[DAO] 执行 getApproveOrganizeById 方法");
         log.debug("\t> Mysql 读取");
         return reviewMapper.getOrganizeApproveById(Long.parseLong(checkId));
     }
 
+    /**
+     * 设置组织审核信息
+     * <hr/>
+     * 用于设置组织审核信息
+     *
+     * @param id 审核ID
+     * @param allow 是否允许
+     * @param remark 备注
+     */
     public void setReviewOrganizeAllow(long id, boolean allow, String remark) {
         log.info("[DAO] 执行 setReviewOrganizeAllow 方法");
         log.debug("\t> Mysql 写入");
@@ -98,12 +115,29 @@ public class ReviewDAO {
         reviewMapper.updateReviewOrganizeCheck(id, value, remark);
     }
 
+    /**
+     * 获取管理员审核信息
+     * <hr/>
+     * 用于获取管理员审核信息
+     *
+     * @param checkId 审核ID
+     * @return ApproveManageDO
+     */
     public ApproveManageDO getApproveAdminById(String checkId) {
         log.info("[DAO] 执行 getApproveAdminById 方法");
         log.debug("\t> Mysql 读取");
         return reviewMapper.getAdminApproveById(Long.parseLong(checkId));
     }
 
+    /**
+     * 设置管理员审核信息
+     * <hr/>
+     * 用于设置管理员审核信息
+     *
+     * @param id 审核ID
+     * @param allow 是否允许
+     * @param remark 备注
+     */
     public void setReviewAdminAllow(long id, boolean allow, String remark) {
         log.info("[DAO] 执行 setReviewOrganizeAllow 方法");
         log.debug("\t> Mysql 写入");
@@ -116,21 +150,69 @@ public class ReviewDAO {
         reviewMapper.updateReviewAdminCheck(id, value, remark);
     }
 
+    /**
+     * 更新组织审核信息
+     * <hr/>
+     * 用于更新组织审核信息, 用于更新数据
+     */
     public void updateReviewOrganizeApprove(ApproveOrganizeDO getApproveOrganizeDO) {
         log.info("[DAO] 执行 updateReviewOrganizeApprove 方法");
         log.debug("\t> Mysql 写入");
         reviewMapper.updateApproveOrganize(getApproveOrganizeDO);
     }
 
+    /**
+     * 更新管理员审核信息
+     * <hr/>
+     * 用于更新管理员审核信息, 用于更新数据
+     */
     public void updateReviewAdminApprove(ApproveManageDO getApproveAdminById) {
         log.info("[DAO] 执行 updateReviewAdminApprove 方法");
         log.debug("\t> Mysql 写入");
         reviewMapper.updateApproveAdmin(getApproveAdminById);
     }
 
+    /**
+     * 获取审核列表
+     * <hr/>
+     * 用于获取审核列表, 用于获取数据
+     *
+     * @param page 页数
+     * @param limit 限制
+     * @param order 排序
+     * @return ArrayList<ApproveOrganizeDO>
+     */
     public ArrayList<ApproveOrganizeDO> getApproveOrganizeList(Integer page, Integer limit, String order) {
         log.info("[DAO] 执行 getApproveOrganizeList 方法");
         log.debug("\t> Mysql 读取");
         return reviewMapper.getApproveOrganizeList(page, limit, order);
+    }
+
+    /**
+     * 获取审核列表
+     * <hr/>
+     * 用于获取审核列表, 用于获取数据
+     *
+     * @param uuid 账户UUID
+     * @return ApproveOrganizeDO
+     */
+    public ApproveOrganizeDO getApproveOrganizeByUuid(String uuid) {
+        log.info("[DAO] 执行 getApproveOrganizeByUuid 方法");
+        log.debug("\t> Mysql 读取");
+        return reviewMapper.getApproveOrganizeByUuid(uuid);
+    }
+
+    /**
+     * 获取审核列表
+     * <hr/>
+     * 用于获取审核列表, 用于获取数据
+     *
+     * @param uuid 账户UUID
+     * @return ArrayList<ApproveManageDO>
+     */
+    public ApproveManageDO getApproveAdminByUuid(String uuid) {
+        log.info("[DAO] 执行 getApproveAdminByUuid 方法");
+        log.debug("\t> Mysql 读取");
+        return reviewMapper.getApproveAdminByUuid(uuid);
     }
 }

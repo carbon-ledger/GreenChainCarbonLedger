@@ -158,4 +158,18 @@ interface ReviewService {
         id: String,
         request: HttpServletRequest
     ): ResponseEntity<BaseResponse>
+
+    /**
+     * getReviewReport
+     *
+     * 用于获取审核报告
+     *
+     * @param timestamp 时间戳
+     * @param request HttpServletRequest
+     * @return ResponseEntity<BaseResponse>
+     */
+    fun getReviewReport(
+        timestamp: Long,
+        request: HttpServletRequest
+    ): ResponseEntity<BaseResponse>
 }
