@@ -77,4 +77,40 @@ public class ReviewDAO {
         log.debug("\t> Mysql 写入");
         reviewMapper.setApproveAdmin(newApproveManageDO);
     }
+
+    public ApproveOrganizeDO getApproveOrganizeById(String checkId) {
+        log.info("[DAO] 执行 getApproveOrganizeById 方法");
+        log.debug("\t> Mysql 读取");
+        return reviewMapper.getOrganizeApproveById(Long.parseLong(checkId));
+    }
+
+    public void setReviewOrganizeAllow(long id, boolean allow, String remark) {
+        log.info("[DAO] 执行 setReviewOrganizeAllow 方法");
+        log.debug("\t> Mysql 写入");
+        short value;
+        if (allow) {
+            value = 1;
+        } else {
+            value = 2;
+        }
+        reviewMapper.updateReviewOrganizeCheck(id, value, remark);
+    }
+
+    public ApproveManageDO getApproveAdminById(String checkId) {
+        log.info("[DAO] 执行 getApproveAdminById 方法");
+        log.debug("\t> Mysql 读取");
+        return reviewMapper.getAdminApproveById(Long.parseLong(checkId));
+    }
+
+    public void setReviewAdminAllow(long id, boolean allow, String remark) {
+        log.info("[DAO] 执行 setReviewOrganizeAllow 方法");
+        log.debug("\t> Mysql 写入");
+        short value;
+        if (allow) {
+            value = 1;
+        } else {
+            value = 2;
+        }
+        reviewMapper.updateReviewAdminCheck(id, value, remark);
+    }
 }

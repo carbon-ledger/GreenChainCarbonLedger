@@ -2,6 +2,7 @@ package com.frontleaves.greenchaincarbonledger.controllers;
 
 import com.frontleaves.greenchaincarbonledger.annotations.CheckAccountPermission;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.ReviewAdminVO;
+import com.frontleaves.greenchaincarbonledger.models.voData.getData.ReviewCheckVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.ReviewOrganizeVO;
 import com.frontleaves.greenchaincarbonledger.services.ReviewService;
 import com.frontleaves.greenchaincarbonledger.utils.BaseResponse;
@@ -98,10 +99,23 @@ public class ReviewController {
     @PatchMapping("/check/organize/{checkId}")
     @CheckAccountPermission({"review:checkOrganize"})
     public ResponseEntity<BaseResponse> checkReviewFromOrganize(
-
-            @PathVariable String checkId
+            @RequestBody @Validated ReviewCheckVO reviewCheckVO,
+            @NotNull BindingResult bindingResult,
+            @NotNull @PathVariable String checkId,
+            @NotNull HttpServletRequest request
     ) {
-        return null;
+        log.info("[Controller] 执行 checkReviewFromOrganize 方法");
+        long timestamp = System.currentTimeMillis();
+        // 内容检查
+        if (bindingResult.hasErrors()) {
+            return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR, ProcessingUtil.getValidatedErrorList(bindingResult));
+        }
+        // 检查id是否正确输入
+        if (checkId.isBlank() || !checkId.matches("^[0-9]+$")) {
+            return ResultUtil.error(timestamp, ErrorCode.PATH_VARIABLE_ERROR);
+        }
+        // 业务逻辑
+        return reviewService.checkReviewFormOrganize(timestamp, checkId, reviewCheckVO, request);
     }
 
     /**
@@ -115,10 +129,23 @@ public class ReviewController {
     @PatchMapping("/check/admin/{checkId}")
     @CheckAccountPermission({"review:checkAdmin"})
     public ResponseEntity<BaseResponse> checkReviewFromAdmin(
-
-            @PathVariable String checkId
+            @RequestBody @Validated ReviewCheckVO reviewCheckVO,
+            @NotNull BindingResult bindingResult,
+            @NotNull @PathVariable String checkId,
+            @NotNull HttpServletRequest request
     ) {
-        return null;
+        log.info("[Controller] 执行 checkReviewFromAdmin 方法");
+        long timestamp = System.currentTimeMillis();
+        // 内容检查
+        if (bindingResult.hasErrors()) {
+            return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR, ProcessingUtil.getValidatedErrorList(bindingResult));
+        }
+        // 检查id是否正确输入
+        if (checkId.isBlank() || !checkId.matches("^[0-9]+$")) {
+            return ResultUtil.error(timestamp, ErrorCode.PATH_VARIABLE_ERROR);
+        }
+        // 业务逻辑
+        return reviewService.checkReviewFormAdmin(timestamp, checkId, reviewCheckVO, request);
     }
 
     /**
@@ -166,6 +193,21 @@ public class ReviewController {
     @CheckAccountPermission({"review:getList"})
     public ResponseEntity<BaseResponse> getReviewList(
 
+    ) {
+        return null;
+    }
+
+    /**
+     * 获取审核
+     * <hr/>
+     * 用于获取详细审核信息，需要组织账户权限
+     *
+     * @return ResponseEntity<BaseResponse>
+     */
+    @GetMapping("/get/{id}")
+    public ResponseEntity<BaseResponse> getReview(
+
+            @PathVariable String id
     ) {
         return null;
     }

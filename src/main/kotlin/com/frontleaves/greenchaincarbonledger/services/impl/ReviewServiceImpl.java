@@ -6,6 +6,7 @@ import com.frontleaves.greenchaincarbonledger.models.doData.ApproveManageDO;
 import com.frontleaves.greenchaincarbonledger.models.doData.ApproveOrganizeDO;
 import com.frontleaves.greenchaincarbonledger.models.doData.UserDO;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.ReviewAdminVO;
+import com.frontleaves.greenchaincarbonledger.models.voData.getData.ReviewCheckVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.ReviewOrganizeVO;
 import com.frontleaves.greenchaincarbonledger.services.ReviewService;
 import com.frontleaves.greenchaincarbonledger.utils.BaseResponse;
@@ -20,16 +21,19 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 
 /**
  * ReviewServiceImpl
  * <hr/>
  * 用于实现审核服务, 用于组织账户与监管账户的实名认证审核
  *
- * @since v1.0.0-SNAPSHOT
- * @version v1.0.0-SNAPSHOT
  * @author xiao_lfeng
+ * @version v1.0.0-SNAPSHOT
+ * @since v1.0.0-SNAPSHOT
  */
 @Slf4j
 @Service
@@ -179,6 +183,54 @@ public class ReviewServiceImpl implements ReviewService {
             }
         } else {
             return ResultUtil.error(timestamp, "申请已通过或正在审核", ErrorCode.REVIEW_ERROR);
+        }
+    }
+
+    @NotNull
+    @Override
+    public ResponseEntity<BaseResponse> checkReviewFormOrganize(
+            long timestamp,
+            @NotNull String checkId,
+            @NotNull ReviewCheckVO reviewCheckVO,
+            @NotNull HttpServletRequest request
+    ) {
+        log.info("[Service] 执行 checkReviewFormOrganize 方法");
+        // 根据id获取信息
+        ApproveOrganizeDO getApproveOrganizeDO = reviewDAO.getApproveOrganizeById(checkId);
+        if (getApproveOrganizeDO != null) {
+            // 检查是否审核通过
+            if (reviewCheckVO.getAllow()) {
+                reviewDAO.setReviewOrganizeAllow(getApproveOrganizeDO.getId(), true, null);
+            } else {
+                reviewDAO.setReviewOrganizeAllow(getApproveOrganizeDO.getId(), false, reviewCheckVO.getRemark());
+            }
+            return ResultUtil.success(timestamp, "已进行操作");
+        } else {
+            return ResultUtil.error(timestamp, "审核内容不存在", ErrorCode.REVIEW_ERROR);
+        }
+    }
+
+    @NotNull
+    @Override
+    public ResponseEntity<BaseResponse> checkReviewFormAdmin(
+            long timestamp,
+            @NotNull String checkId,
+            @NotNull ReviewCheckVO reviewCheckVO,
+            @NotNull HttpServletRequest request
+    ) {
+        log.info("[Service] 执行 checkReviewFormAdmin 方法");
+        // 根据id获取信息
+        ApproveManageDO getApproveAdminDO = reviewDAO.getApproveAdminById(checkId);
+        if (getApproveAdminDO != null) {
+            // 检查是否审核通过
+            if (reviewCheckVO.getAllow()) {
+                reviewDAO.setReviewAdminAllow(getApproveAdminDO.getId(), true, null);
+            } else {
+                reviewDAO.setReviewAdminAllow(getApproveAdminDO.getId(), false, reviewCheckVO.getRemark());
+            }
+            return ResultUtil.success(timestamp, "已进行操作");
+        } else {
+            return ResultUtil.error(timestamp, "审核内容不存在", ErrorCode.REVIEW_ERROR);
         }
     }
 }

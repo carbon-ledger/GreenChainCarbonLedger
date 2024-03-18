@@ -5,6 +5,7 @@ import com.frontleaves.greenchaincarbonledger.models.doData.ApproveOrganizeDO;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
 /**
  * ReviewMapper
@@ -58,4 +59,24 @@ public interface ReviewMapper {
     VALUES (#{accountUuid}, #{accountType}, #{organizeName}, #{organizeAuthorizeUrl}, #{legalRepresentativeName}, #{legalRepresentativeId}, #{legalIdCardFrontUrl}, #{legalIdCardBackUrl}, #{remarks})
     """)
     void setApproveAdmin(ApproveManageDO newApproveManageDO);
+
+    /**
+     * 获取组织审核信息
+     * <hr/>
+     * 根据Id获取组织审核相关的信息，获取全部的数据，若没有数据返回 null
+     *
+     * @param checkId 审核id
+     * @return ApproveOrganizeDO
+     */
+    @Select("SELECT * FROM fy_approve_organize WHERE id = #{id}")
+    ApproveOrganizeDO getOrganizeApproveById(long checkId);
+
+    @Update("UPDATE fy_approve_organize SET certification_status = #{allow}, remarks = #{remark} WHERE id = #{id}")
+    void updateReviewOrganizeCheck(long id, short allow, String remark);
+
+    @Select("SELECT * FROM fy_approve_manage WHERE id = #{id}")
+    ApproveManageDO getAdminApproveById(long id);
+
+    @Update("UPDATE fy_approve_manage SET certification_status = #{value}, remarks = #{remark} WHERE id = #{id}")
+    void updateReviewAdminCheck(long id, short value, String remark);
 }
