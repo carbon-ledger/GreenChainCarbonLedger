@@ -182,6 +182,12 @@
             <artifactId>commons-codec</artifactId>
             <version>1.15</version>
         </dependency>
+        <!-- UserAgent Util -->
+        <dependency>
+            <groupId>eu.bitwalker</groupId>
+            <artifactId>UserAgentUtils</artifactId>
+            <version>1.21</version>
+        </dependency>
 
         <!-- Lombok -->
         <dependency>

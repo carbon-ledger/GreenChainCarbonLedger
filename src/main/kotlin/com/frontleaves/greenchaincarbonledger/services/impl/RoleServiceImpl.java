@@ -74,7 +74,7 @@ public class RoleServiceImpl implements RoleService {
                 if (roleMapper.insertRole(uuid, roleVO.getName(), roleVO.getDisplayName(), json, getUuid)) {
                     return ResultUtil.success(timestamp, "角色信息已添加");
                 } else {
-                    return ResultUtil.error(timestamp, ErrorCode.INSERT_DATA_ERROR);
+                    return ResultUtil.error(timestamp, ErrorCode.SERVER_INTERNAL_ERROR);
                 }
             } else {
                 return ResultUtil.error(timestamp, "角色名重复", ErrorCode.REQUEST_BODY_ERROR);
@@ -93,7 +93,7 @@ public class RoleServiceImpl implements RoleService {
         UserDO getUserDO = userDAO.getUserByUuid(getUuid);
         if (getUserDO != null) {
             //这里已经获取了用户此时的Role
-            RoleDO getUserRole = roleDAO.getRoleUuid(getUserDO.getRole());
+            RoleDO getUserRole = roleDAO.getRoleByUuid(getUserDO.getRole());
             //判断用户此时Role是否获取成功
             if (getUserRole != null) {
                 //现在进行值的输出，先将其存入返回值VO里面
@@ -153,12 +153,14 @@ public class RoleServiceImpl implements RoleService {
 
     @NotNull
     @Override
-    //TODO:管理员权限注解
-    public ResponseEntity<BaseResponse> getRoleList(long timestamp, @NotNull HttpServletRequest request, @NotNull String type, String search, Integer limit, Integer page, String order) {
+    public ResponseEntity<BaseResponse> getRoleList(
+            long timestamp, @NotNull HttpServletRequest request,
+            @NotNull String type, String search, @NotNull String limit, @NotNull String page, String order
+    ) {
         log.info("[Service] 执行 getRoleList 方法");
         // 检查参数，如果未设置（即为null），则使用默认值
-        limit = (limit == null || limit > 100) ? 20 : limit;
-        page = (page == null) ? 1 : page;
+        limit = (limit.isEmpty() || Integer.parseInt(limit) > 100) ? "20" : limit;
+        page = (page.isEmpty()) ? "1" : page;
         if (order == null || order.isBlank()) {
             order = "ASC";
         }
@@ -168,11 +170,11 @@ public class RoleServiceImpl implements RoleService {
         switch (type) {
             case "all" -> {
                 order = "id " + order;
-                getRoleList = roleDAO.getRoleByAllList(limit, page, order);
+                getRoleList = roleDAO.getRoleByAllList(Integer.valueOf(limit), Integer.valueOf(page), order);
             }
             case "search" -> {
                 order = "id " + order;
-                getRoleList = roleDAO.getRoleByFuzzy(search, limit, page, order);
+                getRoleList = roleDAO.getRoleByFuzzy(search, Integer.valueOf(limit), Integer.valueOf(page), order);
             }
             case "permission" -> {
                 order = "pid " + order;
@@ -188,8 +190,9 @@ public class RoleServiceImpl implements RoleService {
                         }
                     }
                 }
-                if (!getRoleList.isEmpty() && getRoleList.size() >= limit * page) {
-                    getRoleList = getRoleList.subList(limit * (page - 1), limit * page);
+                int getPageLimit = Integer.parseInt(limit) * Integer.parseInt(page);
+                if (!getRoleList.isEmpty() && getRoleList.size() >= getPageLimit) {
+                    getRoleList = getRoleList.subList(Integer.parseInt(limit) * (Integer.parseInt(page) - 1), getPageLimit);
                 } else {
                     getRoleList = new ArrayList<>();
                 }
@@ -198,11 +201,11 @@ public class RoleServiceImpl implements RoleService {
                 order = "uid " + order;
                 //首先去User表中模糊查询得到role链表
                 //这里的链表只存role数据
-                List<String> getRoleListByUser = userDAO.getRoleByAllList(search, limit, page, order);
+                List<String> getRoleListByUser = userDAO.getRoleByAllList(search, Integer.valueOf(limit), Integer.valueOf(page), order);
                 getRoleList = new ArrayList<>();
                 for (String roleUuid : getRoleListByUser) {
                     //已经把role提出
-                    RoleDO getRoleDO = roleDAO.getRoleUuid(roleUuid);
+                    RoleDO getRoleDO = roleDAO.getRoleByUuid(roleUuid);
                     if (!getRoleList.contains(getRoleDO)) {
                         getRoleList.add(getRoleDO);
                     }
@@ -231,7 +234,7 @@ public class RoleServiceImpl implements RoleService {
     public ResponseEntity<BaseResponse> deleteRole(long timestamp, @NotNull HttpServletRequest request, @NotNull String roleUuid) {
         log.info("[Service] 执行 deleteRole 方法");
         //用缓存的UUID与数据库UUID进行校对
-        RoleDO roleDO = roleDAO.getRoleUuid(roleUuid);
+        RoleDO roleDO = roleDAO.getRoleByUuid(roleUuid);
         ArrayList<String> arrayList = new ArrayList<>(List.of("default", "organize", "admin", "console"));
         if (roleDO != null) {
             if (!arrayList.contains(roleDO.getName())) {

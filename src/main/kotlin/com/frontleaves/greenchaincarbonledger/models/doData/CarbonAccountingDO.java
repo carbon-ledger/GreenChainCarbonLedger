@@ -3,7 +3,13 @@ package com.frontleaves.greenchaincarbonledger.models.doData;
 import lombok.Data;
 
 /**
- * @author 32841
+ * CarbonAccountingDO
+ * <hr/>
+ * 用于碳交易技术,数据库操作,CarbonAccountingDO
+ *
+ * @since v1.0.0-SNAPSHOT
+ * @version v1.0.0-SNAPSHOT
+ * @author FLASHLACK
  */
 @Data
 public class CarbonAccountingDO {
@@ -13,9 +19,10 @@ public class CarbonAccountingDO {
     Integer emissionAmount;
     String accountingPeriod;
     String dataVerificationStatus;
+    String verifierUuid;
     String verificationNotes;
-    Integer carbonReportId;
+    String carbonReportId;
     Integer blockchainTxId;
-    String createAt;
+    String creatAt;
     String updateAt;
 }

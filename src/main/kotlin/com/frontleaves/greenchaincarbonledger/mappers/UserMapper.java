@@ -2,7 +2,10 @@ package com.frontleaves.greenchaincarbonledger.mappers;
 
 import com.frontleaves.greenchaincarbonledger.models.doData.UserDO;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.UserEditVO;
-import org.apache.ibatis.annotations.*;
+import org.apache.ibatis.annotations.Insert;
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
 import java.util.List;
 
@@ -51,10 +54,6 @@ public interface UserMapper {
     @Update("UPDATE fy_user SET deleted_at = null WHERE uuid = #{uuid}")
     boolean userAccountDistanceDeletion(String uuid);
 
-
-    @Delete("DELETE FROM fy_user WHERE uuid = #{uuid}")
-    boolean deleteUserAccount(String uuid);
-
     @Select("""
             SELECT * FROM fy_user
             WHERE user_name LIKE CONCAT('%', #{search}, '%')
@@ -76,8 +75,19 @@ public interface UserMapper {
     @Select("SELECT * FROM fy_user WHERE ban = 1 ORDER BY ${order} LIMIT #{limit} OFFSET ${(page-1) * limit}")
     List<UserDO> getUserByBanlist(Integer limit, Integer page, String order);
 
-    @Select("SELECT * FROM fy_user WHERE deleted_at IS NULL ORDER BY ${order} LIMIT #{limit} OFFSET ${(page-1) * limit}")
-        // 如果删除时间不为空，则该用户存在
+
+    /**
+     * 获取用户可用列表
+     * <hr/>
+     * 获取用户可用列表，即没有被删除的用户，没有被封禁的用户
+     * 如果删除时间不为空，则该用户存在或者没有被封禁
+     *
+     * @param limit 限制
+     * @param page  页数
+     * @param order 排序
+     * @return {@link List<UserDO>}
+     */
+    @Select("SELECT * FROM fy_user WHERE deleted_at IS NULL and ban = 0 ORDER BY ${order} LIMIT #{limit} OFFSET ${(page-1) * limit}")
     List<UserDO> getUserByAvailablelist(Integer limit, Integer page, String order);
 
     @Select("SELECT * FROM fy_user ORDER BY ${order} LIMIT #{limit} OFFSET ${(page-1) * limit}")
@@ -113,6 +123,14 @@ public interface UserMapper {
             SET user_name = #{userName},nick_name = #{nickName}, real_name = #{realName}, avatar = #{avatar}, email = #{email}, phone = #{phone}, updated_at = NOW()
             WHERE uuid = #{userUuid}
             """)
-    boolean updateUserForceByUuid(String userUuid, String userName,String realName,String nickName, String avatar,String email, String phone);
+    boolean updateUserForceByUuid(String userUuid, String userName, String nickName, String realName, String avatar, String email, String phone);
 
+    @Update("UPDATE fy_user SET ban = 1 WHERE uuid = #{uuid}")
+    Boolean banUser(String banUuid);
+
+    @Update("UPDATE fy_user SET deleted_at = NOW() WHERE uuid = #{userUuid}")
+    Boolean forceLogout(String userUuid);
+
+    @Insert("INSERT INTO fy_user(uuid, user_name, `real_name`, email, phone, password, role) VALUES (#{addUuid}, #{addUsername}, #{addRealname}, #{addEmail}, #{addPhone}, #{addPassword}, #{defaultUuid})")
+    boolean addAccount(String addUuid, String addUsername, String addRealname, String addEmail, String addPhone, String addPassword, String defaultUuid);
 }
