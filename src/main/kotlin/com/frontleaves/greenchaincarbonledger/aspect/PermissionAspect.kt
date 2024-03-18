@@ -5,6 +5,7 @@ import com.frontleaves.greenchaincarbonledger.annotations.KotlinSlf4j.Companion.
 import com.frontleaves.greenchaincarbonledger.dao.RoleDAO
 import com.frontleaves.greenchaincarbonledger.dao.UserDAO
 import com.frontleaves.greenchaincarbonledger.exceptions.NotEnoughPermissionException
+import com.frontleaves.greenchaincarbonledger.exceptions.NotLoginException
 import com.frontleaves.greenchaincarbonledger.exceptions.RoleNotEnoughPermissionException
 import com.frontleaves.greenchaincarbonledger.exceptions.RoleNotFoundException
 import com.frontleaves.greenchaincarbonledger.utils.ProcessingUtil
@@ -53,6 +54,7 @@ class PermissionAspect(
 
         // 获取用户
         val getUserUuid = ProcessingUtil.getAuthorizeUserUuid(servletRequestAttributes.request)
+            ?: throw NotLoginException("用户未登录")
         log.debug("\t> 登陆用户UUID: {}", getUserUuid)
 
         // 获取方法签名

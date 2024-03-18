@@ -148,7 +148,6 @@ public class ProcessingUtil {
      * @return {@link String}
      * @since v1.0.0
      */
-    @NotNull
     public static String getAuthorizeUserUuid(@NotNull HttpServletRequest request) {
         log.info("[Util] 执行 getAuthorizeUserUuid 工具");
         String getAuthUuid = request.getHeader("X-Auth-UUID");
