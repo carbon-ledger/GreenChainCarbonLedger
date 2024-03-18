@@ -3,8 +3,10 @@ package com.frontleaves.greenchaincarbonledger.mappers;
 import com.frontleaves.greenchaincarbonledger.models.doData.CarbonAccountingDO;
 import com.frontleaves.greenchaincarbonledger.models.doData.CarbonQuotaDO;
 import com.frontleaves.greenchaincarbonledger.models.doData.CarbonReportDO;
+import com.frontleaves.greenchaincarbonledger.models.doData.CarbonTradeDO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,4 +33,10 @@ public interface CarbonMapper {
     List<CarbonReportDO> getReportBySearch(String uuid, String search, String limit, String page, String order);
     @Select("SELECT * FROM fy_carbon_accounting WHERE organize_uuid=#{uuid}")
     List<CarbonAccountingDO> getAccountByUuid(String uuid);
+    @Select("SELECT * FROM fy_carbon_trade WHERE organize_uuid=#{uuid}")
+    List<CarbonTradeDO> getTradeByUuid(String uuid);
+    @Select("SELECT * FROM fy_carbon_trade WHERE id=#{id}")
+    CarbonTradeDO getTradeById(String id);
+    @Update("UPDATE fy_carbon_trade SET status=#{status} AND updated_at=now() WHERE id=#{id}")
+    Boolean deleteTrade(String id,String status);
 }

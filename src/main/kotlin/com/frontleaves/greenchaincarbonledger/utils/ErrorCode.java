@@ -40,6 +40,7 @@ public enum ErrorCode {
     ROLE_NOT_EXISTED("RoleNotExist", 40313, "角色不存在"),
     PARAM_VARIABLE_ERROR("ParamVariableError", 40314, "参数变量错误"),
     CAN_T_ACCOUNT_FOR_CARBON("NotAccountedForCarbon",40313,"您未进行碳核算"),
+    CAN_T_PUBLISH_TRADE("NotPublishCarbonTrade",40314,"您未进行碳交易发布"),
     PAGE_NOT_FOUNDED("PageNotFounded", 40401, "页面不存在"),
     REQUEST_METHOD_NOT_SUPPORTED("RequestMethodNotSupported", 40500, "请求方法不支持"),
     SERVER_INTERNAL_ERROR("ServerInternalError", 50000, "服务器内部错误"),
