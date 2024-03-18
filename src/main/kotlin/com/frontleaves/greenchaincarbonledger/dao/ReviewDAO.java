@@ -8,6 +8,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Repository;
 
+import java.util.ArrayList;
+
 /**
  * ReviewDAO
  * <hr/>
@@ -124,5 +126,11 @@ public class ReviewDAO {
         log.info("[DAO] 执行 updateReviewAdminApprove 方法");
         log.debug("\t> Mysql 写入");
         reviewMapper.updateApproveAdmin(getApproveAdminById);
+    }
+
+    public ArrayList<ApproveOrganizeDO> getApproveOrganizeList(Integer page, Integer limit, String order) {
+        log.info("[DAO] 执行 getApproveOrganizeList 方法");
+        log.debug("\t> Mysql 读取");
+        return reviewMapper.getApproveOrganizeList(page, limit, order);
     }
 }
