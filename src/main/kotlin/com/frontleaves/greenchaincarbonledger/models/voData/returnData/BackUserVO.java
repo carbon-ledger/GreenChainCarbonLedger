@@ -25,6 +25,7 @@ public class BackUserVO {
     public String realName;
     public String email;
     public String phone;
+    public String avatar;
     public String newPassword;
     public Timestamp createdAt;
     public Timestamp updatedAt;
