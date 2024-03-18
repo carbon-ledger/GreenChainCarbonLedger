@@ -1,11 +1,15 @@
 package com.frontleaves.greenchaincarbonledger.services.impl;
 
+import com.frontleaves.greenchaincarbonledger.dao.CarbonAccountingDAO;
 import com.frontleaves.greenchaincarbonledger.dao.CarbonDAO;
 import com.frontleaves.greenchaincarbonledger.dao.UserDAO;
+import com.frontleaves.greenchaincarbonledger.mappers.CarbonMapper;
 import com.frontleaves.greenchaincarbonledger.models.doData.CarbonAccountingDO;
 import com.frontleaves.greenchaincarbonledger.models.doData.CarbonQuotaDO;
 import com.frontleaves.greenchaincarbonledger.models.doData.CarbonReportDO;
 import com.frontleaves.greenchaincarbonledger.models.doData.UserDO;
+import com.frontleaves.greenchaincarbonledger.models.voData.getData.TradeReleaseVO;
+import com.frontleaves.greenchaincarbonledger.models.voData.returnData.BackCarbonAccountingVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.returnData.BackCarbonQuotaVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.returnData.BackCarbonReportVO;
 import com.frontleaves.greenchaincarbonledger.services.CarbonService;
@@ -34,6 +38,8 @@ import java.util.List;
 public class CarbonServiceImpl implements CarbonService {
     private final CarbonDAO carbonDAO;
     private final UserDAO userDAO;
+    private final CarbonAccountingDAO carbonAccountingDAO;
+    private final CarbonMapper carbonMapper;
 
     @NotNull
     @Override
@@ -124,6 +130,73 @@ public class CarbonServiceImpl implements CarbonService {
             }
         } else {
             return ResultUtil.error(timestamp, ErrorCode.CAN_T_ACCOUNT_FOR_CARBON);
+        }
+    }
+
+    @NotNull
+    @Override
+    public ResponseEntity<BaseResponse> getCarbonAccounting(long timestamp, @NotNull HttpServletRequest request, String limit, String page, @NotNull String order) {
+        log.info("[Service] 执行 getCarbonAccounting 方法");
+        // 检查参数，如果未设置（即为null），则使用默认值
+        limit = (limit.isEmpty() || Integer.parseInt(limit) > 100) ? "20" : limit;
+        page = (page.isEmpty()) ? "1" : page;
+        if (order.isBlank()) {
+            order = "id ASC";
+        } else {
+            order = "id " + order;
+        }
+        // 获取自己企业的Uuid
+        String organizeUuid = ProcessingUtil.getAuthorizeUserUuid(request);
+        List<BackCarbonAccountingVO> carbonAccountinglist = new ArrayList<>();
+        List<CarbonAccountingDO> carbonAccountingDOList = carbonAccountingDAO.getCarbonAccountingList(organizeUuid, Integer.parseInt(limit), Integer.parseInt(page), order);
+        if (carbonAccountingDOList != null){
+            for (CarbonAccountingDO carbonAccountingDO : carbonAccountingDOList) {
+                BackCarbonAccountingVO backCarbonAccountingVO = new BackCarbonAccountingVO();
+                backCarbonAccountingVO
+                        .setId(carbonAccountingDO.getId())
+                        .setOrganizeUuid(carbonAccountingDO.getOrganizeUuid())
+                        .setEmissionSource(carbonAccountingDO.getEmissionSource())
+                        .setEmissionAmount(carbonAccountingDO.getEmissionAmount())
+                        .setAccountingPeriod(carbonAccountingDO.getAccountingPeriod())
+                        .setEmissionSource(carbonAccountingDO.getEmissionSource())
+                        .setDataVerificationStatus(carbonAccountingDO.getDataVerificationStatus())
+                        .setCreateAt(carbonAccountingDO.getCreatedAt())
+                        .setUpdateAt(carbonAccountingDO.getUpdatedAt());
+                carbonAccountinglist.add(backCarbonAccountingVO);
+            }
+            return ResultUtil.success(timestamp, "数据已准备完毕", carbonAccountinglist);
+        } else {
+            return ResultUtil.error(timestamp, ErrorCode.SELECT_DATA_ERROR);
+        }
+    }
+    @NotNull
+    @Override
+    public ResponseEntity<BaseResponse> releaseCarbonTrade(long timestamp, @NotNull HttpServletRequest request, @NotNull TradeReleaseVO tradeReleaseVO) {
+        log.info("[Service] 执行 releaseCarbonTrade 方法");
+        String getUuid = ProcessingUtil.getAuthorizeUserUuid(request);
+        // 先对自己组织剩余的碳配额量进行判断
+        // 1.获取 总配额量total_quota、已分配额量allocated_quota、已使用配额量used_quota
+        CarbonQuotaDO carbonQuotaDO = carbonDAO.getQuotaByUuid(getUuid);
+        double totalQuota = carbonQuotaDO.getTotalQuota();
+        double allocatedQuota = carbonQuotaDO.getAllocatedQuota();
+        double usedQuota = carbonQuotaDO.getUsedQuota();
+        // 2.根据三个数据获取组织现有的碳配额量
+        double nowQuota = totalQuota - usedQuota;
+        // 3.如果企业的 已使用配额量used_quota 小于 已分配额量allocated_quota 的话，才允许发布碳交易
+        // 达到允许条件下，则可发布交易
+        if (nowQuota > 0 && allocatedQuota > usedQuota){
+            if (tradeReleaseVO.getDraft()){
+                carbonMapper.insertTradeByUuid(getUuid, tradeReleaseVO, "draft");
+            } else {
+                carbonMapper.insertTradeByUuid(getUuid, tradeReleaseVO, "pending_review");
+            }
+            return ResultUtil.success(timestamp, "交易发布成功");
+        } else {
+            if (nowQuota <= 0) {
+                return ResultUtil.error(timestamp, "当前组织碳配额量小于0，无法发布交易", ErrorCode.RELEASE_TRADE_FAILURE);
+            }else {
+                return ResultUtil.error(timestamp, "无法使用购入的碳配额量进行交易", ErrorCode.RELEASE_TRADE_FAILURE);
+            }
         }
     }
 }

@@ -99,6 +99,11 @@ public class CarbonDAO {
         return carbonMapper.getAccountByUuid(uuid);
     }
 
+    public CarbonQuotaDO getQuotaByUuid(String uuid) {
+        log.info("[DAO] 执行 getTotalQuotaByUuid 方法");
+        return carbonMapper.getQuotaByUuid(uuid);
+    }
+
     /**
      * 通过UUID获取碳交易发布
      * @param uuid -用户UUID
