@@ -7,6 +7,8 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 
+import java.util.ArrayList;
+
 /**
  * ReviewMapper
  * <hr/>
@@ -175,4 +177,7 @@ public interface ReviewMapper {
     WHERE id = #{id}
     """)
     void updateApproveAdmin(ApproveManageDO getApproveAdminById);
+
+    @Select("SELECT * FROM fy_approve_organize WHERE certification_status = 0 ORDER BY ${order} LIMIT #{limit} OFFSET #{offset}")
+    ArrayList<ApproveOrganizeDO> getApproveOrganizeList(Integer page, Integer limit, String order);
 }

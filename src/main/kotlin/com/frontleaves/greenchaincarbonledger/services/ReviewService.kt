@@ -86,6 +86,17 @@ interface ReviewService {
         request: HttpServletRequest
     ): ResponseEntity<BaseResponse>
 
+    /**
+     * reSendReviewFormOrganize
+     *
+     * 用于组织账户的实名认证审核, 重新申请审核，由超级管理账户进行审核
+     *
+     * @param timestamp 时间戳
+     * @param checkId 审核ID
+     * @param reviewOrganizeVO ReviewOrganizeVO
+     * @param request HttpServletRequest
+     * @return ResponseEntity<BaseResponse>
+     */
     fun reSendReviewFormOrganize(
         timestamp: Long,
         checkId: String,
@@ -93,10 +104,58 @@ interface ReviewService {
         request: HttpServletRequest
     ): ResponseEntity<BaseResponse>
 
+    /**
+     * reSendReviewFormAdmin
+     *
+     * 用于组织账户的组织审核, 重新申请审核，由超级管理账户进行审核
+     *
+     * @param timestamp 时间戳
+     * @param checkId 审核ID
+     * @param reviewAdminVO ReviewAdminVO
+     * @param request HttpServletRequest
+     * @return ResponseEntity<BaseResponse>
+     */
     fun reSendReviewFormAdmin(
         timestamp: Long,
         checkId: String,
         reviewAdminVO: ReviewAdminVO,
+        request: HttpServletRequest
+    ): ResponseEntity<BaseResponse>
+
+    /**
+     * getReviewList
+     *
+     * 用于获取审核列表
+     *
+     * @param timestamp 时间戳
+     * @param page 页码
+     * @param limit 每页数量
+     * @param order 排序
+     * @param request HttpServletRequest
+     * @return ResponseEntity<BaseResponse>
+     */
+    fun getReviewList(
+        timestamp: Long,
+        page: String,
+        limit: String,
+        order: String,
+        request: HttpServletRequest
+    ): ResponseEntity<BaseResponse>
+
+    /**
+     * getReview
+     *
+     * 用于获取审核详情
+     *
+     * @param timestamp 时间戳
+     * @param id 审核ID
+     * @param request HttpServletRequest
+     * @return ResponseEntity<BaseResponse>
+     */
+    fun getReview(
+        timestamp: Long,
+        type: String,
+        id: String,
         request: HttpServletRequest
     ): ResponseEntity<BaseResponse>
 }

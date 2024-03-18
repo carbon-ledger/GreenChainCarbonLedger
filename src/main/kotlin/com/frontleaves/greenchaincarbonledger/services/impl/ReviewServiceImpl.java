@@ -8,6 +8,10 @@ import com.frontleaves.greenchaincarbonledger.models.doData.UserDO;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.ReviewAdminVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.ReviewCheckVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.ReviewOrganizeVO;
+import com.frontleaves.greenchaincarbonledger.models.voData.returnData.BackReviewAdminVO;
+import com.frontleaves.greenchaincarbonledger.models.voData.returnData.BackReviewListVO;
+import com.frontleaves.greenchaincarbonledger.models.voData.returnData.BackReviewOrganizeVO;
+import com.frontleaves.greenchaincarbonledger.models.voData.returnData.BackUserVO;
 import com.frontleaves.greenchaincarbonledger.services.ReviewService;
 import com.frontleaves.greenchaincarbonledger.utils.BaseResponse;
 import com.frontleaves.greenchaincarbonledger.utils.ErrorCode;
@@ -27,6 +31,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.sql.Date;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 
 /**
  * ReviewServiceImpl
@@ -397,6 +402,110 @@ public class ReviewServiceImpl implements ReviewService {
             }
         } else {
             return ResultUtil.error(timestamp, ErrorCode.USER_NOT_EXISTED);
+        }
+    }
+
+    @NotNull
+    @Override
+    public ResponseEntity<BaseResponse> getReviewList(long timestamp, @NotNull String page, @NotNull String limit, @NotNull String order, @NotNull HttpServletRequest request) {
+        // 数据检查转换
+        page = page.isEmpty() ? "1" : page;
+        limit = limit.isEmpty() ? "20" : limit;
+        order = "approve_time " + (order.isEmpty() ? "desc" : order);
+        // 筛选数据
+        ArrayList<ApproveOrganizeDO> getApproveOrganizeDOList = reviewDAO.getApproveOrganizeList(Integer.parseInt(page), Integer.parseInt(limit), order);
+        ArrayList<BackReviewListVO> newApproveOrganizeDOList = new ArrayList<>();
+        getApproveOrganizeDOList.forEach(it -> {
+            BackReviewListVO newApproveOrganizeDO = new BackReviewListVO();
+            // 根据 uuid 查找账户
+            UserDO getUserDO = userDAO.getUserByUuid(it.getAccountUuid());
+            BackUserVO backUserVO = new BackUserVO();
+            backUserVO
+                    .setUserName(getUserDO.getUserName())
+                    .setEmail(getUserDO.getEmail());
+            newApproveOrganizeDO
+                    .setAccount(backUserVO)
+                    .setOrganizeName(it.getOrganizeName())
+                    .setLegalRepresentativeName(it.getLegalRepresentativeName())
+                    .setApplyTime(it.getApplyTime());
+            newApproveOrganizeDOList.add(newApproveOrganizeDO);
+        });
+        return ResultUtil.success(timestamp, newApproveOrganizeDOList);
+    }
+
+    @NotNull
+    @Override
+    public ResponseEntity<BaseResponse> getReview(long timestamp, @NotNull String type, @NotNull String id, @NotNull HttpServletRequest request) {
+        // 根据 id 获取审核信息
+        if ("organize".equals(type)) {
+            ApproveOrganizeDO getApproveOrganizeDO = reviewDAO.getApproveOrganizeById(id);
+            if (getApproveOrganizeDO != null) {
+                // 根据 uuid 查找账户
+                UserDO getUserDO = userDAO.getUserByUuid(getApproveOrganizeDO.getAccountUuid());
+                BackUserVO backUserVO = new BackUserVO();
+                backUserVO
+                        .setUuid(getUserDO.getUuid())
+                        .setUserName(getUserDO.getUserName())
+                        .setNickName(getUserDO.getNickName())
+                        .setRealName(getUserDO.getRealName())
+                        .setEmail(getUserDO.getEmail())
+                        .setPhone(getUserDO.getPhone())
+                        .setAvatar(getUserDO.getAvatar())
+                        .setCreatedAt(getUserDO.getCreatedAt())
+                        .setUpdatedAt(getUserDO.getUpdatedAt());
+                BackReviewOrganizeVO newApproveOrganizeDO = new BackReviewOrganizeVO();
+                newApproveOrganizeDO
+                        .setAccount(backUserVO)
+                        .setType(getApproveOrganizeDO.getType())
+                        .setOrganizeName(getApproveOrganizeDO.getOrganizeName())
+                        .setOrganizeCreditCode(getApproveOrganizeDO.getOrganizeCreditCode())
+                        .setOrganizeRegisteredCapital(getApproveOrganizeDO.getOrganizeRegisteredCapital())
+                        .setOrganizeEstablishmentDate(getApproveOrganizeDO.getOrganizeEstablishmentDate())
+                        .setOrganizeLicenseUrl(getApproveOrganizeDO.getOrganizeLicenseUrl())
+                        .setLegalRepresentativeName(getApproveOrganizeDO.getLegalRepresentativeName())
+                        .setLegalRepresentativeId(getApproveOrganizeDO.getLegalRepresentativeId())
+                        .setLegalIdCardFrontUrl(getApproveOrganizeDO.getLegalIdCardFrontUrl())
+                        .setLegalIdCardBackUrl(getApproveOrganizeDO.getLegalIdCardBackUrl())
+                        .setApplyTime(getApproveOrganizeDO.getApplyTime())
+                        .setUpdatedAt(getApproveOrganizeDO.getUpdatedAt())
+                        .setRemarks(getApproveOrganizeDO.getRemarks());
+                return ResultUtil.success(timestamp, newApproveOrganizeDO);
+            } else {
+                return ResultUtil.error(timestamp, "审核内容不存在", ErrorCode.REVIEW_ERROR);
+            }
+        } else {
+            ApproveManageDO getApproveAdminDO = reviewDAO.getApproveAdminById(id);
+            if (getApproveAdminDO != null) {
+                // 根据 uuid 查找账户
+                UserDO getUserDO = userDAO.getUserByUuid(getApproveAdminDO.getAccountUuid());
+                BackUserVO backUserVO = new BackUserVO();
+                backUserVO
+                        .setUuid(getUserDO.getUuid())
+                        .setUserName(getUserDO.getUserName())
+                        .setNickName(getUserDO.getNickName())
+                        .setRealName(getUserDO.getRealName())
+                        .setEmail(getUserDO.getEmail())
+                        .setPhone(getUserDO.getPhone())
+                        .setAvatar(getUserDO.getAvatar())
+                        .setCreatedAt(getUserDO.getCreatedAt())
+                        .setUpdatedAt(getUserDO.getUpdatedAt());
+                BackReviewAdminVO newApproveAdminDO = new BackReviewAdminVO();
+                newApproveAdminDO
+                        .setAccount(backUserVO)
+                        .setAccountType(getApproveAdminDO.getAccountType())
+                        .setOrganizeName(getApproveAdminDO.getOrganizeName())
+                        .setOrganizeAuthorizeUrl(getApproveAdminDO.getOrganizeAuthorizeUrl())
+                        .setLegalRepresentativeName(getApproveAdminDO.getLegalRepresentativeName())
+                        .setLegalRepresentativeId(getApproveAdminDO.getLegalRepresentativeId())
+                        .setLegalIdCardFrontUrl(getApproveAdminDO.getLegalIdCardFrontUrl())
+                        .setLegalIdCardBackUrl(getApproveAdminDO.getLegalIdCardBackUrl())
+                        .setCertificationStatus(getApproveAdminDO.getCertificationStatus())
+                        .setApplyTime(getApproveAdminDO.getApplyTime())
+                        .setRemarks(getApproveAdminDO.getRemarks());
+                return ResultUtil.success(timestamp, newApproveAdminDO);
+            } else {
+                return ResultUtil.error(timestamp, "审核内容不存在", ErrorCode.REVIEW_ERROR);
+            }
         }
     }
 }

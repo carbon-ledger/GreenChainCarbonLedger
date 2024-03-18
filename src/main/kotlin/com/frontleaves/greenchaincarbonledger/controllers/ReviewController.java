@@ -40,8 +40,8 @@ public class ReviewController {
      * 用于组织账户的实名认证审核，需要组织账户权限, 通过组织账户实名认证审核VO进行审核
      *
      * @param reviewOrganizeVO 组织账户实名认证审核VO
-     * @param bindingResult     数据绑定结果
-     * @param request           请求
+     * @param bindingResult    数据绑定结果
+     * @param request          请求
      * @return ResponseEntity<BaseResponse>
      */
     @PostMapping("/add/organize")
@@ -67,8 +67,8 @@ public class ReviewController {
      * 用于监管账户的实名认证审核，需要监管账户权限, 通过监管账户实名认证审核VO进行审核
      *
      * @param reviewAdminVO 组织账户实名认证审核VO
-     * @param bindingResult     数据绑定结果
-     * @param request           请求
+     * @param bindingResult 数据绑定结果
+     * @param request       请求
      * @return ResponseEntity<BaseResponse>
      */
     @PostMapping("/add/admin")
@@ -112,7 +112,7 @@ public class ReviewController {
         }
         // 检查id是否正确输入
         if (checkId.isBlank() || !checkId.matches("^[0-9]+$")) {
-            return ResultUtil.error(timestamp, ErrorCode.PATH_VARIABLE_ERROR);
+            return ResultUtil.error(timestamp, "参数 checkId 错误", ErrorCode.PATH_VARIABLE_ERROR);
         }
         // 业务逻辑
         return reviewService.checkReviewFormOrganize(timestamp, checkId, reviewCheckVO, request);
@@ -142,7 +142,7 @@ public class ReviewController {
         }
         // 检查id是否正确输入
         if (checkId.isBlank() || !checkId.matches("^[0-9]+$")) {
-            return ResultUtil.error(timestamp, ErrorCode.PATH_VARIABLE_ERROR);
+            return ResultUtil.error(timestamp, "参数 checkId 错误", ErrorCode.PATH_VARIABLE_ERROR);
         }
         // 业务逻辑
         return reviewService.checkReviewFormAdmin(timestamp, checkId, reviewCheckVO, request);
@@ -172,7 +172,7 @@ public class ReviewController {
         }
         // 检查id是否正确输入
         if (checkId.isBlank() || !checkId.matches("^[0-9]+$")) {
-            return ResultUtil.error(timestamp, ErrorCode.PATH_VARIABLE_ERROR);
+            return ResultUtil.error(timestamp, "参数 checkId 错误", ErrorCode.PATH_VARIABLE_ERROR);
         }
         // 业务逻辑
         return reviewService.reSendReviewFormOrganize(timestamp, checkId, reviewOrganizeVO, request);
@@ -202,7 +202,7 @@ public class ReviewController {
         }
         // 检查id是否正确输入
         if (checkId.isBlank() || !checkId.matches("^[0-9]+$")) {
-            return ResultUtil.error(timestamp, ErrorCode.PATH_VARIABLE_ERROR);
+            return ResultUtil.error(timestamp, "参数 checkId 错误", ErrorCode.PATH_VARIABLE_ERROR);
         }
         // 业务逻辑
         return reviewService.reSendReviewFormAdmin(timestamp, checkId, reviewAdminVO, request);
@@ -213,14 +213,45 @@ public class ReviewController {
      * <hr/>
      * 用于获取审核列表，需要组织账户权限
      *
+     * @param page  页数
+     * @param limit 每页限制的结果数
+     * @param order 排序方式，可选值包括 "asc"（升序）和 "desc"（降序）
      * @return ResponseEntity<BaseResponse>
      */
     @GetMapping("/list")
     @CheckAccountPermission({"review:getList"})
     public ResponseEntity<BaseResponse> getReviewList(
-
+            @RequestParam(required = false) String page,
+            @RequestParam(required = false) String limit,
+            @RequestParam(required = false) String order,
+            @NotNull HttpServletRequest request
     ) {
-        return null;
+        log.info("[Controller] 执行 getReviewList 方法");
+        long timestamp = System.currentTimeMillis();
+        // 数据检查
+        if (page != null && !page.isEmpty()) {
+            if (!page.matches("^[0-9]+$")) {
+                return ResultUtil.error(timestamp, "参数 page 错误", ErrorCode.PARAM_VARIABLE_ERROR);
+            }
+        } else {
+            page = "";
+        }
+        if (limit != null && !limit.isEmpty()) {
+            if (!limit.matches("^[0-9]+$")) {
+                return ResultUtil.error(timestamp, "参数 limit 错误", ErrorCode.PARAM_VARIABLE_ERROR);
+            }
+        } else {
+            limit = "";
+        }
+        if (order != null && !order.isEmpty()) {
+            if (!"asc".equals(order) && !"desc".equals(order)) {
+                return ResultUtil.error(timestamp, "参数 order 错误", ErrorCode.PARAM_VARIABLE_ERROR);
+            }
+        } else {
+            order = "";
+        }
+        // 业务逻辑
+        return reviewService.getReviewList(timestamp, page, limit, order, request);
     }
 
     /**
@@ -230,11 +261,22 @@ public class ReviewController {
      *
      * @return ResponseEntity<BaseResponse>
      */
-    @GetMapping("/get/{id}")
+    @GetMapping("/get/{type}/{id}")
     public ResponseEntity<BaseResponse> getReview(
-
-            @PathVariable String id
+            @PathVariable @NotNull String type,
+            @PathVariable String id,
+            @NotNull HttpServletRequest request
     ) {
-        return null;
+        log.info("[Controller] 执行 getReview 方法");
+        long timestamp = System.currentTimeMillis();
+        // 数据检查
+        if (type.isBlank() || (!"organize".equals(type) && !"admin".equals(type))) {
+            return ResultUtil.error(timestamp, "参数 type 错误", ErrorCode.PATH_VARIABLE_ERROR);
+        }
+        if (id.isBlank() || !id.matches("^[0-9]+$")) {
+            return ResultUtil.error(timestamp, "参数 id 错误", ErrorCode.PATH_VARIABLE_ERROR);
+        }
+        // 业务逻辑
+        return reviewService.getReview(timestamp, type, id, request);
     }
 }
