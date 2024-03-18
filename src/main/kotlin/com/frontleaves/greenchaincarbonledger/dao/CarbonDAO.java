@@ -92,4 +92,9 @@ public class CarbonDAO {
         log.info("[DAO] 执行 getAccountByUuid");
         return carbonMapper.getAccountByUuid(uuid);
     }
+
+    public CarbonQuotaDO getQuotaByUuid(String uuid) {
+        log.info("[DAO] 执行 getTotalQuotaByUuid 方法");
+        return carbonMapper.getQuotaByUuid(uuid);
+    }
 }
