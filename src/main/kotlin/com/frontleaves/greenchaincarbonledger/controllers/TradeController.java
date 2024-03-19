@@ -2,12 +2,9 @@ package com.frontleaves.greenchaincarbonledger.controllers;
 
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.TradeReleaseVO;
 import com.frontleaves.greenchaincarbonledger.services.CarbonService;
-import com.frontleaves.greenchaincarbonledger.utils.BaseResponse;
-import com.frontleaves.greenchaincarbonledger.utils.ErrorCode;
-import com.frontleaves.greenchaincarbonledger.utils.ProcessingUtil;
+import com.frontleaves.greenchaincarbonledger.utils.*;
 import com.frontleaves.greenchaincarbonledger.annotations.CheckAccountPermission;
 import com.frontleaves.greenchaincarbonledger.services.TradeService;
-import com.frontleaves.greenchaincarbonledger.utils.ResultUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,13 +12,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * TradeController
@@ -37,6 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class TradeController {
     private final CarbonService carbonService;
     private final TradeService tradeService;
+    private final BusinessUtil businessUtil;
 
     @PostMapping("/sell")
     public ResponseEntity<BaseResponse> releaseCarbonTrade(
@@ -68,5 +60,35 @@ public class TradeController {
         }else {
             return tradeService.deleteTrade(timestamp,request,id);
         }
+    }
+    @GetMapping("/send")
+    @CheckAccountPermission("{Trade:getOwnTradeList}")
+    public ResponseEntity<BaseResponse> getOwnTradeList (
+            @RequestParam String type,
+            @RequestParam (required = false)String search,
+            @RequestParam (required = false)String limit,
+            @RequestParam (required = false)String page,
+            @RequestParam (required = false)String order,
+            HttpServletRequest request
+    ){
+        log.info("[Controller] 请求 getOwnTrade 接口");
+        long timestamp =System.currentTimeMillis();
+        //校验参数
+        ResponseEntity<BaseResponse> checkResult = businessUtil.checkLimitPageAndOrder(timestamp, limit, page, order);
+        if (checkResult != null) {
+            return checkResult;
+        } else {
+            if (!"all".equals(type) && !"search".equals(type) && !"draft".equals(type) && !"completed".equals(type) && !"cancelled".equals(type)) {
+                return ResultUtil.error(timestamp, "type 参数错误", ErrorCode.REQUEST_BODY_ERROR);
+            }
+            if (limit == null) {
+                limit = "";
+            }
+            if (page == null) {
+                page = "";
+            }
+            return tradeService.getOwnTradeList(timestamp, request, type, search, limit, page, order);
+        }
+
     }
 }
