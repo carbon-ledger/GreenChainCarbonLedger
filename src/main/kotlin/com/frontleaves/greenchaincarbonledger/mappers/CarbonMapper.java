@@ -3,9 +3,9 @@ package com.frontleaves.greenchaincarbonledger.mappers;
 import com.frontleaves.greenchaincarbonledger.models.doData.CarbonAccountingDO;
 import com.frontleaves.greenchaincarbonledger.models.doData.CarbonQuotaDO;
 import com.frontleaves.greenchaincarbonledger.models.doData.CarbonReportDO;
+import com.frontleaves.greenchaincarbonledger.models.doData.CarbonTradeDO;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.TradeReleaseVO;
 import org.apache.ibatis.annotations.Insert;
-import com.frontleaves.greenchaincarbonledger.models.doData.CarbonTradeDO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
@@ -18,6 +18,7 @@ import java.util.List;
  * 用于碳交易的查询和更改
  * <hr/>
  * 用于碳交易的查询和更改
+ *
  * @author FLAHSLACK
  */
 @Mapper
@@ -33,6 +34,7 @@ public interface CarbonMapper {
 
     @Select("SELECT * FROM fy_carbon_report WHERE organize_uuid=#{uuid} AND report_summary =#{search} ORDER BY ${order} LIMIT #{limit} OFFSET ${(page-1) * limit}")
     List<CarbonReportDO> getReportBySearch(String uuid, String search, String limit, String page, String order);
+
     @Select("SELECT * FROM fy_carbon_accounting WHERE organize_uuid=#{uuid}")
     List<CarbonAccountingDO> getAccountByUuid(String uuid);
 
@@ -41,10 +43,38 @@ public interface CarbonMapper {
 
     @Insert("INSERT INTO fy_carbon_trade (organize_uuid, quota_amount, price_per_unit, description, status, created_at) VALUES (#{uuid}, #{amount}, #{unit}, #{text}, #{status}, NOW())")
     Boolean insertTradeByUuid(String uuid, TradeReleaseVO tradeReleaseVO, String status);
+
     @Select("SELECT * FROM fy_carbon_trade WHERE organize_uuid=#{uuid}")
     List<CarbonTradeDO> getTradeByUuid(String uuid);
+
     @Select("SELECT * FROM fy_carbon_trade WHERE id=#{id}")
     CarbonTradeDO getTradeById(String id);
+
     @Update("UPDATE fy_carbon_trade SET status=#{status} AND updated_at=now() WHERE id=#{id}")
-    Boolean deleteTrade(String id,String status);
+    Boolean deleteTrade(String id, String status);
+
+    @Select("""
+            SELECT * FROM fy_carbon_trade WHERE organize_uuid=#{uuid}
+            ORDER BY ${order} LIMIT #{limit} OFFSET ${(page-1) * limit}
+            """)
+    List<CarbonTradeDO> getTradeListAll(String uuid, Integer limit, Integer page, String order);
+
+    @Select("SELECT * FROM fy_carbon_trade WHERE organize_uuid=#{uuid}")
+    Boolean getTradeListByUuid(String uuid);
+
+    @Select("""
+            SELECT * FROM fy_carbon_trade
+            WHERE organize_uuid=#{uuid}
+            AND status LIKE CONCAT('%', #{search}, '%')
+            ORDER BY ${order} LIMIT #{limit} OFFSET ${(page-1) * limit}
+            """)
+    List<CarbonTradeDO> getTradeListByStatus(String uuid, String search, Integer limit, Integer page, String order);
+
+    @Select("""
+            SELECT * FROM fy_carbon_trade
+            WHERE organize_uuid=#{uuid}
+            AND description LIKE CONCAT('%', #{search}, '%')
+            ORDER BY ${order} LIMIT #{limit} OFFSET ${(page-1) * limit}
+                        """)
+    List<CarbonTradeDO> getTradeListBySearch(String uuid, String search, Integer limit, Integer page, String order);
 }
