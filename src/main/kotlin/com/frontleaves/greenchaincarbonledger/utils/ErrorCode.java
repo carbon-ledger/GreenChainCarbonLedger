@@ -54,7 +54,8 @@ public enum ErrorCode {
     INSERT_DATA_EXISTED("InsertDataExisted", 40392, "添加用户信息失败"),
     INSERT_DATA_ERROR("InsertDataError", 40395, "插入数据失败"),
     SELECT_DATA_ERROR("SelectDataError", 40389, "查询数据失败"),
-    RELEASE_TRADE_FAILURE("ReleaseTradeFailure", 40380, "发布碳交易失败");
+    RELEASE_TRADE_FAILURE("ReleaseTradeFailure", 40380, "发布碳交易失败"),
+    EDIT_TRADE_FAILURE("EditTradeFailure", 403779, "编辑碳交易失败");
 
     final String output;
     final Integer code;

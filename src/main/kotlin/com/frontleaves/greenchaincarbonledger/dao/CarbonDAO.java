@@ -87,18 +87,19 @@ public class CarbonDAO {
      * @return 符合条件的碳报告列表 -List
      */
     public List<CarbonReportDO> getReportBySearch(String uuid, String search, String  limit, String page, String order) {
-        log.info("[DAO] 执行 etReportBySearch 操作");
+        log.info("[DAO] 执行 getReportBySearch 方法");
         log.info("Mysql 读取");
         return carbonMapper.getReportBySearch(uuid, search, limit, page, order);
     }
 
     /**
      * 通过UUID获取碳核算数据表
+     *
      * @param uuid-用户UUID
      * @return 符合条件的碳核算数据列表 -List
      */
     public List<CarbonAccountingDO> getAccountByUuid(String uuid) {
-        log.info("[DAO] 执行 getAccountByUuid 操作");
+        log.info("[DAO] 执行 getAccountByUuid 方法");
         log.info("Mysql 读取");
         return carbonMapper.getAccountByUuid(uuid);
     }
@@ -111,10 +112,11 @@ public class CarbonDAO {
 
     /**
      * 通过UUID获取碳交易发布
+     *
      * @param uuid -用户UUID
      * @return 符合条件的碳交易发布列表 -List
      */
-    public List<CarbonTradeDO> getTradeByUuid(String uuid){
+    public List<CarbonTradeDO> getTradeByUuid(String uuid) {
         log.info("[DAO] 执行 getTradeByUuid");
         log.info("Mysql 读取");
         return carbonMapper.getTradeByUuid(uuid);
@@ -122,10 +124,11 @@ public class CarbonDAO {
 
     /**
      * 通过id来获取碳交易发布
+     *
      * @param id- 交易id
      * @return 返回CarbonTradeDO
      */
-    public CarbonTradeDO getTradeById(String id){
+    public CarbonTradeDO getTradeById(String id) {
         log.info("[DAO] 执行 getTradeById");
         log.info("Mysql 读取");
         return carbonMapper.getTradeById(id);
@@ -133,13 +136,73 @@ public class CarbonDAO {
 
     /**
      * 软删除交易发布
+     *
      * @param id-交易id
      * @param status-状态（cancelled）
      * @return 成功返回ture，失败返回false
      */
-    public Boolean deleteTrade(String id,String status){
+    public Boolean deleteTrade(String id, String status) {
         log.info("[DAO] 执行 deleteTrade");
         log.info("Mysql 更新");
         return carbonMapper.deleteTrade(id,status);
+    }
+
+    /**
+     * 获取当前组织的全部碳交易发布信息列表
+     *
+     * @param uuid-组织uuid
+     * @param limit-页数限制
+     * @param page-页码
+     * @param order-顺序
+     * @return 碳交易发布信息列表
+     */
+    public List<CarbonTradeDO> getTradeListAll(String uuid, Integer limit, Integer page, String order) {
+        log.info("[DAO] 执行 getTradeListAll");
+        return carbonMapper.getTradeListAll(uuid, limit, page, order);
+    }
+
+    /**
+     * 获取当前组织的全部碳交易发布信息列表
+     *
+     * @param uuid-组织uuid
+     * @return 查到返回ture，查不到则返回false
+     */
+    public Boolean getTradeListByUuid(String uuid) {
+        log.info("[DAO] 执行 getTradeListByUuid");
+        return carbonMapper.getTradeListByUuid(uuid);
+    }
+
+    /**
+     * 通过Status获取当前组织的全部碳交易发布信息列表
+     *
+     * @param uuid-组织uuid
+     * @param search-status
+     * @param limit-页数限制
+     * @param page-页码
+     * @param order-顺序
+     * @return 碳交易发布信息列表
+     */
+    public List<CarbonTradeDO> getTradeListByStatus(String uuid, String search, Integer limit, Integer page, String order) {
+        log.info("[DAO] 执行 getTradeListByStatus");
+        return carbonMapper.getTradeListByStatus(uuid, search, limit, page, order);
+    }
+
+    /**
+     * 通过模糊查询获取当前组织的全部碳交易发布信息列表
+     * @param uuid-组织uuid
+     * @param search-status
+     * @param limit-页数限制
+     * @param page-页码
+     * @param order-顺序
+     * @return 碳交易发布信息列表
+     */
+    public List<CarbonTradeDO> getTradeListBySearch(String uuid, String search, Integer limit, Integer page, String order) {
+        log.info("[DAO] 执行 getTradeListBySearch");
+        return carbonMapper.getTradeListBySearch(uuid, search, limit, page, order);
+    }
+
+    public CarbonTradeDO getTradeByUuidAndId(String getUuid, String id) {
+        log.info("[DAO] 执行 getTradeByUuidAndId");
+        return carbonMapper.getTradeByUuidAndId(getUuid, id);
     }
 }
