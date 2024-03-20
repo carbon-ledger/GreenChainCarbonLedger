@@ -2,6 +2,7 @@ package com.frontleaves.greenchaincarbonledger.controllers;
 
 import com.frontleaves.greenchaincarbonledger.annotations.CheckAccountPermission;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.EditTradeVO;
+import com.frontleaves.greenchaincarbonledger.annotations.CheckAccountPermission;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.TradeReleaseVO;
 import com.frontleaves.greenchaincarbonledger.services.CarbonService;
 import com.frontleaves.greenchaincarbonledger.services.TradeService;
@@ -13,13 +14,6 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -107,7 +101,7 @@ public class TradeController {
             @NotNull BindingResult bindingResult,
             @PathVariable String id,
             HttpServletRequest request
-    ){
+    ) {
         log.info("[Controller] 请求 editCarbonTrade 接口");
         long timestamp = System.currentTimeMillis();
         // 对请求参数进行校验
@@ -116,5 +110,28 @@ public class TradeController {
         }
         // 业务操作
         return carbonService.editCarbonTrade(timestamp, request, editTradeVO, id);
+    }
+
+    /**
+     * 进行碳交易
+     *
+     * @param id-交易id
+     * @param request-请求
+     * @return 是否完成交易
+     */
+    @PatchMapping("/buy/{id}")
+    @CheckAccountPermission("{trade:buyTrade}")
+    public ResponseEntity<BaseResponse> buyTrade(
+            @PathVariable String id,
+            HttpServletRequest request
+    ) {
+        log.info("[Controller] 请求 buyTrade 接口 ");
+        long timestamp = System.currentTimeMillis();
+        //校验参数
+        if (id.isEmpty()) {
+            return ResultUtil.error(timestamp, "Path参数错误", ErrorCode.REQUEST_BODY_ERROR);
+        }
+        //返回业务操作
+        return tradeService.buyTrade(timestamp, request, id);
     }
 }

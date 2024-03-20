@@ -30,4 +30,9 @@ public class CarbonAccountingDAO {
         log.info("\t> Mysql 读取");
         return carbonAccountingMapper.getOrganizeCarbonAccounting(organizeUuid, limit, page, order);
     }
+    public List<CarbonAccountingDO> getCarbonAccountingListByUuid(String uuid){
+        log.info("[DAO] 执行 getCarbonAccountingListByUuid");
+        log.info("/t >Mysql 读取");
+        return carbonAccountingMapper.getCarbonAccountingListByUuid(uuid);
+    }
 }

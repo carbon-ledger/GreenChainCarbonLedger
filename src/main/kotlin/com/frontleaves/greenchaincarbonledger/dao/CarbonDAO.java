@@ -56,6 +56,7 @@ public class CarbonDAO {
 
     public List<CarbonReportDO> getReportByUuid(String uuid, String limit, String page, String order) {
         log.info("[DAO] 执行 getReportByUuid 方法");
+        log.info("Mysql 读取");
         return carbonMapper.getReportByUuid(uuid, limit, page, order);
     }
 
@@ -70,7 +71,8 @@ public class CarbonDAO {
      * @return 包含碳排放报告信息的列表 -List
      */
     public List<CarbonReportDO> getReportByStatus(String uuid, String search, String limit, String page, String order) {
-        log.info("[DAO] 执行 getReportByStatus 方法");
+        log.info("[DAO] 执行 getReportByStatus 操作");
+        log.info("Mysql 读取");
         return carbonMapper.getReportByStatus(uuid, search, limit, page, order);
     }
 
@@ -84,8 +86,9 @@ public class CarbonDAO {
      * @param order  排序顺序
      * @return 符合条件的碳报告列表 -List
      */
-    public List<CarbonReportDO> getReportBySearch(String uuid, String search, String limit, String page, String order) {
-        log.info("[DAO] 执行 etReportBySearch 方法");
+    public List<CarbonReportDO> getReportBySearch(String uuid, String search, String  limit, String page, String order) {
+        log.info("[DAO] 执行 getReportBySearch 方法");
+        log.info("Mysql 读取");
         return carbonMapper.getReportBySearch(uuid, search, limit, page, order);
     }
 
@@ -96,12 +99,14 @@ public class CarbonDAO {
      * @return 符合条件的碳核算数据列表 -List
      */
     public List<CarbonAccountingDO> getAccountByUuid(String uuid) {
-        log.info("[DAO] 执行 getAccountByUuid");
+        log.info("[DAO] 执行 getAccountByUuid 方法");
+        log.info("Mysql 读取");
         return carbonMapper.getAccountByUuid(uuid);
     }
 
     public CarbonQuotaDO getQuotaByUuid(String uuid) {
         log.info("[DAO] 执行 getTotalQuotaByUuid 方法");
+        log.info("Mysql 读取");
         return carbonMapper.getQuotaByUuid(uuid);
     }
 
@@ -113,6 +118,7 @@ public class CarbonDAO {
      */
     public List<CarbonTradeDO> getTradeByUuid(String uuid) {
         log.info("[DAO] 执行 getTradeByUuid");
+        log.info("Mysql 读取");
         return carbonMapper.getTradeByUuid(uuid);
     }
 
@@ -124,6 +130,7 @@ public class CarbonDAO {
      */
     public CarbonTradeDO getTradeById(String id) {
         log.info("[DAO] 执行 getTradeById");
+        log.info("Mysql 读取");
         return carbonMapper.getTradeById(id);
     }
 
@@ -136,7 +143,8 @@ public class CarbonDAO {
      */
     public Boolean deleteTrade(String id, String status) {
         log.info("[DAO] 执行 deleteTrade");
-        return carbonMapper.deleteTrade(id, status);
+        log.info("Mysql 更新");
+        return carbonMapper.deleteTrade(id,status);
     }
 
     /**
