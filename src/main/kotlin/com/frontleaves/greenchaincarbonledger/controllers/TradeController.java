@@ -101,12 +101,13 @@ public class TradeController {
 
     }
 
-    @PostMapping("edit{id}")
+    @PostMapping("/edit/{id}")
     public ResponseEntity<BaseResponse> editCarbonTrade(
             @RequestBody @Validated EditTradeVO editTradeVO,
             @NotNull BindingResult bindingResult,
-            HttpServletRequest request,
-            @PathVariable String id){
+            @PathVariable String id,
+            HttpServletRequest request
+    ){
         log.info("[Controller] 请求 editCarbonTrade 接口");
         long timestamp = System.currentTimeMillis();
         // 对请求参数进行校验
