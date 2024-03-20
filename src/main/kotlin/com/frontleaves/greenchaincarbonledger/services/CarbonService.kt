@@ -1,5 +1,6 @@
 package com.frontleaves.greenchaincarbonledger.services
 
+import com.frontleaves.greenchaincarbonledger.models.voData.getData.EditTradeVO
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.TradeReleaseVO
 import com.frontleaves.greenchaincarbonledger.utils.BaseResponse
 import jakarta.servlet.http.HttpServletRequest
@@ -61,5 +62,12 @@ interface CarbonService {
         timestamp: Long,
         request: HttpServletRequest,
         tradeReleaseVO: TradeReleaseVO
+    ): ResponseEntity<BaseResponse>
+
+    fun editCarbonTrade(
+        timestamp: Long,
+        request: HttpServletRequest,
+        editTradeVO: EditTradeVO,
+        id: String
     ): ResponseEntity<BaseResponse>
 }
