@@ -67,6 +67,7 @@ interface CarbonService {
     fun editCarbonTrade(
         timestamp: Long,
         request: HttpServletRequest,
-        editTradeVO: EditTradeVO
+        editTradeVO: EditTradeVO,
+        id: String
     ): ResponseEntity<BaseResponse>
 }

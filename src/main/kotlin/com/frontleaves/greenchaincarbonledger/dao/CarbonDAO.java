@@ -138,4 +138,9 @@ public class CarbonDAO {
         log.info("[DAO] 执行 deleteTrade");
         return carbonMapper.deleteTrade(id, status);
     }
+
+    public CarbonTradeDO getTradeByUuidAndId(String getUuid, String id) {
+        log.info("[DAO] 执行 getTradeByUuidAndId");
+        return carbonMapper.getTradeByUuidAndId(getUuid, id);
+    }
 }

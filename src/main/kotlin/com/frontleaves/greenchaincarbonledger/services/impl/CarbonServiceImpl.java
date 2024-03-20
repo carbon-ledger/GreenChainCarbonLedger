@@ -201,24 +201,23 @@ public class CarbonServiceImpl implements CarbonService {
 
     @NotNull
     @Override
-    public ResponseEntity<BaseResponse> editCarbonTrade(long timestamp, @NotNull HttpServletRequest request, @NotNull EditTradeVO editTradeVO) {
+    public ResponseEntity<BaseResponse> editCarbonTrade(long timestamp, @NotNull HttpServletRequest request, @NotNull EditTradeVO editTradeVO, @NotNull String id) {
         log.info("[Service] 执行 releaseCarbonTrade 方法");
-        /*String getUuid = ProcessingUtil.getAuthorizeUserUuid(request);
+       String getUuid = ProcessingUtil.getAuthorizeUserUuid(request);
         // 判断用户是否发布过交易
         // 判断交易是否已经发布
-        CarbonTradeDO carbonTradeDO = carbonDAO.getTradeByUuid(getUuid);
+        CarbonTradeDO carbonTradeDO = carbonDAO.getTradeByUuidAndId(getUuid, id);
         String status = carbonTradeDO.getStatus();
         if ("draft".equals(status) || "pending_review".equals(status)) {
             // 判断编辑的信息是否合法有效，如果有效则可以提交编辑
             if (editTradeVO.getDraft()) {
-                carbonMapper.updateTradeByUuid(getUuid, editTradeVO, "draft");
+                carbonMapper.updateTradeByUuid(getUuid, editTradeVO, "draft", id);
             } else {
-                carbonMapper.updateTradeByUuid(getUuid, editTradeVO, "pending_review");
+                carbonMapper.updateTradeByUuid(getUuid, editTradeVO, "pending_review", id);
             }
             return ResultUtil.success(timestamp, "交易发布信息修改成功");
         } else {
             return ResultUtil.error(timestamp, ErrorCode.EDIT_TRADE_FAILURE);
-        }*/
-        return null;
+        }
     }
 }

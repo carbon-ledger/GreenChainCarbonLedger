@@ -54,6 +54,9 @@ public interface CarbonMapper {
     @Select("SELECT * FROM fy_carbon_trade WHERE organize_uuid = #{uuid}")
     List<CarbonTradeDO> getTradeByUuid(String uuid);
 
-    @Update("UPDATE fy_carbon_trade SET quota_amount = #{amount}, price_per_unit = #{unit}, description = #{text}, status = #{status}, updated_at = NOW() WHERE organize_uuid = #{uuid}")
-    Boolean updateTradeByUuid(String uuid, EditTradeVO editTradeVO, String status);
+    @Update("UPDATE fy_carbon_trade SET quota_amount = #{amount}, price_per_unit = #{unit}, description = #{text}, status = #{status}, updated_at = NOW() WHERE organize_uuid = #{uuid} AND id = #{id}")
+    void updateTradeByUuid(String uuid, EditTradeVO editTradeVO, String status, String id);
+
+    @Select("SELECT * FROM fy_carbon_trade WHERE id = #{id} AND organize_uuid = #{getUuid}")
+    CarbonTradeDO getTradeByUuidAndId(String getUuid, String id);
 }
