@@ -47,8 +47,8 @@ public class MailController {
     @PostMapping("/send/code")
     public ResponseEntity<BaseResponse> sendMailByCode(
             @RequestBody @Validated MailSendCodeVO mailSendCodeVO,
-            HttpServletRequest request,
-            @NotNull BindingResult bindingResult
+            @NotNull BindingResult bindingResult,
+            @NotNull HttpServletRequest request
             ) {
         log.info("[Controller] 执行 sendMailByCode 方法");
         long timestamp = System.currentTimeMillis();
