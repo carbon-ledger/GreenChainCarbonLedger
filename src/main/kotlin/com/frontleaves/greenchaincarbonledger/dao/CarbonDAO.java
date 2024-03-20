@@ -192,4 +192,9 @@ public class CarbonDAO {
         log.info("[DAO] 执行 getTradeListBySearch");
         return carbonMapper.getTradeListBySearch(uuid, search, limit, page, order);
     }
+
+    public CarbonTradeDO getTradeByUuidAndId(String getUuid, String id) {
+        log.info("[DAO] 执行 getTradeByUuidAndId");
+        return carbonMapper.getTradeByUuidAndId(getUuid, id);
+    }
 }
