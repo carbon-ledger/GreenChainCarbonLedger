@@ -17,8 +17,8 @@ import lombok.experimental.Accessors;
 public class CarbonTradeDO {
     String id;
     String organizeUuid;
-    double quotaAmount;
-    double pricePerUnit;
+    Double quotaAmount;
+    Double pricePerUnit;
     String status;
     String description;
     String verifyUuid;
