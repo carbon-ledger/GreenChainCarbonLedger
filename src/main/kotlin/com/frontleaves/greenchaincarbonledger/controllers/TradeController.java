@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * TradeController
@@ -72,11 +73,12 @@ public class TradeController {
     }
 
 
+    @PostMapping("edit{id}")
     public ResponseEntity<BaseResponse> editCarbonTrade(
             @RequestBody @Validated EditTradeVO editTradeVO,
             @NotNull BindingResult bindingResult,
-            HttpServletRequest request
-    ){
+            HttpServletRequest request,
+            @PathVariable String id){
         log.info("[Controller] 请求 editCarbonTrade 接口");
         long timestamp = System.currentTimeMillis();
         // 对请求参数进行校验
@@ -84,6 +86,6 @@ public class TradeController {
             return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR, ProcessingUtil.getValidatedErrorList(bindingResult));
         }
         // 业务操作
-        return carbonService.editCarbonTrade(timestamp, request, editTradeVO);
+        return carbonService.editCarbonTrade(timestamp, request, editTradeVO, id);
     }
 }
