@@ -4,6 +4,7 @@ import com.frontleaves.greenchaincarbonledger.models.doData.CarbonAccountingDO;
 import com.frontleaves.greenchaincarbonledger.models.doData.CarbonQuotaDO;
 import com.frontleaves.greenchaincarbonledger.models.doData.CarbonReportDO;
 import com.frontleaves.greenchaincarbonledger.models.doData.CarbonTradeDO;
+import com.frontleaves.greenchaincarbonledger.models.voData.getData.EditTradeVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.TradeReleaseVO;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
@@ -42,7 +43,7 @@ public interface CarbonMapper {
     CarbonQuotaDO getQuotaByUuid(String uuid);
 
     @Insert("INSERT INTO fy_carbon_trade (organize_uuid, quota_amount, price_per_unit, description, status, created_at) VALUES (#{uuid}, #{amount}, #{unit}, #{text}, #{status}, NOW())")
-    Boolean insertTradeByUuid(String uuid, TradeReleaseVO tradeReleaseVO, String status);
+    void insertTradeByUuid(String uuid, TradeReleaseVO tradeReleaseVO, String status);
 
     @Select("SELECT * FROM fy_carbon_trade WHERE organize_uuid=#{uuid}")
     List<CarbonTradeDO> getTradeByUuid(String uuid);
@@ -77,4 +78,10 @@ public interface CarbonMapper {
             ORDER BY ${order} LIMIT #{limit} OFFSET ${(page-1) * limit}
                         """)
     List<CarbonTradeDO> getTradeListBySearch(String uuid, String search, Integer limit, Integer page, String order);
+
+    @Update("UPDATE fy_carbon_trade SET quota_amount = #{amount}, price_per_unit = #{unit}, description = #{text}, status = #{status}, updated_at = NOW() WHERE organize_uuid = #{uuid} AND id = #{id}")
+    void updateTradeByUuid(String uuid, EditTradeVO editTradeVO, String status, String id);
+
+    @Select("SELECT * FROM fy_carbon_trade WHERE id = #{id} AND organize_uuid = #{getUuid}")
+    CarbonTradeDO getTradeByUuidAndId(String getUuid, String id);
 }
