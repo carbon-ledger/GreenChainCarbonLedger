@@ -97,21 +97,25 @@ public class UserServiceImpl implements UserService {
         UserDO getUserDO = userDAO.getUserByUuid(ProcessingUtil.getAuthorizeUserUuid(request));
         //获取自己的账号详细信息（姓名，联系方式，电子邮件等）
         if (getUserDO != null) {
-            ArrayList<String> getPermissionList = gson.fromJson(getUserDO.getPermission(), new TypeToken<ArrayList<String>>() {
-            }.getType());
-            if (getPermissionList == null) {
-                getPermissionList = new ArrayList<>();
-            }
+            RoleDO getRoleDO = roleDAO.getRoleByUuid(getUserDO.getRole());
             // 数据整理
             BackUserCurrentVO backUserCurrent = new BackUserCurrentVO();
             BackUserCurrentVO.UserVO newUserInfo = new BackUserCurrentVO.UserVO();
             BackUserCurrentVO.PermissionVO newPermissionInfo = new BackUserCurrentVO.PermissionVO();
             //  如果是进行了脱敏处理，就可以创建一个新的工具类进行统一处理
-            newUserInfo.setUserName(getUserDO.getUserName()).setRealName(getUserDO.getRealName()).setEmail(getUserDO.getEmail()).setPhone(getUserDO.getPhone()).setUuid(getUserDO.getUuid());
-            // TODO: 权限信息写好后，需要数据库调取
-            newPermissionInfo.setUserPermission(getPermissionList).setRolePermission(getPermissionList);
-
-            backUserCurrent.setUser(newUserInfo).setPermission(newPermissionInfo).setRole(roleDAO.getRoleByUuid(getUserDO.getRole()).getName());
+            newUserInfo
+                    .setUserName(getUserDO.getUserName())
+                    .setRealName(getUserDO.getRealName())
+                    .setEmail(getUserDO.getEmail())
+                    .setPhone(getUserDO.getPhone())
+                    .setUuid(getUserDO.getUuid());
+            newPermissionInfo
+                    .setUserPermission(gson.fromJson(getUserDO.getPermission(), new TypeToken<ArrayList<String>>() {}.getType()))
+                    .setRolePermission(gson.fromJson(getRoleDO.getPermission(), new TypeToken<ArrayList<String>>() {}.getType()));
+            backUserCurrent
+                    .setUser(newUserInfo)
+                    .setPermission(newPermissionInfo)
+                    .setRole(getRoleDO.getName());
             // 数据输出
             return ResultUtil.success(timestamp, "用户查看的信息已准备完毕", backUserCurrent);
         } else {
