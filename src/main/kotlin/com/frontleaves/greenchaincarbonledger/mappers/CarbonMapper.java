@@ -77,4 +77,7 @@ public interface CarbonMapper {
             ORDER BY ${order} LIMIT #{limit} OFFSET ${(page-1) * limit}
                         """)
     List<CarbonTradeDO> getTradeListBySearch(String uuid, String search, Integer limit, Integer page, String order);
+
+    @Update("UPDATE fy_carbon_trade SET verify_uuid = #{getUuid}  WHERE id = #{tradeId}")
+    Boolean reviewTrade(String getUuid, String tradeId);
 }

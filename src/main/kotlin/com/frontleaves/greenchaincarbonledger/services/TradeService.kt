@@ -42,4 +42,10 @@ interface TradeService {
         order: String?
     ): ResponseEntity<BaseResponse>
 
+    fun reviewTradeList(
+        timestamp: Long,
+        request: HttpServletRequest,
+        id: String
+    ): ResponseEntity<BaseResponse>
+
 }

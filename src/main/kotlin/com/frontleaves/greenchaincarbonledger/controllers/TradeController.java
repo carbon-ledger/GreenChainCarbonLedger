@@ -89,6 +89,19 @@ public class TradeController {
             }
             return tradeService.getOwnTradeList(timestamp, request, type, search, limit, page, order);
         }
+    }
 
+    @PatchMapping("/review/{tradeId}")
+    public ResponseEntity<BaseResponse> reviewTradeList(
+            @PathVariable("tradeId")String id,
+            HttpServletRequest request
+    ){
+        log.info("[Controller] 请求 getOwnTrade 接口");
+        long timestamp =System.currentTimeMillis();
+        if(id == null || id.isEmpty()){
+            return ResultUtil.error(timestamp, "Path 参数错误",ErrorCode.PATH_VARIABLE_ERROR);
+        }else {
+            return tradeService.reviewTradeList(timestamp,request,id);
+        }
     }
 }
