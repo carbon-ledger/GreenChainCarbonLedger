@@ -89,6 +89,34 @@ public class TradeController {
             }
             return tradeService.getOwnTradeList(timestamp, request, type, search, limit, page, order);
         }
+    }
 
+    @GetMapping("/list")
+    public ResponseEntity<BaseResponse> getTradeList(
+            //需要Query参数
+            @RequestParam String type,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String limit,
+            @RequestParam(required = false) String page,
+            @RequestParam(required = false) String order,
+            @NotNull HttpServletRequest request){
+        log.info("[Controller] 请求 getTradeList 接口");
+        long timestamp = System.currentTimeMillis();
+        ResponseEntity<BaseResponse> checkResult = businessUtil.checkLimitPageAndOrder(timestamp, limit, page, order);
+        if (checkResult != null) {
+            return checkResult;
+        }
+        if ("all".equals(type) || "search".equals(type) || "active".equals(type) || "completed".equals(type)) {
+            //业务操作
+            if (limit == null) {
+                limit = "";
+            }
+            if (page == null) {
+                page = "";
+            }
+            return tradeService.getTradeList(timestamp, request, type, search, limit, page, order);
+        } else {
+            return ResultUtil.error(timestamp, "type 参数错误", ErrorCode.PARAM_VARIABLE_ERROR);
+        }
     }
 }

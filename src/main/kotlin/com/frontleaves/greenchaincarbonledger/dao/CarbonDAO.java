@@ -192,4 +192,24 @@ public class CarbonDAO {
         log.info("[DAO] 执行 getTradeListBySearch");
         return carbonMapper.getTradeListBySearch(uuid, search, limit, page, order);
     }
+
+    public List<CarbonTradeDO> getAvailableTradeListAll(Integer limit, Integer page, String order) {
+        log.info("[DAO] 执行 getAvailableTradeListAll");
+        return carbonMapper.getAvailableTradeListAll(limit, page, order);
+    }
+
+    public List<CarbonTradeDO> getAvailableTradeList(String search, Integer limit, Integer page, String order) {
+        log.info("[DAO] 执行 getAvailableTradeList");
+        return carbonMapper.getAvailableTradeList(search, limit, page, order);
+    }
+
+    public List<CarbonTradeDO> getCompletedTradeList(String search, Integer limit, Integer page, String order) {
+        log.info("[DAO] 执行 getCompletedTradeList");
+        return carbonMapper.getCompletedTradeList(search, limit, page, order);
+    }
+
+    public List<CarbonTradeDO> getSearchTradeList(String search, Integer limit, Integer page, String order) {
+        log.info("[DAO] 执行 getSearchTradeList");
+        return carbonMapper.getSearchTradeList(search, limit, page, order);
+    }
 }
