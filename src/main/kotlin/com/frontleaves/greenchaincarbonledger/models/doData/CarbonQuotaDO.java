@@ -1,9 +1,8 @@
 package com.frontleaves.greenchaincarbonledger.models.doData;
 
 import lombok.Data;
+import lombok.experimental.Accessors;
 
-import java.sql.Timestamp;
-import java.util.ArrayList;
 
 /**
  * 用于存放fy_carbon_quota的数据库放回的数据
@@ -14,6 +13,7 @@ import java.util.ArrayList;
  */
 
 @Data
+@Accessors(chain = true)
 public class CarbonQuotaDO {
     public String uuid;
     public String organizeUuid;
@@ -22,8 +22,8 @@ public class CarbonQuotaDO {
     public double allocatedQuota;
     public double usedQuota;
     public String allocationDate;
-    public boolean complianceStatus;
-    public ArrayList<String> auditLog;
+    public Boolean complianceStatus;
+    public String auditLog;
     public String createdAt;
     public String updatedAt;
 }
