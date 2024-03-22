@@ -2,9 +2,11 @@ package com.frontleaves.greenchaincarbonledger.services.impl;
 
 import com.frontleaves.greenchaincarbonledger.dao.CarbonAccountingDAO;
 import com.frontleaves.greenchaincarbonledger.dao.CarbonDAO;
+import com.frontleaves.greenchaincarbonledger.dao.CarbonQuotaDAO;
 import com.frontleaves.greenchaincarbonledger.dao.UserDAO;
 import com.frontleaves.greenchaincarbonledger.mappers.CarbonMapper;
 import com.frontleaves.greenchaincarbonledger.models.doData.*;
+import com.frontleaves.greenchaincarbonledger.models.voData.getData.CarbonAddQuotaVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.EditTradeVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.TradeReleaseVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.returnData.BackCarbonAccountingVO;
@@ -15,6 +17,7 @@ import com.frontleaves.greenchaincarbonledger.utils.BaseResponse;
 import com.frontleaves.greenchaincarbonledger.utils.ErrorCode;
 import com.frontleaves.greenchaincarbonledger.utils.ProcessingUtil;
 import com.frontleaves.greenchaincarbonledger.utils.ResultUtil;
+import com.google.gson.Gson;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,6 +25,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import com.google.gson.reflect.TypeToken;
+
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -37,7 +42,9 @@ public class CarbonServiceImpl implements CarbonService {
     private final CarbonDAO carbonDAO;
     private final UserDAO userDAO;
     private final CarbonAccountingDAO carbonAccountingDAO;
+    private final CarbonQuotaDAO carbonQuotaDAO;
     private final CarbonMapper carbonMapper;
+    private final Gson gson;
 
     @NotNull
     @Override
@@ -219,5 +226,45 @@ public class CarbonServiceImpl implements CarbonService {
         } else {
             return ResultUtil.error(timestamp, ErrorCode.EDIT_TRADE_FAILURE);
         }
+    }
+
+    @NotNull
+    @Override
+    public ResponseEntity<BaseResponse> editCarbonQuota(long timestamp, @NotNull HttpServletRequest request, @NotNull String organizeId, @NotNull CarbonAddQuotaVO carbonAddQuotaVO) {
+        //获取当前年份
+        SimpleDateFormat simpleDateFormat=new SimpleDateFormat("yyyy");
+        int localYear = Integer.parseInt(simpleDateFormat.format(timestamp));
+        // 将年份、月份和日期合并
+        SimpleDateFormat combinedFormat = new SimpleDateFormat("yyyy-MM-dd");
+        String combinedDate = combinedFormat.format(timestamp);
+        //查找组织uuid
+        CarbonQuotaDO getCarbonQuota =carbonQuotaDAO.getCarbonQuota(localYear,organizeId);
+        if (getCarbonQuota!=null){
+            //找到后进行修改
+            //进行总额配额的修改
+            //校验传进来的是正还是负值
+            double carbonTotalQuota;
+            if (Double.parseDouble(carbonAddQuotaVO.getQuota())>=0){
+                carbonTotalQuota = getCarbonQuota.getTotalQuota() + Double.parseDouble(carbonAddQuotaVO.getQuota());
+            }else {
+                carbonTotalQuota = getCarbonQuota.getTotalQuota() - Double.parseDouble(carbonAddQuotaVO.getQuota());
+            }
+            ArrayList<CarbonAuditLogDO> oldCarbonAuditLogList=gson.fromJson(getCarbonQuota.getAuditLog(), new TypeToken<ArrayList<CarbonAuditLogDO>>() {}.getType());
+            CarbonAuditLogDO newCarbonAuditLog=new CarbonAuditLogDO();
+            newCarbonAuditLog.setDate(combinedDate)
+                    .setLog("进行碳配额的修改"+Double.parseDouble(carbonAddQuotaVO.getQuota()))
+                    .setOperate("为此次进行修改的账户UUID为"+request.getHeader("{X-Auth-UUID}"));
+            oldCarbonAuditLogList.add(newCarbonAuditLog);
+            String carbonAuditLog = gson.toJson(oldCarbonAuditLogList);
+            if(carbonQuotaDAO.editCarbonQuota(organizeId,localYear,carbonTotalQuota,!carbonAddQuotaVO.getStatus(),carbonAuditLog)){
+                return ResultUtil.success(timestamp,"修改成功");
+            }else {
+                return ResultUtil.error(timestamp,"修改失败",ErrorCode.SERVER_INTERNAL_ERROR);
+            }
+
+        }else {
+            return ResultUtil.error(timestamp,"请检查要修改的组织id",ErrorCode.SERVER_INTERNAL_ERROR);
+        }
+
     }
 }

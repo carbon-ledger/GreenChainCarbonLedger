@@ -23,7 +23,7 @@ public class CarbonQuotaDO {
     public double usedQuota;
     public String allocationDate;
     public boolean complianceStatus;
-    public ArrayList<String> auditLog;
+    public String auditLog;
     public String createdAt;
     public String updatedAt;
 }
