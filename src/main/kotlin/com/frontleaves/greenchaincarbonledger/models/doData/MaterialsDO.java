@@ -4,6 +4,7 @@ import lombok.Data;
 import lombok.experimental.Accessors;
 
 import java.util.List;
+
 /**
  * E碳的燃料种类和消耗量
  *
@@ -14,6 +15,8 @@ import java.util.List;
 public class MaterialsDO {
     List<Materials> materials;
     List<Courses> courses;
+    List<CarbonSequestration> carbonSequestrations;
+    List<Desulfuization> desulfuizations;
 
     /**
      * E燃烧的种类和消耗量
@@ -32,6 +35,16 @@ public class MaterialsDO {
     @Data
     @Accessors(chain = true)
     public static class Courses {
+        public String name;
+        public Material material;
+    }
+
+    /**
+     * E脱硫的种类和消耗量
+     */
+    @Data
+    @Accessors(chain = true)
+    public static class Desulfuization {
         public String name;
         public Material material;
     }
