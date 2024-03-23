@@ -249,13 +249,18 @@ public class ReviewServiceImpl implements ReviewService {
         // 根据id获取信息
         ApproveOrganizeDO getApproveOrganizeDO = reviewDAO.getApproveOrganizeById(checkId);
         if (getApproveOrganizeDO != null) {
-            // 检查是否审核通过
-            if (reviewCheckVO.getAllow()) {
-                reviewDAO.setReviewOrganizeAllow(getApproveOrganizeDO.getId(), true, null);
+            if (getApproveOrganizeDO.getCertificationStatus() == 0) {
+                UserDO getUserDO = ProcessingUtil.getUserByHeaderUuid(request, userDAO);
+                assert getUserDO != null;
+                getApproveOrganizeDO
+                        .setApproveUuid(getUserDO.getUuid())
+                        .setApproveRemarks(reviewCheckVO.getRemark())
+                        .setUpdatedAt(new Timestamp(System.currentTimeMillis()));
+                reviewDAO.setReviewOrganizeAllow(getApproveOrganizeDO, reviewCheckVO.getAllow());
+                return ResultUtil.success(timestamp, "已进行操作");
             } else {
-                reviewDAO.setReviewOrganizeAllow(getApproveOrganizeDO.getId(), false, reviewCheckVO.getRemark());
+                return ResultUtil.error(timestamp, "此内容无需审核", ErrorCode.REVIEW_ERROR);
             }
-            return ResultUtil.success(timestamp, "已进行操作");
         } else {
             return ResultUtil.error(timestamp, "审核内容不存在", ErrorCode.REVIEW_ERROR);
         }
@@ -273,13 +278,18 @@ public class ReviewServiceImpl implements ReviewService {
         // 根据id获取信息
         ApproveManageDO getApproveAdminDO = reviewDAO.getApproveAdminById(checkId);
         if (getApproveAdminDO != null) {
-            // 检查是否审核通过
-            if (reviewCheckVO.getAllow()) {
-                reviewDAO.setReviewAdminAllow(getApproveAdminDO.getId(), true, null);
+            if (getApproveAdminDO.getCertificationStatus() == 0) {
+                UserDO getUserDO = ProcessingUtil.getUserByHeaderUuid(request, userDAO);
+                assert getUserDO != null;
+                getApproveAdminDO
+                        .setApproveUuid(getUserDO.getUuid())
+                        .setApproveRemarks(reviewCheckVO.getRemark())
+                        .setUpdatedAt(new Timestamp(System.currentTimeMillis()));
+                reviewDAO.setReviewAdminAllow(getApproveAdminDO, reviewCheckVO.getAllow());
+                return ResultUtil.success(timestamp, "已进行操作");
             } else {
-                reviewDAO.setReviewAdminAllow(getApproveAdminDO.getId(), false, reviewCheckVO.getRemark());
+                return ResultUtil.error(timestamp, "此内容无需审核", ErrorCode.REVIEW_ERROR);
             }
-            return ResultUtil.success(timestamp, "已进行操作");
         } else {
             return ResultUtil.error(timestamp, "审核内容不存在", ErrorCode.REVIEW_ERROR);
         }

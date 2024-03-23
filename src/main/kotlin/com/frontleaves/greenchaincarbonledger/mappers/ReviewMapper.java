@@ -7,6 +7,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 /**
@@ -119,14 +120,14 @@ public interface ReviewMapper {
     @Select("SELECT * FROM fy_approve_organize WHERE id = #{id}")
     ApproveOrganizeDO getOrganizeApproveById(long checkId);
 
-    @Update("UPDATE fy_approve_organize SET certification_status = #{allow}, remarks = #{remark} WHERE id = #{id}")
-    void updateReviewOrganizeCheck(long id, short allow, String remark);
+    @Update("UPDATE fy_approve_organize SET certification_status = #{allow}, approve_uuid = #{approveRemarksUuid}, approve_remarks = #{approveRemarks}, updated_at = #{updatedAt} WHERE id = #{id}")
+    void updateReviewOrganizeCheck(short allow, String approveRemarksUuid, String approveRemarks, Timestamp updatedAt, long id);
 
     @Select("SELECT * FROM fy_approve_manage WHERE id = #{id}")
     ApproveManageDO getAdminApproveById(long id);
 
-    @Update("UPDATE fy_approve_manage SET certification_status = #{value}, remarks = #{remark} WHERE id = #{id}")
-    void updateReviewAdminCheck(long id, short value, String remark);
+    @Update("UPDATE fy_approve_manage SET certification_status = #{value}, approve_uuid = #{approveRemarksUuid}, approve_remarks = #{approveRemarks}, updated_at = #{updatedAt} WHERE id = #{id}")
+    void updateReviewAdminCheck(short value, String approveRemarksUuid, String approveRemarks, Timestamp updatedAt, long id);
 
     /**
      * 更新组织审核信息
