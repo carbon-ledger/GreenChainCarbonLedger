@@ -295,7 +295,7 @@ public class ReviewServiceImpl implements ReviewService {
             // 获取管理账户资料
             ApproveOrganizeDO getApproveOrganizeDO = reviewDAO.getApproveOrganizeById(checkId);
             if (getApproveOrganizeDO != null) {
-                if (getApproveOrganizeDO.getApproveUuid().equals(getUserDO.getUuid())) {
+                if (getApproveOrganizeDO.getAccountUuid().equals(getUserDO.getUuid())) {
                     if (getApproveOrganizeDO.getCertificationStatus() != 0) {
                         // 对资料进行编辑
                         Base64 base64 = new Base64();
@@ -378,7 +378,7 @@ public class ReviewServiceImpl implements ReviewService {
             // 获取管理账户资料
             ApproveManageDO getApproveAdminById = reviewDAO.getApproveAdminById(checkId);
             if (getApproveAdminById != null) {
-                if (getApproveAdminById.getApproveUuid().equals(getUserDO.getUuid())) {
+                if (getApproveAdminById.getAccountUuid().equals(getUserDO.getUuid())) {
                     if (getApproveAdminById.getCertificationStatus() != 0) {
                         // 对资料进行编辑
                         Base64 base64 = new Base64();
