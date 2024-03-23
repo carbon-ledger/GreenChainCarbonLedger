@@ -22,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.binary.Base64;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -48,6 +49,53 @@ public class ReviewServiceImpl implements ReviewService {
     private final ReviewDAO reviewDAO;
     private final UserDAO userDAO;
 
+    /**
+     * 获取图片类型
+     * <hr/>
+     * 用于获取图片类型, 用于判断图片类型
+     *
+     * @param base64 图片数据
+     * @return 图片类型
+     */
+    @NotNull
+    private static String getImageType(@NotNull String base64) {
+        if (base64.startsWith("data:image/png;base64,")) {
+            return "png";
+        } else if (base64.startsWith("data:image/jpg;base64,")) {
+            return "jpg";
+        } else if (base64.startsWith("data:image/jpeg;base64,")) {
+            return "jpeg";
+        } else {
+            return "png";
+        }
+    }
+
+    /**
+     * 单独获取图片 base64
+     * <hr/>
+     * 对图片进行内容拆分，拆分单独的base64出来进行解析操作
+     *
+     * @param base64 总体base64
+     * @return 返回单独的 base64
+     */
+    @Nullable
+    private static String extractImageData(@NotNull String base64) {
+        switch (getImageType(base64)) {
+            case "png" -> {
+                return base64.replace("data:image/png;base64,", "");
+            }
+            case "jpg" -> {
+                return base64.replace("data:image/jpg;base64,", "");
+            }
+            case "jpeg" -> {
+                return base64.replace("data:image/jpeg;base64,", "");
+            }
+            default -> {
+                return null;
+            }
+        }
+    }
+
     @NotNull
     @Override
     public ResponseEntity<BaseResponse> addReviewFromOrganize(long timestamp, @NotNull ReviewOrganizeVO reviewOrganizeVO, @NotNull HttpServletRequest request) {
@@ -60,33 +108,33 @@ public class ReviewServiceImpl implements ReviewService {
                 Base64 base64 = new Base64();
                 try {
                     // 对图片数据进行 Base64 解码重命名保存在指定位置
-                    byte[] license = base64.decode(reviewOrganizeVO.getLicense());
-                    OutputStream licenseOutput = new FileOutputStream("upload/license/" + getUserDO.getUuid() + "_organize.jpg");
+                    OutputStream licenseOutput = new FileOutputStream("upload/license/" + getUserDO.getUuid() + "_organize." + getImageType(reviewOrganizeVO.getLicense()));
+                    byte[] license = base64.decode(extractImageData(reviewOrganizeVO.getLicense()));
                     licenseOutput.write(license);
                     licenseOutput.flush();
                     licenseOutput.close();
                     // 对身份证数据进行 Base64 解码重命名保存在指定位置
-                    byte[] idCardFront = base64.decode(reviewOrganizeVO.getLegalIdCardFront());
-                    OutputStream idCardFrontOutput = new FileOutputStream("upload/legal_id_card" + getUserDO.getUuid() + "_front.jpg");
+                    OutputStream idCardFrontOutput = new FileOutputStream("upload/legal_id_card/" + getUserDO.getUuid() + "_front." + getImageType(reviewOrganizeVO.getLegalIdCardFront()));
+                    byte[] idCardFront = base64.decode(extractImageData(reviewOrganizeVO.getLegalIdCardFront()));
                     idCardFrontOutput.write(idCardFront);
                     idCardFrontOutput.flush();
                     idCardFrontOutput.close();
                     // 对身份证数据进行 Base64 解码重命名保存在指定位置
-                    byte[] idCardBack = base64.decode(reviewOrganizeVO.getLegalIdCardBack());
-                    OutputStream idCardBackOutput = new FileOutputStream("output/legal_id_card" + getUserDO.getUuid() + "_back.jpg");
+                    OutputStream idCardBackOutput = new FileOutputStream("upload/legal_id_card/" + getUserDO.getUuid() + "_back." + getImageType(reviewOrganizeVO.getLegalIdCardBack()));
+                    byte[] idCardBack = base64.decode(extractImageData(reviewOrganizeVO.getLegalIdCardBack()));
                     idCardBackOutput.write(idCardBack);
                     idCardBackOutput.flush();
                     idCardBackOutput.close();
                 } catch (Exception e) {
                     log.error("[Service] 文件处理错误: {}", e.getMessage(), e);
                     // 删除文件（处理无关数据）
-                    if (!new File("upload/license/" + getUserDO.getUuid() + "_organize.jpg").delete()) {
+                    if (!new File("upload/license/" + getUserDO.getUuid() + "_organize." + getImageType(reviewOrganizeVO.getLicense())).delete()) {
                         log.debug("[Service] License 资料不存在");
                     }
-                    if (!new File("upload/legal_id_card" + getUserDO.getUuid() + "_front.jpg").delete()) {
+                    if (!new File("upload/legal_id_card/" + getUserDO.getUuid() + "_front." + getImageType(reviewOrganizeVO.getLegalIdCardFront())).delete()) {
                         log.debug("[Service] IdCardFront 资料不存在");
                     }
-                    if (!new File("output/legal_id_card" + getUserDO.getUuid() + "_back.jpg").delete()) {
+                    if (!new File("output/legal_id_card/" + getUserDO.getUuid() + "_back.jpg" + getImageType(reviewOrganizeVO.getLegalIdCardBack())).delete()) {
                         log.debug("[Service] IdCardBack 资料不存在");
                     }
                     return ResultUtil.error(timestamp, "文件处理错误", ErrorCode.SERVER_INTERNAL_ERROR);
@@ -97,14 +145,14 @@ public class ReviewServiceImpl implements ReviewService {
                         .setAccountUuid(getUserDO.getUuid())
                         .setType((short) 0)
                         .setOrganizeName(reviewOrganizeVO.getOrganizeName())
-                        .setOrganizeLicenseUrl(getUserDO.getUuid() + "_organize.jpg")
+                        .setOrganizeLicenseUrl(getUserDO.getUuid() + "_organize." + getImageType(reviewOrganizeVO.getLicense()))
                         .setOrganizeCreditCode(reviewOrganizeVO.getCreditCode())
                         .setOrganizeRegisteredCapital(reviewOrganizeVO.getRegisteredCapital())
                         .setOrganizeEstablishmentDate(reviewOrganizeVO.getEstablishmentDate())
                         .setLegalRepresentativeName(reviewOrganizeVO.getLegalRepresentativeName())
                         .setLegalRepresentativeId(reviewOrganizeVO.getLegalRepresentativeId())
-                        .setLegalIdCardFrontUrl(getUserDO.getUuid() + "_front.jpg")
-                        .setLegalIdCardBackUrl(getUserDO.getUuid() + "_back.jpg")
+                        .setLegalIdCardFrontUrl(getUserDO.getUuid() + "_front." + getImageType(reviewOrganizeVO.getLegalIdCardFront()))
+                        .setLegalIdCardBackUrl(getUserDO.getUuid() + "_back." + getImageType(reviewOrganizeVO.getLegalIdCardBack()))
                         .setRemarks(reviewOrganizeVO.getRemark());
                 reviewDAO.setReviewOrganizeApprove(newApproveOrganizeDO);
                 return ResultUtil.success(timestamp, "申请已提交");
@@ -128,33 +176,33 @@ public class ReviewServiceImpl implements ReviewService {
                 Base64 base64 = new Base64();
                 try {
                     // 对图片数据进行 Base64 解码重命名保存在指定位置
-                    byte[] license = base64.decode(reviewAdminVO.getOrganizeAuthorize());
-                    OutputStream licenseOutput = new FileOutputStream("upload/license/" + getUserDO.getUuid() + "_authorize.jpg");
+                    byte[] license = base64.decode(extractImageData(reviewAdminVO.getOrganizeAuthorize()));
+                    OutputStream licenseOutput = new FileOutputStream("upload/license/" + getUserDO.getUuid() + "_authorize." + getImageType(reviewAdminVO.getOrganizeAuthorize()));
                     licenseOutput.write(license);
                     licenseOutput.flush();
                     licenseOutput.close();
                     // 对身份证数据进行 Base64 解码重命名保存在指定位置
-                    byte[] idCardFront = base64.decode(reviewAdminVO.getLegalIdCardFront());
-                    OutputStream idCardFrontOutput = new FileOutputStream("upload/legal_id_card" + getUserDO.getUuid() + "_front.jpg");
+                    byte[] idCardFront = base64.decode(extractImageData(reviewAdminVO.getLegalIdCardFront()));
+                    OutputStream idCardFrontOutput = new FileOutputStream("upload/legal_id_card/" + getUserDO.getUuid() + "_front." + getImageType(reviewAdminVO.getLegalIdCardFront()));
                     idCardFrontOutput.write(idCardFront);
                     idCardFrontOutput.flush();
                     idCardFrontOutput.close();
                     // 对身份证数据进行 Base64 解码重命名保存在指定位置
-                    byte[] idCardBack = base64.decode(reviewAdminVO.getLegalIdCardBack());
-                    OutputStream idCardBackOutput = new FileOutputStream("output/legal_id_card" + getUserDO.getUuid() + "_back.jpg");
+                    byte[] idCardBack = base64.decode(extractImageData(reviewAdminVO.getLegalIdCardBack()));
+                    OutputStream idCardBackOutput = new FileOutputStream("upload/legal_id_card/" + getUserDO.getUuid() + "_back." + getImageType(reviewAdminVO.getLegalIdCardBack()));
                     idCardBackOutput.write(idCardBack);
                     idCardBackOutput.flush();
                     idCardBackOutput.close();
                 } catch (Exception e) {
                     log.error("[Service] 文件处理错误: {}", e.getMessage(), e);
                     // 删除文件（处理无关数据）
-                    if (!new File("upload/license/" + getUserDO.getUuid() + "_authorize.jpg").delete()) {
+                    if (!new File("upload/license/" + getUserDO.getUuid() + "_authorize." + getImageType(reviewAdminVO.getOrganizeAuthorize())).delete()) {
                         log.debug("[Service] License 资料不存在");
                     }
-                    if (!new File("upload/legal_id_card" + getUserDO.getUuid() + "_front.jpg").delete()) {
+                    if (!new File("upload/legal_id_card/" + getUserDO.getUuid() + "_front." + getImageType(reviewAdminVO.getLegalIdCardFront())).delete()) {
                         log.debug("[Service] IdCardFront 资料不存在");
                     }
-                    if (!new File("output/legal_id_card" + getUserDO.getUuid() + "_back.jpg").delete()) {
+                    if (!new File("upload/legal_id_card/" + getUserDO.getUuid() + "_back.jpg" + getImageType(reviewAdminVO.getLegalIdCardBack())).delete()) {
                         log.debug("[Service] IdCardBack 资料不存在");
                     }
                     return ResultUtil.error(timestamp, "文件处理错误", ErrorCode.SERVER_INTERNAL_ERROR);
@@ -169,11 +217,11 @@ public class ReviewServiceImpl implements ReviewService {
                     .setAccountUuid(getUserDO.getUuid())
                     .setAccountType(reviewAdminVO.getType())
                     .setOrganizeName(reviewAdminVO.getOrganizeName())
-                    .setOrganizeAuthorizeUrl(getUserDO.getUuid() + "_authorize.jpg")
+                    .setOrganizeAuthorizeUrl(getUserDO.getUuid() + "_authorize." + getImageType(reviewAdminVO.getOrganizeAuthorize()))
                     .setLegalRepresentativeName(reviewAdminVO.getLegalRepresentativeName())
                     .setLegalRepresentativeId(reviewAdminVO.getLegalRepresentativeId())
-                    .setLegalIdCardFrontUrl(getUserDO.getUuid() + "_front.jpg")
-                    .setLegalIdCardBackUrl(getUserDO.getUuid() + "_back.jpg")
+                    .setLegalIdCardFrontUrl(getUserDO.getUuid() + "_front." + getImageType(reviewAdminVO.getLegalIdCardFront()))
+                    .setLegalIdCardBackUrl(getUserDO.getUuid() + "_back." + getImageType(reviewAdminVO.getLegalIdCardBack()))
                     .setRemarks(reviewAdminVO.getRemarks());
             try {
                 reviewDAO.setReviewAdminApprove(newApproveManageDO);
@@ -251,36 +299,36 @@ public class ReviewServiceImpl implements ReviewService {
                         Base64 base64 = new Base64();
                         try {
                             // 对图片数据进行 Base64 解码重命名保存在指定位置
-                            byte[] license = base64.decode(reviewOrganizeVO.getLicense());
-                            OutputStream licenseOutput = new FileOutputStream("upload/license/" + getUserDO.getUuid() + "_organize.jpg");
-                            new File("upload/license/" + getUserDO.getUuid() + "_organize.jpg").delete();
+                            byte[] license = base64.decode(extractImageData(reviewOrganizeVO.getLicense()));
+                            OutputStream licenseOutput = new FileOutputStream("upload/license/" + getUserDO.getUuid() + "_organize." + getImageType(reviewOrganizeVO.getLicense()));
+                            new File("upload/license/" + getUserDO.getUuid() + "_organize." + getImageType(reviewOrganizeVO.getLicense())).delete();
                             licenseOutput.write(license);
                             licenseOutput.flush();
                             licenseOutput.close();
                             // 对身份证数据进行 Base64 解码重命名保存在指定位置
-                            byte[] idCardFront = base64.decode(reviewOrganizeVO.getLegalIdCardFront());
-                            OutputStream idCardFrontOutput = new FileOutputStream("upload/legal_id_card" + getUserDO.getUuid() + "_front.jpg");
-                            new File("upload/legal_id_card" + getUserDO.getUuid() + "_front.jpg").delete();
+                            byte[] idCardFront = base64.decode(extractImageData(reviewOrganizeVO.getLegalIdCardFront()));
+                            OutputStream idCardFrontOutput = new FileOutputStream("upload/legal_id_card/" + getUserDO.getUuid() + "_front." + getImageType(reviewOrganizeVO.getLegalIdCardFront()));
+                            new File("upload/legal_id_card" + getUserDO.getUuid() + "_front." + getImageType(reviewOrganizeVO.getLegalIdCardFront())).delete();
                             idCardFrontOutput.write(idCardFront);
                             idCardFrontOutput.flush();
                             idCardFrontOutput.close();
                             // 对身份证数据进行 Base64 解码重命名保存在指定位置
-                            byte[] idCardBack = base64.decode(reviewOrganizeVO.getLegalIdCardBack());
-                            OutputStream idCardBackOutput = new FileOutputStream("output/legal_id_card" + getUserDO.getUuid() + "_back.jpg");
-                            new File("output/legal_id_card" + getUserDO.getUuid() + "_back.jpg").delete();
+                            byte[] idCardBack = base64.decode(extractImageData(reviewOrganizeVO.getLegalIdCardBack()));
+                            OutputStream idCardBackOutput = new FileOutputStream("upload/legal_id_card/" + getUserDO.getUuid() + "_back." + getImageType(reviewOrganizeVO.getLegalIdCardBack()));
+                            new File("upload/legal_id_card" + getUserDO.getUuid() + "_back." + getImageType(reviewOrganizeVO.getLegalIdCardBack())).delete();
                             idCardBackOutput.write(idCardBack);
                             idCardBackOutput.flush();
                             idCardBackOutput.close();
                         } catch (Exception e) {
                             log.error("[Service] 文件处理错误: {}", e.getMessage(), e);
                             // 删除文件（处理无关数据）
-                            if (!new File("upload/license/" + getUserDO.getUuid() + "_organize.jpg").delete()) {
+                            if (!new File("upload/license/" + getUserDO.getUuid() + "_organize." + getImageType(reviewOrganizeVO.getLicense())).delete()) {
                                 log.debug("[Service] License 资料不存在");
                             }
-                            if (!new File("upload/legal_id_card" + getUserDO.getUuid() + "_front.jpg").delete()) {
+                            if (!new File("upload/legal_id_card/" + getUserDO.getUuid() + "_front." + getImageType(reviewOrganizeVO.getLegalIdCardFront())).delete()) {
                                 log.debug("[Service] IdCardFront 资料不存在");
                             }
-                            if (!new File("output/legal_id_card" + getUserDO.getUuid() + "_back.jpg").delete()) {
+                            if (!new File("upload/legal_id_card/" + getUserDO.getUuid() + "_back." + getImageType(reviewOrganizeVO.getLegalIdCardBack())).delete()) {
                                 log.debug("[Service] IdCardBack 资料不存在");
                             }
                             return ResultUtil.error(timestamp, "文件处理错误", ErrorCode.SERVER_INTERNAL_ERROR);
@@ -290,14 +338,14 @@ public class ReviewServiceImpl implements ReviewService {
                                 .setAccountUuid(getUserDO.getUuid())
                                 .setType((short) 0)
                                 .setOrganizeName(reviewOrganizeVO.getOrganizeName())
-                                .setOrganizeLicenseUrl(getUserDO.getUuid() + "_organize.jpg")
+                                .setOrganizeLicenseUrl(getUserDO.getUuid() + "_organize." + getImageType(reviewOrganizeVO.getLicense()))
                                 .setOrganizeCreditCode(reviewOrganizeVO.getCreditCode())
                                 .setOrganizeRegisteredCapital(reviewOrganizeVO.getRegisteredCapital())
                                 .setOrganizeEstablishmentDate(reviewOrganizeVO.getEstablishmentDate())
                                 .setLegalRepresentativeName(reviewOrganizeVO.getLegalRepresentativeName())
                                 .setLegalRepresentativeId(reviewOrganizeVO.getLegalRepresentativeId())
-                                .setLegalIdCardFrontUrl(getUserDO.getUuid() + "_front.jpg")
-                                .setLegalIdCardBackUrl(getUserDO.getUuid() + "_back.jpg")
+                                .setLegalIdCardFrontUrl(getUserDO.getUuid() + "_front." + getImageType(reviewOrganizeVO.getLegalIdCardFront()))
+                                .setLegalIdCardBackUrl(getUserDO.getUuid() + "_back." + getImageType(reviewOrganizeVO.getLegalIdCardBack()))
                                 .setRemarks(reviewOrganizeVO.getRemark())
                                 .setApplyTime(new Date(System.currentTimeMillis()))
                                 .setUpdatedAt(new Timestamp(System.currentTimeMillis()))
@@ -337,36 +385,36 @@ public class ReviewServiceImpl implements ReviewService {
                         Base64 base64 = new Base64();
                         try {
                             // 对图片数据进行 Base64 解码重命名保存在指定位置
-                            byte[] license = base64.decode(reviewAdminVO.getOrganizeAuthorize());
-                            OutputStream licenseOutput = new FileOutputStream("upload/license/" + getUserDO.getUuid() + "_authorize.jpg");
-                            new File("upload/license/" + getUserDO.getUuid() + "_authorize.jpg").delete();
+                            byte[] license = base64.decode(extractImageData(reviewAdminVO.getOrganizeAuthorize()));
+                            OutputStream licenseOutput = new FileOutputStream("upload/license/" + getUserDO.getUuid() + "_authorize." + getImageType(reviewAdminVO.getOrganizeAuthorize()));
+                            new File("upload/license/" + getUserDO.getUuid() + "_authorize." + getImageType(reviewAdminVO.getOrganizeAuthorize())).delete();
                             licenseOutput.write(license);
                             licenseOutput.flush();
                             licenseOutput.close();
                             // 对身份证数据进行 Base64 解码重命名保存在指定位置
-                            byte[] idCardFront = base64.decode(reviewAdminVO.getLegalIdCardFront());
-                            OutputStream idCardFrontOutput = new FileOutputStream("upload/legal_id_card" + getUserDO.getUuid() + "_front.jpg");
-                            new File("upload/legal_id_card" + getUserDO.getUuid() + "_front.jpg").delete();
+                            byte[] idCardFront = base64.decode(extractImageData(reviewAdminVO.getLegalIdCardFront()));
+                            OutputStream idCardFrontOutput = new FileOutputStream("upload/legal_id_card/" + getUserDO.getUuid() + "_front." + getImageType(reviewAdminVO.getLegalIdCardFront()));
+                            new File("upload/legal_id_card" + getUserDO.getUuid() + "_front." + getImageType(reviewAdminVO.getLegalIdCardFront())).delete();
                             idCardFrontOutput.write(idCardFront);
                             idCardFrontOutput.flush();
                             idCardFrontOutput.close();
                             // 对身份证数据进行 Base64 解码重命名保存在指定位置
-                            byte[] idCardBack = base64.decode(reviewAdminVO.getLegalIdCardBack());
-                            OutputStream idCardBackOutput = new FileOutputStream("output/legal_id_card" + getUserDO.getUuid() + "_back.jpg");
-                            new File("output/legal_id_card" + getUserDO.getUuid() + "_back.jpg").delete();
+                            byte[] idCardBack = base64.decode(extractImageData(reviewAdminVO.getLegalIdCardBack()));
+                            OutputStream idCardBackOutput = new FileOutputStream("upload/legal_id_card/" + getUserDO.getUuid() + "_back." + getImageType(reviewAdminVO.getLegalIdCardBack()));
+                            new File("output/legal_id_card" + getUserDO.getUuid() + "_back." + getImageType(reviewAdminVO.getLegalIdCardBack())).delete();
                             idCardBackOutput.write(idCardBack);
                             idCardBackOutput.flush();
                             idCardBackOutput.close();
                         } catch (Exception e) {
                             log.error("[Service] 文件处理错误: {}", e.getMessage(), e);
                             // 删除文件（处理无关数据）
-                            if (!new File("upload/license/" + getUserDO.getUuid() + "_authorize.jpg").delete()) {
+                            if (!new File("upload/license/" + getUserDO.getUuid() + "_authorize." + getImageType(reviewAdminVO.getOrganizeAuthorize())).delete()) {
                                 log.debug("[Service] License 资料不存在");
                             }
-                            if (!new File("upload/legal_id_card" + getUserDO.getUuid() + "_front.jpg").delete()) {
+                            if (!new File("upload/legal_id_card/" + getUserDO.getUuid() + "_front." + getImageType(reviewAdminVO.getLegalIdCardFront())).delete()) {
                                 log.debug("[Service] IdCardFront 资料不存在");
                             }
-                            if (!new File("output/legal_id_card" + getUserDO.getUuid() + "_back.jpg").delete()) {
+                            if (!new File("upload/legal_id_card/" + getUserDO.getUuid() + "_back." + getImageType(reviewAdminVO.getLegalIdCardBack())).delete()) {
                                 log.debug("[Service] IdCardBack 资料不存在");
                             }
                             return ResultUtil.error(timestamp, "文件处理错误", ErrorCode.SERVER_INTERNAL_ERROR);
@@ -376,11 +424,11 @@ public class ReviewServiceImpl implements ReviewService {
                                 .setAccountUuid(getUserDO.getUuid())
                                 .setAccountType(reviewAdminVO.getType())
                                 .setOrganizeName(reviewAdminVO.getOrganizeName())
-                                .setOrganizeAuthorizeUrl(getUserDO.getUuid() + "_authorize.jpg")
+                                .setOrganizeAuthorizeUrl(getUserDO.getUuid() + "_authorize." + getImageType(reviewAdminVO.getOrganizeAuthorize()))
                                 .setLegalRepresentativeName(reviewAdminVO.getLegalRepresentativeName())
                                 .setLegalRepresentativeId(reviewAdminVO.getLegalRepresentativeId())
-                                .setLegalIdCardFrontUrl(getUserDO.getUuid() + "_front.jpg")
-                                .setLegalIdCardBackUrl(getUserDO.getUuid() + "_back.jpg")
+                                .setLegalIdCardFrontUrl(getUserDO.getUuid() + "_front." + getImageType(reviewAdminVO.getLegalIdCardFront()))
+                                .setLegalIdCardBackUrl(getUserDO.getUuid() + "_back." + getImageType(reviewAdminVO.getLegalIdCardBack()))
                                 .setRemarks(reviewAdminVO.getRemarks())
                                 .setApplyTime(new Date(System.currentTimeMillis()))
                                 .setUpdatedAt(new Timestamp(System.currentTimeMillis()))
