@@ -18,7 +18,6 @@ import java.sql.Date;
 @Accessors(chain = true)
 public class BackReviewListVO {
     public BackUserVO account;
-    public Short type;
     public String organizeName;
     public String legalRepresentativeName;
     public Date applyTime;

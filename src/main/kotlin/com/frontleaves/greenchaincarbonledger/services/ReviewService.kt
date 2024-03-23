@@ -128,17 +128,11 @@ interface ReviewService {
      * 用于获取审核列表
      *
      * @param timestamp 时间戳
-     * @param page 页码
-     * @param limit 每页数量
-     * @param order 排序
      * @param request HttpServletRequest
      * @return ResponseEntity<BaseResponse>
      */
     fun getReviewList(
         timestamp: Long,
-        page: String,
-        limit: String,
-        order: String,
         request: HttpServletRequest
     ): ResponseEntity<BaseResponse>
 
