@@ -1,20 +1,18 @@
 package com.frontleaves.greenchaincarbonledger.controllers;
 
 import com.frontleaves.greenchaincarbonledger.annotations.CheckAccountPermission;
+import com.frontleaves.greenchaincarbonledger.models.voData.getData.CarbonConsumeVO;
+import com.frontleaves.greenchaincarbonledger.models.voData.getData.UserAddVO;
 import com.frontleaves.greenchaincarbonledger.services.CarbonService;
-import com.frontleaves.greenchaincarbonledger.utils.BaseResponse;
-import com.frontleaves.greenchaincarbonledger.utils.BusinessUtil;
-import com.frontleaves.greenchaincarbonledger.utils.ErrorCode;
-import com.frontleaves.greenchaincarbonledger.utils.ResultUtil;
+import com.frontleaves.greenchaincarbonledger.utils.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
 
 import java.text.SimpleDateFormat;
 
@@ -146,5 +144,20 @@ public class CarbonController {
         log.info("[Controller] 请求 getCarbonAccounting 接口");
         long timestamp = System.currentTimeMillis();
         return carbonService.getCarbonAccounting(timestamp, request, limit, page, order);
+    }
+    @PostMapping("/report/create")
+    public ResponseEntity<BaseResponse> createCarbonReport(
+            @RequestBody @Validated CarbonConsumeVO carbonConsumeVO ,
+            @NotNull BindingResult bindingResult,
+            HttpServletRequest request
+    ){
+        log.info("[Controller] 请求 creatCarbonReport 接口");
+        long timestamp = System.currentTimeMillis();
+        // 对请求参数进行校验
+        if (bindingResult.hasErrors()) {
+            return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR, ProcessingUtil.getValidatedErrorList(bindingResult));
+        }
+        //返回业务操作
+        return carbonService.createCarbonReport(timestamp,request,carbonConsumeVO);
     }
 }

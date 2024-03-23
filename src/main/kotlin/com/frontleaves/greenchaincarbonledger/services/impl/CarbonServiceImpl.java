@@ -5,6 +5,7 @@ import com.frontleaves.greenchaincarbonledger.dao.CarbonDAO;
 import com.frontleaves.greenchaincarbonledger.dao.UserDAO;
 import com.frontleaves.greenchaincarbonledger.mappers.CarbonMapper;
 import com.frontleaves.greenchaincarbonledger.models.doData.*;
+import com.frontleaves.greenchaincarbonledger.models.voData.getData.CarbonConsumeVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.EditTradeVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.TradeReleaseVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.returnData.BackCarbonAccountingVO;
@@ -219,5 +220,11 @@ public class CarbonServiceImpl implements CarbonService {
         } else {
             return ResultUtil.error(timestamp, ErrorCode.EDIT_TRADE_FAILURE);
         }
+    }
+
+    @NotNull
+    @Override
+    public ResponseEntity<BaseResponse> createCarbonReport(long timestamp, @NotNull HttpServletRequest request, @NotNull CarbonConsumeVO carbonConsumeVO) {
+        return null;
     }
 }
