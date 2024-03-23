@@ -84,6 +84,20 @@ open class StartupConfiguration(
     }
 
     @Bean
+    @Order(6)
+    open fun checkCarbonAccountingRelatedData(): CommandLineRunner {
+        return CommandLineRunner {
+            log.info("[Preparation] 检查碳核算相关数据表信息是否完整")
+            // 准备碳排放类型表
+            prepareData.sqlCarbonItemType()
+            // 准备过程因子
+            prepareData.sqlProcessFactor()
+            // 准备其他因子
+            prepareData.sqlOtherFactor()
+        }
+    }
+
+    @Bean
     @Order(1000)
     open fun endPreparation(): CommandLineRunner {
         return CommandLineRunner {
