@@ -260,7 +260,7 @@ class PrepareData(
                     "INSERT INTO fy_process_emission_factor (name, display_name, factor) VALUES (?, ?, ?)",
                     it["name"]!!,
                     it["displayName"]!!,
-                    it["factor"]!!
+                    it["factor"]!!.toDouble()
                 )
             }
         }
@@ -277,7 +277,7 @@ class PrepareData(
                     "INSERT INTO fy_other_emission_factor (name, display_name, factor, unit) VALUES (?, ?, ?, ?)",
                     it["name"]!!,
                     it["displayName"]!!,
-                    it["factor"]!!,
+                    it["factor"]!!.toDouble(),
                     it["unit"]!!
                 )
             }

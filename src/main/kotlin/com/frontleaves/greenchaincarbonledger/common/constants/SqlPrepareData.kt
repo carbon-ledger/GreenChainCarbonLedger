@@ -344,7 +344,7 @@ object SqlPrepareData {
         it.add(HashMap<String, String>().apply {
             put("name", "electricity")
             put("displayName", "电力")
-            put("factor", "use the latest national value") // Replace with the actual value once known.
+            put("factor", "0.11") // Replace with the actual value once known.
             put("unit", "tCO2/MWh")
         })
         it.add(HashMap<String, String>().apply {
