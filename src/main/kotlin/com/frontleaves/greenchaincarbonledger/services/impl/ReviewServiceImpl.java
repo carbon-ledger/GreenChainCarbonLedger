@@ -611,4 +611,77 @@ public class ReviewServiceImpl implements ReviewService {
             return ResultUtil.error(timestamp, ErrorCode.USER_NOT_EXISTED);
         }
     }
+
+    @NotNull
+    @Override
+    public ResponseEntity<BaseResponse> getReviewInfo(long timestamp, @NotNull String id, @NotNull String type, @NotNull HttpServletRequest request) {
+        // 获取类型
+        if ("true".equals(type)) {
+            // 组织账户审核
+            ApproveOrganizeDO getApproveOrganizeDO = reviewDAO.getApproveOrganizeById(id);
+            if (getApproveOrganizeDO != null) {
+                UserDO getOrganizeUserDO = userDAO.getUserByUuid(getApproveOrganizeDO.getAccountUuid());
+                BackReviewOrganizeVO backReviewOrganizeVO = new BackReviewOrganizeVO();
+                BackUserVO backUserVO = new BackUserVO();
+                backUserVO
+                        .setUuid(getApproveOrganizeDO.getAccountUuid())
+                        .setUserName(getOrganizeUserDO.getUserName())
+                        .setNickName(getOrganizeUserDO.getNickName())
+                        .setRealName(getOrganizeUserDO.getRealName())
+                        .setEmail(getOrganizeUserDO.getEmail())
+                        .setPhone(getOrganizeUserDO.getPhone())
+                        .setAvatar(getOrganizeUserDO.getAvatar());
+                backReviewOrganizeVO
+                        .setAccount(backUserVO)
+                        .setType(getApproveOrganizeDO.getType())
+                        .setOrganizeName(getApproveOrganizeDO.getOrganizeName())
+                        .setOrganizeCreditCode(getApproveOrganizeDO.getOrganizeCreditCode())
+                        .setOrganizeRegisteredCapital(getApproveOrganizeDO.getOrganizeRegisteredCapital())
+                        .setOrganizeEstablishmentDate(getApproveOrganizeDO.getOrganizeEstablishmentDate())
+                        .setOrganizeLicenseUrl(getApproveOrganizeDO.getOrganizeLicenseUrl())
+                        .setLegalRepresentativeName(getApproveOrganizeDO.getLegalRepresentativeName())
+                        .setLegalRepresentativeId(getApproveOrganizeDO.getLegalRepresentativeId())
+                        .setLegalIdCardFrontUrl(getApproveOrganizeDO.getLegalIdCardFrontUrl())
+                        .setLegalIdCardBackUrl(getApproveOrganizeDO.getLegalIdCardBackUrl())
+                        .setApplyTime(getApproveOrganizeDO.getApplyTime())
+                        .setUpdatedAt(getApproveOrganizeDO.getUpdatedAt())
+                        .setRemarks(getApproveOrganizeDO.getRemarks());
+                return ResultUtil.success(timestamp, backReviewOrganizeVO);
+            } else {
+                return ResultUtil.error(timestamp, "审核内容不存在", ErrorCode.REVIEW_ERROR);
+            }
+        } else {
+            // 监管账户审核
+            ApproveManageDO getApproveAdminDO = reviewDAO.getApproveAdminById(id);
+            if (getApproveAdminDO != null) {
+                UserDO getAdminUserDO = userDAO.getUserByUuid(getApproveAdminDO.getAccountUuid());
+                BackReviewAdminVO backReviewAdminVO = new BackReviewAdminVO();
+                BackUserVO backUserVO = new BackUserVO();
+                backUserVO
+                        .setUuid(getApproveAdminDO.getAccountUuid())
+                        .setUserName(getAdminUserDO.getUserName())
+                        .setNickName(getAdminUserDO.getNickName())
+                        .setRealName(getAdminUserDO.getRealName())
+                        .setEmail(getAdminUserDO.getEmail())
+                        .setPhone(getAdminUserDO.getPhone())
+                        .setAvatar(getAdminUserDO.getAvatar());
+                backReviewAdminVO
+                        .setAccount(backUserVO)
+                        .setAccountType(getApproveAdminDO.getAccountType())
+                        .setOrganizeName(getApproveAdminDO.getOrganizeName())
+                        .setOrganizeAuthorizeUrl(getApproveAdminDO.getOrganizeAuthorizeUrl())
+                        .setLegalRepresentativeName(getApproveAdminDO.getLegalRepresentativeName())
+                        .setLegalRepresentativeId(getApproveAdminDO.getLegalRepresentativeId())
+                        .setLegalIdCardFrontUrl(getApproveAdminDO.getLegalIdCardFrontUrl())
+                        .setLegalIdCardBackUrl(getApproveAdminDO.getLegalIdCardBackUrl())
+                        .setCertificationStatus(getApproveAdminDO.getCertificationStatus())
+                        .setApplyTime(getApproveAdminDO.getApplyTime())
+                        .setUpdatedAt(getApproveAdminDO.getUpdatedAt())
+                        .setRemarks(getApproveAdminDO.getRemarks());
+                return ResultUtil.success(timestamp, getApproveAdminDO);
+            } else {
+                return ResultUtil.error(timestamp, "审核内容不存在", ErrorCode.REVIEW_ERROR);
+            }
+        }
+    }
 }

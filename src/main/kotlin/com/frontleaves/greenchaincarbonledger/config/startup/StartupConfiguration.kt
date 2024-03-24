@@ -98,6 +98,16 @@ open class StartupConfiguration(
     }
 
     @Bean
+    @Order(7)
+    open fun checkCarbonTypeData(): CommandLineRunner {
+        return CommandLineRunner {
+            log.info("[Preparation] 检查碳排放采用生产类型是否完整")
+            // 准备碳排放类型数据
+            prepareData.sqlCarbonType()
+        }
+    }
+
+    @Bean
     @Order(1000)
     open fun endPreparation(): CommandLineRunner {
         return CommandLineRunner {

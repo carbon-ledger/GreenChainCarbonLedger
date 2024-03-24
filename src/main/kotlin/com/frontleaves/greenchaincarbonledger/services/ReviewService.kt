@@ -166,4 +166,22 @@ interface ReviewService {
         timestamp: Long,
         request: HttpServletRequest
     ): ResponseEntity<BaseResponse>
+
+    /**
+     * getReviewInfo
+     *
+     * 用于获取审核信息
+     *
+     * @param timestamp 时间戳
+     * @param id 审核ID
+     * @param type 审核类型
+     * @param request HttpServletRequest
+     * @return ResponseEntity<BaseResponse>
+     */
+    fun getReviewInfo(
+        timestamp: Long,
+        id: String,
+        type: String,
+        request: HttpServletRequest
+    ): ResponseEntity<BaseResponse>
 }

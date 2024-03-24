@@ -27,5 +27,6 @@ public class BackReviewAdminVO {
     public String legalIdCardBackUrl;
     public Short certificationStatus;
     public Timestamp applyTime;
+    public Timestamp updatedAt;
     public String remarks;
 }

@@ -270,4 +270,31 @@ public class ReviewController {
         // 业务逻辑
         return reviewService.getReviewReport(timestamp, request);
     }
+
+    /**
+     * 获取审核信息
+     * <hr/>
+     * 用于获取审核信息，需要组织账户权限
+     *
+     * @return ResponseEntity<BaseResponse>
+     */
+    @GetMapping("/check")
+    @CheckAccountPermission({"review:getReviewInfo"})
+    public ResponseEntity<BaseResponse> getReviewInfo(
+            @RequestParam String id,
+            @RequestParam String type,
+            @NotNull HttpServletRequest request
+    ) {
+        log.info("[Controller] 执行 getReviewInfo 方法");
+        long timestamp = System.currentTimeMillis();
+        // 参数检查
+        if (id == null || id.isBlank() || !id.matches("^[0-9]+$")) {
+            return ResultUtil.error(timestamp, "参数 id 错误", ErrorCode.PARAM_VARIABLE_ERROR);
+        }
+        if (!"true".equals(type) && !"false".equals(type)) {
+            return ResultUtil.error(timestamp, "参数 type 错误", ErrorCode.PARAM_VARIABLE_ERROR);
+        }
+        // 业务逻辑
+        return reviewService.getReviewInfo(timestamp, id, type, request);
+    }
 }

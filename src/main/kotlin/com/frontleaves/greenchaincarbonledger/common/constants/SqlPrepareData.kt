@@ -46,6 +46,7 @@ object SqlPrepareData {
         add(ArrayList(listOf("review:getList", "获取审核列表")))
         add(ArrayList(listOf("review:getReview", "获取审核信息")))
         add(ArrayList(listOf("review:getReport", "获取审核报告")))
+        add(ArrayList(listOf("review:getReviewInfo", "获取详细审核信息")))
     }
 
     /**
@@ -364,6 +365,17 @@ object SqlPrepareData {
             put("displayName", "甲醇")
             put("factor", "1.375")
             put("unit", "tCO2/t")
+        })
+    }
+
+    val SQL_CARBON_TYPE = ArrayList<HashMap<String,String>>().apply {
+        add(HashMap<String, String>().apply {
+            put("name", "steelProduction")
+            put("displayName", "中国钢铁生产企业温室气体排放")
+        })
+        add(HashMap<String, String>().apply {
+            put("name", "generateElectricity")
+            put("displayName", "中国发电企业温室气体排放")
         })
     }
 }
