@@ -29,8 +29,8 @@ public class ApproveManageDO {
     public String legalIdCardFrontUrl;
     public String legalIdCardBackUrl;
     public Short certificationStatus;
-    public Date applyTime;
-    public Date approveTime;
+    public Timestamp applyTime;
+    public Timestamp approveTime;
     public Timestamp updatedAt;
     public String remarks;
     public String approveUuid;

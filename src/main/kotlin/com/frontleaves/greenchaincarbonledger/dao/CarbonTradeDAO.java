@@ -15,5 +15,4 @@ import org.springframework.stereotype.Repository;
 public class CarbonTradeDAO {
     private final CarbonMapper carbonMapper;
 
-
 }

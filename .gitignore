@@ -36,3 +36,5 @@ build/
 /src/main/resources/application-dev.yml
 /logs/
 .DS_Store
+/jupyter/
+/upload/

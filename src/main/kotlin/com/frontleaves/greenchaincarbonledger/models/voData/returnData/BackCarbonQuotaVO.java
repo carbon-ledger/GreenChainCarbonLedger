@@ -22,7 +22,7 @@ public class BackCarbonQuotaVO {
     public double allocatedQuota;
     public double usedQuota;
     public String allocationDate;
-    public Boolean complianceStatus;
+    public boolean complianceStatus;
     public ArrayList<String> auditLog;
     public String createdAt;
     public String updatedAt;

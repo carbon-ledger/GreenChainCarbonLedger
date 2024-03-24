@@ -1,7 +1,8 @@
 package com.frontleaves.greenchaincarbonledger.controllers;
 
 import com.frontleaves.greenchaincarbonledger.annotations.CheckAccountPermission;
-import com.frontleaves.greenchaincarbonledger.models.voData.getData.CarbonAddQuotaVO;
+import com.frontleaves.greenchaincarbonledger.models.voData.getData.CarbonConsumeVO;
+import com.frontleaves.greenchaincarbonledger.models.voData.getData.UserAddVO;
 import com.frontleaves.greenchaincarbonledger.services.CarbonService;
 import com.frontleaves.greenchaincarbonledger.utils.*;
 import jakarta.servlet.http.HttpServletRequest;
@@ -174,5 +175,21 @@ public class CarbonController {
         } else {
             return carbonService.addOrganizeIdQuota(timestamp,request,organizeId,carbonAddQuotaVO);
         }
+    }
+
+    @PostMapping("/report/create")
+    public ResponseEntity<BaseResponse> createCarbonReport(
+            @RequestBody @Validated CarbonConsumeVO carbonConsumeVO ,
+            @NotNull BindingResult bindingResult,
+            HttpServletRequest request
+    ){
+        log.info("[Controller] 请求 creatCarbonReport 接口");
+        long timestamp = System.currentTimeMillis();
+        // 对请求参数进行校验
+        if (bindingResult.hasErrors()) {
+            return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR, ProcessingUtil.getValidatedErrorList(bindingResult));
+        }
+        //返回业务操作
+        return carbonService.createCarbonReport(timestamp,request,carbonConsumeVO);
     }
 }

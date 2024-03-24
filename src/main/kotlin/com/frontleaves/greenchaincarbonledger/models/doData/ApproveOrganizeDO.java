@@ -3,7 +3,6 @@ package com.frontleaves.greenchaincarbonledger.models.doData;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
-import java.sql.Date;
 import java.sql.Timestamp;
 
 /**
@@ -26,14 +25,14 @@ public class ApproveOrganizeDO {
     public String organizeLicenseUrl;
     public String organizeCreditCode;
     public String organizeRegisteredCapital;
-    public String organizeEstablishmentDate;
+    public Timestamp organizeEstablishmentDate;
     public String legalRepresentativeName;
     public String legalRepresentativeId;
     public String legalIdCardFrontUrl;
     public String legalIdCardBackUrl;
     public Short certificationStatus;
-    public Date applyTime;
-    public Date approveTime;
+    public Timestamp applyTime;
+    public Timestamp approveTime;
     public Timestamp updatedAt;
     public String remarks;
     public String approveUuid;

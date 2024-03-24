@@ -2,6 +2,12 @@ package com.frontleaves.greenchaincarbonledger.services.impl;
 
 import com.frontleaves.greenchaincarbonledger.dao.CarbonAccountingDAO;
 import com.frontleaves.greenchaincarbonledger.dao.CarbonDAO;
+import com.frontleaves.greenchaincarbonledger.dao.CarbonReportDAO;
+import com.frontleaves.greenchaincarbonledger.dao.UserDAO;
+import com.frontleaves.greenchaincarbonledger.mappers.CarbonMapper;
+import com.frontleaves.greenchaincarbonledger.mappers.CarbonReportMapper;
+import com.frontleaves.greenchaincarbonledger.models.doData.*;
+import com.frontleaves.greenchaincarbonledger.models.voData.getData.CarbonConsumeVO;
 import com.frontleaves.greenchaincarbonledger.dao.CarbonQuotaDAO;
 import com.frontleaves.greenchaincarbonledger.dao.UserDAO;
 import com.frontleaves.greenchaincarbonledger.mappers.CarbonMapper;
@@ -26,6 +32,10 @@ import org.jetbrains.annotations.Nullable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,9 +50,10 @@ public class CarbonServiceImpl implements CarbonService {
     private final CarbonDAO carbonDAO;
     private final UserDAO userDAO;
     private final CarbonAccountingDAO carbonAccountingDAO;
-    private final CarbonQuotaDAO carbonQuotaDAO;
     private final CarbonMapper carbonMapper;
     private final Gson gson;
+    private final CarbonReportDAO carbonReportDAO;
+    private final CarbonQuotaDAO carbonQuotaDAO;
 
     @NotNull
     @Override
@@ -224,6 +235,31 @@ public class CarbonServiceImpl implements CarbonService {
         } else {
             return ResultUtil.error(timestamp, ErrorCode.EDIT_TRADE_FAILURE);
         }
+    }
+
+    @NotNull
+    @Override
+    public ResponseEntity<BaseResponse> createCarbonReport(long timestamp, @NotNull HttpServletRequest request, @NotNull CarbonConsumeVO carbonConsumeVO) {
+        //获取时间
+        SimpleDateFormat inputDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat outputDateFormat = new SimpleDateFormat("yyyyMMdd");
+        Date startDate;
+        Date endDate;
+        try {
+            startDate = inputDateFormat.parse(carbonConsumeVO.getStartTime());
+            endDate = inputDateFormat.parse(carbonConsumeVO.getEndTime());
+        } catch (ParseException e) {
+            throw new RuntimeException("日期解析错误：" + e.getMessage());
+        }
+        String formattedStartDate = outputDateFormat.format(startDate);
+        String formattedEndDate = outputDateFormat.format(endDate);
+        String formattedDateRange = formattedStartDate + "-" + formattedEndDate;
+        //取出报告类型(通过type)
+        //进行数据库初始化碳核算报告表
+        //解析materials
+        String materialsJson = carbonConsumeVO.getMaterials();
+        MaterialsDO materialsDO = gson.fromJson(materialsJson, MaterialsDO.class);
+        return ResultUtil.success(timestamp);
     }
 
     @NotNull

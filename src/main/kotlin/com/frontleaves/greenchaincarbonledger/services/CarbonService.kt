@@ -1,5 +1,6 @@
 package com.frontleaves.greenchaincarbonledger.services
 
+import com.frontleaves.greenchaincarbonledger.models.voData.getData.CarbonConsumeVO
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.CarbonAddQuotaVO
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.EditTradeVO
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.TradeReleaseVO
@@ -71,6 +72,20 @@ interface CarbonService {
         editTradeVO: EditTradeVO,
         id: String
     ): ResponseEntity<BaseResponse>
+
+    /**
+     * 创建碳核算报告
+     * @param timestamp-时间戳
+     * @param request-请求体
+     * @param carbonConsumeVO-创建报告所需要的信息体
+     * @return 是否完成报告
+     */
+    fun createCarbonReport(
+        timestamp: Long,
+        request: HttpServletRequest,
+        carbonConsumeVO: CarbonConsumeVO
+    ): ResponseEntity<BaseResponse>
+
     /**
      * 为组织添加配额
      * @param timestamp-时间戳

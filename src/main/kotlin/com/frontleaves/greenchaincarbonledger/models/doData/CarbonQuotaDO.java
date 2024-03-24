@@ -1,6 +1,8 @@
 package com.frontleaves.greenchaincarbonledger.models.doData;
 
 import lombok.Data;
+
+import java.util.ArrayList;
 import lombok.experimental.Accessors;
 
 
@@ -22,8 +24,8 @@ public class CarbonQuotaDO {
     public double allocatedQuota;
     public double usedQuota;
     public String allocationDate;
-    public Boolean complianceStatus;
-    public String auditLog;
+    public boolean complianceStatus;
+    public ArrayList<String> auditLog;
     public String createdAt;
     public String updatedAt;
 }
