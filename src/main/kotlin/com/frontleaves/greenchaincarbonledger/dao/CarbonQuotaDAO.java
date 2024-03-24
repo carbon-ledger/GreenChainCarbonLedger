@@ -53,4 +53,19 @@ public class CarbonQuotaDAO {
         log.info("/t Mysql 插入");
         return carbonQuotaMapper.createCarbonQuota(carbonQuotaDO);
     }
+
+    /**
+     * 为组织修改碳配额
+     * @param uuid-组织uuid
+     * @param year-年份
+     * @param totalQuota-配额总
+     * @param status-合规状态
+     * @param auditLog-审计日志
+     * @return 是否完成
+     */
+    public Boolean editCarbonQuota(String uuid,Integer year,Double totalQuota,boolean status,String auditLog){
+        log.info("[DAO] 执行 editCarbonQuota 操作");
+        log.info("/t Mysql更新");
+        return carbonQuotaMapper.editCarbonQuota(uuid, year, totalQuota, status, auditLog);
+    }
 }

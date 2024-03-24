@@ -192,4 +192,26 @@ public class CarbonController {
         //返回业务操作
         return carbonService.createCarbonReport(timestamp, request, carbonConsumeVO);
     }
+
+    @PatchMapping("/edit/{organizeId}")
+    @CheckAccountPermission("{Carbon:editCarbonQuota}")
+    public ResponseEntity<BaseResponse> editCarbonQuota(
+            @RequestBody @Validated CarbonAddQuotaVO carbonAddQuotaVO,
+            @NotNull BindingResult bindingResult,
+            @PathVariable String organizeId,
+            HttpServletRequest request
+    ) {
+        log.info("[Controller] 请求  editCarbonQuota 接口 ");
+        long timestamp = System.currentTimeMillis();
+        // 对请求参数进行校验
+        if (bindingResult.hasErrors()) {
+            return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR, ProcessingUtil.getValidatedErrorList(bindingResult));
+        }
+        if (organizeId.isEmpty()){
+            return ResultUtil.error(timestamp,ErrorCode.PATH_VARIABLE_ERROR);
+        }else {
+            //进入业务操作
+            return carbonService.editCarbonQuota(timestamp,request,organizeId,carbonAddQuotaVO);
+        }
+    }
 }

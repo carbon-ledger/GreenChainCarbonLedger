@@ -102,4 +102,20 @@ interface CarbonService {
     ): ResponseEntity<BaseResponse>
 
 
+
+    /**
+     * 为组织修改碳配额
+     * @param timestamp-时间戳
+     * @param request-请求体
+     * @param organizeId-组织uuid
+     * @param carbonAddQuotaVO-修改内容
+     * @return 是否完成
+     *
+     */
+    fun editCarbonQuota(
+        timestamp: Long,
+        request: HttpServletRequest,
+        organizeId: String,
+        carbonAddQuotaVO: CarbonAddQuotaVO
+    ): ResponseEntity<BaseResponse>
 }
