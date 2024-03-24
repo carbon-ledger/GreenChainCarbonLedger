@@ -1,6 +1,7 @@
 package com.frontleaves.greenchaincarbonledger.services
 
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.CarbonConsumeVO
+import com.frontleaves.greenchaincarbonledger.models.voData.getData.CarbonAddQuotaVO
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.EditTradeVO
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.TradeReleaseVO
 import com.frontleaves.greenchaincarbonledger.utils.BaseResponse
@@ -84,4 +85,21 @@ interface CarbonService {
         request: HttpServletRequest,
         carbonConsumeVO: CarbonConsumeVO
     ): ResponseEntity<BaseResponse>
+
+    /**
+     * 为组织添加配额
+     * @param timestamp-时间戳
+     * @param request-请求体
+     * @param organizeId-组织UUID
+     * @param carbonAddQuotaVO-添加的配额值
+     * @return 是否完成配额增加
+     */
+    fun addOrganizeIdQuota(
+         timestamp: Long,
+         request: HttpServletRequest,
+         organizeId: String,
+         carbonAddQuotaVO: CarbonAddQuotaVO
+    ): ResponseEntity<BaseResponse>
+
+
 }

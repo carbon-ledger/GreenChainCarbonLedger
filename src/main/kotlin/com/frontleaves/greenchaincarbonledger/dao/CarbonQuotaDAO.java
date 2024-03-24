@@ -42,4 +42,15 @@ public class CarbonQuotaDAO {
         log.info("/t Mysql更新");
         return carbonQuotaMapper.finishCarbonTrade(totalQuota, uuid, year);
     }
+
+    /**
+     * 创建碳排放配额
+     * @param carbonQuotaDO-碳排放配额
+     * @return 是否完成
+     */
+    public Boolean createCarbonQuota(CarbonQuotaDO carbonQuotaDO){
+        log.info("[DAO] 执行 CreateCarbonQuota 操作");
+        log.info("/t Mysql 插入");
+        return carbonQuotaMapper.createCarbonQuota(carbonQuotaDO);
+    }
 }
