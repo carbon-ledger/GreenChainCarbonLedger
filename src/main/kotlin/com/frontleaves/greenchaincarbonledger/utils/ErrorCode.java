@@ -50,11 +50,12 @@ public enum ErrorCode {
     INVITE_CODE_ERROR("VerifyCodeError", 40398, "邀请码错误"),
     NO_LOGIN("NoLogin", 40110, "未登录"),
     UPDATE_DATA_ERROR("UpdateDataError", 40394, "更新数据失败"),
-    USER_CANNOT_BE_BANED("UserCannotBeDeleted", 40393, "用户不能被封禁"),
+    USER_CANNOT_BE_OPERATE("UserCannotBeOperate", 40393, "用户不能被操作"),
     INSERT_DATA_EXISTED("InsertDataExisted", 40392, "添加用户信息失败"),
     INSERT_DATA_ERROR("InsertDataError", 40395, "插入数据失败"),
     SELECT_DATA_ERROR("SelectDataError", 40389, "查询数据失败"),
-    RELEASE_TRADE_FAILURE("ReleaseTradeFailure", 40380, "发布碳交易失败");
+    RELEASE_TRADE_FAILURE("ReleaseTradeFailure", 40380, "发布碳交易失败"),
+    EDIT_TRADE_FAILURE("EditTradeFailure", 403779, "编辑碳交易失败");
 
     final String output;
     final Integer code;

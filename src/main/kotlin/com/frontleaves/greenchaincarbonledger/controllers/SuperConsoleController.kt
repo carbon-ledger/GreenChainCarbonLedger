@@ -60,6 +60,9 @@ class SuperConsoleController(
             "TRUNCATE TABLE fy_user",
             "TRUNCATE TABLE fy_user_ram",
             "TRUNCATE TABLE fy_user_verify",
+            "TRUNCATE TABLE fy_process_emission_factor",
+            "TRUNCATE TABLE fy_other_emission_factor",
+            "TRUNCATE TABLE fy_carbon_item_type",
             "SET FOREIGN_KEY_CHECKS = 1"
         ).forEach { sql ->
             jdbcTemplate.execute(sql)

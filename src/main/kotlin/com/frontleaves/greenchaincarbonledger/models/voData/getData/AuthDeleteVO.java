@@ -17,7 +17,6 @@ import lombok.Data;
 public class AuthDeleteVO {
     @NotBlank(message = "用户密码不可为空")
     String password;
-    @NotBlank(message = "邮箱验证码不可以为空")
     @Pattern(regexp = "^[a-zA-Z0-9]{6,10}$", message = "邮箱验证码错误")
     String code;
 
