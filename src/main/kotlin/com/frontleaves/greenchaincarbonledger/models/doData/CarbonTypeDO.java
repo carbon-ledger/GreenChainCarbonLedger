@@ -14,5 +14,5 @@ public class CarbonTypeDO {
     String name;
     String displayName;
     String createdAt;
-
+    String updatedAt;
 }

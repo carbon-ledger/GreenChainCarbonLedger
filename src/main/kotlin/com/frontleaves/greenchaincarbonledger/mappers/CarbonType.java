@@ -9,6 +9,4 @@ import org.apache.ibatis.annotations.Select;
  */
 @Mapper
 public interface CarbonType {
-    @Select("SELECT * FROM fy_carbon_type WHERE name=#{}")
-
 }

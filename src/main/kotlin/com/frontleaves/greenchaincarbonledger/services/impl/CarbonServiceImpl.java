@@ -247,16 +247,10 @@ public class CarbonServiceImpl implements CarbonService {
         String formattedEndDate = outputDateFormat.format(endDate);
         String formattedDateRange = formattedStartDate + "-" + formattedEndDate;
         //取出报告类型(通过type)
-
-        //初始化碳核算报告周期
-        if (carbonReportDAO.initializationReportMapper(request.getHeader("{{X-Auth-UUID}"),carbonConsumeVO.getTitle(),formattedDateRange,){
-
-        }else {
-
-        }
         //进行数据库初始化碳核算报告表
         //解析materials
         String materialsJson = carbonConsumeVO.getMaterials();
         MaterialsDO materialsDO = gson.fromJson(materialsJson, MaterialsDO.class);
+        return ResultUtil.success(timestamp);
     }
 }
