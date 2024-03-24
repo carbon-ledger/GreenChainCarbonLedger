@@ -485,6 +485,8 @@ public class ReviewServiceImpl implements ReviewService {
                     .setUserName(getUserDO.getUserName())
                     .setEmail(getUserDO.getEmail());
             newApproveOrganizeDO
+                    .setId(it.getId())
+                    .setType(true)
                     .setAccount(backUserVO)
                     .setOrganizeName(it.getOrganizeName())
                     .setLegalRepresentativeName(it.getLegalRepresentativeName())
@@ -500,6 +502,8 @@ public class ReviewServiceImpl implements ReviewService {
                     .setUserName(getUserDO.getUserName())
                     .setEmail(getUserDO.getEmail());
             newApproveAdminDO
+                    .setId(it.getId())
+                    .setType(false)
                     .setAccount(backUserVO)
                     .setOrganizeName(it.getOrganizeName())
                     .setLegalRepresentativeName(it.getLegalRepresentativeName())

@@ -17,6 +17,8 @@ import java.sql.Timestamp;
 @Data
 @Accessors(chain = true)
 public class BackReviewListVO {
+    public Long id;
+    public Boolean type;
     public BackUserVO account;
     public String organizeName;
     public String legalRepresentativeName;
