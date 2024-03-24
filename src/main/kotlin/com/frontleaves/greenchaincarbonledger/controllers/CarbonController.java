@@ -2,6 +2,7 @@ package com.frontleaves.greenchaincarbonledger.controllers;
 
 import com.frontleaves.greenchaincarbonledger.annotations.CheckAccountPermission;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.CarbonAddQuotaVO;
+import com.frontleaves.greenchaincarbonledger.models.voData.getData.CarbonConsumeVO;
 import com.frontleaves.greenchaincarbonledger.services.CarbonService;
 import com.frontleaves.greenchaincarbonledger.utils.*;
 import jakarta.servlet.http.HttpServletRequest;
@@ -143,6 +144,53 @@ public class CarbonController {
         log.info("[Controller] 请求 getCarbonAccounting 接口");
         long timestamp = System.currentTimeMillis();
         return carbonService.getCarbonAccounting(timestamp, request, limit, page, order);
+    }
+
+    /**
+     * 为组织添加配额
+     *
+     * @param carbonAddQuotaVO-添加配额的值
+     * @param bindingResult-结果
+     * @param organizeId-组织UUID
+     * @param request-请求图
+     * @return 是否完成配额的添加
+     */
+    @PostMapping("/add/{organizeId}")
+    @CheckAccountPermission("{Carbon:addOrganizeIdQuota}")
+    public ResponseEntity<BaseResponse> addOrganizeIdQuota(
+            @RequestBody @Validated CarbonAddQuotaVO carbonAddQuotaVO,
+            @org.jetbrains.annotations.NotNull BindingResult bindingResult,
+            @PathVariable("organizeId") String organizeId,
+            HttpServletRequest request
+    ) {
+        log.info("[Controller] 执行 addOrganizeIdQuota 接口");
+        long timestamp = System.currentTimeMillis();
+        // 对请求参数进行校验
+        if (bindingResult.hasErrors()) {
+            return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR, ProcessingUtil.getValidatedErrorList(bindingResult));
+        }
+        //校验组织uuid
+        if (organizeId.isEmpty()) {
+            return ResultUtil.error(timestamp, ErrorCode.PARAM_VARIABLE_ERROR);
+        } else {
+            return carbonService.addOrganizeIdQuota(timestamp, request, organizeId, carbonAddQuotaVO);
+        }
+    }
+
+    @PostMapping("/report/create")
+    public ResponseEntity<BaseResponse> createCarbonReport(
+            @RequestBody @Validated CarbonConsumeVO carbonConsumeVO,
+            @NotNull BindingResult bindingResult,
+            HttpServletRequest request
+    ) {
+        log.info("[Controller] 请求 creatCarbonReport 接口");
+        long timestamp = System.currentTimeMillis();
+        // 对请求参数进行校验
+        if (bindingResult.hasErrors()) {
+            return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR, ProcessingUtil.getValidatedErrorList(bindingResult));
+        }
+        //返回业务操作
+        return carbonService.createCarbonReport(timestamp, request, carbonConsumeVO);
     }
 
     @PatchMapping("/edit/{organizeId}")

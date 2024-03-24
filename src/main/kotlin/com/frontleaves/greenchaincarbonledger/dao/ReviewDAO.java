@@ -99,11 +99,10 @@ public class ReviewDAO {
      * <hr/>
      * 用于设置组织审核信息
      *
-     * @param id 审核ID
      * @param allow 是否允许
-     * @param remark 备注
+     * @param approveOrganizeDO 审核信息
      */
-    public void setReviewOrganizeAllow(long id, boolean allow, String remark) {
+    public void setReviewOrganizeAllow(ApproveOrganizeDO approveOrganizeDO, Boolean allow) {
         log.info("[DAO] 执行 setReviewOrganizeAllow 方法");
         log.debug("\t> Mysql 写入");
         short value;
@@ -112,7 +111,7 @@ public class ReviewDAO {
         } else {
             value = 2;
         }
-        reviewMapper.updateReviewOrganizeCheck(id, value, remark);
+        reviewMapper.updateReviewOrganizeCheck(value, approveOrganizeDO.getApproveUuid(), approveOrganizeDO.getApproveRemarks(), approveOrganizeDO.getUpdatedAt(), approveOrganizeDO.getId());
     }
 
     /**
@@ -134,20 +133,19 @@ public class ReviewDAO {
      * <hr/>
      * 用于设置管理员审核信息
      *
-     * @param id 审核ID
-     * @param allow 是否允许
+     * @param approveManageDO 审核信息
      * @param remark 备注
      */
-    public void setReviewAdminAllow(long id, boolean allow, String remark) {
+    public void setReviewAdminAllow(ApproveManageDO approveManageDO, Boolean remark) {
         log.info("[DAO] 执行 setReviewOrganizeAllow 方法");
         log.debug("\t> Mysql 写入");
         short value;
-        if (allow) {
+        if (remark) {
             value = 1;
         } else {
             value = 2;
         }
-        reviewMapper.updateReviewAdminCheck(id, value, remark);
+        reviewMapper.updateReviewAdminCheck(value, approveManageDO.getApproveUuid(), approveManageDO.getApproveRemarks(), approveManageDO.getUpdatedAt(), approveManageDO.getId());
     }
 
     /**
@@ -177,15 +175,12 @@ public class ReviewDAO {
      * <hr/>
      * 用于获取审核列表, 用于获取数据
      *
-     * @param page 页数
-     * @param limit 限制
-     * @param order 排序
      * @return ArrayList<ApproveOrganizeDO>
      */
-    public ArrayList<ApproveOrganizeDO> getApproveOrganizeList(Integer page, Integer limit, String order) {
+    public ArrayList<ApproveOrganizeDO> getApproveOrganizeList() {
         log.info("[DAO] 执行 getApproveOrganizeList 方法");
         log.debug("\t> Mysql 读取");
-        return reviewMapper.getApproveOrganizeList(page, limit, order);
+        return (ArrayList<ApproveOrganizeDO>) reviewMapper.getApproveOrganizeList();
     }
 
     /**
@@ -214,5 +209,11 @@ public class ReviewDAO {
         log.info("[DAO] 执行 getApproveAdminByUuid 方法");
         log.debug("\t> Mysql 读取");
         return reviewMapper.getApproveAdminByUuid(uuid);
+    }
+
+    public ArrayList<ApproveManageDO> getApproveAdminList() {
+        log.info("[DAO] 执行 getApproveAdminList 方法");
+        log.debug("\t> Mysql 读取");
+        return (ArrayList<ApproveManageDO>) reviewMapper.getApproveAdminList();
     }
 }

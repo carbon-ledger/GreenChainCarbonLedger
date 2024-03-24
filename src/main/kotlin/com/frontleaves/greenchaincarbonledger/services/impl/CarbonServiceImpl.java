@@ -3,6 +3,13 @@ package com.frontleaves.greenchaincarbonledger.services.impl;
 import com.frontleaves.greenchaincarbonledger.dao.CarbonAccountingDAO;
 import com.frontleaves.greenchaincarbonledger.dao.CarbonDAO;
 import com.frontleaves.greenchaincarbonledger.dao.CarbonQuotaDAO;
+import com.frontleaves.greenchaincarbonledger.dao.CarbonReportDAO;
+import com.frontleaves.greenchaincarbonledger.dao.UserDAO;
+import com.frontleaves.greenchaincarbonledger.mappers.CarbonMapper;
+import com.frontleaves.greenchaincarbonledger.mappers.CarbonReportMapper;
+import com.frontleaves.greenchaincarbonledger.models.doData.*;
+import com.frontleaves.greenchaincarbonledger.models.voData.getData.CarbonConsumeVO;
+import com.frontleaves.greenchaincarbonledger.dao.CarbonQuotaDAO;
 import com.frontleaves.greenchaincarbonledger.dao.UserDAO;
 import com.frontleaves.greenchaincarbonledger.mappers.CarbonMapper;
 import com.frontleaves.greenchaincarbonledger.models.doData.*;
@@ -28,6 +35,10 @@ import org.springframework.stereotype.Service;
 import com.google.gson.reflect.TypeToken;
 
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -45,6 +56,8 @@ public class CarbonServiceImpl implements CarbonService {
     private final CarbonQuotaDAO carbonQuotaDAO;
     private final CarbonMapper carbonMapper;
     private final Gson gson;
+    private final CarbonReportDAO carbonReportDAO;
+    private final CarbonQuotaDAO carbonQuotaDAO;
 
     @NotNull
     @Override
@@ -225,6 +238,68 @@ public class CarbonServiceImpl implements CarbonService {
             return ResultUtil.success(timestamp, "交易发布信息修改成功");
         } else {
             return ResultUtil.error(timestamp, ErrorCode.EDIT_TRADE_FAILURE);
+        }
+    }
+
+    @NotNull
+    @Override
+    public ResponseEntity<BaseResponse> createCarbonReport(long timestamp, @NotNull HttpServletRequest request, @NotNull CarbonConsumeVO carbonConsumeVO) {
+        //获取时间
+        SimpleDateFormat inputDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat outputDateFormat = new SimpleDateFormat("yyyyMMdd");
+        Date startDate;
+        Date endDate;
+        try {
+            startDate = inputDateFormat.parse(carbonConsumeVO.getStartTime());
+            endDate = inputDateFormat.parse(carbonConsumeVO.getEndTime());
+        } catch (ParseException e) {
+            throw new RuntimeException("日期解析错误：" + e.getMessage());
+        }
+        String formattedStartDate = outputDateFormat.format(startDate);
+        String formattedEndDate = outputDateFormat.format(endDate);
+        String formattedDateRange = formattedStartDate + "-" + formattedEndDate;
+        //取出报告类型(通过type)
+        //进行数据库初始化碳核算报告表
+        //解析materials
+        String materialsJson = carbonConsumeVO.getMaterials();
+        MaterialsDO materialsDO = gson.fromJson(materialsJson, MaterialsDO.class);
+        return ResultUtil.success(timestamp);
+    }
+
+    @NotNull
+    @Override
+    public ResponseEntity<BaseResponse> addOrganizeIdQuota(long timestamp, @NotNull HttpServletRequest request, @NotNull String organizeId, @NotNull CarbonAddQuotaVO carbonAddQuotaVO) {
+        //首先提取年份
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy");
+        int localYear = Integer.parseInt(simpleDateFormat.format(timestamp));
+        SimpleDateFormat combinedFormat = new SimpleDateFormat("yyyy-MM-dd");
+        String combinedDate = combinedFormat.format(timestamp);
+        //创建此时今年的碳排放配额
+        //编辑审计日志
+        ArrayList<CarbonAuditLogDO> carbonAuditLogList = new ArrayList<>();
+        CarbonAuditLogDO carbonAuditLog = new CarbonAuditLogDO();
+        carbonAuditLog
+                .setDate(combinedDate)
+                .setLog("于" + combinedDate + "添加" + carbonAddQuotaVO.getQuota() + "的交易配额，此次为初建碳排放配额表")
+                .setOperate("为此此配额添加的账号Uuid为%s".formatted(request.getHeader("{X-Auth-UUID}")));
+        carbonAuditLogList.add(carbonAuditLog);
+        //整理数据
+        CarbonQuotaDO carbonQuotaDO = new CarbonQuotaDO();
+        carbonQuotaDO.setUuid(ProcessingUtil.createUuid())
+                .setOrganizeUuid(organizeId)
+                .setQuotaYear(localYear)
+                .setTotalQuota(Double.parseDouble(carbonAddQuotaVO.getQuota()))
+                .setAllocatedQuota(Double.parseDouble(carbonAddQuotaVO.getQuota()))
+                .setUsedQuota(0)
+                .setAllocatedQuota(Double.parseDouble(combinedDate))
+                //相反
+                .setComplianceStatus(!carbonAddQuotaVO.getStatus())
+                .setAuditLog(gson.toJson(carbonAuditLogList));
+        //进行数据库
+        if (carbonQuotaDAO.createCarbonQuota(carbonQuotaDO)){
+            return ResultUtil.success(timestamp,"您已成功添加碳排放配额");
+        }else {
+            return ResultUtil.error(timestamp,"添加碳排放配额失败",ErrorCode.SERVER_INTERNAL_ERROR);
         }
     }
 

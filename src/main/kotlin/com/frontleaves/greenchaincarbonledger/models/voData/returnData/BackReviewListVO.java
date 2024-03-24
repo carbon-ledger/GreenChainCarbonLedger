@@ -3,23 +3,24 @@ package com.frontleaves.greenchaincarbonledger.models.voData.returnData;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
-import java.sql.Date;
+import java.sql.Timestamp;
 
 /**
  * BackReviewListVO
  * <hr/>
  * 用于返回审核列表信息
  *
- * @since v1.0.0-SNAPSHOT
- * @version v1.0.0-SNAPSHOT
  * @author xiao_lfeng
+ * @version v1.0.0-SNAPSHOT
+ * @since v1.0.0-SNAPSHOT
  */
 @Data
 @Accessors(chain = true)
 public class BackReviewListVO {
+    public Long id;
+    public Boolean type;
     public BackUserVO account;
-    public Short type;
     public String organizeName;
     public String legalRepresentativeName;
-    public Date applyTime;
+    public Timestamp applyTime;
 }
