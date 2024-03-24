@@ -1,9 +1,12 @@
 package com.frontleaves.greenchaincarbonledger.dao;
 
 import com.frontleaves.greenchaincarbonledger.mappers.CarbonReportMapper;
+import com.frontleaves.greenchaincarbonledger.models.doData.CarbonReportDO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
 
 /**
  * 用于对于碳核算报告的操作
@@ -29,5 +32,16 @@ public class CarbonReportDAO {
         log.info("[DAO] 执行 initializationReportMapper");
         log.info("/t Mysql 插入");
         return carbonReportMapper.initializationReportMapper(uuid, title, type, period, status, summary);
+    }
+
+    /**
+     * 通过uuid来获取碳核算报告链表(倒序排列)(ID大在最上面)
+     * @param uuid-组织uuid
+     * @return 碳核算报告链表
+     */
+    public List<CarbonReportDO> getReportListByUuid(String uuid){
+        log.info("[DAO] 执行 getReportListByUuid");
+        log.info("/t Mysql 查询");
+        return carbonReportMapper.getReportListByUuid(uuid);
     }
 }

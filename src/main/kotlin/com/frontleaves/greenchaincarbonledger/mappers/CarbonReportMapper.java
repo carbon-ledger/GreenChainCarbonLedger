@@ -1,7 +1,11 @@
 package com.frontleaves.greenchaincarbonledger.mappers;
 
+import com.frontleaves.greenchaincarbonledger.models.doData.CarbonReportDO;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Select;
+
+import java.util.List;
 
 /**
  * 作用于CarbonReport的数据库语句
@@ -15,4 +19,6 @@ public interface CarbonReportMapper {
             VALUES (#{uuid},#{title},#{type},#{period},0,#{status},0,0,#{summary},0,now(),0)
             """)
     Boolean initializationReportMapper(String uuid,String title,String type,String period,String status,String summary);
+    @Select("SELECT * FROM fy_carbon_report WHERE organize_uuid=#{uuid} ORDER BY id desc")
+    List<CarbonReportDO> getReportListByUuid (String uuid);
 }

@@ -36,4 +36,30 @@ public class CarbonAccountingDAO {
         return carbonAccountingMapper.getCarbonAccountingListByUuid(uuid);
     }
 
+    /**
+     * 初始化碳核算数据表
+     * @param uuid-组织uuid
+     * @param reportId-报告ID
+     * @param type-碳排放类型
+     * @param period-核算周期
+     * @param status-数据校验状态（初始化默认pending）
+     * @return 是否初始化成功
+     */
+    public Boolean initializationCarbonAccounting(String uuid,String reportId,String type,String period,String status){
+        log.info("[DAO] 执行 initializationCarbonAccounting");
+        log.info("/t Mysql 插入");
+        return carbonAccountingMapper.initializationCarbonAccounting(uuid, reportId, type, period, status);
+    }
+
+    /**
+     * 通过uuid查询碳核算数据链表 倒序（ID大在上面）
+     * @param uuid-组织uuid
+     * @return 碳核算数据链表
+     */
+    public List<CarbonAccountingDO>getCarbonAccountingListByUuidDesc(String uuid){
+        log.info("[DAO] 执行 getCarbonAccountingListByUuidDesc");
+        log.info("/t Mysql 查询");
+        return carbonAccountingMapper.getCarbonAccountingListByUuidDesc(uuid);
+    }
+
 }
