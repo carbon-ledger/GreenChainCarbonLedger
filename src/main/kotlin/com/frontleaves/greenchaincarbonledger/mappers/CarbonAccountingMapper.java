@@ -1,6 +1,7 @@
 package com.frontleaves.greenchaincarbonledger.mappers;
 
 import com.frontleaves.greenchaincarbonledger.models.doData.CarbonAccountingDO;
+import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 
@@ -19,6 +20,8 @@ import java.util.List;
 public interface CarbonAccountingMapper {
     @Select("SELECT * FROM fy_carbon_accounting ORDER BY ${order} LIMIT #{limit} OFFSET ${(page-1) * limit}")
     List<CarbonAccountingDO> getOrganizeCarbonAccounting(String organizeUuid, Integer limit, Integer page, String order);
+
     @Select("SELECT * FROM fy_carbon_accounting WHERE organize_uuid=#{uuid} ")
     List<CarbonAccountingDO> getCarbonAccountingListByUuid(String uuid);
+
 }

@@ -15,6 +15,7 @@ import lombok.Data;
 public class CarbonAccountingDO {
     String id;
     String organizeUuid;
+    String reportId;
     String emissionSource;
     Integer emissionAmount;
     String accountingPeriod;

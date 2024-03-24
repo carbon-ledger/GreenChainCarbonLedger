@@ -2,8 +2,10 @@ package com.frontleaves.greenchaincarbonledger.services.impl;
 
 import com.frontleaves.greenchaincarbonledger.dao.CarbonAccountingDAO;
 import com.frontleaves.greenchaincarbonledger.dao.CarbonDAO;
+import com.frontleaves.greenchaincarbonledger.dao.CarbonReportDAO;
 import com.frontleaves.greenchaincarbonledger.dao.UserDAO;
 import com.frontleaves.greenchaincarbonledger.mappers.CarbonMapper;
+import com.frontleaves.greenchaincarbonledger.mappers.CarbonReportMapper;
 import com.frontleaves.greenchaincarbonledger.models.doData.*;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.CarbonConsumeVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.EditTradeVO;
@@ -16,6 +18,7 @@ import com.frontleaves.greenchaincarbonledger.utils.BaseResponse;
 import com.frontleaves.greenchaincarbonledger.utils.ErrorCode;
 import com.frontleaves.greenchaincarbonledger.utils.ProcessingUtil;
 import com.frontleaves.greenchaincarbonledger.utils.ResultUtil;
+import com.google.gson.Gson;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,8 +27,10 @@ import org.jetbrains.annotations.Nullable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -39,6 +44,8 @@ public class CarbonServiceImpl implements CarbonService {
     private final UserDAO userDAO;
     private final CarbonAccountingDAO carbonAccountingDAO;
     private final CarbonMapper carbonMapper;
+    private final Gson gson;
+    private final CarbonReportDAO carbonReportDAO;
 
     @NotNull
     @Override
@@ -225,6 +232,31 @@ public class CarbonServiceImpl implements CarbonService {
     @NotNull
     @Override
     public ResponseEntity<BaseResponse> createCarbonReport(long timestamp, @NotNull HttpServletRequest request, @NotNull CarbonConsumeVO carbonConsumeVO) {
-        return null;
+        //获取时间
+        SimpleDateFormat inputDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat outputDateFormat = new SimpleDateFormat("yyyyMMdd");
+        Date startDate;
+        Date endDate;
+        try {
+            startDate = inputDateFormat.parse(carbonConsumeVO.getStartTime());
+            endDate = inputDateFormat.parse(carbonConsumeVO.getEndTime());
+        } catch (ParseException e) {
+            throw new RuntimeException("日期解析错误：" + e.getMessage());
+        }
+        String formattedStartDate = outputDateFormat.format(startDate);
+        String formattedEndDate = outputDateFormat.format(endDate);
+        String formattedDateRange = formattedStartDate + "-" + formattedEndDate;
+        //取出报告类型(通过type)
+
+        //初始化碳核算报告周期
+        if (carbonReportDAO.initializationReportMapper(request.getHeader("{{X-Auth-UUID}"),carbonConsumeVO.getTitle(),formattedDateRange,){
+
+        }else {
+
+        }
+        //进行数据库初始化碳核算报告表
+        //解析materials
+        String materialsJson = carbonConsumeVO.getMaterials();
+        MaterialsDO materialsDO = gson.fromJson(materialsJson, MaterialsDO.class);
     }
 }
