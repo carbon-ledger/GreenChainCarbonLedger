@@ -29,8 +29,9 @@ import org.springframework.stereotype.Service;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
-import java.sql.Date;
 import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
 /**
@@ -141,20 +142,25 @@ public class ReviewServiceImpl implements ReviewService {
                 }
                 // 对数据进行集中化处理
                 ApproveOrganizeDO newApproveOrganizeDO = new ApproveOrganizeDO();
-                newApproveOrganizeDO
-                        .setAccountUuid(getUserDO.getUuid())
-                        .setType((short) 0)
-                        .setOrganizeName(reviewOrganizeVO.getOrganizeName())
-                        .setOrganizeLicenseUrl(getUserDO.getUuid() + "_organize." + getImageType(reviewOrganizeVO.getLicense()))
-                        .setOrganizeCreditCode(reviewOrganizeVO.getCreditCode())
-                        .setOrganizeRegisteredCapital(reviewOrganizeVO.getRegisteredCapital())
-                        .setOrganizeEstablishmentDate(reviewOrganizeVO.getEstablishmentDate())
-                        .setLegalRepresentativeName(reviewOrganizeVO.getLegalRepresentativeName())
-                        .setLegalRepresentativeId(reviewOrganizeVO.getLegalRepresentativeId())
-                        .setLegalIdCardFrontUrl(getUserDO.getUuid() + "_front." + getImageType(reviewOrganizeVO.getLegalIdCardFront()))
-                        .setLegalIdCardBackUrl(getUserDO.getUuid() + "_back." + getImageType(reviewOrganizeVO.getLegalIdCardBack()))
-                        .setApplyTime(new Date(System.currentTimeMillis()))
-                        .setRemarks(reviewOrganizeVO.getRemark());
+                try {
+                    newApproveOrganizeDO
+                            .setAccountUuid(getUserDO.getUuid())
+                            .setType((short) 0)
+                            .setOrganizeName(reviewOrganizeVO.getOrganizeName())
+                            .setOrganizeLicenseUrl(getUserDO.getUuid() + "_organize." + getImageType(reviewOrganizeVO.getLicense()))
+                            .setOrganizeCreditCode(reviewOrganizeVO.getCreditCode())
+                            .setOrganizeRegisteredCapital(reviewOrganizeVO.getRegisteredCapital())
+                            .setOrganizeEstablishmentDate(new Timestamp(new SimpleDateFormat("yyyy-MM-dd").parse(reviewOrganizeVO.getEstablishmentDate()).getTime()))
+                            .setLegalRepresentativeName(reviewOrganizeVO.getLegalRepresentativeName())
+                            .setLegalRepresentativeId(reviewOrganizeVO.getLegalRepresentativeId())
+                            .setLegalIdCardFrontUrl(getUserDO.getUuid() + "_front." + getImageType(reviewOrganizeVO.getLegalIdCardFront()))
+                            .setLegalIdCardBackUrl(getUserDO.getUuid() + "_back." + getImageType(reviewOrganizeVO.getLegalIdCardBack()))
+                            .setApplyTime(new Timestamp(System.currentTimeMillis()))
+                            .setRemarks(reviewOrganizeVO.getRemark());
+                } catch (ParseException e) {
+                    log.error("[Service] 日期解析错误: {}", e.getMessage(), e);
+                    return ResultUtil.error(timestamp, "日期解析错误", ErrorCode.SERVER_INTERNAL_ERROR);
+                }
                 reviewDAO.setReviewOrganizeApprove(newApproveOrganizeDO);
                 return ResultUtil.success(timestamp, "申请已提交");
             } else {
@@ -223,7 +229,7 @@ public class ReviewServiceImpl implements ReviewService {
                     .setLegalRepresentativeId(reviewAdminVO.getLegalRepresentativeId())
                     .setLegalIdCardFrontUrl(getUserDO.getUuid() + "_front." + getImageType(reviewAdminVO.getLegalIdCardFront()))
                     .setLegalIdCardBackUrl(getUserDO.getUuid() + "_back." + getImageType(reviewAdminVO.getLegalIdCardBack()))
-                    .setApplyTime(new Date(System.currentTimeMillis()))
+                    .setApplyTime(new Timestamp(System.currentTimeMillis()))
                     .setRemarks(reviewAdminVO.getRemarks());
             try {
                 reviewDAO.setReviewAdminApprove(newApproveManageDO);
@@ -343,25 +349,29 @@ public class ReviewServiceImpl implements ReviewService {
                             return ResultUtil.error(timestamp, "文件处理错误", ErrorCode.SERVER_INTERNAL_ERROR);
                         }
                         // 资料进行更新
-                        getApproveOrganizeDO
-                                .setAccountUuid(getUserDO.getUuid())
-                                .setType((short) 0)
-                                .setOrganizeName(reviewOrganizeVO.getOrganizeName())
-                                .setOrganizeLicenseUrl(getUserDO.getUuid() + "_organize." + getImageType(reviewOrganizeVO.getLicense()))
-                                .setOrganizeCreditCode(reviewOrganizeVO.getCreditCode())
-                                .setOrganizeRegisteredCapital(reviewOrganizeVO.getRegisteredCapital())
-                                .setOrganizeEstablishmentDate(reviewOrganizeVO.getEstablishmentDate())
-                                .setLegalRepresentativeName(reviewOrganizeVO.getLegalRepresentativeName())
-                                .setLegalRepresentativeId(reviewOrganizeVO.getLegalRepresentativeId())
-                                .setLegalIdCardFrontUrl(getUserDO.getUuid() + "_front." + getImageType(reviewOrganizeVO.getLegalIdCardFront()))
-                                .setLegalIdCardBackUrl(getUserDO.getUuid() + "_back." + getImageType(reviewOrganizeVO.getLegalIdCardBack()))
-                                .setRemarks(reviewOrganizeVO.getRemark())
-                                .setApplyTime(new Date(System.currentTimeMillis()))
-                                .setUpdatedAt(new Timestamp(System.currentTimeMillis()))
-                                .setApproveUuid(null)
-                                .setApproveRemarks(null)
-                                .setApplyTime(null)
-                                .setCertificationStatus((short) 0);
+                        try {
+                            getApproveOrganizeDO
+                                    .setAccountUuid(getUserDO.getUuid())
+                                    .setType((short) 0)
+                                    .setOrganizeName(reviewOrganizeVO.getOrganizeName())
+                                    .setOrganizeLicenseUrl(getUserDO.getUuid() + "_organize." + getImageType(reviewOrganizeVO.getLicense()))
+                                    .setOrganizeCreditCode(reviewOrganizeVO.getCreditCode())
+                                    .setOrganizeRegisteredCapital(reviewOrganizeVO.getRegisteredCapital())
+                                    .setOrganizeEstablishmentDate(new Timestamp(new SimpleDateFormat("yyyy-MM-dd").parse(reviewOrganizeVO.getEstablishmentDate()).getTime()))
+                                    .setLegalRepresentativeName(reviewOrganizeVO.getLegalRepresentativeName())
+                                    .setLegalRepresentativeId(reviewOrganizeVO.getLegalRepresentativeId())
+                                    .setLegalIdCardFrontUrl(getUserDO.getUuid() + "_front." + getImageType(reviewOrganizeVO.getLegalIdCardFront()))
+                                    .setLegalIdCardBackUrl(getUserDO.getUuid() + "_back." + getImageType(reviewOrganizeVO.getLegalIdCardBack()))
+                                    .setRemarks(reviewOrganizeVO.getRemark())
+                                    .setApplyTime(new Timestamp(System.currentTimeMillis()))
+                                    .setUpdatedAt(new Timestamp(System.currentTimeMillis()))
+                                    .setApproveUuid(null)
+                                    .setApproveRemarks(null)
+                                    .setCertificationStatus((short) 0);
+                        } catch (ParseException e) {
+                            log.error("[Service] 日期解析错误: {}", e.getMessage(), e);
+                            return ResultUtil.error(timestamp, "日期解析错误", ErrorCode.SERVER_INTERNAL_ERROR);
+                        }
                         reviewDAO.updateReviewOrganizeApprove(getApproveOrganizeDO);
                         return ResultUtil.success(timestamp, "申请已提交");
                     } else {
@@ -436,7 +446,7 @@ public class ReviewServiceImpl implements ReviewService {
                                 .setLegalIdCardFrontUrl(getUserDO.getUuid() + "_front." + getImageType(reviewAdminVO.getLegalIdCardFront()))
                                 .setLegalIdCardBackUrl(getUserDO.getUuid() + "_back." + getImageType(reviewAdminVO.getLegalIdCardBack()))
                                 .setRemarks(reviewAdminVO.getRemarks())
-                                .setApplyTime(new Date(System.currentTimeMillis()))
+                                .setApplyTime(new Timestamp(System.currentTimeMillis()))
                                 .setUpdatedAt(new Timestamp(System.currentTimeMillis()))
                                 .setCertificationStatus((short) 0)
                                 .setApproveTime(null)
@@ -519,8 +529,8 @@ public class ReviewServiceImpl implements ReviewService {
                         .setAvatar(getUserDO.getAvatar())
                         .setCreatedAt(getUserDO.getCreatedAt())
                         .setUpdatedAt(getUserDO.getUpdatedAt());
-                BackReviewOrganizeVO newApproveOrganizeDO = new BackReviewOrganizeVO();
-                newApproveOrganizeDO
+                BackReviewOrganizeVO backReviewOrganizeVO = new BackReviewOrganizeVO();
+                backReviewOrganizeVO
                         .setAccount(backUserVO)
                         .setType(getApproveOrganizeDO.getType())
                         .setOrganizeName(getApproveOrganizeDO.getOrganizeName())
@@ -535,7 +545,7 @@ public class ReviewServiceImpl implements ReviewService {
                         .setApplyTime(getApproveOrganizeDO.getApplyTime())
                         .setUpdatedAt(getApproveOrganizeDO.getUpdatedAt())
                         .setRemarks(getApproveOrganizeDO.getRemarks());
-                return ResultUtil.success(timestamp, newApproveOrganizeDO);
+                return ResultUtil.success(timestamp, backReviewOrganizeVO);
             } else {
                 return ResultUtil.error(timestamp, "审核内容不存在", ErrorCode.REVIEW_ERROR);
             }
@@ -555,8 +565,8 @@ public class ReviewServiceImpl implements ReviewService {
                         .setAvatar(getUserDO.getAvatar())
                         .setCreatedAt(getUserDO.getCreatedAt())
                         .setUpdatedAt(getUserDO.getUpdatedAt());
-                BackReviewAdminVO newApproveAdminDO = new BackReviewAdminVO();
-                newApproveAdminDO
+                BackReviewAdminVO backReviewAdminVO = new BackReviewAdminVO();
+                backReviewAdminVO
                         .setAccount(backUserVO)
                         .setAccountType(getApproveAdminDO.getAccountType())
                         .setOrganizeName(getApproveAdminDO.getOrganizeName())
@@ -568,7 +578,7 @@ public class ReviewServiceImpl implements ReviewService {
                         .setCertificationStatus(getApproveAdminDO.getCertificationStatus())
                         .setApplyTime(getApproveAdminDO.getApplyTime())
                         .setRemarks(getApproveAdminDO.getRemarks());
-                return ResultUtil.success(timestamp, newApproveAdminDO);
+                return ResultUtil.success(timestamp, backReviewAdminVO);
             } else {
                 return ResultUtil.error(timestamp, "审核内容不存在", ErrorCode.REVIEW_ERROR);
             }
