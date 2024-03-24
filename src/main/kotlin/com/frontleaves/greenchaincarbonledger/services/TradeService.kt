@@ -56,4 +56,14 @@ interface TradeService {
     ): ResponseEntity<BaseResponse>
 
 
+    fun getTradeList(
+        timestamp: Long,
+        request: HttpServletRequest,
+        type: String,
+        search: String?,
+        limit: String,
+        page: String,
+        order: String
+    ): ResponseEntity<BaseResponse>
+
 }

@@ -84,4 +84,31 @@ public interface CarbonMapper {
 
     @Select("SELECT * FROM fy_carbon_trade WHERE id = #{id} AND organize_uuid = #{getUuid}")
     CarbonTradeDO getTradeByUuidAndId(String getUuid, String id);
+
+    @Select("""
+            SELECT * FROM fy_carbon_trade WHERE status = #{'active'} OR status = #{'completed'}
+            ORDER BY ${order} LIMIT #{limit} OFFSET ${(page-1) * limit}
+            """)
+    List<CarbonTradeDO> getAvailableTradeListAll(Integer limit, Integer page, String order);
+
+    @Select("""
+            SELECT * FROM fy_carbon_trade WHERE status = #{'active'}
+            ORDER BY ${order} LIMIT #{limit} OFFSET ${(page-1) * limit}
+            """)
+    List<CarbonTradeDO> getAvailableTradeList(String search, Integer limit, Integer page, String order);
+
+    @Select("""
+            SELECT * FROM fy_carbon_trade WHERE status = #{'completed'}
+            ORDER BY ${order} LIMIT #{limit} OFFSET ${(page-1) * limit}
+            """)
+    List<CarbonTradeDO> getCompletedTradeList(String search, Integer limit, Integer page, String order);
+
+    @Select("""
+            SELECT * FROM fy_carbon_trade
+            WHERE description LIKE CONCAT('%', #{search}, '%')
+            OR quota_amount  LIKE CONCAT('%', #{search}, '%')
+            OR price_per_unit  LIKE CONCAT('%', #{search}, '%')
+            ORDER BY ${order} LIMIT #{limit} OFFSET ${(page-1) * limit}
+           """)
+    List<CarbonTradeDO> getSearchTradeList(String search, Integer limit, Integer page, String order);
 }
