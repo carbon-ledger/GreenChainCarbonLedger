@@ -1,11 +1,8 @@
 package com.frontleaves.greenchaincarbonledger.services.impl;
 
-import com.frontleaves.greenchaincarbonledger.dao.CarbonAccountingDAO;
-import com.frontleaves.greenchaincarbonledger.dao.CarbonDAO;
-import com.frontleaves.greenchaincarbonledger.dao.CarbonReportDAO;
-import com.frontleaves.greenchaincarbonledger.dao.UserDAO;
+import com.frontleaves.greenchaincarbonledger.dao.*;
 import com.frontleaves.greenchaincarbonledger.mappers.CarbonMapper;
-import com.frontleaves.greenchaincarbonledger.mappers.CarbonReportMapper;
+import com.frontleaves.greenchaincarbonledger.mappers.CarbonTypeMapper;
 import com.frontleaves.greenchaincarbonledger.models.doData.*;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.CarbonConsumeVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.EditTradeVO;
@@ -46,6 +43,11 @@ public class CarbonServiceImpl implements CarbonService {
     private final CarbonMapper carbonMapper;
     private final Gson gson;
     private final CarbonReportDAO carbonReportDAO;
+    private final CarbonTypeMapper carbonTypeMapper;
+    private final CarbonCompensationMaterialDAO carbonCompensationMaterialDAO;
+    private final CarbonItemTypeDAO carbonItemTypeDAO;
+    private final ProcessEmissionFactorDAO processEmissionFactorDAO;
+    private final OtherEmissionFactorDAO otherEmissionFactorDAO;
 
     @NotNull
     @Override
@@ -211,7 +213,7 @@ public class CarbonServiceImpl implements CarbonService {
     @Override
     public ResponseEntity<BaseResponse> editCarbonTrade(long timestamp, @NotNull HttpServletRequest request, @NotNull EditTradeVO editTradeVO, @NotNull String id) {
         log.info("[Service] 执行 releaseCarbonTrade 方法");
-       String getUuid = ProcessingUtil.getAuthorizeUserUuid(request);
+        String getUuid = ProcessingUtil.getAuthorizeUserUuid(request);
         // 判断用户是否发布过交易
         // 判断交易是否已经发布
         CarbonTradeDO carbonTradeDO = carbonDAO.getTradeByUuidAndId(getUuid, id);
@@ -241,16 +243,175 @@ public class CarbonServiceImpl implements CarbonService {
             startDate = inputDateFormat.parse(carbonConsumeVO.getStartTime());
             endDate = inputDateFormat.parse(carbonConsumeVO.getEndTime());
         } catch (ParseException e) {
-            throw new RuntimeException("日期解析错误：" + e.getMessage());
+            log.error("[Service] 日期读取错误：{}", e.getMessage(), e);
+            return ResultUtil.error(timestamp, "日期读取错误", ErrorCode.SERVER_INTERNAL_ERROR);
         }
         String formattedStartDate = outputDateFormat.format(startDate);
         String formattedEndDate = outputDateFormat.format(endDate);
         String formattedDateRange = formattedStartDate + "-" + formattedEndDate;
+        //进行判断是否这次要创建的报告的核算开始时间是否和之前的结束时间有冲突
+        //首先取出之前的报告结束时间,若没有无需进行判断，若有进行判断
+        List<CarbonReportDO> carbonReportDOList = carbonReportDAO.getReportListByUuid(ProcessingUtil.getAuthorizeUserUuid(request));
+        if (!carbonReportDOList.isEmpty()) {
+            //获取最新的碳核算报告
+            CarbonReportDO lastCarbonReportDO = carbonReportDOList.get(0);
+            // 获取时间范围的结束日期
+            String accountingPeriod = lastCarbonReportDO.getAccountingPeriod();
+            String[] dateRange = accountingPeriod.split("-");
+            String endDateString = dateRange[1];
+            // 将结束日期字符串转换为日期对象
+            Date endLastDate;
+            try {
+                endLastDate = inputDateFormat.parse(endDateString);
+            } catch (ParseException e) {
+                log.error("[Service] 日期解析错误：{}", e.getMessage(), e);
+                return ResultUtil.error(timestamp, "日期解析错误", ErrorCode.SERVER_INTERNAL_ERROR);
+            }
+            //若endLastDate 晚于或者等于 endDate
+            if (endLastDate.compareTo(startDate) >= 0) {
+                return ResultUtil.error(timestamp, "碳核算周期时间冲突", ErrorCode.PATH_VARIABLE_ERROR);
+            }
+        }
         //取出报告类型(通过type)
-        //进行数据库初始化碳核算报告表
-        //解析materials
-        String materialsJson = carbonConsumeVO.getMaterials();
-        MaterialsDO materialsDO = gson.fromJson(materialsJson, MaterialsDO.class);
-        return ResultUtil.success(timestamp);
+        CarbonTypeDO getCarbonType = carbonTypeMapper.getTypeByName(carbonConsumeVO.getType());
+        //进行数据库初始化本次碳核算报告表
+        if (carbonReportDAO.initializationReportMapper(ProcessingUtil.getAuthorizeUserUuid(request), carbonConsumeVO.getTitle(), getCarbonType.getUuid(), formattedDateRange, "draft", carbonConsumeVO.getSummary())) {
+            //进行查询
+            List<CarbonReportDO> getCarbonReportListDO = carbonReportDAO.getReportListByUuid(ProcessingUtil.getAuthorizeUserUuid(request));
+            //获取最新的碳核算报告
+            CarbonReportDO getCarbonReportDO = getCarbonReportListDO.get(0);
+            //初始化本次碳核算数据表
+            if (carbonAccountingDAO.initializationCarbonAccounting(ProcessingUtil.getAuthorizeUserUuid(request), getCarbonReportDO.getId(), getCarbonType.getUuid(), formattedDateRange, "pending")) {
+                //查询碳核算数据表
+                List<CarbonAccountingDO> carbonAccountingDOList = carbonAccountingDAO.getCarbonAccountingListByUuidDesc(ProcessingUtil.getAuthorizeUserUuid(request));
+                CarbonAccountingDO getCarbonAccounting = carbonAccountingDOList.get(0);
+                //初始化原料表
+                if (carbonCompensationMaterialDAO.initializationCarbonCompensationMaterial(getCarbonAccounting.getId(), carbonConsumeVO.getMaterials())) {
+                    //进行碳核算计算
+                    //解析materials
+                    String materialsJson = carbonConsumeVO.getMaterials();
+                    MaterialsDO materialsDO = gson.fromJson(materialsJson, MaterialsDO.class);
+                    //获取materials列表
+                    List<MaterialsDO.Materials> materialsList = materialsDO.getMaterials();
+                    // 声明一个变量来存储累加的结果
+                    double totalCombustion = 0.0;
+                    for (MaterialsDO.Materials material : materialsList) {
+                        //获取材料名称
+                        CarbonItemTypeDO carbonItemTypeDO = carbonItemTypeDAO.getCarbonItemTypeByName(material.getName());
+                        //获取净消耗量
+                        MaterialsDO.Material materialData = material.getMaterial();
+                        // 计算净消耗量
+                        double netConsumption = Double.parseDouble(materialData.getBuy()) + (Double.parseDouble(materialData.getOpeningInv())
+                                - Double.parseDouble(materialData.getEndingInv())) + Double.parseDouble(materialData.getOutSide()) + Double.parseDouble(materialData.getExport());
+                        //计算E燃烧
+                        double eCombustion = carbonItemTypeDO.getLowCalorific() * netConsumption * carbonItemTypeDO.getCarbonUnitCalorific() * carbonItemTypeDO.getFuelOxidationRate() / ((double) 44 / 12);
+                        // 累加
+                        totalCombustion += eCombustion;
+                    }
+                    // 创建一个CarbonAccountingEmissionsVolumeDO对象
+                    CarbonAccountingEmissionsVolumeDO carbonAccountingEmissionsVolumeDO = new CarbonAccountingEmissionsVolumeDO();
+                    // 设置Materials对象
+                    CarbonAccountingEmissionsVolumeDO.Materials materials = new CarbonAccountingEmissionsVolumeDO.Materials();
+                    materials.setName("E燃烧：")
+                            .setCarbonEmissions(totalCombustion);
+                    totalCombustion = 0;
+                    // 获取courses列表
+                    List<MaterialsDO.Courses> coursesList = materialsDO.getCourses();
+                    for (MaterialsDO.Courses courses : coursesList) {
+                        //获取材料名称
+                        ProcessEmissionFactorDO processEmissionFactorDO = processEmissionFactorDAO.getFactorByName(courses.getName());
+                        //获取净消耗量
+                        MaterialsDO.Material coursesData = courses.getMaterial();
+                        // 计算净消耗量
+                        double netConsumption = Double.parseDouble(coursesData.getBuy()) + (Double.parseDouble(coursesData.getOpeningInv())
+                                - Double.parseDouble(coursesData.getEndingInv())) + Double.parseDouble(coursesData.getOutSide()) + Double.parseDouble(coursesData.getExport());
+                        //计算E过程
+                        double eProcess = netConsumption * processEmissionFactorDO.getFactor();
+                        // 累加
+                        totalCombustion += eProcess;
+                    }
+                    // 设置Courses对象
+                    CarbonAccountingEmissionsVolumeDO.Courses courses = new CarbonAccountingEmissionsVolumeDO.Courses();
+                    courses.setName("E过程")
+                            .setCarbonEmissions(totalCombustion);
+                    carbonAccountingEmissionsVolumeDO.setCourses(courses);
+                    totalCombustion = 0;
+                    //获取carbonSequestrations列表
+                    List<MaterialsDO.CarbonSequestration> carbonSequestrationList = materialsDO.getCarbonSequestrations();
+                    for (MaterialsDO.CarbonSequestration carbonSequestration : carbonSequestrationList) {
+                        //获取名字
+                        OtherEmissionFactorDO otherEmissionFactorDO = otherEmissionFactorDAO.getFactorByName(carbonSequestration.getName());
+                        //获取净消耗量
+                        MaterialsDO.CarbonSequestration.MaterialSequestration sequestrationData = carbonSequestration.getMaterial();
+                        //计算净消耗量
+                        double netConsumption = Double.parseDouble(sequestrationData.getExport()) + Double.parseDouble(sequestrationData.getEndingInv())
+                                - Double.parseDouble(sequestrationData.getOpeningInv());
+                        //计算R固碳
+                        double eSequestration = netConsumption * otherEmissionFactorDO.getFactor();
+                        //累加
+                        totalCombustion += eSequestration;
+                    }
+                    // 设置CarbonSequestration对象
+                    CarbonAccountingEmissionsVolumeDO.CarbonSequestration carbonSequestration = new CarbonAccountingEmissionsVolumeDO.CarbonSequestration();
+                    carbonSequestration.setName("固碳排放：")
+                            .setCarbonEmissions(totalCombustion);
+                    carbonAccountingEmissionsVolumeDO.setCarbonSequestrations(carbonSequestration);
+                    totalCombustion = 0;
+                    //计算电和热
+                    //获取Heat列表
+                    List<MaterialsDO.Heat> heatList = materialsDO.getHeat();
+                    for (MaterialsDO.Heat heat : heatList) {
+                        //获取名字
+                        OtherEmissionFactorDO otherEmissionFactorDO = otherEmissionFactorDAO.getFactorByName("thermalPower");
+                        //计算消耗量
+                        double netConsumption = Double.parseDouble(heat.getBuy()) - Double.parseDouble(heat.getExport())
+                                - Double.parseDouble(heat.getExport());
+                        //计算E火力
+                        double hCombustion = netConsumption * otherEmissionFactorDO.getFactor();
+                        //累加
+                        totalCombustion += hCombustion;
+                    }
+                    //计算电力
+                    //获取电力排放因子
+                    OtherEmissionFactorDO otherEmissionFactorDO =otherEmissionFactorDAO.getFactorByName(carbonConsumeVO.getElectricCompany());
+                    //计算E电力
+                    double electricCombustion =(Double.parseDouble(carbonConsumeVO.getElectricBuy()) - Double.parseDouble(carbonConsumeVO.getElectricOutside()) -Double.parseDouble(carbonConsumeVO.getElectricExport()) )
+                            * otherEmissionFactorDO.getFactor();
+                    //E电和E火
+                    totalCombustion += electricCombustion;
+                    CarbonAccountingEmissionsVolumeDO.ElectricHeat electricHeat =new CarbonAccountingEmissionsVolumeDO.ElectricHeat();
+                    electricHeat.setName("E电和火：")
+                            .setElectricHeatEmissions(totalCombustion);
+                    carbonAccountingEmissionsVolumeDO.setElectricHeat(electricHeat);
+                    return ResultUtil.success(timestamp);
+                } else {
+                    return ResultUtil.error(timestamp, "初始化碳原料数据表失败", ErrorCode.SERVER_INTERNAL_ERROR);
+                }
+            } else {
+                return ResultUtil.error(timestamp, "初始化碳核算数据表失败", ErrorCode.SERVER_INTERNAL_ERROR);
+            }
+        } else {
+            return ResultUtil.error(timestamp, "初始化碳核算报告失败", ErrorCode.SERVER_INTERNAL_ERROR);
+        }
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

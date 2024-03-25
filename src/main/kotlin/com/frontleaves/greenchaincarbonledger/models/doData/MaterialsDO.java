@@ -17,6 +17,7 @@ public class MaterialsDO {
     List<Courses> courses;
     List<CarbonSequestration> carbonSequestrations;
     List<Desulfuization> desulfuizations;
+    List<Heat> heat;
 
     /**
      * E燃烧的种类和消耗量
@@ -66,6 +67,13 @@ public class MaterialsDO {
             public String endingInv;
             public String export;
         }
+    }
+    @Data
+    @Accessors(chain = true)
+    public static class Heat {
+        public String buy;
+        public String outside;
+        public String export;
     }
 
 
