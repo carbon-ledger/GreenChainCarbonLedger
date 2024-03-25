@@ -62,4 +62,16 @@ public class CarbonAccountingDAO {
         return carbonAccountingMapper.getCarbonAccountingListByUuidDesc(uuid);
     }
 
+    /**
+     * 更新碳核算
+     * @param emissionsVolume-分排放量
+     * @param emissionAmount-总排放量
+     * @return 是否完成
+     */
+    public Boolean updateEmissionByUuidId(String emissionsVolume,Double emissionAmount,String id){
+        log.info("[DAO] 执行 updateEmissionByUuidId");
+        log.info("/t Mysql 更新");
+        return  carbonAccountingMapper.updateEmissionByUuidId(emissionsVolume, emissionAmount,id);
+    }
+
 }

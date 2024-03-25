@@ -10,6 +10,6 @@ import org.apache.ibatis.annotations.Select;
  */
 @Mapper
 public interface CarbonTypeMapper {
-    @Select("SELECT * FROM fy_carbon_type WHERE name=#{}")
+    @Select("SELECT * FROM fy_carbon_type WHERE name=#{name}")
     CarbonTypeDO getTypeByName(String name);
 }

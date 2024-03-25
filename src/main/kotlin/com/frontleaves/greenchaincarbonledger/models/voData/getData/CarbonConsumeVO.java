@@ -18,5 +18,5 @@ public class CarbonConsumeVO {
     String electricExport;
     String electricCompany;
     String summary;
-    String parameters;
+    Boolean send;
 }

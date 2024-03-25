@@ -44,4 +44,17 @@ public class CarbonReportDAO {
         log.info("/t Mysql 查询");
         return carbonReportMapper.getReportListByUuid(uuid);
     }
+
+    /**
+     * 更新碳核算报告
+     * @param totalEmission-总碳排放额
+     * @param status-报告状态
+     * @param id-报告id
+     * @return 是否更新成功
+     */
+    public Boolean updateEmissionById(Double totalEmission,String status,String id){
+        log.info("[DAO] 执行 totalEmission");
+        log.info("/t Mysql 更新");
+        return carbonReportMapper.updateEmissionById(totalEmission, status, id);
+    }
 }

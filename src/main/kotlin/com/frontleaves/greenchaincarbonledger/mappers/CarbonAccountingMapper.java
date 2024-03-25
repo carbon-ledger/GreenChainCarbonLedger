@@ -4,6 +4,7 @@ import com.frontleaves.greenchaincarbonledger.models.doData.CarbonAccountingDO;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
 import java.util.List;
 
@@ -31,4 +32,6 @@ public interface CarbonAccountingMapper {
     Boolean initializationCarbonAccounting(String uuid,String reportId,String type,String period,String status);
     @Select("SELECT * FROM fy_carbon_accounting WHERE organize_uuid=#{uuid} ORDER BY id desc")
     List<CarbonAccountingDO> getCarbonAccountingListByUuidDesc(String uuid);
+    @Update("UPDATE fy_carbon_accounting SET emissions_volume =#{emissionsVolume} AND emission_amount=#{emissionAmount} AND updated_at =now() WHERE id=#{id}")
+    Boolean updateEmissionByUuidId(String emissionsVolume,Double emissionAmount,String id);
 }
