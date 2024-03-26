@@ -24,10 +24,8 @@ import org.jetbrains.annotations.Nullable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -48,6 +46,34 @@ public class CarbonServiceImpl implements CarbonService {
     private final CarbonItemTypeDAO carbonItemTypeDAO;
     private final ProcessEmissionFactorDAO processEmissionFactorDAO;
     private final OtherEmissionFactorDAO otherEmissionFactorDAO;
+
+    /**
+     * 检查报告时间是否冲突
+     * <hr/>
+     * 检查组织的报告时间是否出现冲突，例如与上一次报告时间重复，以及开始时间大于结束时间。
+     * 不符合时间常理规范的内容将会被拒绝
+     *
+     * @param getOrganizeUserLastCarbonReport 存放碳排放报告数据表的数据（上一次报告的内容获取）
+     * @param getStartTimeReplace             获取此次报告开始的时间
+     * @param getEndTimeReplace               获取此次报告结束的时间
+     * @return 返回是否通过时间重复性检查
+     */
+    private static boolean checkReportTimeHasDuplicate(CarbonReportDO getOrganizeUserLastCarbonReport, String getStartTimeReplace, String getEndTimeReplace) {
+        if (getOrganizeUserLastCarbonReport != null) {
+            // 时间字符整理整理
+            long nowReportStartTime = Long.parseLong(getStartTimeReplace);
+            long nowReportEndTime = Long.parseLong(getEndTimeReplace);
+            // 获取时间范围的结束日期
+            long lastReportEndTime = Long.parseLong(getOrganizeUserLastCarbonReport.getAccountingPeriod().split("-")[1]);
+            // 时间范围检查
+            if (nowReportStartTime < nowReportEndTime) {
+                return lastReportEndTime < nowReportStartTime;
+            }
+        } else {
+            return true;
+        }
+        return false;
+    }
 
     @NotNull
     @Override
@@ -234,54 +260,25 @@ public class CarbonServiceImpl implements CarbonService {
     @NotNull
     @Override
     public ResponseEntity<BaseResponse> createCarbonReport(long timestamp, @NotNull HttpServletRequest request, @NotNull CarbonConsumeVO carbonConsumeVO) {
-        //获取时间
-        SimpleDateFormat inputDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        SimpleDateFormat outputDateFormat = new SimpleDateFormat("yyyyMMdd");
-        Date startDate;
-        Date endDate;
-        try {
-            startDate = inputDateFormat.parse(carbonConsumeVO.getStartTime());
-            endDate = inputDateFormat.parse(carbonConsumeVO.getEndTime());
-        } catch (ParseException e) {
-            log.error("[Service] 日期读取错误：{}", e.getMessage(), e);
-            return ResultUtil.error(timestamp, "日期读取错误", ErrorCode.SERVER_INTERNAL_ERROR);
-        }
-        String formattedStartDate = outputDateFormat.format(startDate);
-        String formattedEndDate = outputDateFormat.format(endDate);
-        String formattedDateRange = formattedStartDate + "-" + formattedEndDate;
-        //进行判断是否这次要创建的报告的核算开始时间是否和之前的结束时间有冲突
-        //首先取出之前的报告结束时间,若没有无需进行判断，若有进行判断
-        List<CarbonReportDO> carbonReportDOList = carbonReportDAO.getReportListByUuid(ProcessingUtil.getAuthorizeUserUuid(request));
-        if (!carbonReportDOList.isEmpty()) {
-            //获取最新的碳核算报告
-            CarbonReportDO lastCarbonReportDO = carbonReportDOList.get(0);
-            // 获取时间范围的结束日期
-            String accountingPeriod = lastCarbonReportDO.getAccountingPeriod();
-            String[] dateRange = accountingPeriod.split("-");
-            String endDateString = dateRange[1];
-            // 将结束日期字符串转换为日期对象
-            Date endLastDate;
-            try {
-                endLastDate = inputDateFormat.parse(endDateString);
-            } catch (ParseException e) {
-                log.error("[Service] 日期解析错误：{}", e.getMessage(), e);
-                return ResultUtil.error(timestamp, "日期解析错误", ErrorCode.SERVER_INTERNAL_ERROR);
-            }
-            //若endLastDate 晚于或者等于 endDate
-            if (endLastDate.compareTo(startDate) >= 0) {
-                return ResultUtil.error(timestamp, "碳核算周期时间冲突", ErrorCode.PATH_VARIABLE_ERROR);
-            }
+        // 获取时间并进行整理
+        String getStartTimeReplace = carbonConsumeVO.getStartTime().replace("-", "");
+        String getEndTimeReplace = carbonConsumeVO.getEndTime().replace("-", "");
+        String getFormatDateRange = getStartTimeReplace + "-" + getEndTimeReplace;
+        // 进行判断是否这次要创建的报告的核算开始时间是否和之前的结束时间有冲突
+        CarbonReportDO getOrganizeUserLastCarbonReport = carbonReportDAO.getLastReportByUuid(ProcessingUtil.getAuthorizeUserUuid(request));
+        if (!checkReportTimeHasDuplicate(getOrganizeUserLastCarbonReport, getStartTimeReplace, getEndTimeReplace)) {
+            return ResultUtil.error(timestamp, "您此次报告与之前报告冲突或时间范围不正确", ErrorCode.WRONG_DATE);
         }
         //取出报告类型(通过type)
         CarbonTypeDO getCarbonType = carbonTypeMapper.getTypeByName(carbonConsumeVO.getType());
         //进行数据库初始化本次碳核算报告表
-        if (carbonReportDAO.initializationReportMapper(ProcessingUtil.getAuthorizeUserUuid(request), carbonConsumeVO.getTitle(), getCarbonType.getUuid(), formattedDateRange, "draft", carbonConsumeVO.getSummary())) {
+        if (carbonReportDAO.initializationReportMapper(ProcessingUtil.getAuthorizeUserUuid(request), carbonConsumeVO.getTitle(), getCarbonType.getUuid(), getFormatDateRange, "draft", carbonConsumeVO.getSummary())) {
             //进行查询
             List<CarbonReportDO> getCarbonReportListDO = carbonReportDAO.getReportListByUuid(ProcessingUtil.getAuthorizeUserUuid(request));
             //获取最新的碳核算报告
             CarbonReportDO getCarbonReportDO = getCarbonReportListDO.get(0);
             //初始化本次碳核算数据表
-            if (carbonAccountingDAO.initializationCarbonAccounting(ProcessingUtil.getAuthorizeUserUuid(request), getCarbonReportDO.getId(), getCarbonType.getUuid(), formattedDateRange, "pending")) {
+            if (carbonAccountingDAO.initializationCarbonAccounting(ProcessingUtil.getAuthorizeUserUuid(request), getCarbonReportDO.getId(), getCarbonType.getUuid(), getFormatDateRange, "pending")) {
                 //查询碳核算数据表
                 List<CarbonAccountingDO> carbonAccountingDOList = carbonAccountingDAO.getCarbonAccountingListByUuidDesc(ProcessingUtil.getAuthorizeUserUuid(request));
                 CarbonAccountingDO getCarbonAccounting = carbonAccountingDOList.get(0);
@@ -391,17 +388,17 @@ public class CarbonServiceImpl implements CarbonService {
                         //更新碳核算报告
                         if (carbonConsumeVO.getSend()) {
                             //等待审核
-                            if (carbonReportDAO.updateEmissionById(totalCombustion,"pending_review",getCarbonReportDO.getId())){
-                                return ResultUtil.success(timestamp,"您的碳核算报告已经成功创建");
-                            }else {
-                                return ResultUtil.error(timestamp,"更新碳核算报告失败",ErrorCode.SERVER_INTERNAL_ERROR);
+                            if (carbonReportDAO.updateEmissionById(totalCombustion, "pending_review", getCarbonReportDO.getId())) {
+                                return ResultUtil.success(timestamp, "您的碳核算报告已经成功创建");
+                            } else {
+                                return ResultUtil.error(timestamp, "更新碳核算报告失败", ErrorCode.SERVER_INTERNAL_ERROR);
                             }
                         } else {
                             //草稿状态
-                            if (carbonReportDAO.updateEmissionById(totalCombustion,"draft",getCarbonReportDO.getId())){
-                                return ResultUtil.success(timestamp,"您的碳核算报告已经成功创建");
-                            }else {
-                                return ResultUtil.error(timestamp,"更新碳核算报告失败",ErrorCode.SERVER_INTERNAL_ERROR);
+                            if (carbonReportDAO.updateEmissionById(totalCombustion, "draft", getCarbonReportDO.getId())) {
+                                return ResultUtil.success(timestamp, "您的碳核算报告已经成功创建");
+                            } else {
+                                return ResultUtil.error(timestamp, "更新碳核算报告失败", ErrorCode.SERVER_INTERNAL_ERROR);
                             }
                         }
                     } else {
@@ -418,23 +415,3 @@ public class CarbonServiceImpl implements CarbonService {
         }
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

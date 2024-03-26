@@ -16,7 +16,7 @@ public class MaterialsDO {
     List<Materials> materials;
     List<Courses> courses;
     List<CarbonSequestration> carbonSequestrations;
-    List<Desulfuization> desulfuizations;
+    List<Desulfurization> desulfurization;
     List<Heat> heat;
 
     /**
@@ -45,7 +45,7 @@ public class MaterialsDO {
      */
     @Data
     @Accessors(chain = true)
-    public static class Desulfuization {
+    public static class Desulfurization {
         public String name;
         public Material material;
     }

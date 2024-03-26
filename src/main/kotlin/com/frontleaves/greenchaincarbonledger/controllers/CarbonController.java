@@ -1,20 +1,23 @@
 package com.frontleaves.greenchaincarbonledger.controllers;
 
 import com.frontleaves.greenchaincarbonledger.annotations.CheckAccountPermission;
+import com.frontleaves.greenchaincarbonledger.models.doData.MaterialsDO;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.CarbonConsumeVO;
-import com.frontleaves.greenchaincarbonledger.models.voData.getData.UserAddVO;
 import com.frontleaves.greenchaincarbonledger.services.CarbonService;
 import com.frontleaves.greenchaincarbonledger.utils.*;
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 
 /**
  * CarbonController
@@ -30,6 +33,7 @@ import java.text.SimpleDateFormat;
 @RequiredArgsConstructor
 public class CarbonController {
     private final CarbonService carbonService;
+    private final Gson gson;
 
     private final BusinessUtil businessUtil;
 
@@ -145,19 +149,40 @@ public class CarbonController {
         long timestamp = System.currentTimeMillis();
         return carbonService.getCarbonAccounting(timestamp, request, limit, page, order);
     }
+
     @PostMapping("/report/create")
     public ResponseEntity<BaseResponse> createCarbonReport(
-            @RequestBody @Validated CarbonConsumeVO carbonConsumeVO ,
+            @RequestBody @Validated CarbonConsumeVO carbonConsumeVO,
             @NotNull BindingResult bindingResult,
             HttpServletRequest request
-    ){
+    ) {
+        ArrayList<String> errorMessage = new ArrayList<>();
         log.info("[Controller] 请求 creatCarbonReport 接口");
         long timestamp = System.currentTimeMillis();
         // 对请求参数进行校验
         if (bindingResult.hasErrors()) {
             return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR, ProcessingUtil.getValidatedErrorList(bindingResult));
         }
-        //返回业务操作
-        return carbonService.createCarbonReport(timestamp,request,carbonConsumeVO);
+        // 对原料相关参数进行解析
+        try {
+            MaterialsDO materialsDO = gson.fromJson(carbonConsumeVO.getMaterials(), MaterialsDO.class);
+        } catch (JsonSyntaxException e) {
+            log.error("[Controller] 原料参数解析失败");
+            errorMessage.add("原料参数解析失败，请检查原料参数格式");
+            return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR, errorMessage);
+        }
+        // 返回业务操作
+        switch (carbonConsumeVO.getType()) {
+            case "steelProduction" -> {
+                return carbonService.createCarbonReport(timestamp, request, carbonConsumeVO);
+            }
+            case "generateElectricity" -> {
+                return null;
+            }
+            default -> {
+                errorMessage.add("type 参数错误");
+                return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR, errorMessage);
+            }
+        }
     }
 }

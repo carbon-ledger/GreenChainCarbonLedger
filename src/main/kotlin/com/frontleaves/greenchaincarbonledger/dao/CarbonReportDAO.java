@@ -41,8 +41,22 @@ public class CarbonReportDAO {
      */
     public List<CarbonReportDO> getReportListByUuid(String uuid){
         log.info("[DAO] 执行 getReportListByUuid");
-        log.info("/t Mysql 查询");
+        log.info("\t> Mysql 查询");
         return carbonReportMapper.getReportListByUuid(uuid);
+    }
+
+    /**
+     * 获取最后一次报告
+     * <hr/>
+     * 根据账户的UUID进行对信息的获取，获取最后一次碳核算报告单
+     *
+     * @param organizeUserUuid 组织用户的UUID
+     * @return 最后一次报告
+     */
+    public CarbonReportDO getLastReportByUuid(String organizeUserUuid) {
+        log.info("[DAO] 执行 getLastReportByUuid");
+        log.info("\t> Mysql 查询");
+        return carbonReportMapper.getLastReportByUuid(organizeUserUuid);
     }
 
     /**
