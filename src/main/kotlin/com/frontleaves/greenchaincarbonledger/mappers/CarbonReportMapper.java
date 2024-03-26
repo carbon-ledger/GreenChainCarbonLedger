@@ -18,8 +18,8 @@ import java.util.List;
 @Mapper
 public interface CarbonReportMapper {
     @Insert("""
-            INSERT INTO fy_carbon_report(organize_uuid, report_title, report_type, accounting_period, total_emission, report_status, verifier_uuid, verification_date, report_summary, blockchain_tx_id, created_at, updated_at)
-            VALUES (#{uuid},#{title},#{type},#{period},0,#{status},0,0,#{summary},0,now(),0)
+            INSERT INTO fy_carbon_report(organize_uuid, report_title, report_type, accounting_period, total_emission, report_status, report_summary, blockchain_tx_id, created_at)
+            VALUES (#{uuid},#{title},#{type},#{period},0,#{status},#{summary},0,now())
             """)
     Boolean initializationReportMapper(String uuid,String title,String type,String period,String status,String summary);
 

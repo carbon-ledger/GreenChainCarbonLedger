@@ -2,7 +2,6 @@ package com.frontleaves.greenchaincarbonledger.services.impl;
 
 import com.frontleaves.greenchaincarbonledger.dao.*;
 import com.frontleaves.greenchaincarbonledger.mappers.CarbonMapper;
-import com.frontleaves.greenchaincarbonledger.mappers.CarbonTypeMapper;
 import com.frontleaves.greenchaincarbonledger.models.doData.*;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.CarbonConsumeVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.EditTradeVO;
@@ -23,7 +22,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -41,7 +40,7 @@ public class CarbonServiceImpl implements CarbonService {
     private final CarbonMapper carbonMapper;
     private final Gson gson;
     private final CarbonReportDAO carbonReportDAO;
-    private final CarbonTypeMapper carbonTypeMapper;
+    private final CarbonTypeDAO carbonTypeDAO;
     private final CarbonCompensationMaterialDAO carbonCompensationMaterialDAO;
     private final CarbonItemTypeDAO carbonItemTypeDAO;
     private final ProcessEmissionFactorDAO processEmissionFactorDAO;
@@ -270,7 +269,7 @@ public class CarbonServiceImpl implements CarbonService {
             return ResultUtil.error(timestamp, "您此次报告与之前报告冲突或时间范围不正确", ErrorCode.WRONG_DATE);
         }
         //取出报告类型(通过type)
-        CarbonTypeDO getCarbonType = carbonTypeMapper.getTypeByName(carbonConsumeVO.getType());
+        CarbonTypeDO getCarbonType = carbonTypeDAO.getTypeByName(carbonConsumeVO.getType());
         //进行数据库初始化本次碳核算报告表
         if (carbonReportDAO.initializationReportMapper(ProcessingUtil.getAuthorizeUserUuid(request), carbonConsumeVO.getTitle(), getCarbonType.getUuid(), getFormatDateRange, "draft", carbonConsumeVO.getSummary())) {
             //进行查询

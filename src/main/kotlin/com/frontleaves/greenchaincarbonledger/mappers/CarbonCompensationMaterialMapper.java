@@ -11,8 +11,8 @@ import org.apache.ibatis.annotations.Mapper;
 @Mapper
 public interface CarbonCompensationMaterialMapper {
     @Insert("""
-            INSERT INTO fy_carbon_compensation_material( accounting_id, raw_material, created_at, updated_at) 
-            VALUES (#{accountId},#{rawMaterial},now(),0)
+            INSERT INTO fy_carbon_compensation_material(accounting_id, raw_material, created_at)
+            VALUES (#{accountId},#{rawMaterial},now())
             """)
     Boolean initializationCarbonCompensationMaterial(String accountId,String rawMaterial);
 }

@@ -25,6 +25,6 @@ public class CarbonCompensationMaterialDAO {
     public Boolean initializationCarbonCompensationMaterial(String accountId,String rawMaterial){
         log.info("[DAO] 执行 initializationCarbonCompensationMaterial");
         log.info("/t Mysql 插入");
-        return carbonCompensationMaterialMapper.initializationCarbonCompensationMaterial(accountId,rawMaterial);
+        return carbonCompensationMaterialMapper.initializationCarbonCompensationMaterial(accountId, rawMaterial);
     }
 }

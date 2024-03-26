@@ -1,6 +1,8 @@
 package com.frontleaves.greenchaincarbonledger.dao;
 
 import com.frontleaves.greenchaincarbonledger.mappers.CarbonMapper;
+import com.frontleaves.greenchaincarbonledger.mappers.CarbonTypeMapper;
+import com.frontleaves.greenchaincarbonledger.models.doData.CarbonTypeDO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
@@ -14,5 +16,4 @@ import org.springframework.stereotype.Repository;
 @RequiredArgsConstructor
 public class CarbonTradeDAO {
     private final CarbonMapper carbonMapper;
-
 }
