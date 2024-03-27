@@ -1,6 +1,8 @@
 package com.frontleaves.greenchaincarbonledger.dao;
 
+import com.frontleaves.greenchaincarbonledger.mappers.DesulfurizationFactorMapper;
 import com.frontleaves.greenchaincarbonledger.mappers.ProcessEmissionFactorMapper;
+import com.frontleaves.greenchaincarbonledger.models.doData.DesulfurizationFactorDO;
 import com.frontleaves.greenchaincarbonledger.models.doData.ProcessEmissionFactorDO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +17,7 @@ import org.springframework.stereotype.Repository;
 @RequiredArgsConstructor
 public class ProcessEmissionFactorDAO {
     private final ProcessEmissionFactorMapper processEmissionFactorMapper;
+    private final DesulfurizationFactorMapper desulfurizationFactorMapper;
 
     /**
      * 通过名字来获取对应的碳排放因子
@@ -26,4 +29,11 @@ public class ProcessEmissionFactorDAO {
         log.info("/t Mysql 查询");
         return processEmissionFactorMapper.getFactorByName(name);
     }
+
+    public DesulfurizationFactorDO getDesFactorByName(String name){
+        log.info("[DAO] 执行 getDesFactorByName");
+        log.info("/t Mysql 查询");
+        return desulfurizationFactorMapper.getDesFactorByName(name);
+    }
+
 }

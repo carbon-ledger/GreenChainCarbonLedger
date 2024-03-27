@@ -84,4 +84,10 @@ interface CarbonService {
         request: HttpServletRequest,
         carbonConsumeVO: CarbonConsumeVO
     ): ResponseEntity<BaseResponse>
+
+    fun createCarbonReport1(
+        timestamp: Long,
+        request: HttpServletRequest,
+        carbonConsumeVO: CarbonConsumeVO
+    ): ResponseEntity<BaseResponse>
 }

@@ -177,7 +177,7 @@ public class CarbonController {
                 return carbonService.createCarbonReport(timestamp, request, carbonConsumeVO);
             }
             case "generateElectricity" -> {
-                return null;
+                return carbonService.createCarbonReport1(timestamp, request, carbonConsumeVO);
             }
             default -> {
                 errorMessage.add("type 参数错误");

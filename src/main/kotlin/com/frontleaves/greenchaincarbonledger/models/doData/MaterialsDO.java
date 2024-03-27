@@ -47,7 +47,13 @@ public class MaterialsDO {
     @Accessors(chain = true)
     public static class Desulfurization {
         public String name;
-        public Material material;
+        public desulfurizationComposition material;
+
+        @Data
+        @Accessors(chain = true)
+        public static class desulfurizationComposition{
+            public Double consumption;
+        }
     }
 
     /**
