@@ -68,6 +68,8 @@ public class MailTemplateServiceImpl implements MailTemplateService {
         switch (template) {
             case "user-login" -> prepareData.put("title", SystemConstants.SYSTEM_NAME + " - 用户登陆");
             case "user-register" -> prepareData.put("title", SystemConstants.SYSTEM_NAME + " - 用户注册");
+            case "user-registered" -> prepareData.put("title", SystemConstants.SYSTEM_NAME + " - 用户注册成功");
+            case "user-delete" -> prepareData.put("title", SystemConstants.SYSTEM_NAME + " - 账户注销");
             case "user-forget-password" -> prepareData.put("title", SystemConstants.SYSTEM_NAME + " - 忘记密码");
             default -> {
                 verifyCodeDAO.deleteVerifyCode(email);
