@@ -59,4 +59,19 @@ public class MailController {
         // 业务代码
         return mailService.sendMailByCode(timestamp, request, mailSendCodeVO.getEmail(), mailSendCodeVO.getTemplate());
     }
+
+    @PostMapping("/send")
+    public ResponseEntity<BaseResponse> sendMail(
+            @RequestBody @Validated MailSendCodeVO mailSendCodeVO,
+            @NotNull BindingResult bindingResult
+            ) {
+        log.info("[Controller] 执行 sendMail 方法");
+        long timestamp = System.currentTimeMillis();
+        if (bindingResult.hasErrors()) {
+            log.warn("\t> 参数校验失败");
+            return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR, ProcessingUtil.getValidatedErrorList(bindingResult));
+        }
+        // 业务代码
+        return mailService.sendMail(timestamp, mailSendCodeVO.getEmail(), mailSendCodeVO.getTemplate());
+    }
 }
