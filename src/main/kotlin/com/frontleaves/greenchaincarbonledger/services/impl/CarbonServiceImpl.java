@@ -336,15 +336,11 @@ public class CarbonServiceImpl implements CarbonService {
     @NotNull
     @Override
     public ResponseEntity<BaseResponse> createCarbonReport(long timestamp, @NotNull HttpServletRequest request, @NotNull CarbonConsumeVO carbonConsumeVO) {
-        // 获取时间并进行整理
+        // 1. 检查时间冲突
+            // 从前端获取时间并进行格式化
         String getStartTimeReplace = carbonConsumeVO.getStartTime().replace("-", "");
         String getEndTimeReplace = carbonConsumeVO.getEndTime().replace("-", "");
         String getFormatDateRange = getStartTimeReplace + "-" + getEndTimeReplace;
-        // 进行判断是否这次要创建的报告的核算开始时间是否和之前的结束时间有冲突
-        CarbonReportDO getOrganizeUserLastCarbonReport = carbonReportDAO.getLastReportByUuid(ProcessingUtil.getAuthorizeUserUuid(request));
-        if (!checkReportTimeHasDuplicate(getOrganizeUserLastCarbonReport, getStartTimeReplace, getEndTimeReplace)) {
-            return ResultUtil.error(timestamp, "您此次报告与之前报告冲突或时间范围不正确", ErrorCode.WRONG_DATE);
-        }
         //取出报告类型(通过type)
         CarbonTypeDO getCarbonType = carbonTypeDAO.getTypeByName(carbonConsumeVO.getType());
         //进行数据库初始化本次碳核算报告表
@@ -455,7 +451,8 @@ public class CarbonServiceImpl implements CarbonService {
                     //E电和E火
                     ehCombustion = electricCombustion + hAllCombustion;
                     CarbonAccountingEmissionsVolumeDO.ElectricHeat electricHeat = new CarbonAccountingEmissionsVolumeDO.ElectricHeat();
-                    electricHeat.setName("eElectricityAndFire")
+                    electricHeat
+                            .setName("eElectricityAndFire")
                             .setElectricHeatEmissions(ehCombustion);
                     carbonAccountingEmissionsVolumeDO.setElectricHeat(electricHeat);
                     //总排放量为
@@ -495,7 +492,7 @@ public class CarbonServiceImpl implements CarbonService {
     @NotNull
     @Override
     public ResponseEntity<BaseResponse> createCarbonReport1(long timestamp, @NotNull HttpServletRequest request, @NotNull CarbonConsumeVO carbonConsumeVO) {
-        // 1. 检查时间冲突
+    // 1. 检查时间冲突
         // 从前端获取时间并进行格式化
         String getStartTimeReplace = carbonConsumeVO.getStartTime().replace("-", "");
         String getEndTimeReplace = carbonConsumeVO.getEndTime().replace("-", "");
@@ -506,7 +503,7 @@ public class CarbonServiceImpl implements CarbonService {
         if (!checkReportTimeHasDuplicate(getOrganizeUserLastCarbonReport, getStartTimeReplace, getEndTimeReplace)) {
             return ResultUtil.error(timestamp, "您此次报告与之前报告冲突或时间范围不正确", ErrorCode.WRONG_DATE);
         }
-        // 2. 从VO获取数据向数据库插入此次报告的基本数据
+    // 2. 从VO获取数据向数据库插入此次报告的基本数据
         // 取出报告类型(通过type)
         CarbonTypeDO getCarbonType = carbonTypeDAO.getTypeByName(carbonConsumeVO.getType());
         // 向碳排放报告数据表中，插入数据，暂时插入碳总排放量为0
