@@ -137,6 +137,7 @@ public class UserController {
      * @return 包含用户信息的响应实体
      */
     @PostMapping("/add")
+    @CheckAccountPermission("{user:addAccount}")
     public ResponseEntity<BaseResponse> addAccount(
             @RequestBody @Validated UserAddVO userAddVO,
             @NotNull BindingResult bindingResult,
@@ -188,6 +189,7 @@ public class UserController {
      * @return 包含用户信息的响应实体
      */
     @DeleteMapping("/force-logout/{uuid}")
+    @CheckAccountPermission("{user:forceLogout}")
     public ResponseEntity<BaseResponse> forceLogout(
             HttpServletRequest request,
             @PathVariable("uuid") String userUuid
@@ -214,6 +216,7 @@ public class UserController {
      * @return 包含用户信息的响应实体
      */
     @PutMapping("/force-edit/{uuid}")
+    @CheckAccountPermission("{user:putUserForceEdit}")
     public ResponseEntity<BaseResponse> putUserForceEdit(
             @RequestBody @Validated UserForceEditVO userForceEditVO,
             @NotNull BindingResult bindingResult,

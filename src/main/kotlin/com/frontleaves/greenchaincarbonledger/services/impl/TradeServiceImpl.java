@@ -40,6 +40,7 @@ public class TradeServiceImpl implements TradeService {
     @Override
     public ResponseEntity<BaseResponse> deleteTrade(long timestamp, @NotNull HttpServletRequest request, @NotNull String id) {
         log.info("[Service] 执行 deleteTrade 方法");
+        log.debug("[Service] 进行用户查询确认");
         //确认用户
         UserDO getAuthUserDO = ProcessingUtil.getUserByHeaderUuid(request, userDAO);
         if (getAuthUserDO != null) {
@@ -60,6 +61,7 @@ public class TradeServiceImpl implements TradeService {
                 if (state) {
                     CarbonTradeDO getCarbonTrade = carbonDAO.getTradeById(id);
                     //校验删除的订单是否是今年的
+                    log.debug("[Service] 时间戳获取时间");
                     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy");
                     int localYear = Integer.parseInt(simpleDateFormat.format(timestamp));
                     if (Integer.parseInt(simpleDateFormat.format(getCarbonTrade.getCreatedAt())) != localYear) {
@@ -74,6 +76,7 @@ public class TradeServiceImpl implements TradeService {
                                 String status = "cancelled";
                                 Boolean result = carbonDAO.deleteTrade(id, status);
                                 if (result) {
+                                    log.debug("[Service] 数据库软删除更新数据");
                                     //获取用户的碳排放额
                                     CarbonQuotaDO getCarbonQuota = carbonQuotaDAO.getCarbonQuota(localYear, getAuthUserDO.getUuid());
                                     //进行碳交易碳总量的返还
@@ -111,6 +114,7 @@ public class TradeServiceImpl implements TradeService {
             String getUuid = getUser.getUuid();
             //检查是否发布了碳交易
             if (carbonDAO.getTradeListByUuid(getUuid)) {
+                log.debug("[Service] 校验参数");
                 //检查参数
                 // 检查参数，如果未设置（即为null），则使用默认值
                 limit = (limit.isEmpty() || Integer.parseInt(limit) > 100) ? "20" : limit;
@@ -122,6 +126,7 @@ public class TradeServiceImpl implements TradeService {
                 }
                 log.debug("\t> limit: {}, page: {}, order: {}", limit, page, order);
                 //对于type值进行判断
+                log.debug("[Service] 校验type");
                 List<CarbonTradeDO> getTradeList;
                 switch (type) {
                     case "all" ->
@@ -134,6 +139,7 @@ public class TradeServiceImpl implements TradeService {
                         return ResultUtil.error(timestamp, "type参数错误", ErrorCode.REQUEST_BODY_ERROR);
                     }
                 }
+                log.debug("[Service] 整理输出数据");
                 //整理数据
                 ArrayList<BackCarbonTradeListVO> backCarbonTradeList=new ArrayList<>();
                 if (getTradeList != null) {
@@ -174,6 +180,7 @@ public class TradeServiceImpl implements TradeService {
         //确认买家身份并且校验是否合规
         UserDO getOrganizeDO = ProcessingUtil.getUserByHeaderUuid(request, userDAO);
         if (getOrganizeDO != null) {
+            log.debug("[Service] 从时间戳获取时间");
             //首先提取年份
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy");
             int localYear = Integer.parseInt(simpleDateFormat.format(timestamp));

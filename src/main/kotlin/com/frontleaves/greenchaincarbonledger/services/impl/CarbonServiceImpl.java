@@ -92,6 +92,7 @@ public class CarbonServiceImpl implements CarbonService {
         //校验组织是否在系统中进行碳核算
         List<CarbonAccountingDO> getAccountList = carbonDAO.getAccountByUuid(getUuid);
         if (!getAccountList.isEmpty()) {
+            log.debug("[Service] 校验参数");
             // 检查参数，如果未设置（即为null），则使用默认值
             limit = (limit.isEmpty() || Integer.parseInt(limit) > 100) ? "20" : limit;
             page = (page.isEmpty()) ? "1" : page;
@@ -100,6 +101,7 @@ public class CarbonServiceImpl implements CarbonService {
             }
             log.debug("\t> limit: {}, page: {}, order: {}", limit, page, order);
             //进行type值判断
+            log.debug("[Service] 校验type参数");
             List<CarbonReportDO> getReportList;
             order = "id " + order;
             switch (type) {
@@ -112,6 +114,7 @@ public class CarbonServiceImpl implements CarbonService {
                 }
             }
             //整理数据
+            log.debug("[Service] 整理输出数据");
             ArrayList<BackCarbonReportVO> backCarbonReportList = new ArrayList<>();
             if (getReportList != null) {
                 for (CarbonReportDO getReport : getReportList) {

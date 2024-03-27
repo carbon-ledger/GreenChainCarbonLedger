@@ -135,6 +135,7 @@ public class CarbonController {
      * @return carbonService
      */
     @GetMapping("/accounting/get")
+    @CheckAccountPermission("{carbon:getCarbonAccounting}")
     public ResponseEntity<BaseResponse> getCarbonAccounting(
             @RequestParam(required = false) String limit,
             @RequestParam(required = false) String page,
@@ -156,7 +157,7 @@ public class CarbonController {
      * @return 是否完成配额的添加
      */
     @PostMapping("/add/{organizeId}")
-    @CheckAccountPermission("{Carbon:addOrganizeIdQuota}")
+    @CheckAccountPermission("{carbon:addOrganizeIdQuota}")
     public ResponseEntity<BaseResponse> addOrganizeIdQuota(
             @RequestBody @Validated CarbonAddQuotaVO carbonAddQuotaVO,
             @org.jetbrains.annotations.NotNull BindingResult bindingResult,
@@ -178,6 +179,7 @@ public class CarbonController {
     }
 
     @PostMapping("/report/create")
+    @CheckAccountPermission("{carbon:createCarbonReport}")
     public ResponseEntity<BaseResponse> createCarbonReport(
             @RequestBody @Validated CarbonConsumeVO carbonConsumeVO,
             @NotNull BindingResult bindingResult,
@@ -194,7 +196,7 @@ public class CarbonController {
     }
 
     @PatchMapping("/edit/{organizeId}")
-    @CheckAccountPermission("{Carbon:editCarbonQuota}")
+    @CheckAccountPermission("{carbon:editCarbonQuota}")
     public ResponseEntity<BaseResponse> editCarbonQuota(
             @RequestBody @Validated CarbonAddQuotaVO carbonAddQuotaVO,
             @NotNull BindingResult bindingResult,
