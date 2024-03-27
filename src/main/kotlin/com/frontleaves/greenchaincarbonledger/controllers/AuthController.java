@@ -85,9 +85,9 @@ public class AuthController {
     }
 
     /**
-     * 用户注册
+     * 用户更改密码
      * <hr/>
-     * 用于用户注册, 用户可以通过该接口进行注册
+     * 用于用户更改密码, 用户可以通过该接口进行密码更改
      *
      * @param authChangeVO  注册获取的信息
      * @param bindingResult 结果
