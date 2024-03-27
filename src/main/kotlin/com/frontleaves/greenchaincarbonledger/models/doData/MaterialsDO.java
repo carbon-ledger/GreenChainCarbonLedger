@@ -13,10 +13,15 @@ import java.util.List;
 @Data
 @Accessors(chain = true)
 public class MaterialsDO {
+    // E燃烧参数
     List<Materials> materials;
+    // E过程参数
     List<Courses> courses;
+    // E固碳参数
     List<CarbonSequestration> carbonSequestrations;
+    // E脱硫参数
     List<Desulfurization> desulfurization;
+    // E热力参数
     List<Heat> heat;
 
     /**

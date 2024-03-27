@@ -4,7 +4,7 @@ import lombok.Data;
 import lombok.experimental.Accessors;
 
 /**
- * 用于粗放碳排放数据表中的分排放额
+ * 用于存放碳排放数据表中的分排放额
  * @author FALSHLACK
  */
 @Data
@@ -15,6 +15,7 @@ public class CarbonAccountingEmissionsVolumeDO {
     CarbonSequestration carbonSequestrations;
     ElectricHeat electricHeat;
     Desulfuization desulfuizations;
+    Electric electric;
 
     @Data
     @Accessors(chain = true)
@@ -45,6 +46,13 @@ public class CarbonAccountingEmissionsVolumeDO {
     public static class Desulfuization {
         public String name;
         public Double carbonEmissions;
+    }
+
+    @Data
+    @Accessors(chain = true)
+    public static class Electric {
+        public String name;
+        public Double electricEmissions;
     }
 
 }
