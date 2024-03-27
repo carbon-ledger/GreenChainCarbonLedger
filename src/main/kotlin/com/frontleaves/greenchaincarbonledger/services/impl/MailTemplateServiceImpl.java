@@ -67,6 +67,7 @@ public class MailTemplateServiceImpl implements MailTemplateService {
 
         switch (template) {
             case "user-register" -> prepareData.put("title", SystemConstants.SYSTEM_NAME + " - 用户注册");
+            case "user-delete" -> prepareData.put("title", SystemConstants.SYSTEM_NAME + " - 账户注销");
             case "user-forget-password" -> prepareData.put("title", SystemConstants.SYSTEM_NAME + " - 忘记密码");
             default -> {
                 verifyCodeDAO.deleteVerifyCode(email);
@@ -87,7 +88,7 @@ public class MailTemplateServiceImpl implements MailTemplateService {
             switch (template) {
                 case "user-change-password-confirm" -> prepareData.put("title", SystemConstants.SYSTEM_NAME + " - 修改密码确认");
                 case "user-registered" -> prepareData.put("title", SystemConstants.SYSTEM_NAME + " - 用户注册成功");
-                case "user-delete" -> prepareData.put("title", SystemConstants.SYSTEM_NAME + " - 账户已删除");
+                case "user-deleted" -> prepareData.put("title", SystemConstants.SYSTEM_NAME + " - 账户已注销");
                 default -> throw new MailTemplateDoesNotExistException("模板不存在");
             }
             this.sendMail(email, prepareData, "./mail/" + template + ".html");

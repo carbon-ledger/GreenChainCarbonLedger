@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="zh-cn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>用户注册</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            padding: 0;
+            text-align: center;
+        }
+
+        .container {
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px 8px 0 0;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: left;
+        }
+
+        .title {
+            padding-bottom: 20px;
+            text-align: center;
+        }
+
+        h1, h2, p {
+            color: #333;
+            margin: 10px 0;
+        }
+
+        p.right-aligned {
+            text-align: right;
+        }
+
+        .footer {
+            text-align: center;
+            font-size: 14px;
+            background-color: #adadad; /* 淡灰色背景 */
+            box-shadow: 0 2px 0 rgba(0, 0, 0, 0.1);
+            border-radius: 0 0 8px 8px; /* 取消页脚圆角 */
+            padding: 10px 20px; /* 调整页脚内边距 */
+            box-sizing: border-box; /* 确保宽度计算包含内边距 */
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1 class="title" th:text="${title}">绿链碳账本</h1>
+    <p>尊敬的用户 <b th:text="${username}">[用户名]</b>,</p>
+    <hr/>
+    <p>我们已收到您的账号注销请求。根据您的要求，您的账户目前已被暂时注销，但请注意，您的账号并未从我们的系统中彻底删除。您有7天的时间（从注销请求之日起算）重新登录您的账户，以取消注销过程。</p>
+    <p>如果在这7天内您选择重新登录，您的账号将被完全恢复，就如同从未发生过注销请求一样。但是，如果7天内没有任何登录尝试，您的账号将进入永久注销状态。</p>
+    <p>重要提示：为了保持区块链的完整性和有效性，即使账户进入永久注销状态，您过往的交易记录仍将被保留在我们的系统中。这意味着，尽管账户不再活跃，您的交易历史将继续作为区块链记录的一部分存在。</p>
+    <p>如果您有任何疑问，或在注销过程中遇到问题，欢迎随时联系我们的客服团队。我们始终在这里，乐于助您解答疑惑并提供必要的支持。</p>
+    <p>感谢您对绿链碳账本服务的信任与支持。我们希望您的未来充满可能，也期待有一天能再次为您服务。</p>
+    <hr/>
+    <hr/>
+    <p class="right-aligned">此致，绿链碳账本服务团队</p>
+</div>
+<div class="footer">
+    <p id="copyright">&copy;️ 2016-2024 绿链碳账本. All Rights Reserved.</p>
+    <p>如遇任何问题，请随时联系：support@yourdomain.com</p>
+</div>
+</body>
+<script type="application/javascript">
+    // 生成当年年
+    const footerYear = document.querySelector('#copyright');
+    const currentYear = new Date().getFullYear();
+    footerYear.textContent = '©️ 2016-' + currentYear + ' 绿链碳账本. All Rights Reserved.';
+</script>
+</html>
