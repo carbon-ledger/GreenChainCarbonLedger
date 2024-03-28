@@ -13,7 +13,7 @@ public class CarbonAccountingEmissionsVolumeDO {
     Materials materials;
     Courses courses;
     CarbonSequestration carbonSequestrations;
-    ElectricHeat electricHeat;
+    Heat heat;
     Desulfuization desulfuizations;
     Electric electric;
 
@@ -31,9 +31,9 @@ public class CarbonAccountingEmissionsVolumeDO {
     }
     @Data
     @Accessors(chain = true)
-    public static class ElectricHeat{
+    public static class Heat{
         public String name;
-        public Double electricHeatEmissions;
+        public Double heatEmissions;
     }
     @Data
     @Accessors(chain = true)

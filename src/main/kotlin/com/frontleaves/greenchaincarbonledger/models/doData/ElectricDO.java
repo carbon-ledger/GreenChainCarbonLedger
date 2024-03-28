@@ -9,7 +9,9 @@ import lombok.experimental.Accessors;
  */
 @Data
 @Accessors(chain = true)
-public class ElectricDO {
+public class
+
+ElectricDO {
     String electricBuy;
     String electricOutside;
     String electricExport;
