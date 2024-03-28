@@ -51,6 +51,12 @@ public class CarbonAccountingDAO {
         return carbonAccountingMapper.initializationCarbonAccounting(uuid, reportId, type, period, status);
     }
 
+    public Boolean insertCarbonAccounting(CarbonAccountingDO carbonAccountingDO){
+        log.info("[DAO] 执行 insertCarbonAccounting");
+        log.info("/t Mysql 插入");
+        return carbonAccountingMapper.insertCarbonAccounting(carbonAccountingDO);
+    }
+
     /**
      * 通过uuid查询碳核算数据链表 倒序（ID大在上面）
      * @param uuid-组织uuid

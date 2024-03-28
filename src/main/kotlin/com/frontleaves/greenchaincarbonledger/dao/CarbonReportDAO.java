@@ -35,6 +35,18 @@ public class CarbonReportDAO {
     }
 
     /**
+     * 新增碳核算报告数据表记录
+     * @param carbonReportDO 报告表DO对象
+     * @return 是否成功插入数据
+    * */
+    public Boolean insertReportMapper(CarbonReportDO carbonReportDO){
+        log.info("[DAO] 执行 insertReportMapper");
+        log.info("/t Mysql 插入");
+        return carbonReportMapper.insertReportMapper(carbonReportDO);
+    }
+
+
+    /**
      * 通过uuid来获取碳核算报告链表(倒序排列)(ID大在最上面)
      * @param uuid-组织uuid
      * @return 碳核算报告链表

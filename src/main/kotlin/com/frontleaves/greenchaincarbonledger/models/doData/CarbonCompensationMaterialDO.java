@@ -10,11 +10,16 @@ import lombok.experimental.Accessors;
  */
 @Data
 @Accessors(chain = true)
-public class fyCarbonCompensationMaterialDO {
+public class CarbonCompensationMaterialDO {
     String id;
+    // 碳核算数据ID
     String accountingId;
+    // 原料
     String rawMaterial;
+    // 电力原料
     String electricMaterial;
+    // 创建时间
     String createdAt;
+    // 修改时间
     String updatedAt;
 }

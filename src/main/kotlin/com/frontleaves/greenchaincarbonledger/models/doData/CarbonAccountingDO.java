@@ -1,6 +1,7 @@
 package com.frontleaves.greenchaincarbonledger.models.doData;
 
 import lombok.Data;
+import lombok.experimental.Accessors;
 
 /**
  * CarbonAccountingDO
@@ -12,11 +13,13 @@ import lombok.Data;
  * @author FLASHLACK
  */
 @Data
+@Accessors(chain = true)
 public class CarbonAccountingDO {
     String id;
     String organizeUuid;
     String reportId;
-    String emissionSource;
+    String emissionType;
+    String emissionVolume;
     Integer emissionAmount;
     String accountingPeriod;
     String dataVerificationStatus;

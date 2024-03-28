@@ -193,7 +193,7 @@ public class CarbonServiceImpl implements CarbonService {
             @NotNull String page, String order
     ) {
         log.info("[Service] 执行 getCarbonReport 方法");
-        String getUuid = ProcessingUtil.getAuthorizeUserUuid(request);
+        /*String getUuid = ProcessingUtil.getAuthorizeUserUuid(request);
         //校验组织是否在系统中进行碳核算
         List<CarbonAccountingDO> getAccountList = carbonDAO.getAccountByUuid(getUuid);
         if (!getAccountList.isEmpty()) {
@@ -240,7 +240,8 @@ public class CarbonServiceImpl implements CarbonService {
             }
         } else {
             return ResultUtil.error(timestamp, ErrorCode.CAN_T_ACCOUNT_FOR_CARBON);
-        }
+        }*/
+        return null;
     }
 
     @NotNull
@@ -265,10 +266,9 @@ public class CarbonServiceImpl implements CarbonService {
                 backCarbonAccountingVO
                         .setId(carbonAccountingDO.getId())
                         .setOrganizeUuid(carbonAccountingDO.getOrganizeUuid())
-                        .setEmissionSource(carbonAccountingDO.getEmissionSource())
+                        .setEmissionSource(carbonAccountingDO.getEmissionVolume())
                         .setEmissionAmount(carbonAccountingDO.getEmissionAmount())
                         .setAccountingPeriod(carbonAccountingDO.getAccountingPeriod())
-                        .setEmissionSource(carbonAccountingDO.getEmissionSource())
                         .setDataVerificationStatus(carbonAccountingDO.getDataVerificationStatus())
                         .setCreateAt(carbonAccountingDO.getCreatedAt())
                         .setUpdateAt(carbonAccountingDO.getUpdatedAt());
@@ -504,26 +504,67 @@ public class CarbonServiceImpl implements CarbonService {
             return ResultUtil.error(timestamp, "您此次报告与之前报告冲突或时间范围不正确", ErrorCode.WRONG_DATE);
         }
     // 2. 从VO获取数据向数据库插入此次报告的基本数据
+        // 考虑外键约束相关的数据表插入数据顺序：fy_carbon_report、fy_carbon_accounting、fy_carbon_compensation_material
         // 取出报告类型(通过type)
         CarbonTypeDO getCarbonType = carbonTypeDAO.getTypeByName(carbonConsumeVO.getType());
         // 向碳排放报告数据表中，插入数据，暂时插入碳总排放量为0
-        if (!(carbonReportDAO.initializationReportMapper(ProcessingUtil.getAuthorizeUserUuid(request), carbonConsumeVO.getTitle(), getCarbonType.getUuid(), getFormatDateRange, "draft", carbonConsumeVO.getSummary()))) {
-            return ResultUtil.error(timestamp, "初始化碳核算报告数据表失败", ErrorCode.UPDATE_DATA_ERROR);
+        // 生成准备存放的DO对象
+        CarbonReportDO carbonReportDO = new CarbonReportDO();
+        carbonReportDO
+                .setOrganizeUuid(ProcessingUtil.getAuthorizeUserUuid(request))
+                .setReportTitle(carbonConsumeVO.getTitle())
+                .setReportType(getCarbonType.getUuid())
+                .setAccountingPeriod(getFormatDateRange)
+                .setReportStatus("draft")
+                .setReportSummary(carbonConsumeVO.getSummary());
+        if (!(carbonReportDAO.insertReportMapper(carbonReportDO))) {
+            return ResultUtil.error(timestamp, "新增碳核算报告数据表记录失败", ErrorCode.INSERT_DATA_ERROR);
         }
+//        if (!(carbonReportDAO.initializationReportMapper(ProcessingUtil.getAuthorizeUserUuid(request), carbonConsumeVO.getTitle(), getCarbonType.getUuid(), getFormatDateRange, "draft", carbonConsumeVO.getSummary()))) {
+//            return ResultUtil.error(timestamp, "初始化碳核算报告数据表失败", ErrorCode.UPDATE_DATA_ERROR);
+//        }
         // 获取刚刚初始化的碳核算报告数据表
         List<CarbonReportDO> getCarbonReportListDO = carbonReportDAO.getReportListByUuid(ProcessingUtil.getAuthorizeUserUuid(request));
         CarbonReportDO getCarbonReportDO = getCarbonReportListDO.get(0);
         // 向碳核算数据表中，插入数据
-        if (!(carbonAccountingDAO.initializationCarbonAccounting(ProcessingUtil.getAuthorizeUserUuid(request), getCarbonReportDO.getId(), getCarbonType.getUuid(), getFormatDateRange, "pending"))) {
-            return ResultUtil.error(timestamp, "初始化碳核算数据表失败", ErrorCode.UPDATE_DATA_ERROR);
+        // 生成准备存放的DO对象
+        CarbonAccountingDO carbonAccountingDO = new CarbonAccountingDO();
+        carbonAccountingDO
+                .setOrganizeUuid(ProcessingUtil.getAuthorizeUserUuid(request))
+                .setCarbonReportId(getCarbonReportDO.getId())
+                .setEmissionType(getCarbonType.getUuid())
+                .setAccountingPeriod(getFormatDateRange)
+                .setDataVerificationStatus("pending");
+        if (!(carbonAccountingDAO.insertCarbonAccounting(carbonAccountingDO))) {
+            return ResultUtil.error(timestamp, "新增碳核算数据表记录失败", ErrorCode.INSERT_DATA_ERROR);
         }
+//        if (!(carbonAccountingDAO.initializationCarbonAccounting(ProcessingUtil.getAuthorizeUserUuid(request), getCarbonReportDO.getId(), getCarbonType.getUuid(), getFormatDateRange, "pending"))) {
+//            return ResultUtil.error(timestamp, "初始化碳核算数据表失败", ErrorCode.UPDATE_DATA_ERROR);
+//        }
         // 获取刚刚初始化的碳核算数据表
         List<CarbonAccountingDO> carbonAccountingDOList = carbonAccountingDAO.getCarbonAccountingListByUuidDesc(ProcessingUtil.getAuthorizeUserUuid(request));
         CarbonAccountingDO getCarbonAccounting = carbonAccountingDOList.get(0);
         // 向碳排放配额原料表中，插入数据
-        if (!(carbonCompensationMaterialDAO.initializationCarbonCompensationMaterial(getCarbonAccounting.getId(), carbonConsumeVO.getMaterials()))) {
-            return ResultUtil.error(timestamp, "初始化碳原料数据表失败", ErrorCode.UPDATE_DATA_ERROR);
+        // 生成准备存放的DO对象
+        CarbonCompensationMaterialDO carbonCompensationMaterialDO = new CarbonCompensationMaterialDO();
+        ElectricDO electricDO = new ElectricDO();
+        electricDO
+                .setElectricBuy(carbonConsumeVO.getElectricBuy())
+                .setElectricOutside(carbonConsumeVO.getElectricOutside())
+                .setElectricCompany(carbonConsumeVO.getElectricCompany())
+                .setElectricExport(carbonConsumeVO.getElectricExport());
+        // 电力数据
+        String electric1 = gson.toJson(electricDO);
+        carbonCompensationMaterialDO
+                .setAccountingId(getCarbonAccounting.getId())
+                .setRawMaterial(carbonConsumeVO.getMaterials())
+                .setElectricMaterial(electric1);
+        if (!(carbonCompensationMaterialDAO.insertCarbonCompensationMaterial(carbonCompensationMaterialDO))) {
+            return ResultUtil.error(timestamp, "新增碳原料数据表记录失败", ErrorCode.INSERT_DATA_ERROR);
         }
+//        if (!(carbonCompensationMaterialDAO.initializationCarbonCompensationMaterial(getCarbonAccounting.getId(), carbonConsumeVO.getMaterials()))) {
+//            return ResultUtil.error(timestamp, "初始化碳原料数据表失败", ErrorCode.UPDATE_DATA_ERROR);
+//        }
         // 从前端传入数据的VO获取materials，此对象中包含了五个列表
         String materialsJson = carbonConsumeVO.getMaterials();
         MaterialsDO materialsDO = gson.fromJson(materialsJson, MaterialsDO.class);

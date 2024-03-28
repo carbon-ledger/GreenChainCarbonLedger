@@ -23,6 +23,12 @@ public interface CarbonReportMapper {
             """)
     Boolean initializationReportMapper(String uuid,String title,String type,String period,String status,String summary);
 
+    @Insert("""
+            INSERT INTO fy_carbon_report(organize_uuid, report_title, report_type, accounting_period, total_emission, report_status, report_summary, created_at)
+            VALUES (#{uuid},#{title},#{type},#{period},0,#{status},#{summary},now())
+            """)
+    Boolean insertReportMapper(CarbonReportDO carbonReportDO);
+
     @Select("SELECT * FROM fy_carbon_report WHERE organize_uuid=#{uuid} ORDER BY id desc")
     List<CarbonReportDO> getReportListByUuid (String uuid);
 

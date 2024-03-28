@@ -26,10 +26,17 @@ public interface CarbonAccountingMapper {
     List<CarbonAccountingDO> getCarbonAccountingListByUuid(String uuid);
 
     @Insert("""
-            INSERT INTO fy_carbon_accounting(organize_uuid, report_id, emission_type, emissions_volume, emission_amount, accounting_period, data_verification_status, verifier_uuid, verification_notes, blockchain_tx_id, created_at, updated_at) 
-            VALUES (#{uuid},#{reportId},#{type},0,0,#{period},#{status},0,0,0,now(),0)
+            INSERT INTO fy_carbon_accounting(organize_uuid, report_id, emission_type, emissions_volume, emission_amount, accounting_period, data_verification_status, verifier_uuid, verification_notes, blockchain_tx_id, created_at)
+            VALUES (#{uuid},#{reportId},#{type},0,0,#{period},#{status},0,0,0,now())
             """)
     Boolean initializationCarbonAccounting(String uuid,String reportId,String type,String period,String status);
+
+    @Insert("""
+            INSERT INTO fy_carbon_accounting(organize_uuid, report_id, emission_type, emission_amount, accounting_period, data_verification_status, created_at)
+            VALUES (#{organizeUuid},#{reportId},#{emissionType},0,#{accountingPeriod},#{dataVerificationStatus},now())
+            """)
+    Boolean insertCarbonAccounting(CarbonAccountingDO carbonAccountingDO);
+
     @Select("SELECT * FROM fy_carbon_accounting WHERE organize_uuid=#{uuid} ORDER BY id desc")
     List<CarbonAccountingDO> getCarbonAccountingListByUuidDesc(String uuid);
     @Update("UPDATE fy_carbon_accounting SET emissions_volume =#{emissionsVolume} AND emission_amount=#{emissionAmount} AND updated_at =now() WHERE id=#{id}")

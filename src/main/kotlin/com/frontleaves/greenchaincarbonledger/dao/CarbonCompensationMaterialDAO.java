@@ -6,6 +6,7 @@ package com.frontleaves.greenchaincarbonledger.dao;
  */
 
 import com.frontleaves.greenchaincarbonledger.mappers.CarbonCompensationMaterialMapper;
+import com.frontleaves.greenchaincarbonledger.models.doData.CarbonCompensationMaterialDO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
@@ -26,5 +27,10 @@ public class CarbonCompensationMaterialDAO {
         log.info("[DAO] 执行 initializationCarbonCompensationMaterial");
         log.info("/t Mysql 插入");
         return carbonCompensationMaterialMapper.initializationCarbonCompensationMaterial(accountId, rawMaterial);
+    }
+    public Boolean insertCarbonCompensationMaterial(CarbonCompensationMaterialDO carbonCompensationMaterialDO){
+        log.info("[DAO] 执行 insertCarbonCompensationMaterial");
+        log.info("/t Mysql 插入");
+        return carbonCompensationMaterialMapper.insertCarbonCompensationMaterial(carbonCompensationMaterialDO);
     }
 }
