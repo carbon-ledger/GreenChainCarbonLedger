@@ -124,8 +124,8 @@ public class RoleServiceImpl implements RoleService {
         String getUuid = request.getHeader("X-Auth-UUID");
         UserDO getUserDO = userDAO.getUserByUuid(getUuid);
         if (getUserDO != null) {
-            // 判断角色名是否和数据库fy_role中有重复
-            RoleDO roleDO = roleDAO.getRoleByName(roleVO.getName());
+            // 判断角色UUID是否和数据库fy_role中有重复
+            RoleDO roleDO = roleDAO.getRoleByUuid(getUuid);
             if (roleDO == null) {
                 ArrayList<String> arrayList1 = roleVO.getPermission();
                 ArrayList<String> arrayList2 = new ArrayList<>(permissionMapper.getPermissionByName());
