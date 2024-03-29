@@ -108,6 +108,7 @@ public class UserServiceImpl implements UserService {
                     .setRealName(getUserDO.getRealName())
                     .setEmail(getUserDO.getEmail())
                     .setPhone(getUserDO.getPhone())
+                    .setAvatar(getUserDO.getAvatar())
                     .setUuid(getUserDO.getUuid());
             newPermissionInfo
                     .setUserPermission(gson.fromJson(getUserDO.getPermission(), new TypeToken<ArrayList<String>>() {}.getType()))

@@ -48,7 +48,6 @@ public class UserController {
     public ResponseEntity<BaseResponse> getUserCurrent(@NotNull HttpServletRequest request) {
         log.info("[Controller] 请求 getUserCurrent 接口");
         long timestamp = System.currentTimeMillis();
-        request.getHeader("X-Auth-UUID");
         // 业务操作
         return userService.getUserCurrent(timestamp, request);
     }
