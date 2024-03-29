@@ -49,7 +49,7 @@ public class TradeController {
     }
 
     @DeleteMapping("/delete/{id}")
-    @CheckAccountPermission("{Trade:deleteTrade}")
+    @CheckAccountPermission({"Trade:deleteTrade"})
     public ResponseEntity<BaseResponse> deleteTrade(
             @PathVariable("id") String id,
             HttpServletRequest request
@@ -65,7 +65,7 @@ public class TradeController {
     }
 
     @GetMapping("/send")
-    @CheckAccountPermission("{Trade:getOwnTradeList}")
+    @CheckAccountPermission({"Trade:getOwnTradeList"})
     public ResponseEntity<BaseResponse> getOwnTradeList(
             @RequestParam String type,
             @RequestParam(required = false) String search,
@@ -148,7 +148,7 @@ public class TradeController {
      * @return 是否完成交易
      */
     @PatchMapping("/buy/{id}")
-    @CheckAccountPermission("{trade:buyTrade}")
+    @CheckAccountPermission({"trade:buyTrade"})
     public ResponseEntity<BaseResponse> buyTrade(
             @PathVariable String id,
             HttpServletRequest request
