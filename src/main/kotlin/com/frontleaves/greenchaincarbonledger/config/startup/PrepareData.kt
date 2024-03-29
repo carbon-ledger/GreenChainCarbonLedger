@@ -309,4 +309,27 @@ class PrepareData(
             }
         }
     }
+
+    fun sqlDesulfurizationFactor() {
+        SqlPrepareData.SQL_DESULFURIZATION_EMISSION_FACTOR.forEach {
+            val getOtherFactor = jdbcTemplate.query(
+                "SELECT * FROM fy_desulfurization_factor WHERE name = ? LIMIT 1",
+                it["name"]!!
+            ) { rs, _ ->
+                return@query rs.getString("name")
+            }
+            if (getOtherFactor.isEmpty()) {
+                log.debug("\t> 脱硫排放因子数据库缺失 {}[{}] 其他因子，开始初始化...", it["name"]!!, it["displayName"]!!)
+                jdbcTemplate.update(
+                    "INSERT INTO fy_desulfurization_factor (name, display_name, desulfurizer_main_content, factor, carbonate_content, unit) VALUES (?, ?, ?, ?, ?, ?)",
+                    it["name"]!!,
+                    it["displayName"]!!,
+                    it["desulfurizerMainContent"]!!,
+                    it["factor"]!!.toDouble(),
+                    it["carbonateContent"]!!,
+                    it["unit"]!!
+                )
+            }
+        }
+    }
 }

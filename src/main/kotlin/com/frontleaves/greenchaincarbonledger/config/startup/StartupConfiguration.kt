@@ -94,6 +94,7 @@ open class StartupConfiguration(
             prepareData.sqlProcessFactor()
             // 准备其他因子
             prepareData.sqlOtherFactor()
+            prepareData.sqlDesulfurizationFactor()
         }
     }
 
