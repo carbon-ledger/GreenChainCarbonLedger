@@ -1,10 +1,7 @@
 package com.frontleaves.greenchaincarbonledger.exceptions.capture
 
 import com.frontleaves.greenchaincarbonledger.annotations.KotlinSlf4j.Companion.log
-import com.frontleaves.greenchaincarbonledger.exceptions.MailTemplateDoesNotExistException
-import com.frontleaves.greenchaincarbonledger.exceptions.NotEnoughPermissionException
-import com.frontleaves.greenchaincarbonledger.exceptions.NotLoginException
-import com.frontleaves.greenchaincarbonledger.exceptions.RoleNotFoundException
+import com.frontleaves.greenchaincarbonledger.exceptions.*
 import com.frontleaves.greenchaincarbonledger.utils.BaseResponse
 import com.frontleaves.greenchaincarbonledger.utils.ErrorCode
 import com.frontleaves.greenchaincarbonledger.utils.ResultUtil
@@ -103,6 +100,20 @@ class PublicException {
     fun missingServletRequestParameterException(e: MissingServletRequestParameterException): ResponseEntity<BaseResponse> {
         val timestamp = System.currentTimeMillis()
         log.error("[Exception] 业务异常: 请求参数错误, 参数名: ${e.parameterName}")
-        return ResultUtil.error(timestamp, "参数 ${e.parameterName} 错误",ErrorCode.PARAM_VARIABLE_ERROR)
+        return ResultUtil.error(timestamp, "参数 ${e.parameterName} 错误", ErrorCode.PARAM_VARIABLE_ERROR)
+    }
+
+    @ExceptionHandler(value = [YouHaveBeenBannedException::class])
+    fun youHaveBeenBannedExceptionException(e: YouHaveBeenBannedException): ResponseEntity<BaseResponse> {
+        val timestamp = System.currentTimeMillis()
+        log.error("[Exception] 业务异常: 用户被封禁")
+        return ResultUtil.error(timestamp, "您已被封禁", ErrorCode.NO_PERMISSION_ERROR)
+    }
+
+    @ExceptionHandler(value = [UserHasLoggedOutException::class])
+    fun userHasLoggedOutException(e: UserHasLoggedOutException): ResponseEntity<BaseResponse> {
+        val timestamp = System.currentTimeMillis()
+        log.error("[Exception] 业务异常: 用户已注销")
+        return ResultUtil.error(timestamp, "您已注销", ErrorCode.NO_PERMISSION_ERROR)
     }
 }

@@ -42,6 +42,7 @@ public enum ErrorCode {
     CAN_T_ACCOUNT_FOR_CARBON("NotAccountedForCarbon",40313,"您未进行碳核算"),
     REVIEW_ERROR("ReviewError", 40315, "审核信息错误"),
     CAN_T_PUBLISH_TRADE("NotPublishCarbonTrade",40314,"您未进行碳交易发布"),
+    ACCOUNT_HAS_BEEN_BANNED("AccountHasBeenBanned", 40315, "用户已封禁"),
     WRONG_DATE("WrongDate", 40316, "日期错误"),
     PAGE_NOT_FOUNDED("PageNotFounded", 40401, "页面不存在"),
     REQUEST_METHOD_NOT_SUPPORTED("RequestMethodNotSupported", 40500, "请求方法不支持"),

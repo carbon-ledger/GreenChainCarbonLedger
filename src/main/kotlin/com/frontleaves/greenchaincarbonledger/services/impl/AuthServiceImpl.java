@@ -107,7 +107,11 @@ public class AuthServiceImpl implements AuthService {
         }
         // 检查用户是否存在
         if (getUserDO != null) {
-            String newToken = new JwtUtil(userDAO).signToken(getUserDO.getUuid());
+            // 检查用户数是否被封禁
+            if (getUserDO.getBan()) {
+                return ResultUtil.error(timestamp, ErrorCode.ACCOUNT_HAS_BEEN_BANNED);
+            }
+            // 检查用户是否已注销
             boolean recover = false;
             if (getUserDO.getDeletedAt() != null) {
                 //用户存在并且处于注销状态，再进行判断是否在7天以内
@@ -122,6 +126,7 @@ public class AuthServiceImpl implements AuthService {
             }
             // 用户存在（密码检查）且不在注销状态
             if (ProcessingUtil.passwordCheck(authLoginVO.getPassword(), getUserDO.getPassword())) {
+                String newToken = new JwtUtil(userDAO).signToken(getUserDO.getUuid());
                 RoleDO getUserRole = roleDAO.getRoleByUuid(getUserDO.getRole());
 
                 BackAuthLoginVO newBackAuthLoginVO = new BackAuthLoginVO();

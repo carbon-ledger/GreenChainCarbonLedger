@@ -4,10 +4,7 @@ import com.frontleaves.greenchaincarbonledger.annotations.CheckAccountPermission
 import com.frontleaves.greenchaincarbonledger.annotations.KotlinSlf4j.Companion.log
 import com.frontleaves.greenchaincarbonledger.dao.RoleDAO
 import com.frontleaves.greenchaincarbonledger.dao.UserDAO
-import com.frontleaves.greenchaincarbonledger.exceptions.NotEnoughPermissionException
-import com.frontleaves.greenchaincarbonledger.exceptions.NotLoginException
-import com.frontleaves.greenchaincarbonledger.exceptions.RoleNotEnoughPermissionException
-import com.frontleaves.greenchaincarbonledger.exceptions.RoleNotFoundException
+import com.frontleaves.greenchaincarbonledger.exceptions.*
 import com.frontleaves.greenchaincarbonledger.utils.ProcessingUtil
 import com.google.gson.Gson
 import org.aspectj.lang.ProceedingJoinPoint
@@ -65,6 +62,17 @@ class PermissionAspect(
         // 获取用户所属角色
         val getUserDO = userDAO.getUserByUuid(getUserUuid)
         if (getUserDO != null) {
+            // 检查用户是否有权限访问
+            if (getUserDO.ban) {
+                throw YouHaveBeenBannedException()
+            }
+            // 检查用户是否注销
+            if (getUserDO.deletedAt != null) {
+                if (System.currentTimeMillis() - getUserDO.deletedAt.time > 604800000L) {
+                    throw UserHasLoggedOutException()
+                }
+            }
+            // 检查权限
             val getRoleWithUser = roleDAO.getRoleByUuid(getUserDO.role)
             log.debug("\t> 需求权限: {}", getPermission.joinToString(","))
 
