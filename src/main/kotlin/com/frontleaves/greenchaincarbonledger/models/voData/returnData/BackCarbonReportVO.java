@@ -17,10 +17,11 @@ public class BackCarbonReportVO {
     String id;
     String organizeUuid;
     String accountingPeriod;
-    double totalEmission;
-    double emissionReduction;
-    double netEmission;
+    Double totalEmission;
+    Double emissionReduction;
+    Double netEmission;
     String reportStatus;
+    String listOfReports;
     String createdAt;
     String updatedAt;
 }

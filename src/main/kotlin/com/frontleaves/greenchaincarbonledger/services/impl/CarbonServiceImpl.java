@@ -20,11 +20,15 @@ import com.google.gson.reflect.TypeToken;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -287,6 +291,7 @@ public class CarbonServiceImpl implements CarbonService {
                             .setAccountingPeriod(getReport.getAccountingPeriod())
                             .setTotalEmission(getReport.getTotalEmission())
                             .setReportStatus(getReport.getReportStatus())
+                            .setListOfReports(getReport.getListOfReports())
                             .setCreatedAt(getReport.getCreatedAt())
                             .setUpdatedAt(getReport.getUpdateAt());
                     backCarbonReportList.add(backCarbonReportVO);

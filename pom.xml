@@ -203,6 +203,14 @@
             <version>24.1.0</version>
             <scope>compile</scope>
         </dependency>
+        <!-- Apache POI  -->
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi</artifactId>
+            <version>5.2.5</version>
+        </dependency>
+
+
 
         <!-- SpringBoot Test -->
         <dependency>
