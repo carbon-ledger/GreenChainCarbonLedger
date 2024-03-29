@@ -39,14 +39,12 @@ public class PermissionDAO {
      * 获取权限列表
      * <hr/>
      * 获取权限列表
-     * @param limit 单页个数
-     * @param page 页数
-     * @param order 顺序
+     *
      * @return 权限列表
      */
-    public  List<PermissionDO> getPermissionListByAll(Integer limit,Integer page,String order){
+    public  List<PermissionDO> getAllPermissionList(){
         log.info("[DAO] 执行getPermissionListByAll");
         log.info("\t>Mysql 读取 ");
-        return permissionMapper.getPermissionListByAll(limit,page,order);
+        return permissionMapper.getAllPermissionList();
     }
 }

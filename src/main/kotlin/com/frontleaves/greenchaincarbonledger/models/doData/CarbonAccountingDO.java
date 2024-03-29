@@ -25,7 +25,6 @@ public class CarbonAccountingDO {
     String dataVerificationStatus;
     String verifierUuid;
     String verificationNotes;
-    String carbonReportId;
     Integer blockchainTxId;
     String createdAt;
     String updatedAt;

@@ -25,6 +25,6 @@ public interface PermissionMapper {
                 ORDER BY ${order}
             """)
     List<String> getNameBySearch(String search, String order);
-    @Select("SELECT * FROM fy_permission ORDER BY ${order} LIMIT #{limit} OFFSET ${(page-1) * limit}")
-    List<PermissionDO> getPermissionListByAll(Integer limit,Integer page,String order);
+    @Select("SELECT * FROM fy_permission")
+    List<PermissionDO> getAllPermissionList();
 }

@@ -6,10 +6,10 @@ import com.frontleaves.greenchaincarbonledger.models.voData.returnData.BackPermi
 import com.frontleaves.greenchaincarbonledger.services.PermissionService;
 import com.frontleaves.greenchaincarbonledger.utils.BaseResponse;
 import com.frontleaves.greenchaincarbonledger.utils.ResultUtil;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -28,19 +28,10 @@ public class PermissionServiceImpl implements PermissionService {
     private final PermissionDAO permissionDAO;
     @NotNull
     @Override
-    public ResponseEntity<BaseResponse> getPermissionList(long timestamp, @Nullable Integer limit, @Nullable Integer page, String order) {
-        log.info("[Service] 执行 getPermissionList");
-        // 检查参数，如果未设置（即为null），则使用默认值
-        limit = (limit == null || limit > 100) ? 20 : limit;
-        page = (page == null) ? 1 : page;
-        if (order == null || order.isBlank()) {
-            order = "asc";
-        }
-        log.debug("\t> limit: {}, page: {}, order: {}", limit, page, order);
-        //进行权限列表搜索
-        order ="pid " + order;
+    public ResponseEntity<BaseResponse> getPermissionList(long timestamp, @NotNull HttpServletRequest request) {
+        log.info("[Service] 执行 getPermissionList 方法");
         List<PermissionDO> getPermissionList;
-        getPermissionList = permissionDAO.getPermissionListByAll(limit,page,order);
+        getPermissionList = permissionDAO.getAllPermissionList();
         //整理数据
         ArrayList<BackPermissionVO> backPermissionList = new ArrayList<>();
         for (PermissionDO getPermission : getPermissionList ){

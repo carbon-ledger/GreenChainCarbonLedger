@@ -11,6 +11,7 @@ import com.frontleaves.greenchaincarbonledger.utils.ResultUtil
 import org.springframework.http.ResponseEntity
 import org.springframework.http.converter.HttpMessageNotReadableException
 import org.springframework.web.HttpRequestMethodNotSupportedException
+import org.springframework.web.bind.MissingServletRequestParameterException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
 import org.springframework.web.servlet.resource.NoResourceFoundException
@@ -96,5 +97,12 @@ class PublicException {
         val timestamp = System.currentTimeMillis()
         log.error("[Exception] 权限异常: {}", e.message)
         return ResultUtil.error(timestamp, "您还未登陆账户", ErrorCode.NO_LOGIN)
+    }
+
+    @ExceptionHandler(value = [MissingServletRequestParameterException::class])
+    fun missingServletRequestParameterException(e: MissingServletRequestParameterException): ResponseEntity<BaseResponse> {
+        val timestamp = System.currentTimeMillis()
+        log.error("[Exception] 业务异常: 请求参数错误, 参数名: ${e.parameterName}")
+        return ResultUtil.error(timestamp, "参数 ${e.parameterName} 错误",ErrorCode.PARAM_VARIABLE_ERROR)
     }
 }

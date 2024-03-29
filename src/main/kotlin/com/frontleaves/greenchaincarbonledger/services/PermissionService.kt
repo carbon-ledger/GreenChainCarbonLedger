@@ -1,6 +1,7 @@
 package com.frontleaves.greenchaincarbonledger.services
 
 import com.frontleaves.greenchaincarbonledger.utils.BaseResponse
+import jakarta.servlet.http.HttpServletRequest
 import org.springframework.http.ResponseEntity
 
 /**
@@ -21,15 +22,11 @@ interface PermissionService {
      * 获取权限列表, 用于获取权限列表
      *
      * @param timestamp 时间戳
-     * @param limit 限制
-     * @param page 页码
-     * @param order 排序
+     * @param request ServiceRequest请求
      * @return 响应实体
      */
     fun getPermissionList(
         timestamp: Long,
-        limit: Int?,
-        page: Int?,
-        order: String?
+        request: HttpServletRequest
     ): ResponseEntity<BaseResponse>
 }
