@@ -218,7 +218,11 @@ public class CarbonController {
                 );
             }
             case "generateElectricity" -> {
-                return carbonService.createCarbonReport1(timestamp, request, carbonConsumeVO);
+                return carbonService.createCarbonReport1(
+                        timestamp, request, carbonConsumeVO,
+                        materialsDO.getMaterials(),
+                        materialsDO.getDesulfurization()
+                );
             }
             default -> {
                 errorMessage.add("type 参数错误");

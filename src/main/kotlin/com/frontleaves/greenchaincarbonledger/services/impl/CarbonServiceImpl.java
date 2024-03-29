@@ -20,6 +20,7 @@ import com.google.gson.reflect.TypeToken;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.http.ResponseEntity;
@@ -57,11 +58,13 @@ public class CarbonServiceImpl implements CarbonService {
      * 不符合时间常理规范的内容将会被拒绝
      *
      * @param getOrganizeUserLastCarbonReport 存放碳排放报告数据表的数据（上一次报告的内容获取）
-     * @param getStartTimeReplace             获取此次报告开始的时间
-     * @param getEndTimeReplace               获取此次报告结束的时间
      * @return 返回是否通过时间重复性检查（不通过为 true 通过为 false）
      */
-    private static boolean checkReportTimeHasDuplicate(CarbonReportDO getOrganizeUserLastCarbonReport, String getStartTimeReplace, String getEndTimeReplace) {
+    @Contract("null, _ -> null")
+    private static String checkReportTimeHasDuplicate(CarbonReportDO getOrganizeUserLastCarbonReport, @NotNull CarbonConsumeVO carbonConsumeVO) {
+        String getStartTimeReplace = carbonConsumeVO.getStartTime().replace("-", "");
+        String getEndTimeReplace = carbonConsumeVO.getEndTime().replace("-", "");
+        String getFormatDateRange = getStartTimeReplace + "-" + getEndTimeReplace;
         if (getOrganizeUserLastCarbonReport != null) {
             // 时间字符整理整理
             long nowReportStartTime = Long.parseLong(getStartTimeReplace);
@@ -70,12 +73,12 @@ public class CarbonServiceImpl implements CarbonService {
             long lastReportEndTime = Long.parseLong(getOrganizeUserLastCarbonReport.getAccountingPeriod().split("-")[1]);
             // 时间范围检查
             if (nowReportStartTime < nowReportEndTime) {
-                return lastReportEndTime >= nowReportStartTime;
+                if (lastReportEndTime >= nowReportStartTime) {
+                    return getFormatDateRange;
+                }
             }
-        } else {
-            return false;
         }
-        return true;
+        return null;
     }
 
     /**
@@ -401,26 +404,20 @@ public class CarbonServiceImpl implements CarbonService {
             @NotNull List<MaterialsDO.Materials> carbonSequestrations,
             @NotNull List<MaterialsDO.Material> heats
     ) {
-        // 1. 检查时间冲突
         // 从前端获取时间并进行格式化
-        String getStartTimeReplace = carbonConsumeVO.getStartTime().replace("-", "");
-        String getEndTimeReplace = carbonConsumeVO.getEndTime().replace("-", "");
-        String getFormatDateRange = getStartTimeReplace + "-" + getEndTimeReplace;
-        // 从数据库获取上一份报告的数据，准备进行比较
         CarbonReportDO getOrganizeUserLastCarbonReport = carbonReportDAO.getLastReportByUuid(ProcessingUtil.getAuthorizeUserUuid(request));
-        // 使用静态方法检查时间冲突
-        if (checkReportTimeHasDuplicate(getOrganizeUserLastCarbonReport, getStartTimeReplace, getEndTimeReplace)) {
+        if (checkReportTimeHasDuplicate(getOrganizeUserLastCarbonReport, carbonConsumeVO) == null) {
             return ResultUtil.error(timestamp, "您此次报告与之前报告冲突或时间范围不正确", ErrorCode.WRONG_DATE);
         }
         // 2. 从VO获取数据向数据库插入此次报告的基本数据
         // 考虑外键约束相关的数据表插入数据顺序：fy_carbon_report、fy_carbon_accounting、fy_carbon_compensation_material
-        CarbonTypeDO getCarbonType = carbonTypeDAO.getTypeByName("steelProduction");
+        CarbonTypeDO getCarbonType = carbonTypeDAO.getTypeByName(carbonConsumeVO.getType());
         CarbonReportDO carbonReportDO = new CarbonReportDO();
         carbonReportDO
                 .setOrganizeUuid(ProcessingUtil.getAuthorizeUserUuid(request))
                 .setReportTitle(carbonConsumeVO.getTitle())
                 .setReportType(getCarbonType.getUuid())
-                .setAccountingPeriod(getFormatDateRange)
+                .setAccountingPeriod(checkReportTimeHasDuplicate(getOrganizeUserLastCarbonReport, carbonConsumeVO))
                 .setReportStatus("draft")
                 .setReportSummary(carbonConsumeVO.getSummary());
         if (!(carbonReportDAO.insertReportMapper(carbonReportDO))) {
@@ -433,7 +430,7 @@ public class CarbonServiceImpl implements CarbonService {
                 .setOrganizeUuid(ProcessingUtil.getAuthorizeUserUuid(request))
                 .setReportId(getLastReport.getId())
                 .setEmissionType(getCarbonType.getUuid())
-                .setAccountingPeriod(getFormatDateRange)
+                .setAccountingPeriod(checkReportTimeHasDuplicate(getOrganizeUserLastCarbonReport, carbonConsumeVO))
                 .setDataVerificationStatus("pending");
         if (!(carbonAccountingDAO.insertCarbonAccounting(carbonAccountingDO))) {
             return ResultUtil.error(timestamp, "新增碳核算数据表记录失败", ErrorCode.SERVER_INTERNAL_ERROR);
@@ -508,35 +505,22 @@ public class CarbonServiceImpl implements CarbonService {
                 .setElectric(electric);
 
         // 更新碳核算报告数据表——修正碳总排放量
-        if (!(carbonAccountingDAO.updateEmissionByUuidId(gson.toJson(carbonAccountingEmissionsVolumeDO), totalCombustion, getLastCarbonAccounting.getId()))) {
-            return ResultUtil.error(timestamp, "更新碳核算数据表错误", ErrorCode.SERVER_INTERNAL_ERROR);
-        }
-        if (carbonConsumeVO.getSend()) {
-            //进入待审状态
-            if (carbonReportDAO.updateEmissionById(totalCombustion, "pending_review", getLastReport.getId())) {
-                return ResultUtil.success(timestamp, "您的碳核算报告已经成功创建");
-            }
-        } else {
-            //进入草稿状态
-            if (carbonReportDAO.updateEmissionById(totalCombustion, "draft", getLastReport.getId())) {
-                return ResultUtil.success(timestamp, "您的碳核算报告已经成功创建");
-            }
-        }
-        return ResultUtil.error(timestamp, "更新碳核算报告失败", ErrorCode.SERVER_INTERNAL_ERROR);
+        return getBaseResponseResponseEntity(timestamp, carbonConsumeVO, getLastReport, getLastCarbonAccounting, totalCombustion, carbonAccountingEmissionsVolumeDO);
     }
 
     @NotNull
     @Override
-    public ResponseEntity<BaseResponse> createCarbonReport1(long timestamp, @NotNull HttpServletRequest request, @NotNull CarbonConsumeVO carbonConsumeVO) {
-        // 1. 检查时间冲突
-        // 从前端获取时间并进行格式化
-        String getStartTimeReplace = carbonConsumeVO.getStartTime().replace("-", "");
-        String getEndTimeReplace = carbonConsumeVO.getEndTime().replace("-", "");
-        String getFormatDateRange = getStartTimeReplace + "-" + getEndTimeReplace;
+    public ResponseEntity<BaseResponse> createCarbonReport1(
+            long timestamp,
+            @NotNull HttpServletRequest request,
+            @NotNull CarbonConsumeVO carbonConsumeVO,
+            @NotNull List<MaterialsDO.Materials> materials,
+            @NotNull List<MaterialsDO.Desulfurization> desulfurization
+    ) {
         // 从数据库获取上一份报告的数据，准备进行比较
         CarbonReportDO getOrganizeUserLastCarbonReport = carbonReportDAO.getLastReportByUuid(ProcessingUtil.getAuthorizeUserUuid(request));
         // 使用静态方法检查时间冲突
-        if (checkReportTimeHasDuplicate(getOrganizeUserLastCarbonReport, getStartTimeReplace, getEndTimeReplace)) {
+        if (checkReportTimeHasDuplicate(getOrganizeUserLastCarbonReport, carbonConsumeVO) == null) {
             return ResultUtil.error(timestamp, "您此次报告与之前报告冲突或时间范围不正确", ErrorCode.WRONG_DATE);
         }
         // 2. 从VO获取数据向数据库插入此次报告的基本数据
@@ -547,7 +531,7 @@ public class CarbonServiceImpl implements CarbonService {
                 .setOrganizeUuid(ProcessingUtil.getAuthorizeUserUuid(request))
                 .setReportTitle(carbonConsumeVO.getTitle())
                 .setReportType(getCarbonType.getUuid())
-                .setAccountingPeriod(getFormatDateRange)
+                .setAccountingPeriod(checkReportTimeHasDuplicate(getOrganizeUserLastCarbonReport, carbonConsumeVO))
                 .setReportStatus("draft")
                 .setReportSummary(carbonConsumeVO.getSummary());
         if (!(carbonReportDAO.insertReportMapper(carbonReportDO))) {
@@ -562,7 +546,7 @@ public class CarbonServiceImpl implements CarbonService {
                 .setOrganizeUuid(ProcessingUtil.getAuthorizeUserUuid(request))
                 .setReportId(getLastReport.getId())
                 .setEmissionType(getCarbonType.getUuid())
-                .setAccountingPeriod(getFormatDateRange)
+                .setAccountingPeriod(checkReportTimeHasDuplicate(getOrganizeUserLastCarbonReport, carbonConsumeVO))
                 .setDataVerificationStatus("pending");
         if (!(carbonAccountingDAO.insertCarbonAccounting(carbonAccountingDO))) {
             return ResultUtil.error(timestamp, "新增碳核算数据表记录失败", ErrorCode.SERVER_INTERNAL_ERROR);
@@ -580,31 +564,31 @@ public class CarbonServiceImpl implements CarbonService {
                 .setElectricExport(carbonConsumeVO.getElectricExport());
         // 电力数据
         String electric1 = gson.toJson(electricDO);
+        HashMap<String, Object> setMaterials = new HashMap<>();
+        setMaterials.put("materials", materials);
+        setMaterials.put("desulfurization", desulfurization);
         carbonCompensationMaterialDO
                 .setAccountingId(getLastCarbonAccounting.getId())
-                .setRawMaterial(carbonConsumeVO.getMaterials())
+                .setRawMaterial(gson.toJson(setMaterials))
                 .setElectricMaterial(electric1);
         if (!(carbonCompensationMaterialDAO.insertCarbonCompensationMaterial(carbonCompensationMaterialDO))) {
             return ResultUtil.error(timestamp, "新增碳原料数据表记录失败", ErrorCode.SERVER_INTERNAL_ERROR);
         }
-        // 从前端传入数据的VO获取materials，此对象中包含了五个列表
-        String materialsJson = carbonConsumeVO.getMaterials();
-        MaterialsDO materialsDO = gson.fromJson(materialsJson, MaterialsDO.class);
         /*
          * 1. 计算E燃烧
          * 2. 计算E脱硫
          * 3. 计算E电力
          */
-        double eCombustion = eCombustion(materialsDO.getMaterials(), carbonItemTypeDAO);
-        double eDesulfurization = eDesulfurization(materialsDO.getDesulfurization(), processEmissionFactorDAO);
+        double eCombustion = eCombustion(materials, carbonItemTypeDAO);
+        double eDesulfurization = eDesulfurization(desulfurization, processEmissionFactorDAO);
         double eElectric = electricity(carbonConsumeVO, otherEmissionFactorDAO);
         // 汇总碳排放
         double totalCombustion = eCombustion + eDesulfurization + eElectric;
         CarbonAccountingEmissionsVolumeDO carbonAccountingEmissionsVolumeDO = new CarbonAccountingEmissionsVolumeDO();
-        CarbonAccountingEmissionsVolumeDO.Material materials = new CarbonAccountingEmissionsVolumeDO.Material();
+        CarbonAccountingEmissionsVolumeDO.Material material = new CarbonAccountingEmissionsVolumeDO.Material();
         CarbonAccountingEmissionsVolumeDO.Material desulfuization = new CarbonAccountingEmissionsVolumeDO.Material();
         CarbonAccountingEmissionsVolumeDO.Electric electric = new CarbonAccountingEmissionsVolumeDO.Electric();
-        materials
+        material
                 .setName("eCombustion")
                 .setCarbonEmissions(eCombustion);
         desulfuization
@@ -615,10 +599,16 @@ public class CarbonServiceImpl implements CarbonService {
                 .setElectricEmissions(eElectric);
 
         carbonAccountingEmissionsVolumeDO
-                .setMaterials(materials)
+                .setMaterials(material)
                 .setDesulfuizations(desulfuization)
                 .setElectric(electric);
         // 更新碳核算报告数据表——修正碳总排放量
+        return getBaseResponseResponseEntity(timestamp, carbonConsumeVO, getLastReport, getLastCarbonAccounting, totalCombustion, carbonAccountingEmissionsVolumeDO);
+    }
+
+    @NotNull
+    private ResponseEntity<BaseResponse> getBaseResponseResponseEntity(
+            long timestamp, @NotNull CarbonConsumeVO carbonConsumeVO, CarbonReportDO getLastReport, @NotNull CarbonAccountingDO getLastCarbonAccounting, double totalCombustion, CarbonAccountingEmissionsVolumeDO carbonAccountingEmissionsVolumeDO) {
         if (!(carbonAccountingDAO.updateEmissionByUuidId(gson.toJson(carbonAccountingEmissionsVolumeDO), totalCombustion, getLastCarbonAccounting.getId()))) {
             return ResultUtil.error(timestamp, "更新碳核算数据表错误", ErrorCode.SERVER_INTERNAL_ERROR);
         }

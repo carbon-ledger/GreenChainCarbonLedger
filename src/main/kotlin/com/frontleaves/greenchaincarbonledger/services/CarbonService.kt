@@ -94,7 +94,9 @@ interface CarbonService {
     fun createCarbonReport1(
         timestamp: Long,
         request: HttpServletRequest,
-        carbonConsumeVO: CarbonConsumeVO
+        carbonConsumeVO: CarbonConsumeVO,
+        materials: MutableList<MaterialsDO.Materials>,
+        desulfurization: MutableList<MaterialsDO.Desulfurization>
     ): ResponseEntity<BaseResponse>
 
     /**
