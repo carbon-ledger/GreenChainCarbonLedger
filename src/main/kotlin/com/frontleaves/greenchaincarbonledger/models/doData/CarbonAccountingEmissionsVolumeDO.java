@@ -10,22 +10,16 @@ import lombok.experimental.Accessors;
 @Data
 @Accessors(chain = true)
 public class CarbonAccountingEmissionsVolumeDO {
-    Materials materials;
-    Courses courses;
-    CarbonSequestration carbonSequestrations;
+    Material materials;
+    Material courses;
+    Material carbonSequestrations;
+    Material desulfuizations;
     Heat heat;
-    Desulfuization desulfuizations;
     Electric electric;
 
     @Data
     @Accessors(chain = true)
-    public static class Materials {
-        public String name;
-        public Double carbonEmissions;
-    }
-    @Data
-    @Accessors(chain = true)
-    public static class Courses {
+    public static class Material {
         public String name;
         public Double carbonEmissions;
     }
@@ -34,18 +28,6 @@ public class CarbonAccountingEmissionsVolumeDO {
     public static class Heat{
         public String name;
         public Double heatEmissions;
-    }
-    @Data
-    @Accessors(chain = true)
-    public static class CarbonSequestration {
-        public String name;
-        public Double carbonEmissions;
-    }
-    @Data
-    @Accessors(chain = true)
-    public static class Desulfuization {
-        public String name;
-        public Double carbonEmissions;
     }
 
     @Data
