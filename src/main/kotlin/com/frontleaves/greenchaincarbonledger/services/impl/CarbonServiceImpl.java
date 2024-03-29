@@ -27,6 +27,7 @@ import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -58,7 +59,7 @@ public class CarbonServiceImpl implements CarbonService {
      * @param getOrganizeUserLastCarbonReport 存放碳排放报告数据表的数据（上一次报告的内容获取）
      * @param getStartTimeReplace             获取此次报告开始的时间
      * @param getEndTimeReplace               获取此次报告结束的时间
-     * @return 返回是否通过时间重复性检查
+     * @return 返回是否通过时间重复性检查（不通过为 true 通过为 false）
      */
     private static boolean checkReportTimeHasDuplicate(CarbonReportDO getOrganizeUserLastCarbonReport, String getStartTimeReplace, String getEndTimeReplace) {
         if (getOrganizeUserLastCarbonReport != null) {
@@ -69,12 +70,12 @@ public class CarbonServiceImpl implements CarbonService {
             long lastReportEndTime = Long.parseLong(getOrganizeUserLastCarbonReport.getAccountingPeriod().split("-")[1]);
             // 时间范围检查
             if (nowReportStartTime < nowReportEndTime) {
-                return lastReportEndTime < nowReportStartTime;
+                return lastReportEndTime >= nowReportStartTime;
             }
         } else {
-            return true;
+            return false;
         }
-        return false;
+        return true;
     }
 
     /**
@@ -148,9 +149,9 @@ public class CarbonServiceImpl implements CarbonService {
      *
      * @return E过程的值
      */
-    private static double eCousers(List<MaterialsDO.Courses> coursesList, ProcessEmissionFactorDAO processEmissionFactorDAO) {
+    private static double eCousers(List<MaterialsDO.Materials> coursesList, ProcessEmissionFactorDAO processEmissionFactorDAO) {
         double value = 0.0;
-        for (MaterialsDO.Courses courses : coursesList) {
+        for (MaterialsDO.Materials courses : coursesList) {
             //获取碳排放因子
             ProcessEmissionFactorDO processEmissionFactorDO = processEmissionFactorDAO.getFactorByName(courses.getName());
             // 获取能计算出净消耗量的相关参数
@@ -169,13 +170,13 @@ public class CarbonServiceImpl implements CarbonService {
      *
      * @return R固碳的值
      */
-    private static double eCarbonSequestration(List<MaterialsDO.CarbonSequestration> carbonSequestrationList, OtherEmissionFactorDAO otherEmissionFactorDAO) {
+    private static double eCarbonSequestration(List<MaterialsDO.Materials> carbonSequestrationList, OtherEmissionFactorDAO otherEmissionFactorDAO) {
         double value = 0.0;
-        for (MaterialsDO.CarbonSequestration carbonSequestration : carbonSequestrationList) {
+        for (MaterialsDO.Materials carbonSequestration : carbonSequestrationList) {
             //获取排放因子
             OtherEmissionFactorDO otherEmissionFactorDO = otherEmissionFactorDAO.getFactorByName(carbonSequestration.getName());
             // 获取能计算出净消耗量的相关参数
-            MaterialsDO.CarbonSequestration.MaterialSequestration materialData = carbonSequestration.getMaterial();
+            MaterialsDO.Material materialData = carbonSequestration.getMaterial();
             //计算净消耗量
             double netConsumption = Double.parseDouble(materialData.getExport()) + Double.parseDouble(materialData.getEndingInv()) - Double.parseDouble(materialData.getOpeningInv());
             double eCarbonSequestration = otherEmissionFactorDO.getFactor() * netConsumption;
@@ -192,13 +193,13 @@ public class CarbonServiceImpl implements CarbonService {
      *
      * @return 返回是否通过时间重复性检查
      */
-    private static double eHeat(List<MaterialsDO.Heat> heatList, OtherEmissionFactorDAO otherEmissionFactorDAO) {
+    private static double eHeat(List<MaterialsDO.Material> heatList, OtherEmissionFactorDAO otherEmissionFactorDAO) {
         double value = 0.0;
-        for (MaterialsDO.Heat heat : heatList) {
+        for (MaterialsDO.Material heat : heatList) {
             //获取排放因子
             OtherEmissionFactorDO otherEmissionFactorDO = otherEmissionFactorDAO.getFactorByName("thermalPower");
             // 计算得出净消耗量
-            double netConsumption = Double.parseDouble(heat.getBuy()) - Double.parseDouble(heat.getExport()) - Double.parseDouble(heat.getOutside());
+            double netConsumption = Double.parseDouble(heat.getBuy()) - Double.parseDouble(heat.getExport()) - Double.parseDouble(heat.getOutSide());
             double eHeat = otherEmissionFactorDO.getFactor() * netConsumption;
             //累加
             value += eHeat;
@@ -391,7 +392,15 @@ public class CarbonServiceImpl implements CarbonService {
 
     @NotNull
     @Override
-    public ResponseEntity<BaseResponse> createCarbonReport(long timestamp, @NotNull HttpServletRequest request, @NotNull CarbonConsumeVO carbonConsumeVO) {
+    public ResponseEntity<BaseResponse> createCarbonReport(
+            long timestamp,
+            @NotNull HttpServletRequest request,
+            @NotNull CarbonConsumeVO carbonConsumeVO,
+            @NotNull List<MaterialsDO.Materials> materials,
+            @NotNull List<MaterialsDO.Materials> courses,
+            @NotNull List<MaterialsDO.Materials> carbonSequestrations,
+            @NotNull List<MaterialsDO.Material> heats
+    ) {
         // 1. 检查时间冲突
         // 从前端获取时间并进行格式化
         String getStartTimeReplace = carbonConsumeVO.getStartTime().replace("-", "");
@@ -400,7 +409,7 @@ public class CarbonServiceImpl implements CarbonService {
         // 从数据库获取上一份报告的数据，准备进行比较
         CarbonReportDO getOrganizeUserLastCarbonReport = carbonReportDAO.getLastReportByUuid(ProcessingUtil.getAuthorizeUserUuid(request));
         // 使用静态方法检查时间冲突
-        if (!checkReportTimeHasDuplicate(getOrganizeUserLastCarbonReport, getStartTimeReplace, getEndTimeReplace)) {
+        if (checkReportTimeHasDuplicate(getOrganizeUserLastCarbonReport, getStartTimeReplace, getEndTimeReplace)) {
             return ResultUtil.error(timestamp, "您此次报告与之前报告冲突或时间范围不正确", ErrorCode.WRONG_DATE);
         }
         // 2. 从VO获取数据向数据库插入此次报告的基本数据
@@ -441,16 +450,19 @@ public class CarbonServiceImpl implements CarbonService {
                 .setElectricCompany(carbonConsumeVO.getElectricCompany())
                 .setElectricExport(carbonConsumeVO.getElectricExport());
         // 电力数据
-        String electric1 = gson.toJson(electricDO);
+        String electricJson = gson.toJson(electricDO);
+        HashMap<String, Object> setMaterials = new HashMap<>();
+        setMaterials.put("materials", materials);
+        setMaterials.put("courses", courses);
+        setMaterials.put("carbonSequestrations", carbonSequestrations);
+        setMaterials.put("heats", heats);
         carbonCompensationMaterialDO
                 .setAccountingId(getLastCarbonAccounting.getId())
-                .setRawMaterial(carbonConsumeVO.getMaterials())
-                .setElectricMaterial(electric1);
+                .setRawMaterial(gson.toJson(setMaterials))
+                .setElectricMaterial(electricJson);
         if (!(carbonCompensationMaterialDAO.insertCarbonCompensationMaterial(carbonCompensationMaterialDO))) {
             return ResultUtil.error(timestamp, "新增碳原料数据表记录失败", ErrorCode.SERVER_INTERNAL_ERROR);
         }
-        // 从前端传入数据的VO获取materials，此对象中包含了五个列表
-        MaterialsDO materialsDO = gson.fromJson(carbonConsumeVO.getMaterials(), MaterialsDO.class);
         /*
          * 1. 计算E燃烧
          * 2. 计算E过程
@@ -458,24 +470,24 @@ public class CarbonServiceImpl implements CarbonService {
          * 4. 计算E热
          * 5. 计算E电力
          */
-        double eCombustion = eCombustion(materialsDO.getMaterials(), carbonItemTypeDAO);
-        double eCourses = eCousers(materialsDO.getCourses(), processEmissionFactorDAO);
-        double eCarbonSequestration = eCarbonSequestration(materialsDO.getCarbonSequestrations(), otherEmissionFactorDAO);
-        double eHeat = eHeat(materialsDO.getHeat(), otherEmissionFactorDAO);
+        double eCombustion = eCombustion(materials, carbonItemTypeDAO);
+        double eCourses = eCousers(courses, processEmissionFactorDAO);
+        double eCarbonSequestration = eCarbonSequestration(carbonSequestrations, otherEmissionFactorDAO);
+        double eHeat = eHeat(heats, otherEmissionFactorDAO);
         double eElectric = electricity(carbonConsumeVO, otherEmissionFactorDAO);
         // 汇总碳排放
         double totalCombustion = eCombustion + eCourses + eElectric + eHeat - eCarbonSequestration;
         // 创建一个DO存储对象
         CarbonAccountingEmissionsVolumeDO carbonAccountingEmissionsVolumeDO = new CarbonAccountingEmissionsVolumeDO();
-        CarbonAccountingEmissionsVolumeDO.Material materials = new CarbonAccountingEmissionsVolumeDO.Material();
-        CarbonAccountingEmissionsVolumeDO.Material courses = new CarbonAccountingEmissionsVolumeDO.Material();
+        CarbonAccountingEmissionsVolumeDO.Material material = new CarbonAccountingEmissionsVolumeDO.Material();
+        CarbonAccountingEmissionsVolumeDO.Material course = new CarbonAccountingEmissionsVolumeDO.Material();
         CarbonAccountingEmissionsVolumeDO.Material carbonSequestration = new CarbonAccountingEmissionsVolumeDO.Material();
         CarbonAccountingEmissionsVolumeDO.Heat heat = new CarbonAccountingEmissionsVolumeDO.Heat();
         CarbonAccountingEmissionsVolumeDO.Electric electric = new CarbonAccountingEmissionsVolumeDO.Electric();
-        materials
+        material
                 .setName("eCombustion")
                 .setCarbonEmissions(eCombustion);
-        courses
+        course
                 .setName("eCourse")
                 .setCarbonEmissions(eCourses);
         carbonSequestration
@@ -489,8 +501,8 @@ public class CarbonServiceImpl implements CarbonService {
                 .setElectricEmissions(eElectric);
         // 存入总表
         carbonAccountingEmissionsVolumeDO
-                .setMaterials(materials)
-                .setCourses(courses)
+                .setMaterials(material)
+                .setCourses(course)
                 .setCarbonSequestrations(carbonSequestration)
                 .setHeat(heat)
                 .setElectric(electric);
@@ -524,7 +536,7 @@ public class CarbonServiceImpl implements CarbonService {
         // 从数据库获取上一份报告的数据，准备进行比较
         CarbonReportDO getOrganizeUserLastCarbonReport = carbonReportDAO.getLastReportByUuid(ProcessingUtil.getAuthorizeUserUuid(request));
         // 使用静态方法检查时间冲突
-        if (!checkReportTimeHasDuplicate(getOrganizeUserLastCarbonReport, getStartTimeReplace, getEndTimeReplace)) {
+        if (checkReportTimeHasDuplicate(getOrganizeUserLastCarbonReport, getStartTimeReplace, getEndTimeReplace)) {
             return ResultUtil.error(timestamp, "您此次报告与之前报告冲突或时间范围不正确", ErrorCode.WRONG_DATE);
         }
         // 2. 从VO获取数据向数据库插入此次报告的基本数据

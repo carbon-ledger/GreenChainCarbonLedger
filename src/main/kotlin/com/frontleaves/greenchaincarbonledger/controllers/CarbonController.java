@@ -140,7 +140,7 @@ public class CarbonController {
      * @return carbonService
      */
     @GetMapping("/accounting/get")
-    @CheckAccountPermission("{carbon:getCarbonAccounting}")
+    @CheckAccountPermission({"carbon:getCarbonAccounting"})
     public ResponseEntity<BaseResponse> getCarbonAccounting(
             @RequestParam(required = false) String limit,
             @RequestParam(required = false) String page,
@@ -162,7 +162,7 @@ public class CarbonController {
      * @return 是否完成配额的添加
      */
     @PostMapping("/add/{organizeId}")
-    @CheckAccountPermission("{carbon:addOrganizeIdQuota}")
+    @CheckAccountPermission({"carbon:addOrganizeIdQuota"})
     public ResponseEntity<BaseResponse> addOrganizeIdQuota(
             @RequestBody @Validated CarbonAddQuotaVO carbonAddQuotaVO,
             @org.jetbrains.annotations.NotNull BindingResult bindingResult,
@@ -184,7 +184,7 @@ public class CarbonController {
     }
 
     @PostMapping("/report/create")
-    @CheckAccountPermission("{carbon:createCarbonReport}")
+    @CheckAccountPermission({"carbon:createCarbonReport"})
     public ResponseEntity<BaseResponse> createCarbonReport(
             @RequestBody @Validated CarbonConsumeVO carbonConsumeVO,
             @NotNull BindingResult bindingResult,
@@ -197,9 +197,10 @@ public class CarbonController {
         if (bindingResult.hasErrors()) {
             return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR, ProcessingUtil.getValidatedErrorList(bindingResult));
         }
+        MaterialsDO materialsDO;
         // 对原料相关参数进行解析
         try {
-            MaterialsDO materialsDO = gson.fromJson(carbonConsumeVO.getMaterials(), MaterialsDO.class);
+            materialsDO = gson.fromJson(carbonConsumeVO.getMaterials(), MaterialsDO.class);
         } catch (JsonSyntaxException e) {
             log.error("[Controller] 原料参数解析失败");
             errorMessage.add("原料参数解析失败，请检查原料参数格式");
@@ -208,7 +209,13 @@ public class CarbonController {
         // 返回业务操作
         switch (carbonConsumeVO.getType()) {
             case "steelProduction" -> {
-                return carbonService.createCarbonReport(timestamp, request, carbonConsumeVO);
+                return carbonService.createCarbonReport(
+                        timestamp, request, carbonConsumeVO,
+                        materialsDO.getMaterials(),
+                        materialsDO.getCourses(),
+                        materialsDO.getCarbonSequestrations(),
+                        materialsDO.getHeat()
+                );
             }
             case "generateElectricity" -> {
                 return carbonService.createCarbonReport1(timestamp, request, carbonConsumeVO);
@@ -221,7 +228,7 @@ public class CarbonController {
     }
 
     @PatchMapping("/edit/{organizeId}")
-    @CheckAccountPermission("{carbon:editCarbonQuota}")
+    @CheckAccountPermission({"carbon:editCarbonQuota"})
     public ResponseEntity<BaseResponse> editCarbonQuota(
             @RequestBody @Validated CarbonAddQuotaVO carbonAddQuotaVO,
             @NotNull BindingResult bindingResult,

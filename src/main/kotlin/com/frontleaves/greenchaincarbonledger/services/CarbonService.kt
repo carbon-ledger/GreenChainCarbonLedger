@@ -1,5 +1,6 @@
 package com.frontleaves.greenchaincarbonledger.services
 
+import com.frontleaves.greenchaincarbonledger.models.doData.MaterialsDO
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.CarbonConsumeVO
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.CarbonAddQuotaVO
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.EditTradeVO
@@ -83,7 +84,11 @@ interface CarbonService {
     fun createCarbonReport(
         timestamp: Long,
         request: HttpServletRequest,
-        carbonConsumeVO: CarbonConsumeVO
+        carbonConsumeVO: CarbonConsumeVO,
+        materials: MutableList<MaterialsDO.Materials>,
+        courses: MutableList<MaterialsDO.Materials>,
+        carbonSequestrations: MutableList<MaterialsDO.Materials>,
+        heats: MutableList<MaterialsDO.Material>
     ): ResponseEntity<BaseResponse>
 
     fun createCarbonReport1(
