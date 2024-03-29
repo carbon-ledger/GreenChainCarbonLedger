@@ -26,6 +26,7 @@ import org.jetbrains.annotations.Nullable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.sql.Date;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -229,11 +230,12 @@ public class CarbonServiceImpl implements CarbonService {
                 backCarbonQuotaVO
                         .setUuid(carbonQuotaDO.getUuid())
                         .setOrganizeUuid(carbonQuotaDO.getOrganizeUuid())
+                        .setAuditLog(gson.fromJson(carbonQuotaDO.getAuditLog(), new TypeToken<ArrayList<AuditLogDO>>() {}.getType()))
                         .setQuotaYear(carbonQuotaDO.getQuotaYear())
                         .setTotalQuota(carbonQuotaDO.getTotalQuota())
                         .setAllocatedQuota(carbonQuotaDO.getAllocatedQuota())
                         .setUsedQuota(carbonQuotaDO.getUsedQuota())
-                        .setAllocationDate(carbonQuotaDO.getAllocationDate())
+                        .setAllocationDate(carbonQuotaDO.getAllocationDate().toString())
                         .setComplianceStatus(carbonQuotaDO.isComplianceStatus())
                         .setCreatedAt(carbonQuotaDO.getCreatedAt())
                         .setUpdatedAt(carbonQuotaDO.getUpdatedAt());
@@ -632,16 +634,16 @@ public class CarbonServiceImpl implements CarbonService {
         //首先提取年份
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy");
         int localYear = Integer.parseInt(simpleDateFormat.format(timestamp));
-        SimpleDateFormat combinedFormat = new SimpleDateFormat("yyyy-MM-dd");
-        String combinedDate = combinedFormat.format(timestamp);
+        String combinedDate = new SimpleDateFormat("yyyy-MM-dd").format(timestamp);
         //创建此时今年的碳排放配额
         //编辑审计日志
+        UserDO getUserDO = ProcessingUtil.getUserByHeaderUuid(request, userDAO);
         ArrayList<CarbonAuditLogDO> carbonAuditLogList = new ArrayList<>();
         CarbonAuditLogDO carbonAuditLog = new CarbonAuditLogDO();
         carbonAuditLog
                 .setDate(combinedDate)
-                .setLog("于" + combinedDate + "添加" + carbonAddQuotaVO.getQuota() + "的交易配额，此次为初建碳排放配额表")
-                .setOperate("为此此配额添加的账号Uuid为%s".formatted(request.getHeader("{X-Auth-UUID}")));
+                .setLog( "添加 " + carbonAddQuotaVO.getQuota() + " 的交易配额，此次为初建碳排放配额表")
+                .setOperate(getUserDO.getUserName());
         carbonAuditLogList.add(carbonAuditLog);
         //整理数据
         CarbonQuotaDO carbonQuotaDO = new CarbonQuotaDO();
@@ -651,8 +653,7 @@ public class CarbonServiceImpl implements CarbonService {
                 .setTotalQuota(Double.parseDouble(carbonAddQuotaVO.getQuota()))
                 .setAllocatedQuota(Double.parseDouble(carbonAddQuotaVO.getQuota()))
                 .setUsedQuota(0)
-                .setAllocatedQuota(Double.parseDouble(combinedDate))
-                //相反
+                .setAllocationDate(new Date(timestamp))
                 .setComplianceStatus(!carbonAddQuotaVO.getStatus())
                 .setAuditLog(gson.toJson(carbonAuditLogList));
         //进行数据库

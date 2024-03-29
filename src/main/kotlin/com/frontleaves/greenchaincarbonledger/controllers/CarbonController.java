@@ -176,10 +176,10 @@ public class CarbonController {
             return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR, ProcessingUtil.getValidatedErrorList(bindingResult));
         }
         //校验组织uuid
-        if (organizeId.isEmpty()) {
-            return ResultUtil.error(timestamp, ErrorCode.PARAM_VARIABLE_ERROR);
-        } else {
+        if (!organizeId.isEmpty()) {
             return carbonService.addOrganizeIdQuota(timestamp, request, organizeId, carbonAddQuotaVO);
+        } else {
+            return ResultUtil.error(timestamp, ErrorCode.PARAM_VARIABLE_ERROR);
         }
     }
 
