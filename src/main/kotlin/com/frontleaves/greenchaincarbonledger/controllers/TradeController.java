@@ -1,10 +1,10 @@
 package com.frontleaves.greenchaincarbonledger.controllers;
 
+import com.frontleaves.greenchaincarbonledger.annotations.CheckAccountPermission;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.TradeReleaseVO;
 import com.frontleaves.greenchaincarbonledger.services.CarbonService;
-import com.frontleaves.greenchaincarbonledger.utils.*;
-import com.frontleaves.greenchaincarbonledger.annotations.CheckAccountPermission;
 import com.frontleaves.greenchaincarbonledger.services.TradeService;
+import com.frontleaves.greenchaincarbonledger.utils.*;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,7 +35,7 @@ public class TradeController {
             @RequestBody @Validated TradeReleaseVO tradeReleaseVO,
             @NotNull BindingResult bindingResult,
             HttpServletRequest request
-    ){
+    ) {
         log.info("[Controller] 请求 releaseCarbonTrade 接口");
         long timestamp = System.currentTimeMillis();
         // 对请求参数进行校验
@@ -49,30 +49,31 @@ public class TradeController {
     @CheckAccountPermission("{Trade:deleteTrade}")
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<BaseResponse> deleteTrade(
-            @PathVariable("id")String id,
+            @PathVariable("id") String id,
             HttpServletRequest request
-    ){
+    ) {
         log.info("[Controller] 请求 deleteTrade 接口");
-        long timestamp =System.currentTimeMillis();
+        long timestamp = System.currentTimeMillis();
         //进行参数校验
-        if(id == null || id.isEmpty()){
-            return ResultUtil.error(timestamp, "Path 参数错误",ErrorCode.PATH_VARIABLE_ERROR);
-        }else {
-            return tradeService.deleteTrade(timestamp,request,id);
+        if (id == null || id.isEmpty()) {
+            return ResultUtil.error(timestamp, "Path 参数错误", ErrorCode.PATH_VARIABLE_ERROR);
+        } else {
+            return tradeService.deleteTrade(timestamp, request, id);
         }
     }
+
     @GetMapping("/send")
     @CheckAccountPermission("{Trade:getOwnTradeList}")
-    public ResponseEntity<BaseResponse> getOwnTradeList (
+    public ResponseEntity<BaseResponse> getOwnTradeList(
             @RequestParam String type,
-            @RequestParam (required = false)String search,
-            @RequestParam (required = false)String limit,
-            @RequestParam (required = false)String page,
-            @RequestParam (required = false)String order,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String limit,
+            @RequestParam(required = false) String page,
+            @RequestParam(required = false) String order,
             HttpServletRequest request
-    ){
+    ) {
         log.info("[Controller] 请求 getOwnTrade 接口");
-        long timestamp =System.currentTimeMillis();
+        long timestamp = System.currentTimeMillis();
         //校验参数
         ResponseEntity<BaseResponse> checkResult = businessUtil.checkLimitPageAndOrder(timestamp, limit, page, order);
         if (checkResult != null) {
@@ -93,15 +94,20 @@ public class TradeController {
 
     @PatchMapping("/review/{tradeId}")
     public ResponseEntity<BaseResponse> reviewTradeList(
-            @PathVariable("tradeId")String id,
+            @PathVariable("tradeId") String id,
+            @RequestParam String pass,
             HttpServletRequest request
-    ){
+    ) {
         log.info("[Controller] 请求 getOwnTrade 接口");
-        long timestamp =System.currentTimeMillis();
-        if(id == null || id.isEmpty()){
-            return ResultUtil.error(timestamp, "Path 参数错误",ErrorCode.PATH_VARIABLE_ERROR);
-        }else {
-            return tradeService.reviewTradeList(timestamp,request,id);
+        long timestamp = System.currentTimeMillis();
+        if (id != null && !id.isEmpty()) {
+            if ("true".equals(pass) || "false".equals(pass)) {
+                return tradeService.reviewTradeList(timestamp, request, id);
+            } else {
+                return ResultUtil.error(timestamp, "参数 pass 错误", ErrorCode.PARAM_VARIABLE_ERROR);
+            }
+        } else {
+            return ResultUtil.error(timestamp, "Path 参数错误", ErrorCode.PATH_VARIABLE_ERROR);
         }
     }
 }

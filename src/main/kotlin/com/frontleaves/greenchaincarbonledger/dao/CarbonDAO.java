@@ -193,8 +193,8 @@ public class CarbonDAO {
         return carbonMapper.getTradeListBySearch(uuid, search, limit, page, order);
     }
 
-    public Boolean reviewTrade(String getUuid, String tradeId) {
+    public Boolean reviewTrade(CarbonTradeDO carbonTradeDO) {
         log.info("[DAO] 执行 reviewTrade");
-        return carbonMapper.reviewTrade(getUuid, tradeId);
+        return carbonMapper.reviewTrade(carbonTradeDO);
     }
 }
