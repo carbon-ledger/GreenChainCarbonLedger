@@ -5,7 +5,6 @@ import com.frontleaves.greenchaincarbonledger.mappers.CarbonMapper;
 import com.frontleaves.greenchaincarbonledger.models.doData.*;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.CarbonAddQuotaVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.CarbonConsumeVO;
-import com.frontleaves.greenchaincarbonledger.models.voData.getData.EditTradeVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.TradeReleaseVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.returnData.BackCarbonAccountingVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.returnData.BackCarbonQuotaVO;
@@ -20,15 +19,25 @@ import com.google.gson.reflect.TypeToken;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.sql.Date;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -99,7 +108,6 @@ public class CarbonServiceImpl implements CarbonService {
             String type = des.name;
             // 脱硫剂消耗量(前端传入)
             double consumption = des.material.consumption;
-
             // 数据库读取
             DesulfurizationFactorDO desulfurizationFactorDO = processEmissionFactorDAO.getDesFactorByName(type);
             // 脱硫剂中碳酸盐含量
@@ -134,6 +142,31 @@ public class CarbonServiceImpl implements CarbonService {
     }
 
     /**
+     * 获取附表1中燃烧材料的ID，净消耗量
+     */
+    private static String[][] combustionConsumption(@NotNull List<MaterialsDO.Materials> materialsList, CarbonItemTypeDAO carbonItemTypeDAO) {
+        String[] materialsNameArray = new String[materialsList.size()];
+        String[] netConsumptionArray = new String[materialsList.size()];
+        String[] lowCalorificArray = new String[materialsList.size()];
+        String[] carbonUnitCalorific = new String[materialsList.size()];
+        String[] fuelOxidationRate = new String[materialsList.size()];
+        for (int i = 0; i < materialsList.size(); i++) {
+            MaterialsDO.Materials material = materialsList.get(i);
+            CarbonItemTypeDO carbonItemTypeDO = carbonItemTypeDAO.getCarbonItemTypeByName(material.getName());
+            //获取姓名
+            materialsNameArray[i] = carbonItemTypeDO.getDisplayName();
+            lowCalorificArray[i] = String.valueOf(carbonItemTypeDO.getLowCalorific());
+            carbonUnitCalorific[i] = String.valueOf(carbonItemTypeDO.getCarbonUnitCalorific());
+            fuelOxidationRate[i] = String.valueOf(carbonItemTypeDO.getFuelOxidationRate());
+            //获取净消耗量
+            MaterialsDO.Material materialData = material.getMaterial();
+            netConsumptionArray[i] = String.valueOf(Double.parseDouble(materialData.getBuy()) + (Double.parseDouble(materialData.getOpeningInv()) - Double.parseDouble(materialData.getEndingInv())) + Double.parseDouble(materialData.getOutSide()) + Double.parseDouble(materialData.getExport()));
+        }
+        return new String[][]{materialsNameArray, netConsumptionArray,lowCalorificArray,carbonUnitCalorific,fuelOxidationRate};
+    }
+
+
+    /**
      * 计算E电力的值
      * <hr/>
      * 计算公式：
@@ -147,6 +180,16 @@ public class CarbonServiceImpl implements CarbonService {
         double electricCombustion;
         electricCombustion = (Double.parseDouble(carbonConsumeVO.getElectricBuy()) - Double.parseDouble(carbonConsumeVO.getElectricOutside()) - Double.parseDouble(carbonConsumeVO.getElectricExport())) * otherEmissionFactorDO.getFactor();
         return electricCombustion;
+    }
+    /**
+     * 获取电力附表所需值
+     */
+    private static  String []  electricityCombustion(CarbonConsumeVO carbonConsumeVO, OtherEmissionFactorDAO otherEmissionFactorDAO){
+        OtherEmissionFactorDO otherEmissionFactorDO =otherEmissionFactorDAO.getFactorByName(carbonConsumeVO.getElectricCompany());
+        String displayName =otherEmissionFactorDO.getDisplayName();
+        String netCombustion = String.valueOf((Double.parseDouble(carbonConsumeVO.getElectricBuy()) - Double.parseDouble(carbonConsumeVO.getElectricOutside()) - Double.parseDouble(carbonConsumeVO.getElectricExport())));
+        String factor = String.valueOf(otherEmissionFactorDO.getFactor());
+        return new String[]{displayName,netCombustion,factor};
     }
 
     /**
@@ -171,6 +214,27 @@ public class CarbonServiceImpl implements CarbonService {
     }
 
     /**
+     * 取出E过程附表
+     */
+    private static String[][] coursesConsumption(@NotNull List<MaterialsDO.Materials> coursesList, ProcessEmissionFactorDAO processEmissionFactorDAO) {
+        String[] courseNameArray = new String[coursesList.size()];
+        String[] courseNetConsumption = new String[coursesList.size()];
+        String[] courseFactor =new String[coursesList.size()];
+        for (int i = 0; i < coursesList.size(); i++) {
+            MaterialsDO.Materials courses = new MaterialsDO.Materials();
+            ProcessEmissionFactorDO processEmissionFactorDO = processEmissionFactorDAO.getFactorByName(courses.getName());
+            //获取名字
+            courseNameArray[i] = processEmissionFactorDO.getDisplayName();
+            courseFactor[i] = String.valueOf(processEmissionFactorDO.getFactor());
+            MaterialsDO.Material materialData = courses.getMaterial();
+            double netConsumption = Double.parseDouble(materialData.getBuy()) + (Double.parseDouble(materialData.getOpeningInv()) - Double.parseDouble(materialData.getEndingInv())) + Double.parseDouble(materialData.getOutSide()) + Double.parseDouble(materialData.getExport());
+            //获取净消耗量
+            courseNetConsumption[i] = String.valueOf(netConsumption);
+        }
+        return new String[][]{courseNameArray, courseNetConsumption,courseFactor};
+    }
+
+    /**
      * 计算R固碳
      *
      * @return R固碳的值
@@ -192,6 +256,26 @@ public class CarbonServiceImpl implements CarbonService {
     }
 
     /**
+     * 获取固碳的净消耗量和固碳
+     */
+    private static String[][] carbonSequestrationConsumption(@NotNull List<MaterialsDO.Materials> carbonSequestrationList,OtherEmissionFactorDAO otherEmissionFactorDAO){
+        String[] sequestrationNameArray = new String[carbonSequestrationList.size()];
+        String[] sequestrationConsumptionArray = new String[carbonSequestrationList.size()];
+        String[] sequestrationFactorArray = new String[carbonSequestrationList.size()];
+        for (int i = 0; i < carbonSequestrationList.size(); i++) {
+            MaterialsDO.Materials carbonSequestration = new MaterialsDO.Materials();
+            OtherEmissionFactorDO otherEmissionFactorDO = otherEmissionFactorDAO.getFactorByName(carbonSequestration.getName());
+            //获取
+            sequestrationNameArray[i] = otherEmissionFactorDO.getDisplayName();
+            sequestrationFactorArray[i] = String.valueOf(otherEmissionFactorDO.getFactor());
+            MaterialsDO.Material materialData = carbonSequestration.getMaterial();
+            double netConsumption = Double.parseDouble(materialData.getExport()) + Double.parseDouble(materialData.getEndingInv()) - Double.parseDouble(materialData.getOpeningInv());
+            sequestrationConsumptionArray[i] = String.valueOf(netConsumption);
+        }
+        return new String[][]{sequestrationNameArray,sequestrationConsumptionArray,sequestrationFactorArray};
+    }
+
+    /**
      * 计算E热力的值
      * <hr/>
      * 计算公式：
@@ -210,6 +294,37 @@ public class CarbonServiceImpl implements CarbonService {
             value += eHeat;
         }
         return value;
+    }
+
+    /**
+     * 取出热力的Id和消耗量
+     */
+    private static String[][] heatConsumption(@NotNull List<MaterialsDO.Material> heatList,OtherEmissionFactorDAO otherEmissionFactorDAO){
+        String [] heatNameArray = new String[heatList.size()];
+        String [] heatConsumption = new String[heatList.size()];
+        String [] heatFactorArray = new String[heatList.size()];
+        for (int i = 0; i < heatList.size(); i++) {
+            MaterialsDO.Material heat = new MaterialsDO.Material();
+            //获取
+            OtherEmissionFactorDO otherEmissionFactorDO = otherEmissionFactorDAO.getFactorByName("thermalPower");
+            heatNameArray[i] = otherEmissionFactorDO.getDisplayName();
+            heatFactorArray[i] = String.valueOf(otherEmissionFactorDO.getFactor());
+            double netConsumption = Double.parseDouble(heat.getBuy()) - Double.parseDouble(heat.getExport()) - Double.parseDouble(heat.getOutSide());
+            heatConsumption[i] = String.valueOf(netConsumption);
+        }
+        return new String[][]{heatNameArray,heatConsumption,heatFactorArray};
+    }
+
+    /**
+     * 为附表中的单元格赋值
+     */
+    private static void setCellValue(Sheet sheet, int rowIndex, int columnIndex, String value) {
+        Row row = sheet.getRow(rowIndex); // 获取要设置数据的行
+        if (row == null) {
+            row = sheet.createRow(rowIndex); // 如果行不存在，则创建新行
+        }
+        Cell cell = row.createCell(columnIndex); // 获取要设置数据的单元格
+        cell.setCellValue(value); // 设置单元格的值
     }
 
 
@@ -383,7 +498,6 @@ public class CarbonServiceImpl implements CarbonService {
     }
 
 
-
     @NotNull
     @Override
     public ResponseEntity<BaseResponse> createCarbonReport(
@@ -494,9 +608,231 @@ public class CarbonServiceImpl implements CarbonService {
                 .setCarbonSequestrations(carbonSequestration)
                 .setHeat(heat)
                 .setElectric(electric);
-
+        //读取附表1
+        String schedule1;
+        try (FileInputStream inputStream = new FileInputStream("AppendixIron1.xlsx")) {
+            try (Workbook workbook = new HSSFWorkbook(inputStream)) {
+                //获取工作表1
+                Sheet sheet1 = workbook.getSheetAt(0);
+                // 给第二行第二列的单元格赋值
+                setCellValue(sheet1, 1, 1, String.valueOf(totalCombustion));
+                // 给第三行第二列的单元格赋值
+                setCellValue(sheet1, 2, 1, String.valueOf(eCombustion));
+                setCellValue(sheet1, 3, 1, String.valueOf(eElectric + eHeat));
+                setCellValue(sheet1, 4, 1, String.valueOf(eCarbonSequestration));
+                //创建附表名称
+                schedule1 = ProcessingUtil.createUuid();
+                String filePath = "workLoad/" + schedule1 + ".xlsx";
+                try (FileOutputStream fileOut = new FileOutputStream(filePath)) {
+                    workbook.write(fileOut);
+                    log.info("附表1创建成功");
+                } catch (IOException e) {
+                    log.error("附表1创建失败", e);
+                    return ResultUtil.error(timestamp, "附表1创建失败", ErrorCode.SERVER_INTERNAL_ERROR);
+                }
+            } catch (IOException e) {
+                log.error("读取附表1错误", e);
+                return ResultUtil.error(timestamp, "读取附表1错误", ErrorCode.SERVER_INTERNAL_ERROR);
+            }
+        } catch (IOException e) {
+            log.error("读取模板附表1错误", e);
+            return ResultUtil.error(timestamp, "读取模板附表1错误", ErrorCode.SERVER_INTERNAL_ERROR);
+        }
+        //取出E材料燃烧消耗和ID
+        String[][] combustionConsumption = combustionConsumption(materials, carbonItemTypeDAO);
+        //取出E过程的消耗量
+        String[][] courseConsumption = coursesConsumption(materials, processEmissionFactorDAO);
+        String[] electricityCombustion =electricityCombustion(carbonConsumeVO,otherEmissionFactorDAO);
+        String[][] heatConsumption =heatConsumption(heats,otherEmissionFactorDAO);
+        String[][] carbonSequestrationConsumption = carbonSequestrationConsumption(carbonSequestrations,otherEmissionFactorDAO);
+        String schedule2;
+        //读取附表2
+        try (FileInputStream inputStream = new FileInputStream("AppendixIron2.xlsx")) {
+            try (Workbook workbook = new HSSFWorkbook(inputStream)) {
+                //读取工作表1
+                Sheet sheet2 = workbook.getSheetAt(0);
+                // 获取 Excel 中的数据并进行匹配
+                for (int i = 3; i < 24; i++) {
+                    // 获取当前行
+                    Row row = sheet2.getRow(i);
+                    // 获取当前行的第二列单元格
+                    Cell cell = row.getCell(1);
+                    // 获取当前单元格的值
+                    String excelName = cell.getStringCellValue();
+                    // 遍历数组，匹配名称
+                    for (String[] materialInfo : combustionConsumption) {
+                        String arrayName = materialInfo[0];
+                        // 如果 Excel 中的名称与数组中的名称匹配成功
+                        if (excelName.equals(arrayName)) {
+                            // 将数组中的第二个值填入当前行的数据中
+                            setCellValue(sheet2,i,2,materialInfo[1]);
+                            setCellValue(sheet2,i,3,materialInfo[2]);
+                            // 匹配成功后跳出内层循环
+                            break;
+                        }
+                    }
+                }
+                //给E过程材料赋值
+                // 获取 Excel 中的数据并进行匹配
+                for (int i = 26; i < 33; i++) {
+                    // 获取当前行
+                    Row row = sheet2.getRow(i);
+                    // 获取当前行的第二列单元格
+                    Cell cell = row.getCell(1);
+                    // 获取当前单元格的值
+                    String excelName = cell.getStringCellValue() + "消耗量";
+                    // 遍历数组，匹配名称
+                    for (String[] materialInfo : courseConsumption) {
+                        String arrayName = materialInfo[0];
+                        // 如果 Excel 中的名称与数组中的名称匹配成功
+                        if (excelName.equals(arrayName)) {
+                            // 将数组中的第二个值填入当前行的数据中
+                           setCellValue(sheet2,i,2,materialInfo[1]);
+                            // 匹配成功后跳出内层循环
+                            break;
+                        }
+                    }
+                }
+                //给E电消耗赋值
+                setCellValue(sheet2,35,2,electricityCombustion[1]);
+                //给热力赋值
+                setCellValue(sheet2,36,2, Arrays.toString(heatConsumption[1]));
+                //给固碳赋值
+                // 获取 Excel 中的数据并进行匹配
+                for (int i = 38; i < 41; i++) {
+                    // 获取当前行
+                    Row row = sheet2.getRow(i);
+                    // 获取当前行的第二列单元格
+                    Cell cell = row.getCell(1);
+                    // 获取当前单元格的值
+                    String excelName = cell.getStringCellValue() + "购入量";
+                    // 遍历数组，匹配名称
+                    for (String[] materialInfo : carbonSequestrationConsumption) {
+                        String arrayName = materialInfo[0];
+                        // 如果 Excel 中的名称与数组中的名称匹配成功
+                        if (excelName.equals(arrayName)) {
+                            // 将数组中的第二个值填入当前行的数据中
+                            setCellValue(sheet2,i,2,materialInfo[1]);
+                            // 匹配成功后跳出内层循环
+                            break;
+                        }
+                    }
+                }
+                //创建附表名称
+                schedule2 = ProcessingUtil.createUuid();
+                String filePath = "workLoad/" + schedule2 + ".xlsx";
+                try (FileOutputStream fileOut = new FileOutputStream(filePath)) {
+                    workbook.write(fileOut);
+                    log.info("附表2创建成功");
+                } catch (IOException e) {
+                    log.error("附表2创建失败", e);
+                    return ResultUtil.error(timestamp, "附表2创建失败", ErrorCode.SERVER_INTERNAL_ERROR);
+                }
+            } catch (IOException e) {
+                log.error("读取附表2错误");
+                return ResultUtil.error(timestamp, "读取附表2错误", ErrorCode.SERVER_INTERNAL_ERROR);
+            }
+        } catch (IOException e) {
+            log.error("读取模板附表2错误");
+            return ResultUtil.error(timestamp, "读取模板附表2错误", ErrorCode.SERVER_INTERNAL_ERROR);
+        }
+        String schedule3;
+        //读取附表3
+        try (FileInputStream inputStream = new FileInputStream("AppendixIron3.xlsx")){
+            try(Workbook workbook = new HSSFWorkbook(inputStream)) {
+                Sheet sheet3 = workbook.getSheetAt(0);
+                //为燃烧赋值
+                // 获取 Excel 中的数据并进行匹配
+                for (int i = 3; i < 24; i++) {
+                    // 获取当前行
+                    Row row = sheet3.getRow(i);
+                    // 获取当前行的第二列单元格
+                    Cell cell = row.getCell(1);
+                    // 获取当前单元格的值
+                    String excelName = cell.getStringCellValue();
+                    // 遍历数组，匹配名称
+                    for (String[] materialInfo : combustionConsumption) {
+                        String arrayName = materialInfo[0];
+                        // 如果 Excel 中的名称与数组中的名称匹配成功
+                        if (excelName.equals(arrayName)) {
+                            // 将数组中的第二个值填入当前行的数据中
+                            setCellValue(sheet3,i,2,materialInfo[3]);
+                            setCellValue(sheet3,i,3,materialInfo[4]);
+                            // 匹配成功后跳出内层循环
+                            break;
+                        }
+                    }
+                }
+                //为过程赋值
+                for (int i = 26; i < 33; i++) {
+                    // 获取当前行
+                    Row row = sheet3.getRow(i);
+                    // 获取当前行的第二列单元格
+                    Cell cell = row.getCell(1);
+                    // 获取当前单元格的值
+                    String excelName = cell.getStringCellValue();
+                    // 遍历数组，匹配名称
+                    for (String[] materialInfo : courseConsumption) {
+                        String arrayName = materialInfo[0];
+                        // 如果 Excel 中的名称与数组中的名称匹配成功
+                        if (excelName.equals(arrayName)) {
+                            // 将数组中的第二个值填入当前行的数据中
+                            setCellValue(sheet3,i,2,materialInfo[2]);
+                            // 匹配成功后跳出内层循环
+                            break;
+                        }
+                    }
+                }
+                //给E电消耗赋值
+                setCellValue(sheet3,35,2,electricityCombustion[2]);
+                //给热力赋值
+                setCellValue(sheet3,36,2, Arrays.toString(heatConsumption[2]));
+                //为固碳赋值
+                // 获取 Excel 中的数据并进行匹配
+                for (int i = 38; i < 41; i++) {
+                    // 获取当前行
+                    Row row = sheet3.getRow(i);
+                    // 获取当前行的第二列单元格
+                    Cell cell = row.getCell(1);
+                    // 获取当前单元格的值
+                    String excelName = cell.getStringCellValue();
+                    // 遍历数组，匹配名称
+                    for (String[] materialInfo : carbonSequestrationConsumption) {
+                        String arrayName = materialInfo[0];
+                        // 如果 Excel 中的名称与数组中的名称匹配成功
+                        if (excelName.equals(arrayName)) {
+                            // 将数组中的第二个值填入当前行的数据中
+                            setCellValue(sheet3,i,2,materialInfo[2]);
+                            // 匹配成功后跳出内层循环
+                            break;
+                        }
+                    }
+                }
+                //创建附表名称
+                schedule3 =ProcessingUtil.createUuid();
+                String filePath = "workLoad/" + schedule3+ ".xlsx";
+                try (FileOutputStream fileOut = new FileOutputStream(filePath)) {
+                    workbook.write(fileOut);
+                    log.info("附表3创建成功");
+                } catch (IOException e) {
+                    log.error("附表3创建失败", e);
+                    return ResultUtil.error(timestamp, "附表3创建失败", ErrorCode.SERVER_INTERNAL_ERROR);
+                }
+            }catch (IOException e){
+                log.error("读取附表3错误",e);
+                return ResultUtil.error(timestamp, "读取附表3错误", ErrorCode.SERVER_INTERNAL_ERROR);
+            }
+        } catch (IOException e) {
+            log.error("读取模板附表3错误",e);
+            return ResultUtil.error(timestamp,"读取模板附表3错误",ErrorCode.SERVER_INTERNAL_ERROR);
+        }
+        //整理3个文件的链接
+        ArrayList<String> listOrReports = new ArrayList<>();
+        listOrReports.add(schedule1 + ".xlsx");
+        listOrReports.add(schedule2 + ".xlsx");
+        listOrReports.add(schedule3 + "xlsx");
         // 更新碳核算报告数据表——修正碳总排放量
-        return getBaseResponseResponseEntity(timestamp, carbonConsumeVO, getLastReport, getLastCarbonAccounting, totalCombustion, carbonAccountingEmissionsVolumeDO);
+        return getBaseResponseResponseEntity(timestamp, carbonConsumeVO, getLastReport, getLastCarbonAccounting, totalCombustion, carbonAccountingEmissionsVolumeDO,listOrReports);
     }
 
     @NotNull
@@ -593,24 +929,26 @@ public class CarbonServiceImpl implements CarbonService {
                 .setMaterials(material)
                 .setDesulfuizations(desulfuization)
                 .setElectric(electric);
+        ArrayList<String> listOrReports = new ArrayList<>();
+        listOrReports.add("11111");
         // 更新碳核算报告数据表——修正碳总排放量
-        return getBaseResponseResponseEntity(timestamp, carbonConsumeVO, getLastReport, getLastCarbonAccounting, totalCombustion, carbonAccountingEmissionsVolumeDO);
+        return getBaseResponseResponseEntity(timestamp, carbonConsumeVO, getLastReport, getLastCarbonAccounting, totalCombustion, carbonAccountingEmissionsVolumeDO,listOrReports);
     }
 
     @NotNull
     private ResponseEntity<BaseResponse> getBaseResponseResponseEntity(
-            long timestamp, @NotNull CarbonConsumeVO carbonConsumeVO, CarbonReportDO getLastReport, @NotNull CarbonAccountingDO getLastCarbonAccounting, double totalCombustion, CarbonAccountingEmissionsVolumeDO carbonAccountingEmissionsVolumeDO) {
+            long timestamp, @NotNull CarbonConsumeVO carbonConsumeVO, CarbonReportDO getLastReport, @NotNull CarbonAccountingDO getLastCarbonAccounting, double totalCombustion, CarbonAccountingEmissionsVolumeDO carbonAccountingEmissionsVolumeDO,ArrayList<String> listOrReports) {
         if (!(carbonAccountingDAO.updateEmissionByUuidId(gson.toJson(carbonAccountingEmissionsVolumeDO), totalCombustion, getLastCarbonAccounting.getId()))) {
             return ResultUtil.error(timestamp, "更新碳核算数据表错误", ErrorCode.SERVER_INTERNAL_ERROR);
         }
         if (carbonConsumeVO.getSend()) {
             //进入待审状态
-            if (carbonReportDAO.updateEmissionById(totalCombustion, "pending_review", getLastReport.getId())) {
+            if (carbonReportDAO.updateEmissionById(totalCombustion, "pending_review", getLastReport.getId(),gson.toJson(listOrReports))) {
                 return ResultUtil.success(timestamp, "您的碳核算报告已经成功创建");
             }
         } else {
             //进入草稿状态
-            if (carbonReportDAO.updateEmissionById(totalCombustion, "draft", getLastReport.getId())) {
+            if (carbonReportDAO.updateEmissionById(totalCombustion, "draft", getLastReport.getId(),gson.toJson(listOrReports))) {
                 return ResultUtil.success(timestamp, "您的碳核算报告已经成功创建");
             }
         }
