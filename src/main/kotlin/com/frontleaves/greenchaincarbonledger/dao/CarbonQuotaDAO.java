@@ -66,9 +66,9 @@ public class CarbonQuotaDAO {
      * @param auditLog-审计日志
      * @return 是否完成
      */
-    public Boolean editCarbonQuota(String uuid, Integer year, Double totalQuota, boolean status, String auditLog) {
+    public Boolean editCarbonQuota(String uuid, Integer year, CarbonQuotaDO carbonQuotaDO) {
         log.info("[DAO] 执行 editCarbonQuota 操作");
         log.info("\t> Mysql更新");
-        return carbonQuotaMapper.editCarbonQuota(uuid, year, totalQuota, status, auditLog);
+        return carbonQuotaMapper.editCarbonQuota(uuid, year, carbonQuotaDO);
     }
 }

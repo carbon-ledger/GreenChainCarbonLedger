@@ -45,6 +45,7 @@ public enum ErrorCode {
     ACCOUNT_HAS_BEEN_BANNED("AccountHasBeenBanned", 40318, "用户已封禁"),
     WRONG_DATE("WrongDate", 40317, "日期错误"),
     DUPLICATE_CREATE("DuplicateCreate",40318,"重复创建"),
+    ID_ERROR("IdError",40319,"组织Id错误"),
     PAGE_NOT_FOUNDED("PageNotFounded", 40401, "页面不存在"),
     REQUEST_METHOD_NOT_SUPPORTED("RequestMethodNotSupported", 40500, "请求方法不支持"),
     SERVER_INTERNAL_ERROR("ServerInternalError", 50000, "服务器内部错误"),

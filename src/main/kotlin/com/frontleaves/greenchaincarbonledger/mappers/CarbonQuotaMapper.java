@@ -26,5 +26,5 @@ public interface CarbonQuotaMapper {
     boolean createCarbonQuota(CarbonQuotaDO carbonQuotaDO);
 
     @Update("UPDATE fy_carbon_quota SET total_quota=#{totalQuota} AND compliance_status=#{status} AND audit_log=#{auditLog} AND updated_at=now() WHERE organize_uuid=#{uuid} AND quota_year=#{year}")
-    Boolean editCarbonQuota(String uuid, Integer year, Double totalQuota, boolean status, String auditLog);
+    Boolean editCarbonQuota(String uuid, Integer year,CarbonQuotaDO carbonQuotaDO);
 }

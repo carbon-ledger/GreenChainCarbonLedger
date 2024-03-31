@@ -696,6 +696,7 @@ public class CarbonServiceImpl implements CarbonService {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy");
         int localYear = Integer.parseInt(simpleDateFormat.format(timestamp));
         // 将年份、月份和日期合并
+        log.debug("[Service]时间的合并");
         SimpleDateFormat combinedFormat = new SimpleDateFormat("yyyy-MM-dd");
         String combinedDate = combinedFormat.format(timestamp);
         //查找组织uuid
@@ -704,6 +705,7 @@ public class CarbonServiceImpl implements CarbonService {
             //找到后进行修改
             //进行总额配额的修改
             //校验传进来的是正还是负值
+            log.debug("[Service]碳配额的添加的计算");
             double carbonTotalQuota;
             if (Double.parseDouble(carbonAddQuotaVO.getQuota()) >= 0) {
                 carbonTotalQuota = getCarbonQuota.getTotalQuota() + Double.parseDouble(carbonAddQuotaVO.getQuota());
@@ -714,19 +716,27 @@ public class CarbonServiceImpl implements CarbonService {
             }.getType());
             UserDO getUserDO = ProcessingUtil.getUserByHeaderUuid(request, userDAO);
             CarbonAuditLogDO newCarbonAuditLog = new CarbonAuditLogDO();
-            newCarbonAuditLog.setDate(combinedDate)
-                    .setLog("进行碳配额的修改 " + Double.parseDouble(carbonAddQuotaVO.getQuota()))
-                    .setOperate(getUserDO.getUserName());
-            oldCarbonAuditLogList.add(newCarbonAuditLog);
-            String carbonAuditLog = gson.toJson(oldCarbonAuditLogList);
-            if (carbonQuotaDAO.editCarbonQuota(organizeId, localYear, carbonTotalQuota, !carbonAddQuotaVO.getStatus(), carbonAuditLog)) {
-                return ResultUtil.success(timestamp, "修改成功");
-            } else {
-                return ResultUtil.error(timestamp, "修改失败", ErrorCode.SERVER_INTERNAL_ERROR);
+            if (getUserDO != null) {
+                log.debug("[Service]审计日志添加");
+                newCarbonAuditLog.setDate(combinedDate)
+                        .setLog("进行碳配额的修改 " + Double.parseDouble(carbonAddQuotaVO.getQuota()))
+                        .setOperate(getUserDO.getUserName());
+                oldCarbonAuditLogList.add(newCarbonAuditLog);
+                String carbonAuditLog = gson.toJson(oldCarbonAuditLogList);
+                //整理更新数据
+                getCarbonQuota.setTotalQuota(carbonTotalQuota)
+                        .setComplianceStatus(!carbonAddQuotaVO.getStatus())
+                        .setAuditLog(carbonAuditLog);
+                if (carbonQuotaDAO.editCarbonQuota(organizeId, localYear,getCarbonQuota)) {
+                    return ResultUtil.success(timestamp, "修改成功");
+                } else {
+                    return ResultUtil.error(timestamp, "修改失败", ErrorCode.SERVER_INTERNAL_ERROR);
+                }
+            }else{
+                return ResultUtil.error(timestamp,"抱歉用户不存在",ErrorCode.UUID_NOT_EXIST);
             }
-
         } else {
-            return ResultUtil.error(timestamp, "请检查要修改的组织id", ErrorCode.SERVER_INTERNAL_ERROR);
+            return ResultUtil.error(timestamp, "请检查要修改的组织id", ErrorCode.ID_ERROR);
         }
 
     }
