@@ -48,7 +48,6 @@ public class UserController {
     public ResponseEntity<BaseResponse> getUserCurrent(@NotNull HttpServletRequest request) {
         log.info("[Controller] 请求 getUserCurrent 接口");
         long timestamp = System.currentTimeMillis();
-        request.getHeader("X-Auth-UUID");
         // 业务操作
         return userService.getUserCurrent(timestamp, request);
     }
@@ -125,7 +124,19 @@ public class UserController {
         return userService.editUser(timestamp, request, userEditVO);
     }
 
+    /**
+     * 添加用户
+     * <hr/>
+     * 该接口提供用户添加的功能。用户在成功登录后，可以请求此接口来添加新的用户，
+     * 包括用户的姓名、联系方式、电子邮件地址等。这通常用于管理员添加新用户。
+     *
+     * @param userAddVO     用户添加信息的请求参数
+     * @param bindingResult 参数校验结果
+     * @param request       HTTP 请求对象
+     * @return 包含用户信息的响应实体
+     */
     @PostMapping("/add")
+    @CheckAccountPermission({"user:addAccount"})
     public ResponseEntity<BaseResponse> addAccount(
             @RequestBody @Validated UserAddVO userAddVO,
             @NotNull BindingResult bindingResult,
@@ -177,6 +188,7 @@ public class UserController {
      * @return 包含用户信息的响应实体
      */
     @DeleteMapping("/force-logout/{uuid}")
+    @CheckAccountPermission({"user:forceLogout"})
     public ResponseEntity<BaseResponse> forceLogout(
             HttpServletRequest request,
             @PathVariable("uuid") String userUuid
@@ -203,6 +215,7 @@ public class UserController {
      * @return 包含用户信息的响应实体
      */
     @PutMapping("/force-edit/{uuid}")
+    @CheckAccountPermission({"user:putUserForceEdit"})
     public ResponseEntity<BaseResponse> putUserForceEdit(
             @RequestBody @Validated UserForceEditVO userForceEditVO,
             @NotNull BindingResult bindingResult,

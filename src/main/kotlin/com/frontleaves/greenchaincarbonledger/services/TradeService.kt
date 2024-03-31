@@ -11,7 +11,7 @@ interface TradeService {
      * 强制修改账户信息
      * @param timestamp 时间戳
      * @param request 请求
-     * @param id 用户id
+     * @param id 交易id
      * @return 是否成功
      */
     fun deleteTrade(
@@ -40,6 +40,30 @@ interface TradeService {
         limit: String?,
         page: String?,
         order: String?
+    ): ResponseEntity<BaseResponse>
+
+    /**
+     * 进行碳交易
+     * @param timestamp-时间戳
+     * @param request-请求
+     * @param id-交易id
+     * @return 是否交易完成
+     */
+    fun buyTrade(
+        timestamp: Long,
+        request: HttpServletRequest,
+        id: String
+    ): ResponseEntity<BaseResponse>
+
+
+    fun getTradeList(
+        timestamp: Long,
+        request: HttpServletRequest,
+        type: String,
+        search: String?,
+        limit: String,
+        page: String,
+        order: String
     ): ResponseEntity<BaseResponse>
 
     fun reviewTradeList(

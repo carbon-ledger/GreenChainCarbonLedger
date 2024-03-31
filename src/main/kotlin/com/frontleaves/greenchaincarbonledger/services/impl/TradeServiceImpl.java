@@ -1,9 +1,12 @@
 package com.frontleaves.greenchaincarbonledger.services.impl;
 
 import com.frontleaves.greenchaincarbonledger.dao.CarbonDAO;
+import com.frontleaves.greenchaincarbonledger.dao.CarbonQuotaDAO;
 import com.frontleaves.greenchaincarbonledger.dao.UserDAO;
+import com.frontleaves.greenchaincarbonledger.models.doData.CarbonQuotaDO;
 import com.frontleaves.greenchaincarbonledger.models.doData.CarbonTradeDO;
 import com.frontleaves.greenchaincarbonledger.models.doData.UserDO;
+import com.frontleaves.greenchaincarbonledger.models.voData.returnData.BackCarbonBuyTradeVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.returnData.BackCarbonTradeListVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.returnData.BackUserVO;
 import com.frontleaves.greenchaincarbonledger.services.TradeService;
@@ -18,6 +21,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,10 +34,13 @@ import java.util.List;
 public class TradeServiceImpl implements TradeService {
     private final UserDAO userDAO;
     private final CarbonDAO carbonDAO;
+    private final CarbonQuotaDAO carbonQuotaDAO;
 
     @NotNull
     @Override
     public ResponseEntity<BaseResponse> deleteTrade(long timestamp, @NotNull HttpServletRequest request, @NotNull String id) {
+        log.info("[Service] 执行 deleteTrade 方法");
+        log.debug("[Service] 进行用户查询确认");
         //确认用户
         UserDO getAuthUserDO = ProcessingUtil.getUserByHeaderUuid(request, userDAO);
         if (getAuthUserDO != null) {
@@ -52,25 +59,42 @@ public class TradeServiceImpl implements TradeService {
                     }
                 }
                 if (state) {
-                    //校验要删除的ID的status是否为completed
                     CarbonTradeDO getCarbonTrade = carbonDAO.getTradeById(id);
-                    if ("completed".equals(getCarbonTrade.getStatus())) {
-                        return ResultUtil.error(timestamp, "无法删除已完成交易的碳核算交易", ErrorCode.REQUEST_METHOD_NOT_SUPPORTED);
-                    } else {
-                        if ("cancelled".equals(getCarbonTrade.getStatus())) {
-                            return ResultUtil.error(timestamp, "请勿重复删除", ErrorCode.REQUEST_METHOD_NOT_SUPPORTED);
+                    //校验删除的订单是否是今年的
+                    log.debug("[Service] 时间戳获取时间");
+                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy");
+                    int localYear = Integer.parseInt(simpleDateFormat.format(timestamp));
+                    if (Integer.parseInt(simpleDateFormat.format(getCarbonTrade.getCreatedAt())) != localYear) {
+                        return ResultUtil.error(timestamp, "您没有权限删除", ErrorCode.NO_PERMISSION_ERROR);
+                    } else {//校验要删除的ID的status是否为completed
+                        if ("completed".equals(getCarbonTrade.getStatus())) {
+                            return ResultUtil.error(timestamp, "无法删除已完成交易的碳核算交易", ErrorCode.REQUEST_METHOD_NOT_SUPPORTED);
                         } else {
-                            String status = "cancelled";
-                            Boolean result = carbonDAO.deleteTrade(id, status);
-                            if (result) {
-                                return ResultUtil.success(timestamp, "删除成功");
+                            if ("cancelled".equals(getCarbonTrade.getStatus())) {
+                                return ResultUtil.error(timestamp, "请勿重复删除", ErrorCode.REQUEST_METHOD_NOT_SUPPORTED);
                             } else {
-                                return ResultUtil.error(timestamp, "删除失败", ErrorCode.SERVER_INTERNAL_ERROR);
+                                String status = "cancelled";
+                                Boolean result = carbonDAO.deleteTrade(id, status);
+                                if (result) {
+                                    log.debug("[Service] 数据库软删除更新数据");
+                                    //获取用户的碳排放额
+                                    CarbonQuotaDO getCarbonQuota = carbonQuotaDAO.getCarbonQuota(localYear, getAuthUserDO.getUuid());
+                                    //进行碳交易碳总量的返还
+                                    Double nowBuyTotalQuota = getCarbonTrade.getQuotaAmount() + getCarbonQuota.getTotalQuota();
+                                    //借用数据库更新
+                                    if (carbonQuotaDAO.finishCarbonTrade(nowBuyTotalQuota, getAuthUserDO.getUuid(), localYear)) {
+                                        return ResultUtil.success(timestamp, "删除成功");
+                                    } else {
+                                        return ResultUtil.success(timestamp, "交易已删除，但未返回配额请联系客服", ErrorCode.SERVER_INTERNAL_ERROR);
+                                    }
+                                } else {
+                                    return ResultUtil.error(timestamp, "删除失败", ErrorCode.SERVER_INTERNAL_ERROR);
+                                }
                             }
+
                         }
 
                     }
-
                 } else {
                     return ResultUtil.error(timestamp, "请检查要删除的碳交易发布是否存在", ErrorCode.REQUEST_METHOD_NOT_SUPPORTED);
                 }
@@ -90,6 +114,7 @@ public class TradeServiceImpl implements TradeService {
             String getUuid = getUser.getUuid();
             //检查是否发布了碳交易
             if (carbonDAO.getTradeListByUuid(getUuid)) {
+                log.debug("[Service] 校验参数");
                 //检查参数
                 // 检查参数，如果未设置（即为null），则使用默认值
                 limit = (limit.isEmpty() || Integer.parseInt(limit) > 100) ? "20" : limit;
@@ -101,6 +126,7 @@ public class TradeServiceImpl implements TradeService {
                 }
                 log.debug("\t> limit: {}, page: {}, order: {}", limit, page, order);
                 //对于type值进行判断
+                log.debug("[Service] 校验type");
                 List<CarbonTradeDO> getTradeList;
                 switch (type) {
                     case "all" ->
@@ -113,8 +139,9 @@ public class TradeServiceImpl implements TradeService {
                         return ResultUtil.error(timestamp, "type参数错误", ErrorCode.REQUEST_BODY_ERROR);
                     }
                 }
+                log.debug("[Service] 整理输出数据");
                 //整理数据
-                ArrayList<BackCarbonTradeListVO> backCarbonTradeList=new ArrayList<>();
+                ArrayList<BackCarbonTradeListVO> backCarbonTradeList = new ArrayList<>();
                 if (getTradeList != null) {
                     for (CarbonTradeDO getTrade : getTradeList) {
                         BackCarbonTradeListVO backCarbonTradeListVO = new BackCarbonTradeListVO();
@@ -134,7 +161,7 @@ public class TradeServiceImpl implements TradeService {
                         backCarbonTradeList.add(backCarbonTradeListVO);
                     }
                     //输出
-                    return ResultUtil.success(timestamp,"您的所需组织碳交易发布信息列表已准备完毕",backCarbonTradeList);
+                    return ResultUtil.success(timestamp, "您的所需组织碳交易发布信息列表已准备完毕", backCarbonTradeList);
                 } else {
                     return ResultUtil.error(timestamp, "未能查询到数据", ErrorCode.SERVER_INTERNAL_ERROR);
                 }
@@ -143,6 +170,145 @@ public class TradeServiceImpl implements TradeService {
             }
         } else {
             return ResultUtil.error(timestamp, "未查询到组长账号", ErrorCode.SERVER_INTERNAL_ERROR);
+        }
+    }
+
+    @NotNull
+    @Override
+    public ResponseEntity<BaseResponse> buyTrade(long timestamp, @NotNull HttpServletRequest request, @NotNull String id) {
+        log.info("[Service] 执行 buyTrade 方法");
+        //确认买家身份并且校验是否合规
+        UserDO getOrganizeDO = ProcessingUtil.getUserByHeaderUuid(request, userDAO);
+        if (getOrganizeDO != null) {
+            log.debug("[Service] 从时间戳获取时间");
+            //首先提取年份
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy");
+            int localYear = Integer.parseInt(simpleDateFormat.format(timestamp));
+            //校验是否可以查到
+            CarbonQuotaDO carbonQuotaDO = carbonQuotaDAO.getCarbonQuota(localYear, getOrganizeDO.getUuid());
+            if (carbonQuotaDO == null) {
+                return ResultUtil.error(timestamp, "抱歉未查询到您当前的碳排放额表", ErrorCode.CAN_T_ACCOUNT_FOR_CARBON);
+            } else {
+                //继续进行校验
+                //开始校验是否合规,注意此时假为合规，真为不合规(数据库与布尔值相反）
+                if (carbonQuotaDO.complianceStatus) {
+                    return ResultUtil.error(timestamp, "抱歉您所在的组织目前初始不合规状态", ErrorCode.REQUEST_METHOD_NOT_SUPPORTED);
+                } else {
+                    //目前买家各项符合可以进行碳交易
+                    //开始查询买家购买的碳交易id是否存在和合规
+                    CarbonTradeDO carbonTradeDO = carbonDAO.getTradeById(id);
+                    if (carbonTradeDO != null) {
+                        //进行合规验证
+                        if ("active".equals(carbonTradeDO.getStatus())) {
+                            //进行时间验证
+                            if (Integer.parseInt(simpleDateFormat.format(carbonTradeDO.getCreatedAt())) != localYear) {
+                                return ResultUtil.error(timestamp, "抱歉您购买的碳交易订单不在本年度", ErrorCode.REQUEST_METHOD_NOT_SUPPORTED);
+                            } else {
+                                //进行碳交易
+                                double nowBuyTotalQuota = carbonTradeDO.getQuotaAmount() + carbonQuotaDO.getTotalQuota();
+                                if (carbonQuotaDAO.finishCarbonTrade(nowBuyTotalQuota, carbonQuotaDO.getUuid(), localYear)) {
+                                    //进行删除碳交易
+                                    if (carbonDAO.deleteTrade(id, "completed")) {
+                                        //整理数据
+                                        BackCarbonBuyTradeVO backCarbonBuyTrade = new BackCarbonBuyTradeVO();
+                                        BackUserVO backUserVO = new BackUserVO();
+                                        backUserVO.setUuid(getOrganizeDO.getUuid())
+                                                .setUserName(getOrganizeDO.getUserName())
+                                                .setNickName(getOrganizeDO.getNickName())
+                                                .setRealName(getOrganizeDO.getRealName())
+                                                .setEmail(getOrganizeDO.getEmail())
+                                                .setPhone(getOrganizeDO.getPhone())
+                                                .setCreatedAt(getOrganizeDO.getCreatedAt())
+                                                .setUpdatedAt(getOrganizeDO.getUpdatedAt());
+                                        backCarbonBuyTrade.setOrganize(backUserVO)
+                                                .setQuotaAmount(carbonTradeDO.getQuotaAmount().toString())
+                                                .setPricePerUnit(carbonTradeDO.getPricePerUnit().toString())
+                                                .setDescription(carbonTradeDO.getDescription());
+                                        //输出
+                                        return ResultUtil.success(timestamp, "您已完成碳交易", backCarbonBuyTrade);
+                                    } else {
+                                        return ResultUtil.error(timestamp, ErrorCode.SERVER_INTERNAL_ERROR);
+                                    }
+                                } else {
+                                    return ResultUtil.error(timestamp, ErrorCode.SERVER_INTERNAL_ERROR);
+                                }
+                            }
+                        } else {
+                            return ResultUtil.error(timestamp, "抱歉您购买的碳交易订单不能进行交易", ErrorCode.REQUEST_METHOD_NOT_SUPPORTED);
+                        }
+                    } else {
+                        return ResultUtil.error(timestamp, "抱歉您购买的碳交易订单并不存在", ErrorCode.REQUEST_BODY_ERROR);
+                    }
+                }
+            }
+        } else {
+            return ResultUtil.error(timestamp, "未找到您的组织账号", ErrorCode.USER_NOT_EXISTED);
+        }
+    }
+
+    @NotNull
+    @Override
+    public ResponseEntity<BaseResponse> getTradeList(
+            long timestamp,
+            @NotNull HttpServletRequest request,
+            @NotNull String type,
+            String search,
+            @NotNull String limit,
+            @NotNull String page,
+            @NotNull String order) {
+        UserDO getUser = ProcessingUtil.getUserByHeaderUuid(request, userDAO);
+        if (getUser != null) {
+            String getUuid = getUser.getUuid();
+            // 此时，type参数已经被校验、page、limit仅仅验证了结构，未校验范围、order还需要赋值添加字段名
+            // 转变page和limit类型
+            limit = (limit.isEmpty() || Integer.parseInt(limit) > 100) ? "20" : limit;
+            page = (page.isEmpty()) ? "1" : page;
+            if (order.isEmpty()) {
+                order = "id ASC";
+            } else {
+                order = "id " + order;
+            }
+            //对于type值进行判断
+            List<CarbonTradeDO> getTradeList;
+            switch (type) {
+                case "all" ->
+                        getTradeList = carbonDAO.getAvailableTradeListAll(Integer.valueOf(limit), Integer.valueOf(page), order);
+                case "active" ->
+                        getTradeList = carbonDAO.getAvailableTradeList(search, Integer.valueOf(limit), Integer.valueOf(page), order);
+                case "completed" ->
+                        getTradeList = carbonDAO.getCompletedTradeList(search, Integer.valueOf(limit), Integer.valueOf(page), order);
+                case "search" ->
+                        getTradeList = carbonDAO.getSearchTradeList(search, Integer.valueOf(limit), Integer.valueOf(page), order);
+                default -> {
+                    return ResultUtil.error(timestamp, "type参数错误", ErrorCode.REQUEST_BODY_ERROR);
+                }
+            }
+            ArrayList<BackCarbonTradeListVO> backCarbonTradeList = new ArrayList<>();
+            if (getTradeList != null) {
+                for (CarbonTradeDO getTrade : getTradeList) {
+                    BackCarbonTradeListVO backCarbonTradeListVO = new BackCarbonTradeListVO();
+                    BackUserVO backUserVO = new BackUserVO();
+                    backUserVO.setUuid(getUuid)
+                            .setUserName(getUser.getUserName())
+                            .setNickName(getUser.getNickName())
+                            .setRealName(getUser.getRealName())
+                            .setEmail(getUser.getEmail())
+                            .setPhone(getUser.getPhone())
+                            .setCreatedAt(getUser.getCreatedAt())
+                            .setUpdatedAt(getUser.getUpdatedAt());
+                    backCarbonTradeListVO.setOrganize(backUserVO)
+                            .setQuotaAmount(getTrade.getQuotaAmount().toString())
+                            .setPricePerUnit(getTrade.getPricePerUnit().toString())
+                            .setDescription(getTrade.getDescription());
+                    backCarbonTradeList.add(backCarbonTradeListVO);
+                }
+                //输出
+                return ResultUtil.success(timestamp, "您的所需组织碳交易发布信息列表已准备完毕", backCarbonTradeList);
+            } else {
+                return ResultUtil.error(timestamp, "未能查询到数据", ErrorCode.SERVER_INTERNAL_ERROR);
+            }
+        } else {
+            return ResultUtil.error(timestamp, "未查询到组长账号", ErrorCode.USER_NOT_EXISTED);
         }
     }
 

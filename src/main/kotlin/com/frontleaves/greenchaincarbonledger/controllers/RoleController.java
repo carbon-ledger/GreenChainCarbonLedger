@@ -139,7 +139,6 @@ public class RoleController {
             @PathVariable("uuid") String roleUuid,
             @NotNull HttpServletRequest request
     ) {
-        request.getHeader("X-Auth-UUID");
         log.info("[Controller] 请求 roleService 接口");
         long timestamp = System.currentTimeMillis();
         // 对请求参数进行校验

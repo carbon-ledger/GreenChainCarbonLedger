@@ -1,22 +1,24 @@
 package com.frontleaves.greenchaincarbonledger.controllers;
 
 import com.frontleaves.greenchaincarbonledger.annotations.CheckAccountPermission;
+import com.frontleaves.greenchaincarbonledger.models.doData.MaterialsDO;
+import com.frontleaves.greenchaincarbonledger.models.voData.getData.CarbonAddQuotaVO;
+import com.frontleaves.greenchaincarbonledger.models.voData.getData.CarbonConsumeVO;
 import com.frontleaves.greenchaincarbonledger.services.CarbonService;
-import com.frontleaves.greenchaincarbonledger.utils.BaseResponse;
-import com.frontleaves.greenchaincarbonledger.utils.BusinessUtil;
-import com.frontleaves.greenchaincarbonledger.utils.ErrorCode;
-import com.frontleaves.greenchaincarbonledger.utils.ResultUtil;
+import com.frontleaves.greenchaincarbonledger.utils.*;
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 
 /**
  * CarbonController
@@ -32,6 +34,7 @@ import java.text.SimpleDateFormat;
 @RequiredArgsConstructor
 public class CarbonController {
     private final CarbonService carbonService;
+    private final Gson gson;
 
     private final BusinessUtil businessUtil;
 
@@ -137,6 +140,7 @@ public class CarbonController {
      * @return carbonService
      */
     @GetMapping("/accounting/get")
+    @CheckAccountPermission({"carbon:getCarbonAccounting"})
     public ResponseEntity<BaseResponse> getCarbonAccounting(
             @RequestParam(required = false) String limit,
             @RequestParam(required = false) String page,
@@ -146,5 +150,106 @@ public class CarbonController {
         log.info("[Controller] 请求 getCarbonAccounting 接口");
         long timestamp = System.currentTimeMillis();
         return carbonService.getCarbonAccounting(timestamp, request, limit, page, order);
+    }
+
+    /**
+     * 为组织添加配额
+     *
+     * @param carbonAddQuotaVO-添加配额的值
+     * @param bindingResult-结果
+     * @param organizeId-组织UUID
+     * @param request-请求图
+     * @return 是否完成配额的添加
+     */
+    @PostMapping("/add/{organizeId}")
+    @CheckAccountPermission({"carbon:addOrganizeIdQuota"})
+    public ResponseEntity<BaseResponse> addOrganizeIdQuota(
+            @RequestBody @Validated CarbonAddQuotaVO carbonAddQuotaVO,
+            @org.jetbrains.annotations.NotNull BindingResult bindingResult,
+            @PathVariable("organizeId") String organizeId,
+            HttpServletRequest request
+    ) {
+        log.info("[Controller] 执行 addOrganizeIdQuota 接口");
+        long timestamp = System.currentTimeMillis();
+        // 对请求参数进行校验
+        if (bindingResult.hasErrors()) {
+            return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR, ProcessingUtil.getValidatedErrorList(bindingResult));
+        }
+        //校验组织uuid
+        if (!organizeId.isEmpty()) {
+            return carbonService.addOrganizeIdQuota(timestamp, request, organizeId, carbonAddQuotaVO);
+        } else {
+            return ResultUtil.error(timestamp, ErrorCode.PARAM_VARIABLE_ERROR);
+        }
+    }
+
+    @PostMapping("/report/create")
+    @CheckAccountPermission({"carbon:createCarbonReport"})
+    public ResponseEntity<BaseResponse> createCarbonReport(
+            @RequestBody @Validated CarbonConsumeVO carbonConsumeVO,
+            @NotNull BindingResult bindingResult,
+            HttpServletRequest request
+    ) {
+        ArrayList<String> errorMessage = new ArrayList<>();
+        log.info("[Controller] 请求 creatCarbonReport 接口");
+        long timestamp = System.currentTimeMillis();
+        // 对请求参数进行校验
+        if (bindingResult.hasErrors()) {
+            return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR, ProcessingUtil.getValidatedErrorList(bindingResult));
+        }
+        MaterialsDO materialsDO;
+        // 对原料相关参数进行解析
+        try {
+            materialsDO = gson.fromJson(carbonConsumeVO.getMaterials(), MaterialsDO.class);
+        } catch (JsonSyntaxException e) {
+            log.error("[Controller] 原料参数解析失败");
+            errorMessage.add("原料参数解析失败，请检查原料参数格式");
+            return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR, errorMessage);
+        }
+        // 返回业务操作
+        switch (carbonConsumeVO.getType()) {
+            case "steelProduction" -> {
+                return carbonService.createCarbonReport(
+                        timestamp, request, carbonConsumeVO,
+                        materialsDO.getMaterials(),
+                        materialsDO.getCourses(),
+                        materialsDO.getCarbonSequestrations(),
+                        materialsDO.getHeat()
+                );
+            }
+            case "generateElectricity" -> {
+                return carbonService.createCarbonReport1(
+                        timestamp, request, carbonConsumeVO,
+                        materialsDO.getMaterials(),
+                        materialsDO.getDesulfurization()
+                );
+            }
+            default -> {
+                errorMessage.add("type 参数错误");
+                return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR, errorMessage);
+            }
+        }
+    }
+
+    @PatchMapping("/edit/{organizeId}")
+    @CheckAccountPermission({"carbon:editCarbonQuota"})
+    public ResponseEntity<BaseResponse> editCarbonQuota(
+            @RequestBody @Validated CarbonAddQuotaVO carbonAddQuotaVO,
+            @NotNull BindingResult bindingResult,
+            @PathVariable String organizeId,
+            HttpServletRequest request
+    ) {
+        log.info("[Controller] 请求  editCarbonQuota 接口 ");
+        long timestamp = System.currentTimeMillis();
+        // 对请求参数进行校验
+        if (bindingResult.hasErrors()) {
+            return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR, ProcessingUtil.getValidatedErrorList(bindingResult));
+        }
+        if (organizeId.isEmpty()){
+            return ResultUtil.error(timestamp,ErrorCode.PATH_VARIABLE_ERROR);
+        }else {
+            //进入业务操作
+            return carbonService.editCarbonQuota(timestamp,request,organizeId,carbonAddQuotaVO);
+        }
     }
 }

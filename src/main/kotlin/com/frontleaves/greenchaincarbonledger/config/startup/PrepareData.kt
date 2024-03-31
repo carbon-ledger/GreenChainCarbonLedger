@@ -8,6 +8,7 @@ import com.frontleaves.greenchaincarbonledger.models.doData.UserDO
 import com.frontleaves.greenchaincarbonledger.utils.ProcessingUtil
 import com.google.gson.Gson
 import org.springframework.jdbc.core.JdbcTemplate
+import org.springframework.jdbc.core.query
 import java.sql.Timestamp
 
 /**
@@ -33,7 +34,7 @@ class PrepareData(
      */
     fun prepareUploadSqlWithPermission(getPermissionList: List<PermissionDO>?) {
         val permissionList = getPermissionList?.toTypedArray() ?: arrayOf()
-        SqlPrepareData.PERMISSION_LIST.forEach {permissionName ->
+        SqlPrepareData.PERMISSION_LIST.forEach { permissionName ->
             if (permissionList.isNotEmpty()) {
                 permissionList.any { permission -> permission.name.equals(permissionName[0]) }
                     .takeIf { !it }?.let {
@@ -224,6 +225,110 @@ class PrepareData(
                 it.pid = rs.getLong("pid")
                 it.name = rs.getString("name")
                 it.description = rs.getString("description")
+            }
+        }
+    }
+
+    fun sqlCarbonItemType() {
+        SqlPrepareData.SQL_CARBON_ITEM_LIST.forEach {
+            val getCarbonItem =
+                jdbcTemplate.query("SELECT * FROM fy_carbon_item_type WHERE name = ? LIMIT 1", it["name"]!!) { rs, _ ->
+                    return@query rs.getString("name")
+                }
+            if (getCarbonItem.isEmpty()) {
+                log.debug("\t> 碳排放数据库缺失 {}[{}] 原料类型，开始初始化...", it["name"]!!, it["displayName"]!!)
+                jdbcTemplate.update(
+                    "INSERT INTO fy_carbon_item_type (mode, name, display_name, low_calorific, carbon_unit_calorific, fuel_oxidation_rate) VALUES (?, ?, ?, ?, ?, ?)",
+                    it["mode"]!!,
+                    it["name"]!!,
+                    it["displayName"]!!,
+                    it["lowCalorific"]!!,
+                    it["carbonUnitCalorific"]!!,
+                    it["fuelOxidationRate"]!!
+                )
+            }
+        }
+    }
+
+    fun sqlProcessFactor() {
+        SqlPrepareData.SQL_PROCESS_EMISSION_FACTOR.forEach {
+            val getProcessFactor = jdbcTemplate.query(
+                "SELECT * FROM fy_process_emission_factor WHERE name = ? LIMIT 1",
+                it["name"]!!
+            ) { rs, _ ->
+                return@query rs.getString("name")
+            }
+            if (getProcessFactor.isEmpty()) {
+                log.debug("\t> 碳排放数据库缺失 {}[{}] 过程因子，开始初始化...", it["name"]!!, it["displayName"]!!)
+                jdbcTemplate.update(
+                    "INSERT INTO fy_process_emission_factor (name, display_name, factor) VALUES (?, ?, ?)",
+                    it["name"]!!,
+                    it["displayName"]!!,
+                    it["factor"]!!.toDouble()
+                )
+            }
+        }
+    }
+
+    fun sqlOtherFactor() {
+        SqlPrepareData.SQL_OTHER_EMISSION_FACTOR.forEach {
+            val getOtherFactor = jdbcTemplate.query(
+                "SELECT * FROM fy_other_emission_factor WHERE name = ? LIMIT 1",
+                it["name"]!!
+            ) { rs, _ ->
+                return@query rs.getString("name")
+            }
+            if (getOtherFactor.isEmpty()) {
+                log.debug("\t> 碳排放数据库缺失 {}[{}] 其他因子，开始初始化...", it["name"]!!, it["displayName"]!!)
+                jdbcTemplate.update(
+                    "INSERT INTO fy_other_emission_factor (name, display_name, factor, unit) VALUES (?, ?, ?, ?)",
+                    it["name"]!!,
+                    it["displayName"]!!,
+                    it["factor"]!!.toDouble(),
+                    it["unit"]!!
+                )
+            }
+        }
+    }
+
+    fun sqlCarbonType() {
+        SqlPrepareData.SQL_CARBON_TYPE.forEach {
+            val getCarbonType =
+                jdbcTemplate.query("SELECT * FROM fy_carbon_type WHERE name = ? LIMIT 1", it["name"]!!) { rs, _ ->
+                    return@query rs.getString("name")
+                }
+            if (getCarbonType.isEmpty()) {
+                log.debug("\t> 碳排放数据库缺失 {}[{}] 碳排放类型，开始初始化...", it["name"]!!, it["displayName"]!!)
+                jdbcTemplate.update(
+                    "INSERT INTO fy_carbon_type (uuid, name, display_name, created_at) VALUES (?, ?, ?, ?)",
+                    ProcessingUtil.createUuid(),
+                    it["name"]!!,
+                    it["displayName"]!!,
+                    Timestamp(System.currentTimeMillis())
+                )
+            }
+        }
+    }
+
+    fun sqlDesulfurizationFactor() {
+        SqlPrepareData.SQL_DESULFURIZATION_EMISSION_FACTOR.forEach {
+            val getOtherFactor = jdbcTemplate.query(
+                "SELECT * FROM fy_desulfurization_factor WHERE name = ? LIMIT 1",
+                it["name"]!!
+            ) { rs, _ ->
+                return@query rs.getString("name")
+            }
+            if (getOtherFactor.isEmpty()) {
+                log.debug("\t> 脱硫排放因子数据库缺失 {}[{}] 其他因子，开始初始化...", it["name"]!!, it["displayName"]!!)
+                jdbcTemplate.update(
+                    "INSERT INTO fy_desulfurization_factor (name, display_name, desulfurizer_main_content, factor, carbonate_content, unit) VALUES (?, ?, ?, ?, ?, ?)",
+                    it["name"]!!,
+                    it["displayName"]!!,
+                    it["desulfurizerMainContent"]!!,
+                    it["factor"]!!.toDouble(),
+                    it["carbonateContent"]!!,
+                    it["unit"]!!
+                )
             }
         }
     }

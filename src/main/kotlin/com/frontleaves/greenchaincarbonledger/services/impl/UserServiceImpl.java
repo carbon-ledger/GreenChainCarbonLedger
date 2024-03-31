@@ -82,7 +82,7 @@ public class UserServiceImpl implements UserService {
                     return ResultUtil.error(timestamp, ErrorCode.SERVER_INTERNAL_ERROR);
                 }
             } else {
-                return ResultUtil.error(timestamp, "用户已经被封禁", ErrorCode.USER_CANNOT_BE_BANED);
+                return ResultUtil.error(timestamp, "用户已经被封禁", ErrorCode.USER_CANNOT_BE_OPERATE);
             }
         } else {
             return ResultUtil.error(timestamp, ErrorCode.USER_NOT_EXISTED);
@@ -108,6 +108,7 @@ public class UserServiceImpl implements UserService {
                     .setRealName(getUserDO.getRealName())
                     .setEmail(getUserDO.getEmail())
                     .setPhone(getUserDO.getPhone())
+                    .setAvatar(getUserDO.getAvatar())
                     .setUuid(getUserDO.getUuid());
             newPermissionInfo
                     .setUserPermission(gson.fromJson(getUserDO.getPermission(), new TypeToken<ArrayList<String>>() {}.getType()))
@@ -262,14 +263,14 @@ public class UserServiceImpl implements UserService {
             if (!banUserUuid.equals(ProcessingUtil.getAuthorizeUserUuid(request))) {
                 return getBaseResponseResponseEntity(timestamp, banUserUuid, userDAO);
             } else {
-                return ResultUtil.error(timestamp, "您不能封禁自己", ErrorCode.USER_CANNOT_BE_BANED);
+                return ResultUtil.error(timestamp, "您不能封禁自己", ErrorCode.USER_CANNOT_BE_OPERATE);
             }
         } else {
             log.info("[Service] 普通管理员");
             if (!ProcessingUtil.checkUserHasOtherConsole(banUserUuid, userDAO, roleDAO)) {
                 return getBaseResponseResponseEntity(timestamp, banUserUuid, userDAO);
             } else {
-                return ResultUtil.error(timestamp, "您不能封禁自己或封禁超级管理员", ErrorCode.USER_CANNOT_BE_BANED);
+                return ResultUtil.error(timestamp, "您不能封禁自己或封禁超级管理员", ErrorCode.USER_CANNOT_BE_OPERATE);
             }
         }
     }
@@ -325,8 +326,8 @@ public class UserServiceImpl implements UserService {
             if (userAddVO.getRole() == null) {
                 userAddVO.setRole("default");
             }
-            RoleDO defaultUuid = roleDAO.getRoleByName(userAddVO.getRole());
-            if (defaultUuid == null) {
+            RoleDO getDefaultRole = roleDAO.getRoleByName(userAddVO.getRole());
+            if (getDefaultRole == null) {
                 return ResultUtil.error(timestamp, ErrorCode.ROLE_NOT_EXISTED);
             }
             // 新建用户
@@ -338,7 +339,7 @@ public class UserServiceImpl implements UserService {
                     .setEmail(userAddVO.getEmail())
                     .setPhone(userAddVO.getPhone())
                     .setPassword(ProcessingUtil.passwordEncrypt(addPassword))
-                    .setRole(defaultUuid.getUuid())
+                    .setRole(getDefaultRole.getUuid())
                     .setPermission("[]");
             if (userDAO.createUser(newUserDO)) {
                 BackAddUserVO backAddUserVO = new BackAddUserVO();

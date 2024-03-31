@@ -213,45 +213,17 @@ public class ReviewController {
      * <hr/>
      * 用于获取审核列表，需要组织账户权限
      *
-     * @param page  页数
-     * @param limit 每页限制的结果数
-     * @param order 排序方式，可选值包括 "asc"（升序）和 "desc"（降序）
      * @return ResponseEntity<BaseResponse>
      */
     @GetMapping("/list")
     @CheckAccountPermission({"review:getList"})
     public ResponseEntity<BaseResponse> getReviewList(
-            @RequestParam(required = false) String page,
-            @RequestParam(required = false) String limit,
-            @RequestParam(required = false) String order,
             @NotNull HttpServletRequest request
     ) {
         log.info("[Controller] 执行 getReviewList 方法");
         long timestamp = System.currentTimeMillis();
-        // 数据检查
-        if (page != null && !page.isEmpty()) {
-            if (!page.matches("^[0-9]+$")) {
-                return ResultUtil.error(timestamp, "参数 page 错误", ErrorCode.PARAM_VARIABLE_ERROR);
-            }
-        } else {
-            page = "";
-        }
-        if (limit != null && !limit.isEmpty()) {
-            if (!limit.matches("^[0-9]+$")) {
-                return ResultUtil.error(timestamp, "参数 limit 错误", ErrorCode.PARAM_VARIABLE_ERROR);
-            }
-        } else {
-            limit = "";
-        }
-        if (order != null && !order.isEmpty()) {
-            if (!"asc".equals(order) && !"desc".equals(order)) {
-                return ResultUtil.error(timestamp, "参数 order 错误", ErrorCode.PARAM_VARIABLE_ERROR);
-            }
-        } else {
-            order = "";
-        }
         // 业务逻辑
-        return reviewService.getReviewList(timestamp, page, limit, order, request);
+        return reviewService.getReviewList(timestamp, request);
     }
 
     /**
@@ -297,5 +269,32 @@ public class ReviewController {
         long timestamp = System.currentTimeMillis();
         // 业务逻辑
         return reviewService.getReviewReport(timestamp, request);
+    }
+
+    /**
+     * 获取审核信息
+     * <hr/>
+     * 用于获取审核信息，需要组织账户权限
+     *
+     * @return ResponseEntity<BaseResponse>
+     */
+    @GetMapping("/check")
+    @CheckAccountPermission({"review:getReviewInfo"})
+    public ResponseEntity<BaseResponse> getReviewInfo(
+            @RequestParam String id,
+            @RequestParam String type,
+            @NotNull HttpServletRequest request
+    ) {
+        log.info("[Controller] 执行 getReviewInfo 方法");
+        long timestamp = System.currentTimeMillis();
+        // 参数检查
+        if (id == null || id.isBlank() || !id.matches("^[0-9]+$")) {
+            return ResultUtil.error(timestamp, "参数 id 错误", ErrorCode.PARAM_VARIABLE_ERROR);
+        }
+        if (!"true".equals(type) && !"false".equals(type)) {
+            return ResultUtil.error(timestamp, "参数 type 错误", ErrorCode.PARAM_VARIABLE_ERROR);
+        }
+        // 业务逻辑
+        return reviewService.getReviewInfo(timestamp, id, type, request);
     }
 }

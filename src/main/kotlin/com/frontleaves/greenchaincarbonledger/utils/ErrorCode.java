@@ -39,9 +39,12 @@ public enum ErrorCode {
     CAN_T_OPERATE_ONESELF("CanTOperateOneself", 40312, "不能操作自己或超级管理"),
     ROLE_NOT_EXISTED("RoleNotExist", 40313, "角色不存在"),
     PARAM_VARIABLE_ERROR("ParamVariableError", 40314, "参数变量错误"),
-    CAN_T_ACCOUNT_FOR_CARBON("NotAccountedForCarbon",40313,"您未进行碳核算"),
-    REVIEW_ERROR("ReviewError", 40315, "审核信息错误"),
-    CAN_T_PUBLISH_TRADE("NotPublishCarbonTrade",40314,"您未进行碳交易发布"),
+    CAN_T_ACCOUNT_FOR_CARBON("NotAccountedForCarbon",40315,"您未进行碳核算"),
+    REVIEW_ERROR("ReviewError", 40316, "审核信息错误"),
+    CAN_T_PUBLISH_TRADE("NotPublishCarbonTrade",40317,"您未进行碳交易发布"),
+    ACCOUNT_HAS_BEEN_BANNED("AccountHasBeenBanned", 40318, "用户已封禁"),
+    WRONG_DATE("WrongDate", 40317, "日期错误"),
+    DUPLICATE_CREATE("DuplicateCreate",40318,"重复创建"),
     TRANSACTION_REVIEW_FAILED("TransactionReviewFailed", 40316, "交易审核失败"),
     PAGE_NOT_FOUNDED("PageNotFounded", 40401, "页面不存在"),
     REQUEST_METHOD_NOT_SUPPORTED("RequestMethodNotSupported", 40500, "请求方法不支持"),
@@ -51,11 +54,12 @@ public enum ErrorCode {
     INVITE_CODE_ERROR("VerifyCodeError", 40398, "邀请码错误"),
     NO_LOGIN("NoLogin", 40110, "未登录"),
     UPDATE_DATA_ERROR("UpdateDataError", 40394, "更新数据失败"),
-    USER_CANNOT_BE_BANED("UserCannotBeDeleted", 40393, "用户不能被封禁"),
+    USER_CANNOT_BE_OPERATE("UserCannotBeOperate", 40393, "用户不能被操作"),
     INSERT_DATA_EXISTED("InsertDataExisted", 40392, "添加用户信息失败"),
     INSERT_DATA_ERROR("InsertDataError", 40395, "插入数据失败"),
     SELECT_DATA_ERROR("SelectDataError", 40389, "查询数据失败"),
-    RELEASE_TRADE_FAILURE("ReleaseTradeFailure", 40380, "发布碳交易失败");
+    RELEASE_TRADE_FAILURE("ReleaseTradeFailure", 40380, "发布碳交易失败"),
+    EDIT_TRADE_FAILURE("EditTradeFailure", 403779, "编辑碳交易失败");
 
     final String output;
     final Integer code;

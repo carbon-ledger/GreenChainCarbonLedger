@@ -122,6 +122,7 @@ class JwtFilter(
 
     override fun getAuthzHeader(request: ServletRequest?): String {
         val httpRequest: HttpServletRequest = request as HttpServletRequest
-        return httpRequest.getHeader("Authorization").replace("Bearer ", "")
+        val getHeader = httpRequest.getHeader("Authorization")
+        return getHeader?.replace("Bearer ", "") ?: ""
     }
 }

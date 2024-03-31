@@ -1,5 +1,6 @@
 package com.frontleaves.greenchaincarbonledger.models.voData.returnData;
 
+import com.frontleaves.greenchaincarbonledger.models.doData.AuditLogDO;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -23,7 +24,7 @@ public class BackCarbonQuotaVO {
     public double usedQuota;
     public String allocationDate;
     public boolean complianceStatus;
-    public ArrayList<String> auditLog;
+    public ArrayList<AuditLogDO> auditLog;
     public String createdAt;
     public String updatedAt;
 }

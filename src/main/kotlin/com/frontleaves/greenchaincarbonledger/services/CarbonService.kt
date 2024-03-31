@@ -1,5 +1,9 @@
 package com.frontleaves.greenchaincarbonledger.services
 
+import com.frontleaves.greenchaincarbonledger.models.doData.MaterialsDO
+import com.frontleaves.greenchaincarbonledger.models.voData.getData.CarbonConsumeVO
+import com.frontleaves.greenchaincarbonledger.models.voData.getData.CarbonAddQuotaVO
+import com.frontleaves.greenchaincarbonledger.models.voData.getData.EditTradeVO
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.TradeReleaseVO
 import com.frontleaves.greenchaincarbonledger.utils.BaseResponse
 import jakarta.servlet.http.HttpServletRequest
@@ -61,5 +65,70 @@ interface CarbonService {
         timestamp: Long,
         request: HttpServletRequest,
         tradeReleaseVO: TradeReleaseVO
+    ): ResponseEntity<BaseResponse>
+
+    fun editCarbonTrade(
+        timestamp: Long,
+        request: HttpServletRequest,
+        editTradeVO: EditTradeVO,
+        id: String
+    ): ResponseEntity<BaseResponse>
+
+    /**
+     * 创建碳核算报告
+     * @param timestamp-时间戳
+     * @param request-请求体
+     * @param carbonConsumeVO-创建报告所需要的信息体
+     * @return 是否完成报告
+     */
+    fun createCarbonReport(
+        timestamp: Long,
+        request: HttpServletRequest,
+        carbonConsumeVO: CarbonConsumeVO,
+        materials: MutableList<MaterialsDO.Materials>,
+        courses: MutableList<MaterialsDO.Materials>,
+        carbonSequestrations: MutableList<MaterialsDO.Materials>,
+        heats: MutableList<MaterialsDO.Material>
+    ): ResponseEntity<BaseResponse>
+
+    fun createCarbonReport1(
+        timestamp: Long,
+        request: HttpServletRequest,
+        carbonConsumeVO: CarbonConsumeVO,
+        materials: MutableList<MaterialsDO.Materials>,
+        desulfurization: MutableList<MaterialsDO.Desulfurization>
+    ): ResponseEntity<BaseResponse>
+
+    /**
+     * 为组织添加配额
+     *
+     * @param timestamp-时间戳
+     * @param request-请求体
+     * @param organizeId-组织UUID
+     * @param carbonAddQuotaVO-添加的配额值
+     * @return 是否完成配额增加
+     */
+    fun addOrganizeIdQuota(
+         timestamp: Long,
+         request: HttpServletRequest,
+         organizeId: String,
+         carbonAddQuotaVO: CarbonAddQuotaVO
+    ): ResponseEntity<BaseResponse>
+
+    /**
+     * 为组织修改碳配额
+     *
+     * @param timestamp-时间戳
+     * @param request-请求体
+     * @param organizeId-组织uuid
+     * @param carbonAddQuotaVO-修改内容
+     * @return 是否完成
+     *
+     */
+    fun editCarbonQuota(
+        timestamp: Long,
+        request: HttpServletRequest,
+        organizeId: String,
+        carbonAddQuotaVO: CarbonAddQuotaVO
     ): ResponseEntity<BaseResponse>
 }
