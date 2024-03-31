@@ -51,7 +51,7 @@ public interface CarbonMapper {
     @Select("SELECT * FROM fy_carbon_trade WHERE id=#{id}")
     CarbonTradeDO getTradeById(String id);
 
-    @Update("UPDATE fy_carbon_trade SET status=#{status} AND updated_at=now() WHERE id=#{id}")
+    @Update("UPDATE fy_carbon_trade SET status=#{status} , updated_at=now() WHERE id=#{id}")
     Boolean deleteTrade(String id, String status);
 
     @Select("""
