@@ -14,4 +14,5 @@ public class BackCarbonTradeListVO {
     String quotaAmount;
     String pricePerUnit;
     String description;
+    String status;
 }
