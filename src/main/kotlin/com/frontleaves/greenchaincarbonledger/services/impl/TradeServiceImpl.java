@@ -311,7 +311,30 @@ public class TradeServiceImpl implements TradeService {
                 return ResultUtil.error(timestamp, "未能查询到数据", ErrorCode.SERVER_INTERNAL_ERROR);
             }
         } else {
-            return ResultUtil.error(timestamp, "未查询到组长账号", ErrorCode.SERVER_INTERNAL_ERROR);
+            return ResultUtil.error(timestamp, "未查询到组长账号", ErrorCode.USER_NOT_EXISTED);
+        }
+    }
+
+    @NotNull
+    @Override
+    public ResponseEntity<BaseResponse> reviewTradeList(long timestamp, @NotNull HttpServletRequest request, @NotNull String tradeId) {
+        UserDO getUser = ProcessingUtil.getUserByHeaderUuid(request, userDAO);
+        if (getUser != null) {
+            CarbonTradeDO getCarbonTradeDO = carbonDAO.getTradeById(tradeId);
+            if (getCarbonTradeDO != null) {
+                getCarbonTradeDO
+                        .setVerifyUuid(getUser.getUuid())
+                        .setStatus("active");
+                if (carbonDAO.reviewTrade(getCarbonTradeDO)) {
+                    return ResultUtil.success(timestamp, "审核通过");
+                } else {
+                    return ResultUtil.error(timestamp, ErrorCode.UPDATE_DATA_ERROR);
+                }
+            } else {
+                return ResultUtil.error(timestamp, "交易不存在", ErrorCode.TRANSACTION_REVIEW_FAILED);
+            }
+        } else {
+            return ResultUtil.error(timestamp, "未查询到组织账号", ErrorCode.SERVER_INTERNAL_ERROR);
         }
     }
 

@@ -94,6 +94,7 @@ public class TradeController {
     }
 
     @GetMapping("/list")
+    @CheckAccountPermission({"trade:getAllTradeList"})
     public ResponseEntity<BaseResponse> getTradeList(
             //需要Query参数
             @RequestParam String type,
@@ -119,6 +120,25 @@ public class TradeController {
             return tradeService.getTradeList(timestamp, request, type, search, limit, page, order);
         } else {
             return ResultUtil.error(timestamp, "type 参数错误", ErrorCode.PARAM_VARIABLE_ERROR);
+        }
+    }
+
+    @PatchMapping("/review/{tradeId}")
+    public ResponseEntity<BaseResponse> reviewTradeList(
+            @PathVariable("tradeId") String id,
+            @RequestParam String pass,
+            HttpServletRequest request
+    ) {
+        log.info("[Controller] 请求 getOwnTrade 接口");
+        long timestamp = System.currentTimeMillis();
+        if (id != null && !id.isEmpty()) {
+            if ("true".equals(pass) || "false".equals(pass)) {
+                return tradeService.reviewTradeList(timestamp, request, id);
+            } else {
+                return ResultUtil.error(timestamp, "参数 pass 错误", ErrorCode.PARAM_VARIABLE_ERROR);
+            }
+        } else {
+            return ResultUtil.error(timestamp, "Path 参数错误", ErrorCode.PATH_VARIABLE_ERROR);
         }
     }
 

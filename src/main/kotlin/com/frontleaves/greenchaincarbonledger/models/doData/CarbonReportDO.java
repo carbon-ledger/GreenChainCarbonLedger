@@ -15,12 +15,13 @@ public class CarbonReportDO {
     String reportTitle;
     String reportType;
     String accountingPeriod;
-    double totalEmission;
+    Double totalEmission;
     String reportStatus;
     String verifierUuid;
     String verificationDate;
     String reportSummary;
     String blockchainTxId;
+    String listOfReports;
     String createdAt;
     String updateAt;
 }
