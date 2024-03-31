@@ -111,4 +111,7 @@ public interface CarbonMapper {
             ORDER BY ${order} LIMIT #{limit} OFFSET ${(page-1) * limit}
            """)
     List<CarbonTradeDO> getSearchTradeList(String search, Integer limit, Integer page, String order);
+
+    @Update("UPDATE fy_carbon_trade SET verify_uuid = #{verifyUuid}, status = #{status}, updated_at = now()  WHERE id = #{id}")
+    Boolean reviewTrade(CarbonTradeDO carbonTradeDO);
 }

@@ -123,6 +123,25 @@ public class TradeController {
         }
     }
 
+    @PatchMapping("/review/{tradeId}")
+    public ResponseEntity<BaseResponse> reviewTradeList(
+            @PathVariable("tradeId") String id,
+            @RequestParam String pass,
+            HttpServletRequest request
+    ) {
+        log.info("[Controller] 请求 getOwnTrade 接口");
+        long timestamp = System.currentTimeMillis();
+        if (id != null && !id.isEmpty()) {
+            if ("true".equals(pass) || "false".equals(pass)) {
+                return tradeService.reviewTradeList(timestamp, request, id);
+            } else {
+                return ResultUtil.error(timestamp, "参数 pass 错误", ErrorCode.PARAM_VARIABLE_ERROR);
+            }
+        } else {
+            return ResultUtil.error(timestamp, "Path 参数错误", ErrorCode.PATH_VARIABLE_ERROR);
+        }
+    }
+
     @PostMapping("/edit/{id}")
     public ResponseEntity<BaseResponse> editCarbonTrade(
             @RequestBody @Validated EditTradeVO editTradeVO,
