@@ -125,26 +125,26 @@ public class RoleServiceImpl implements RoleService {
         UserDO getUserDO = userDAO.getUserByUuid(getUuid);
         if (getUserDO != null) {
             // 判断角色UUID是否和数据库fy_role中有重复
-            RoleDO roleDO = roleDAO.getRoleByUuid(getUuid);
-            if (roleDO == null) {
-                ArrayList<String> arrayList1 = roleVO.getPermission();
-                ArrayList<String> arrayList2 = new ArrayList<>(permissionMapper.getPermissionByName());
-                for (String s : arrayList1) {
-                    if (!(arrayList2.contains(s))) {
-                        return ResultUtil.error(timestamp, "权限无效", ErrorCode.REQUEST_BODY_ERROR);
-                    }
+            RoleDO roleDO = roleDAO.getRoleByName(roleVO.getName());
+            if (roleDO != null) {
+                if (!roleDO.getUuid().equals(roleUuid)) {
+                    return ResultUtil.error(timestamp, "角色名重复", ErrorCode.REQUEST_BODY_ERROR);
                 }
-                // 判断角色名不重复、角色权限存在且有效
-                String json = gson.toJson(roleVO.getPermission());
-                if (roleMapper.updateRole(roleVO.getName(), roleVO.getDisplayName(), json, roleUuid)) {
-                    return ResultUtil.success(timestamp, "修改角色信息成功");
-                } else {
-                    return ResultUtil.error(timestamp, ErrorCode.UPDATE_DATA_ERROR);
-                }
-            } else {
-                return ResultUtil.error(timestamp, "角色名重复", ErrorCode.REQUEST_BODY_ERROR);
             }
-
+            ArrayList<String> arrayList1 = roleVO.getPermission();
+            ArrayList<String> arrayList2 = new ArrayList<>(permissionMapper.getPermissionByName());
+            for (String s : arrayList1) {
+                if (!(arrayList2.contains(s))) {
+                    return ResultUtil.error(timestamp, "权限无效", ErrorCode.REQUEST_BODY_ERROR);
+                }
+            }
+            // 判断角色名不重复、角色权限存在且有效
+            String json = gson.toJson(roleVO.getPermission());
+            if (roleMapper.updateRole(roleVO.getName(), roleVO.getDisplayName(), json, roleUuid)) {
+                return ResultUtil.success(timestamp, "修改角色信息成功");
+            } else {
+                return ResultUtil.error(timestamp, ErrorCode.UPDATE_DATA_ERROR);
+            }
         } else {
             return ResultUtil.error(timestamp, ErrorCode.USER_NOT_EXISTED);
         }
