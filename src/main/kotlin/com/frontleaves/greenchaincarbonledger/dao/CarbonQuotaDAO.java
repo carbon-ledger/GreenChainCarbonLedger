@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 
 /**
  * 用于对碳排放额的数据库查询和更新
+ *
  * @author FLSHALCK
  */
 @Slf4j
@@ -25,7 +26,7 @@ public class CarbonQuotaDAO {
      */
     public CarbonQuotaDO getCarbonQuota(Integer year, String uuid) {
         log.info("[DAO] 执行 getCarbonQuota 操作");
-        log.info("/t Mysql查询");
+        log.info("\t> Mysql查询");
         return carbonQuotaMapper.getCarbonQuota(year, uuid);
     }
 
@@ -39,23 +40,25 @@ public class CarbonQuotaDAO {
      */
     public Boolean finishCarbonTrade(Double totalQuota, String uuid, Integer year) {
         log.info("[DAO] 执行 finishCarbonTrade 操作");
-        log.info("/t Mysql更新");
+        log.info("\t> Mysql更新");
         return carbonQuotaMapper.finishCarbonTrade(totalQuota, uuid, year);
     }
 
     /**
      * 创建碳排放配额
+     *
      * @param carbonQuotaDO-碳排放配额
      * @return 是否完成
      */
-    public Boolean createCarbonQuota(CarbonQuotaDO carbonQuotaDO){
+    public Boolean createCarbonQuota(CarbonQuotaDO carbonQuotaDO) {
         log.info("[DAO] 执行 CreateCarbonQuota 操作");
-        log.info("/t Mysql 插入");
+        log.info("\t> Mysql 插入");
         return carbonQuotaMapper.createCarbonQuota(carbonQuotaDO);
     }
 
     /**
      * 为组织修改碳配额
+     *
      * @param uuid-组织uuid
      * @param year-年份
      * @param totalQuota-配额总
@@ -63,9 +66,9 @@ public class CarbonQuotaDAO {
      * @param auditLog-审计日志
      * @return 是否完成
      */
-    public Boolean editCarbonQuota(String uuid,Integer year,Double totalQuota,boolean status,String auditLog){
+    public Boolean editCarbonQuota(String uuid, Integer year, Double totalQuota, boolean status, String auditLog) {
         log.info("[DAO] 执行 editCarbonQuota 操作");
-        log.info("/t Mysql更新");
+        log.info("\t> Mysql更新");
         return carbonQuotaMapper.editCarbonQuota(uuid, year, totalQuota, status, auditLog);
     }
 }

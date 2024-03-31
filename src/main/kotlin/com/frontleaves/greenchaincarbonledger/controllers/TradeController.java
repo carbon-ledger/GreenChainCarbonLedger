@@ -2,7 +2,6 @@ package com.frontleaves.greenchaincarbonledger.controllers;
 
 import com.frontleaves.greenchaincarbonledger.annotations.CheckAccountPermission;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.EditTradeVO;
-import com.frontleaves.greenchaincarbonledger.annotations.CheckAccountPermission;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.TradeReleaseVO;
 import com.frontleaves.greenchaincarbonledger.services.CarbonService;
 import com.frontleaves.greenchaincarbonledger.services.TradeService;
@@ -49,7 +48,7 @@ public class TradeController {
     }
 
     @DeleteMapping("/delete/{id}")
-    @CheckAccountPermission({"Trade:deleteTrade"})
+    @CheckAccountPermission({"trade:deleteTrade"})
     public ResponseEntity<BaseResponse> deleteTrade(
             @PathVariable("id") String id,
             HttpServletRequest request
@@ -65,7 +64,7 @@ public class TradeController {
     }
 
     @GetMapping("/send")
-    @CheckAccountPermission({"Trade:getOwnTradeList"})
+    @CheckAccountPermission({"trade:getOwnTradeList"})
     public ResponseEntity<BaseResponse> getOwnTradeList(
             @RequestParam String type,
             @RequestParam(required = false) String search,
@@ -74,7 +73,7 @@ public class TradeController {
             @RequestParam(required = false) String order,
             HttpServletRequest request
     ) {
-        log.info("[Controller] 请求 getOwnTrade 接口");
+        log.info("[Controller] 请求 getOwnTradeList 接口");
         long timestamp = System.currentTimeMillis();
         //校验参数
         ResponseEntity<BaseResponse> checkResult = businessUtil.checkLimitPageAndOrder(timestamp, limit, page, order);
@@ -102,7 +101,7 @@ public class TradeController {
             @RequestParam(required = false) String limit,
             @RequestParam(required = false) String page,
             @RequestParam(required = false) String order,
-            @NotNull HttpServletRequest request){
+            @NotNull HttpServletRequest request) {
         log.info("[Controller] 请求 getTradeList 接口");
         long timestamp = System.currentTimeMillis();
         ResponseEntity<BaseResponse> checkResult = businessUtil.checkLimitPageAndOrder(timestamp, limit, page, order);

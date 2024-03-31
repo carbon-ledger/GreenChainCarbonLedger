@@ -705,10 +705,11 @@ public class CarbonServiceImpl implements CarbonService {
             }
             ArrayList<CarbonAuditLogDO> oldCarbonAuditLogList = gson.fromJson(getCarbonQuota.getAuditLog(), new TypeToken<ArrayList<CarbonAuditLogDO>>() {
             }.getType());
+            UserDO getUserDO = ProcessingUtil.getUserByHeaderUuid(request, userDAO);
             CarbonAuditLogDO newCarbonAuditLog = new CarbonAuditLogDO();
             newCarbonAuditLog.setDate(combinedDate)
-                    .setLog("进行碳配额的修改" + Double.parseDouble(carbonAddQuotaVO.getQuota()))
-                    .setOperate("为此次进行修改的账户UUID为" + request.getHeader("{X-Auth-UUID}"));
+                    .setLog("进行碳配额的修改 " + Double.parseDouble(carbonAddQuotaVO.getQuota()))
+                    .setOperate(getUserDO.getUserName());
             oldCarbonAuditLogList.add(newCarbonAuditLog);
             String carbonAuditLog = gson.toJson(oldCarbonAuditLogList);
             if (carbonQuotaDAO.editCarbonQuota(organizeId, localYear, carbonTotalQuota, !carbonAddQuotaVO.getStatus(), carbonAuditLog)) {
