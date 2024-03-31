@@ -45,6 +45,8 @@ public enum ErrorCode {
     ACCOUNT_HAS_BEEN_BANNED("AccountHasBeenBanned", 40318, "用户已封禁"),
     WRONG_DATE("WrongDate", 40317, "日期错误"),
     DUPLICATE_CREATE("DuplicateCreate",40318,"重复创建"),
+    TRANSACTION_REVIEW_FAILED("TransactionReviewFailed", 40316, "交易审核失败"),
+    ID_ERROR("IdError",40319,"组织Id错误"),
     PAGE_NOT_FOUNDED("PageNotFounded", 40401, "页面不存在"),
     REQUEST_METHOD_NOT_SUPPORTED("RequestMethodNotSupported", 40500, "请求方法不支持"),
     SERVER_INTERNAL_ERROR("ServerInternalError", 50000, "服务器内部错误"),
@@ -58,7 +60,7 @@ public enum ErrorCode {
     INSERT_DATA_ERROR("InsertDataError", 40395, "插入数据失败"),
     SELECT_DATA_ERROR("SelectDataError", 40389, "查询数据失败"),
     RELEASE_TRADE_FAILURE("ReleaseTradeFailure", 40380, "发布碳交易失败"),
-    EDIT_TRADE_FAILURE("EditTradeFailure", 403779, "编辑碳交易失败");
+    EDIT_TRADE_FAILURE("EditTradeFailure", 40379, "编辑碳交易失败");
 
     final String output;
     final Integer code;

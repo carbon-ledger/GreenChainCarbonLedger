@@ -5,6 +5,7 @@ import com.frontleaves.greenchaincarbonledger.mappers.CarbonTradeMapper;
 import com.frontleaves.greenchaincarbonledger.mappers.CarbonTypeMapper;
 import com.frontleaves.greenchaincarbonledger.models.doData.CarbonTradeDO;
 import com.frontleaves.greenchaincarbonledger.models.doData.CarbonTypeDO;
+import com.frontleaves.greenchaincarbonledger.models.voData.getData.EditTradeVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
@@ -19,7 +20,14 @@ import java.util.List;
 @Repository
 @RequiredArgsConstructor
 public class CarbonTradeDAO {
+    private final CarbonMapper carbonMapper;
     private final CarbonTradeMapper carbonTradeMapper;
+
+    public void editTrade(String uuid, EditTradeVO editTradeVO, String status, String id){
+        log.info("[DAO] 执行 editTrade");
+        log.info("\t> Mysql 更新");
+        carbonMapper.updateTradeByUuid(uuid, editTradeVO.getAmount(), editTradeVO.getUnit(), editTradeVO.getText(), status, id);
+    }
     /**
      * 获取当前组织的全部碳交易发布信息列表
      *

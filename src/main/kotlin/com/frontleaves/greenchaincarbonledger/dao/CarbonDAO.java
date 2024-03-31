@@ -104,10 +104,10 @@ public class CarbonDAO {
         return carbonMapper.getAccountByUuid(uuid);
     }
 
-    public CarbonQuotaDO getQuotaByUuid(String uuid) {
+    public CarbonQuotaDO getOrganizeQuotaByUuid(String uuid) {
         log.info("[DAO] 执行 getTotalQuotaByUuid 方法");
         log.info("Mysql 读取");
-        return carbonMapper.getQuotaByUuid(uuid);
+        return carbonMapper.getOrganizeQuotaByUuid(uuid);
     }
 
     /**
@@ -214,5 +214,10 @@ public class CarbonDAO {
     public List<CarbonTradeDO> getSearchTradeList(String search, Integer limit, Integer page, String order) {
         log.info("[DAO] 执行 getSearchTradeList");
         return carbonMapper.getSearchTradeList(search, limit, page, order);
+    }
+
+    public Boolean reviewTrade(CarbonTradeDO carbonTradeDO) {
+        log.info("[DAO] 执行 reviewTrade");
+        return carbonMapper.reviewTrade(carbonTradeDO);
     }
 }
