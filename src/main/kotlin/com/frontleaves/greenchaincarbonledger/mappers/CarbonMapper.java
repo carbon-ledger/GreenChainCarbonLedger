@@ -40,7 +40,7 @@ public interface CarbonMapper {
     List<CarbonAccountingDO> getAccountByUuid(String uuid);
 
     @Select("SELECT * FROM fy_carbon_quota WHERE organize_uuid = #{uuid}")
-    CarbonQuotaDO getQuotaByUuid(String uuid);
+    CarbonQuotaDO getOrganizeQuotaByUuid(String uuid);
 
     @Insert("INSERT INTO fy_carbon_trade (organize_uuid, quota_amount, price_per_unit, description, status, created_at) VALUES (#{uuid}, #{amount}, #{unit}, #{text}, #{status}, NOW())")
     void insertTradeByUuid(String uuid, TradeReleaseVO tradeReleaseVO, String status);
