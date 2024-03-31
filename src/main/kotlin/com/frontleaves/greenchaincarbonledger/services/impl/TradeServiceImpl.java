@@ -1,6 +1,5 @@
 package com.frontleaves.greenchaincarbonledger.services.impl;
 
-import com.frontleaves.greenchaincarbonledger.annotations.CheckAccountPermission;
 import com.frontleaves.greenchaincarbonledger.dao.CarbonDAO;
 import com.frontleaves.greenchaincarbonledger.dao.CarbonQuotaDAO;
 import com.frontleaves.greenchaincarbonledger.dao.UserDAO;
@@ -249,7 +248,6 @@ public class TradeServiceImpl implements TradeService {
 
     @NotNull
     @Override
-    @CheckAccountPermission("trade:getOwnTradeList")
     public ResponseEntity<BaseResponse> getTradeList(
             long timestamp,
             @NotNull HttpServletRequest request,
