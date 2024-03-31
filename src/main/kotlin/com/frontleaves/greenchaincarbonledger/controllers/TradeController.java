@@ -122,7 +122,7 @@ public class TradeController {
         }
     }
 
-    @PostMapping("/edit/{id}")
+    @PutMapping("/edit/{id}")
     public ResponseEntity<BaseResponse> editCarbonTrade(
             @RequestBody @Validated EditTradeVO editTradeVO,
             @NotNull BindingResult bindingResult,
@@ -136,7 +136,7 @@ public class TradeController {
             return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR, ProcessingUtil.getValidatedErrorList(bindingResult));
         }
         // 业务操作
-        return carbonService.editCarbonTrade(timestamp, request, editTradeVO, id);
+        return tradeService.editCarbonTrade(timestamp, request, editTradeVO, id);
     }
 
     /**
