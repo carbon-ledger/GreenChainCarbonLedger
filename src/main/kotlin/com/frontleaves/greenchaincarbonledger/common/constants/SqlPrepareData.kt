@@ -28,7 +28,6 @@ object SqlPrepareData {
         add(ArrayList(listOf("user:getUserList", "获取用户列表")))
         add(ArrayList(listOf("user:editUserInformation", "编辑用户信息")))
         add(ArrayList(listOf("user:addAccount","添加用户")))
-        add(ArrayList(listOf("user:putUserForceEdit", "强制编辑用户信息")))
         add(ArrayList(listOf("user:getUserCurrent", "获取当前用户")))
         add(ArrayList(listOf("user:banUser", "封禁用户")))
         add(ArrayList(listOf("user:forceLogout","强制登出用户")))
@@ -44,6 +43,9 @@ object SqlPrepareData {
         add(ArrayList(listOf("carbon:addOrganizeIdQuota","为组织创建今年配额")))
         add(ArrayList(listOf("carbon:createCarbonReport","创建碳核算报告")))
         add(ArrayList(listOf("carbon:editCarbonQuota","为组织修改碳配额")))
+        add(ArrayList(listOf("trade:deleteTrade", "删除碳交易")))
+        add(ArrayList(listOf("trade:getOwnTradeList", "获取自己的交易信息")))
+        add(ArrayList(listOf("trade:buyTrade", "进行碳交易")))
         add(ArrayList(listOf("review:addOrganize", "添加组织账户审核信息")))
         add(ArrayList(listOf("review:addAdmin", "添加监管账户审核信息")))
         add(ArrayList(listOf("review:checkOrganize", "审核组织账户")))
@@ -305,7 +307,7 @@ object SqlPrepareData {
         })
     }
 
-    val SQL_PROCESS_EMISSION_FACTOR = ArrayList<HashMap<String,String>>().also {
+    val SQL_PROCESS_EMISSION_FACTOR = ArrayList<HashMap<String, String>>().also {
         it.add(HashMap<String, String>().apply {
             put("name", "limestone")
             put("displayName", "石灰石")
@@ -348,7 +350,82 @@ object SqlPrepareData {
         })
     }
 
-    val SQL_OTHER_EMISSION_FACTOR = ArrayList<HashMap<String,String>>().also {
+    val SQL_DESULFURIZATION_EMISSION_FACTOR = ArrayList<HashMap<String, String>>().also {
+        it.add(HashMap<String, String>().apply {
+            put("name", "CaCO3")
+            put("displayName", "碳酸钙")
+            put("desulfurizerMainContent", "碳酸钙")
+            put("factor", "0.440")
+            put("carbonateContent", "0.9")
+            put("unit", "吨二氧化碳/吨碳酸盐")
+        })
+        it.add(HashMap<String, String>().apply {
+            put("name", "MgCO3")
+            put("displayName", "碳酸镁")
+            put("desulfurizerMainContent", "碳酸镁")
+            put("factor", "0.522")
+            put("carbonateContent", "0.9")
+            put("unit", "吨二氧化碳/吨碳酸盐")
+        })
+        it.add(HashMap<String, String>().apply {
+            put("name", "Na2CO3")
+            put("displayName", "碳酸钠")
+            put("desulfurizerMainContent", "碳酸钠")
+            put("factor", "0.415")
+            put("carbonateContent", "0.9")
+            put("unit", "吨二氧化碳/吨碳酸盐")
+        })
+        it.add(HashMap<String, String>().apply {
+            put("name", "BaCO3")
+            put("displayName", "碳酸钡")
+            put("desulfurizerMainContent", "碳酸钡")
+            put("factor", "0.223")
+            put("carbonateContent", "0.9")
+            put("unit", "吨二氧化碳/吨碳酸盐")
+        })
+        it.add(HashMap<String, String>().apply {
+            put("name", "Li2CO3")
+            put("displayName", "碳酸锂")
+            put("desulfurizerMainContent", "碳酸锂")
+            put("factor", "0.596")
+            put("carbonateContent", "0.9")
+            put("unit", "吨二氧化碳/吨碳酸盐")
+        })
+        it.add(HashMap<String, String>().apply {
+            put("name", "K2CO3")
+            put("displayName", "碳酸钾")
+            put("desulfurizerMainContent", "碳酸钾")
+            put("factor", "0.318")
+            put("carbonateContent", "0.9")
+            put("unit", "吨二氧化碳/吨碳酸盐")
+        })
+        it.add(HashMap<String, String>().apply {
+            put("name", "SrCO3")
+            put("displayName", "碳酸锶")
+            put("desulfurizerMainContent", "碳酸锶")
+            put("factor", "0.298")
+            put("carbonateContent", "0.9")
+            put("unit", "吨二氧化碳/吨碳酸盐")
+        })
+        it.add(HashMap<String, String>().apply {
+            put("name", "NaHCO3")
+            put("displayName", "碳酸氢钠")
+            put("desulfurizerMainContent", "碳酸氢钠")
+            put("factor", "0.524")
+            put("carbonateContent", "0.9")
+            put("unit", "吨二氧化碳/吨碳酸盐")
+        })
+        it.add(HashMap<String, String>().apply {
+            put("name", "FeCO3")
+            put("displayName", "碳酸铁")
+            put("desulfurizerMainContent", "碳酸铁")
+            put("factor", "0.380")
+            put("carbonateContent", "0.9")
+            put("unit", "吨二氧化碳/吨碳酸盐")
+        })
+    }
+
+    val SQL_OTHER_EMISSION_FACTOR = ArrayList<HashMap<String, String>>().also {
         it.add(HashMap<String, String>().apply {
             put("name", "electricity")
             put("displayName", "电力")
@@ -375,7 +452,7 @@ object SqlPrepareData {
         })
     }
 
-    val SQL_CARBON_TYPE = ArrayList<HashMap<String,String>>().apply {
+    val SQL_CARBON_TYPE = ArrayList<HashMap<String, String>>().apply {
         add(HashMap<String, String>().apply {
             put("name", "steelProduction")
             put("displayName", "中国钢铁生产企业温室气体排放")

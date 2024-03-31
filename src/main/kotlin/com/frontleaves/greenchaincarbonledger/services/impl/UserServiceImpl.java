@@ -108,6 +108,7 @@ public class UserServiceImpl implements UserService {
                     .setRealName(getUserDO.getRealName())
                     .setEmail(getUserDO.getEmail())
                     .setPhone(getUserDO.getPhone())
+                    .setAvatar(getUserDO.getAvatar())
                     .setUuid(getUserDO.getUuid());
             newPermissionInfo
                     .setUserPermission(gson.fromJson(getUserDO.getPermission(), new TypeToken<ArrayList<String>>() {}.getType()))
@@ -325,8 +326,8 @@ public class UserServiceImpl implements UserService {
             if (userAddVO.getRole() == null) {
                 userAddVO.setRole("default");
             }
-            RoleDO defaultUuid = roleDAO.getRoleByName(userAddVO.getRole());
-            if (defaultUuid == null) {
+            RoleDO getDefaultRole = roleDAO.getRoleByName(userAddVO.getRole());
+            if (getDefaultRole == null) {
                 return ResultUtil.error(timestamp, ErrorCode.ROLE_NOT_EXISTED);
             }
             // 新建用户
@@ -338,7 +339,7 @@ public class UserServiceImpl implements UserService {
                     .setEmail(userAddVO.getEmail())
                     .setPhone(userAddVO.getPhone())
                     .setPassword(ProcessingUtil.passwordEncrypt(addPassword))
-                    .setRole(defaultUuid.getUuid())
+                    .setRole(getDefaultRole.getUuid())
                     .setPermission("[]");
             if (userDAO.createUser(newUserDO)) {
                 BackAddUserVO backAddUserVO = new BackAddUserVO();

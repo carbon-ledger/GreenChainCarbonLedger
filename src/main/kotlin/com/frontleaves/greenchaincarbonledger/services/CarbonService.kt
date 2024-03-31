@@ -1,5 +1,6 @@
 package com.frontleaves.greenchaincarbonledger.services
 
+import com.frontleaves.greenchaincarbonledger.models.doData.MaterialsDO
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.CarbonConsumeVO
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.CarbonAddQuotaVO
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.EditTradeVO
@@ -83,11 +84,24 @@ interface CarbonService {
     fun createCarbonReport(
         timestamp: Long,
         request: HttpServletRequest,
-        carbonConsumeVO: CarbonConsumeVO
+        carbonConsumeVO: CarbonConsumeVO,
+        materials: MutableList<MaterialsDO.Materials>,
+        courses: MutableList<MaterialsDO.Materials>,
+        carbonSequestrations: MutableList<MaterialsDO.Materials>,
+        heats: MutableList<MaterialsDO.Material>
+    ): ResponseEntity<BaseResponse>
+
+    fun createCarbonReport1(
+        timestamp: Long,
+        request: HttpServletRequest,
+        carbonConsumeVO: CarbonConsumeVO,
+        materials: MutableList<MaterialsDO.Materials>,
+        desulfurization: MutableList<MaterialsDO.Desulfurization>
     ): ResponseEntity<BaseResponse>
 
     /**
      * 为组织添加配额
+     *
      * @param timestamp-时间戳
      * @param request-请求体
      * @param organizeId-组织UUID
@@ -101,10 +115,9 @@ interface CarbonService {
          carbonAddQuotaVO: CarbonAddQuotaVO
     ): ResponseEntity<BaseResponse>
 
-
-
     /**
      * 为组织修改碳配额
+     *
      * @param timestamp-时间戳
      * @param request-请求体
      * @param organizeId-组织uuid

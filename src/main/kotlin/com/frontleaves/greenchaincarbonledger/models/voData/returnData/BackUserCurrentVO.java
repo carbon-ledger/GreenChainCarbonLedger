@@ -30,6 +30,7 @@ public class BackUserCurrentVO {
         String realName;
         String email;
         String phone;
+        String avatar;
     }
 
     @Data

@@ -48,7 +48,6 @@ public class UserController {
     public ResponseEntity<BaseResponse> getUserCurrent(@NotNull HttpServletRequest request) {
         log.info("[Controller] 请求 getUserCurrent 接口");
         long timestamp = System.currentTimeMillis();
-        request.getHeader("X-Auth-UUID");
         // 业务操作
         return userService.getUserCurrent(timestamp, request);
     }
@@ -137,7 +136,7 @@ public class UserController {
      * @return 包含用户信息的响应实体
      */
     @PostMapping("/add")
-    @CheckAccountPermission("{user:addAccount}")
+    @CheckAccountPermission({"user:addAccount"})
     public ResponseEntity<BaseResponse> addAccount(
             @RequestBody @Validated UserAddVO userAddVO,
             @NotNull BindingResult bindingResult,
@@ -189,7 +188,7 @@ public class UserController {
      * @return 包含用户信息的响应实体
      */
     @DeleteMapping("/force-logout/{uuid}")
-    @CheckAccountPermission("{user:forceLogout}")
+    @CheckAccountPermission({"user:forceLogout"})
     public ResponseEntity<BaseResponse> forceLogout(
             HttpServletRequest request,
             @PathVariable("uuid") String userUuid
@@ -216,7 +215,7 @@ public class UserController {
      * @return 包含用户信息的响应实体
      */
     @PutMapping("/force-edit/{uuid}")
-    @CheckAccountPermission("{user:putUserForceEdit}")
+    @CheckAccountPermission({"user:putUserForceEdit"})
     public ResponseEntity<BaseResponse> putUserForceEdit(
             @RequestBody @Validated UserForceEditVO userForceEditVO,
             @NotNull BindingResult bindingResult,

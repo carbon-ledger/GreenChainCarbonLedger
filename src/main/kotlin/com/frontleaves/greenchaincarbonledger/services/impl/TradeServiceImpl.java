@@ -84,8 +84,8 @@ public class TradeServiceImpl implements TradeService {
                                     //借用数据库更新
                                     if (carbonQuotaDAO.finishCarbonTrade(nowBuyTotalQuota, getAuthUserDO.getUuid(), localYear)) {
                                         return ResultUtil.success(timestamp, "删除成功");
-                                    }else {
-                                        return ResultUtil.success(timestamp,"交易已删除，但未返回配额请联系客服",ErrorCode.SERVER_INTERNAL_ERROR);
+                                    } else {
+                                        return ResultUtil.success(timestamp, "交易已删除，但未返回配额请联系客服", ErrorCode.SERVER_INTERNAL_ERROR);
                                     }
                                 } else {
                                     return ResultUtil.error(timestamp, "删除失败", ErrorCode.SERVER_INTERNAL_ERROR);
@@ -141,7 +141,7 @@ public class TradeServiceImpl implements TradeService {
                 }
                 log.debug("[Service] 整理输出数据");
                 //整理数据
-                ArrayList<BackCarbonTradeListVO> backCarbonTradeList=new ArrayList<>();
+                ArrayList<BackCarbonTradeListVO> backCarbonTradeList = new ArrayList<>();
                 if (getTradeList != null) {
                     for (CarbonTradeDO getTrade : getTradeList) {
                         BackCarbonTradeListVO backCarbonTradeListVO = new BackCarbonTradeListVO();
@@ -161,7 +161,7 @@ public class TradeServiceImpl implements TradeService {
                         backCarbonTradeList.add(backCarbonTradeListVO);
                     }
                     //输出
-                    return ResultUtil.success(timestamp,"您的所需组织碳交易发布信息列表已准备完毕",backCarbonTradeList);
+                    return ResultUtil.success(timestamp, "您的所需组织碳交易发布信息列表已准备完毕", backCarbonTradeList);
                 } else {
                     return ResultUtil.error(timestamp, "未能查询到数据", ErrorCode.SERVER_INTERNAL_ERROR);
                 }
@@ -242,7 +242,7 @@ public class TradeServiceImpl implements TradeService {
                 }
             }
         } else {
-            return ResultUtil.error(timestamp, "抱歉为找到您的组织账号", ErrorCode.USER_NOT_EXISTED);
+            return ResultUtil.error(timestamp, "未找到您的组织账号", ErrorCode.USER_NOT_EXISTED);
         }
     }
 
@@ -257,7 +257,7 @@ public class TradeServiceImpl implements TradeService {
             @NotNull String page,
             @NotNull String order) {
         UserDO getUser = ProcessingUtil.getUserByHeaderUuid(request, userDAO);
-        if (getUser != null){
+        if (getUser != null) {
             String getUuid = getUser.getUuid();
             // 此时，type参数已经被校验、page、limit仅仅验证了结构，未校验范围、order还需要赋值添加字段名
             // 转变page和limit类型
@@ -283,7 +283,7 @@ public class TradeServiceImpl implements TradeService {
                     return ResultUtil.error(timestamp, "type参数错误", ErrorCode.REQUEST_BODY_ERROR);
                 }
             }
-            ArrayList<BackCarbonTradeListVO> backCarbonTradeList=new ArrayList<>();
+            ArrayList<BackCarbonTradeListVO> backCarbonTradeList = new ArrayList<>();
             if (getTradeList != null) {
                 for (CarbonTradeDO getTrade : getTradeList) {
                     BackCarbonTradeListVO backCarbonTradeListVO = new BackCarbonTradeListVO();
@@ -303,7 +303,7 @@ public class TradeServiceImpl implements TradeService {
                     backCarbonTradeList.add(backCarbonTradeListVO);
                 }
                 //输出
-                return ResultUtil.success(timestamp,"您的所需组织碳交易发布信息列表已准备完毕",backCarbonTradeList);
+                return ResultUtil.success(timestamp, "您的所需组织碳交易发布信息列表已准备完毕", backCarbonTradeList);
             } else {
                 return ResultUtil.error(timestamp, "未能查询到数据", ErrorCode.SERVER_INTERNAL_ERROR);
             }
