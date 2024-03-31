@@ -64,36 +64,47 @@ public class TradeServiceImpl implements TradeService {
                     log.debug("[Service] 时间戳获取时间");
                     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy");
                     int localYear = Integer.parseInt(simpleDateFormat.format(timestamp));
-                    if (Integer.parseInt(simpleDateFormat.format(getCarbonTrade.getCreatedAt())) != localYear) {
-                        return ResultUtil.error(timestamp, "您没有权限删除", ErrorCode.NO_PERMISSION_ERROR);
-                    } else {//校验要删除的ID的status是否为completed
-                        if ("completed".equals(getCarbonTrade.getStatus())) {
-                            return ResultUtil.error(timestamp, "无法删除已完成交易的碳核算交易", ErrorCode.REQUEST_METHOD_NOT_SUPPORTED);
-                        } else {
-                            if ("cancelled".equals(getCarbonTrade.getStatus())) {
-                                return ResultUtil.error(timestamp, "请勿重复删除", ErrorCode.REQUEST_METHOD_NOT_SUPPORTED);
+                    //进行时间格式转换
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                    try {
+                        Date date = sdf.parse(getCarbonTrade.getCreatedAt());
+                        Calendar calendar = Calendar.getInstance();
+                        calendar.setTime(date);
+                        int buyYear = calendar.get(Calendar.YEAR);
+                        if (buyYear != localYear) {
+                            return ResultUtil.error(timestamp, "您没有权限删除过时的订单", ErrorCode.NO_PERMISSION_ERROR);
+                        } else {//校验要删除的ID的status是否为completed
+                            if ("completed".equals(getCarbonTrade.getStatus())) {
+                                return ResultUtil.error(timestamp, "无法删除已完成交易的碳核算交易", ErrorCode.NO_PERMISSION_ERROR);
                             } else {
-                                String status = "cancelled";
-                                Boolean result = carbonDAO.deleteTrade(id, status);
-                                if (result) {
-                                    log.debug("[Service] 数据库软删除更新数据");
-                                    //获取用户的碳排放额
-                                    CarbonQuotaDO getCarbonQuota = carbonQuotaDAO.getCarbonQuota(localYear, getAuthUserDO.getUuid());
-                                    //进行碳交易碳总量的返还
-                                    Double nowBuyTotalQuota = getCarbonTrade.getQuotaAmount() + getCarbonQuota.getTotalQuota();
-                                    //借用数据库更新
-                                    if (carbonQuotaDAO.finishCarbonTrade(nowBuyTotalQuota, getAuthUserDO.getUuid(), localYear)) {
-                                        return ResultUtil.success(timestamp, "删除成功");
-                                    } else {
-                                        return ResultUtil.success(timestamp, "交易已删除，但未返回配额请联系客服", ErrorCode.SERVER_INTERNAL_ERROR);
-                                    }
+                                if ("cancelled".equals(getCarbonTrade.getStatus())) {
+                                    return ResultUtil.error(timestamp, "请勿重复删除", ErrorCode.DUPLICATE_DELETION);
                                 } else {
-                                    return ResultUtil.error(timestamp, "删除失败", ErrorCode.SERVER_INTERNAL_ERROR);
+                                    String status = "cancelled";
+                                    Boolean result = carbonDAO.deleteTrade(id, status);
+                                    if (result) {
+                                        log.debug("[Service] 数据库软删除更新数据");
+                                        //获取用户的碳排放额
+                                        CarbonQuotaDO getCarbonQuota = carbonQuotaDAO.getCarbonQuota(localYear, getAuthUserDO.getUuid());
+                                        //进行碳交易碳总量的返还
+                                        Double nowBuyTotalQuota = getCarbonTrade.getQuotaAmount() + getCarbonQuota.getTotalQuota();
+                                        //借用数据库更新
+                                        if (carbonQuotaDAO.finishCarbonTrade(nowBuyTotalQuota, getAuthUserDO.getUuid(), localYear)) {
+                                            return ResultUtil.success(timestamp, "删除成功");
+                                        } else {
+                                            return ResultUtil.success(timestamp, "交易已删除，但未返回配额请联系客服", ErrorCode.SERVER_INTERNAL_ERROR);
+                                        }
+                                    } else {
+                                        return ResultUtil.error(timestamp, "删除失败", ErrorCode.SERVER_INTERNAL_ERROR);
+                                    }
                                 }
+
                             }
 
                         }
-
+                    } catch (ParseException e) {
+                        log.error("时间解析错误", e);
+                        return ResultUtil.error(timestamp, "订单时间解析错误", ErrorCode.PARSING_TIME_ERROR);
                     }
                 } else {
                     return ResultUtil.error(timestamp, "请检查要删除的碳交易发布是否存在", ErrorCode.REQUEST_METHOD_NOT_SUPPORTED);
