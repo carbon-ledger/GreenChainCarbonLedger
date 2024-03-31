@@ -104,10 +104,10 @@ public class CarbonDAO {
         return carbonMapper.getAccountByUuid(uuid);
     }
 
-    public CarbonQuotaDO getQuotaByUuid(String uuid) {
+    public CarbonQuotaDO getOrganizeQuotaByUuid(String uuid) {
         log.info("[DAO] 执行 getTotalQuotaByUuid 方法");
         log.info("Mysql 读取");
-        return carbonMapper.getQuotaByUuid(uuid);
+        return carbonMapper.getOrganizeQuotaByUuid(uuid);
     }
 
     /**
