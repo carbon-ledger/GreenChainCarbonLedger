@@ -225,4 +225,9 @@ public class CarbonDAO {
         log.info("[DAO] 执行 getSearchTradeList");
         return carbonMapper.getSearchTradeList(search, limit, page, order);
     }
+
+    public Boolean reviewTrade(CarbonTradeDO carbonTradeDO) {
+        log.info("[DAO] 执行 reviewTrade");
+        return carbonMapper.reviewTrade(carbonTradeDO);
+    }
 }
