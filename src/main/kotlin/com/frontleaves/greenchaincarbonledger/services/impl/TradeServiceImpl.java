@@ -4,7 +4,6 @@ import com.frontleaves.greenchaincarbonledger.dao.CarbonDAO;
 import com.frontleaves.greenchaincarbonledger.dao.CarbonQuotaDAO;
 import com.frontleaves.greenchaincarbonledger.dao.CarbonTradeDAO;
 import com.frontleaves.greenchaincarbonledger.dao.UserDAO;
-import com.frontleaves.greenchaincarbonledger.mappers.CarbonMapper;
 import com.frontleaves.greenchaincarbonledger.models.doData.CarbonQuotaDO;
 import com.frontleaves.greenchaincarbonledger.models.doData.CarbonTradeDO;
 import com.frontleaves.greenchaincarbonledger.models.doData.UserDO;
@@ -39,7 +38,6 @@ public class TradeServiceImpl implements TradeService {
     private final CarbonDAO carbonDAO;
     private final CarbonTradeDAO carbonTradeDAO;
     private final CarbonQuotaDAO carbonQuotaDAO;
-    private final CarbonMapper carbonMapper;
 
     @NotNull
     @Override
@@ -324,6 +322,7 @@ public class TradeServiceImpl implements TradeService {
         String getUuid = ProcessingUtil.getAuthorizeUserUuid(request);
         // 判断用户是否发布过交易
         // 判断交易是否已经发布
+
         CarbonTradeDO carbonTradeDO = carbonDAO.getTradeByUuidAndId(getUuid, id);
         String status = carbonTradeDO.getStatus();
         if ("draft".equals(status) || "pending_review".equals(status)) {
