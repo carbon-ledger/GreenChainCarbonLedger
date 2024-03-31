@@ -86,19 +86,19 @@ public interface CarbonMapper {
     CarbonTradeDO getTradeByUuidAndId(String getUuid, String id);
 
     @Select("""
-            SELECT * FROM fy_carbon_trade WHERE status = #{'active'} OR status = #{'completed'}
+            SELECT * FROM fy_carbon_trade WHERE status = #{active} OR status = #{completed}
             ORDER BY ${order} LIMIT #{limit} OFFSET ${(page-1) * limit}
             """)
     List<CarbonTradeDO> getAvailableTradeListAll(Integer limit, Integer page, String order);
 
     @Select("""
-            SELECT * FROM fy_carbon_trade WHERE status = #{'active'}
+            SELECT * FROM fy_carbon_trade WHERE status = #{active}
             ORDER BY ${order} LIMIT #{limit} OFFSET ${(page-1) * limit}
             """)
     List<CarbonTradeDO> getAvailableTradeList(String search, Integer limit, Integer page, String order);
 
     @Select("""
-            SELECT * FROM fy_carbon_trade WHERE status = #{'completed'}
+            SELECT * FROM fy_carbon_trade WHERE status = #{completed}
             ORDER BY ${order} LIMIT #{limit} OFFSET ${(page-1) * limit}
             """)
     List<CarbonTradeDO> getCompletedTradeList(String search, Integer limit, Integer page, String order);

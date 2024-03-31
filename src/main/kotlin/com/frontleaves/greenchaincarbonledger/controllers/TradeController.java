@@ -94,6 +94,7 @@ public class TradeController {
     }
 
     @GetMapping("/list")
+    @CheckAccountPermission({"trade:getAllTradeList"})
     public ResponseEntity<BaseResponse> getTradeList(
             //需要Query参数
             @RequestParam String type,
