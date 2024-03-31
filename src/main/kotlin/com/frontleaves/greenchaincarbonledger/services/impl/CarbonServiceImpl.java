@@ -5,7 +5,6 @@ import com.frontleaves.greenchaincarbonledger.mappers.CarbonMapper;
 import com.frontleaves.greenchaincarbonledger.models.doData.*;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.CarbonAddQuotaVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.CarbonConsumeVO;
-import com.frontleaves.greenchaincarbonledger.models.voData.getData.EditTradeVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.TradeReleaseVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.returnData.BackCarbonAccountingVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.returnData.BackCarbonQuotaVO;
@@ -686,12 +685,6 @@ public class CarbonServiceImpl implements CarbonService {
             //进行总额配额的修改
             //校验传进来的是正还是负值
             log.debug("[Service]碳配额的添加的计算");
-            double carbonTotalQuota;
-            if (Double.parseDouble(carbonAddQuotaVO.getQuota()) >= 0) {
-                carbonTotalQuota = getCarbonQuota.getTotalQuota() + Double.parseDouble(carbonAddQuotaVO.getQuota());
-            } else {
-                carbonTotalQuota = getCarbonQuota.getTotalQuota() - Double.parseDouble(carbonAddQuotaVO.getQuota());
-            }
             ArrayList<CarbonAuditLogDO> oldCarbonAuditLogList = gson.fromJson(getCarbonQuota.getAuditLog(), new TypeToken<ArrayList<CarbonAuditLogDO>>() {
             }.getType());
             UserDO getUserDO = ProcessingUtil.getUserByHeaderUuid(request, userDAO);
@@ -704,9 +697,10 @@ public class CarbonServiceImpl implements CarbonService {
                 oldCarbonAuditLogList.add(newCarbonAuditLog);
                 String carbonAuditLog = gson.toJson(oldCarbonAuditLogList);
                 //整理更新数据
-                getCarbonQuota.setTotalQuota(carbonTotalQuota)
+                getCarbonQuota
                         .setComplianceStatus(!carbonAddQuotaVO.getStatus())
                         .setQuotaYear(localYear)
+                        .setAllocatedQuota(Double.parseDouble(carbonAddQuotaVO.getQuota()))
                         .setAuditLog(carbonAuditLog);
                 if (carbonQuotaDAO.editCarbonQuota(getCarbonQuota)) {
                     return ResultUtil.success(timestamp, "修改成功");
