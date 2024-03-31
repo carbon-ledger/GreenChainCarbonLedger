@@ -78,6 +78,6 @@ public interface CarbonMapper {
                         """)
     List<CarbonTradeDO> getTradeListBySearch(String uuid, String search, Integer limit, Integer page, String order);
 
-    @Update("UPDATE fy_carbon_trade SET verify_uuid = #{getUuid}, status = #{status}, updated_at = now()  WHERE id = #{id}")
+    @Update("UPDATE fy_carbon_trade SET verify_uuid = #{verifyUuid}, status = #{status}, updated_at = now()  WHERE id = #{id}")
     Boolean reviewTrade(CarbonTradeDO carbonTradeDO);
 }
