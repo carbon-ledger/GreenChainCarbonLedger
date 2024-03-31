@@ -161,16 +161,6 @@ public class CarbonDAO {
         return carbonMapper.getTradeListAll(uuid, limit, page, order);
     }
 
-    /**
-     * 获取当前组织的全部碳交易发布信息列表
-     *
-     * @param uuid-组织uuid
-     * @return 查到返回ture，查不到则返回false
-     */
-    public Boolean getTradeListByUuid(String uuid) {
-        log.info("[DAO] 执行 getTradeListByUuid");
-        return carbonMapper.getTradeListByUuid(uuid);
-    }
 
     /**
      * 通过Status获取当前组织的全部碳交易发布信息列表

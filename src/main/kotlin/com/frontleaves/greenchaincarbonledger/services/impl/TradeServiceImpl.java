@@ -116,7 +116,8 @@ public class TradeServiceImpl implements TradeService {
         if (getUser != null) {
             String getUuid = getUser.getUuid();
             //检查是否发布了碳交易
-            if (carbonDAO.getTradeListByUuid(getUuid)) {
+            List<CarbonTradeDO> getOwnTradeList =carbonTradeDAO.getTradeListByUuid(getUuid);
+            if (getOwnTradeList != null && !getOwnTradeList.isEmpty()) {
                 log.debug("[Service] 校验参数");
                 //检查参数
                 // 检查参数，如果未设置（即为null），则使用默认值
@@ -169,10 +170,10 @@ public class TradeServiceImpl implements TradeService {
                     return ResultUtil.error(timestamp, "未能查询到数据", ErrorCode.SERVER_INTERNAL_ERROR);
                 }
             } else {
-                return ResultUtil.error(timestamp, "您未发布碳交易", ErrorCode.REQUEST_METHOD_NOT_SUPPORTED);
+                return ResultUtil.error(timestamp, "您未发布碳交易", ErrorCode.CAN_T_PUBLISH_TRADE);
             }
         } else {
-            return ResultUtil.error(timestamp, "未查询到组长账号", ErrorCode.SERVER_INTERNAL_ERROR);
+            return ResultUtil.error(timestamp, "未查询到组织账号", ErrorCode.UUID_NOT_EXIST);
         }
     }
 
