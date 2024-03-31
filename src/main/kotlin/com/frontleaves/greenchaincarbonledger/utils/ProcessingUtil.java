@@ -132,7 +132,6 @@ public class ProcessingUtil {
         UserDO getUserDO = userDAO.getUserByUuid(authUuid);
         if (getUserDO != null) {
             log.debug("\t> 获取用户: {}", getUserDO.getUserName());
-
             return getUserDO;
         } else {
             return null;

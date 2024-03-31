@@ -43,8 +43,10 @@ public enum ErrorCode {
     REVIEW_ERROR("ReviewError", 40316, "审核信息错误"),
     CAN_T_PUBLISH_TRADE("NotPublishCarbonTrade", 40317, "您未进行碳交易发布"),
     ACCOUNT_HAS_BEEN_BANNED("AccountHasBeenBanned", 40318, "用户已封禁"),
-    WRONG_DATE("WrongDate", 40319, "日期错误"),
-    DUPLICATE_CREATE("DuplicateCreate", 40320, "重复创建"),
+    WRONG_DATE("WrongDate", 40317, "日期错误"),
+    DUPLICATE_CREATE("DuplicateCreate",40318,"重复创建"),
+    TRANSACTION_REVIEW_FAILED("TransactionReviewFailed", 40316, "交易审核失败"),
+    ID_ERROR("IdError",40319,"组织Id错误"),
     STATUS_NON_COMPLIANCE("StatusNonCompliance", 40321, "状态不合规"),
     ORDER_TIME_MISMATCH("OrderTimeMismatch", 40322, "订单时间不匹配"),
     PARSING_TIME_ERROR("ParsingTimeError", 40323, "解析时间错误"),
@@ -64,7 +66,7 @@ public enum ErrorCode {
     INSERT_DATA_ERROR("InsertDataError", 40395, "插入数据失败"),
     SELECT_DATA_ERROR("SelectDataError", 40389, "查询数据失败"),
     RELEASE_TRADE_FAILURE("ReleaseTradeFailure", 40380, "发布碳交易失败"),
-    EDIT_TRADE_FAILURE("EditTradeFailure", 403779, "编辑碳交易失败");
+    EDIT_TRADE_FAILURE("EditTradeFailure", 40379, "编辑碳交易失败");
 
     final String output;
     final Integer code;

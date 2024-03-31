@@ -2,10 +2,12 @@ package com.frontleaves.greenchaincarbonledger.services.impl;
 
 import com.frontleaves.greenchaincarbonledger.dao.CarbonDAO;
 import com.frontleaves.greenchaincarbonledger.dao.CarbonQuotaDAO;
+import com.frontleaves.greenchaincarbonledger.dao.CarbonTradeDAO;
 import com.frontleaves.greenchaincarbonledger.dao.UserDAO;
 import com.frontleaves.greenchaincarbonledger.models.doData.CarbonQuotaDO;
 import com.frontleaves.greenchaincarbonledger.models.doData.CarbonTradeDO;
 import com.frontleaves.greenchaincarbonledger.models.doData.UserDO;
+import com.frontleaves.greenchaincarbonledger.models.voData.getData.EditTradeVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.returnData.BackCarbonBuyTradeVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.returnData.BackCarbonTradeListVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.returnData.BackUserVO;
@@ -34,6 +36,7 @@ import java.util.*;
 public class TradeServiceImpl implements TradeService {
     private final UserDAO userDAO;
     private final CarbonDAO carbonDAO;
+    private final CarbonTradeDAO carbonTradeDAO;
     private final CarbonQuotaDAO carbonQuotaDAO;
 
     @NotNull
@@ -124,7 +127,8 @@ public class TradeServiceImpl implements TradeService {
         if (getUser != null) {
             String getUuid = getUser.getUuid();
             //检查是否发布了碳交易
-            if (carbonDAO.getTradeListByUuid(getUuid)) {
+            List<CarbonTradeDO> getOwnTradeList =carbonTradeDAO.getTradeListByUuid(getUuid);
+            if (getOwnTradeList != null && !getOwnTradeList.isEmpty()) {
                 log.debug("[Service] 校验参数");
                 //检查参数
                 // 检查参数，如果未设置（即为null），则使用默认值
@@ -177,10 +181,10 @@ public class TradeServiceImpl implements TradeService {
                     return ResultUtil.error(timestamp, "未能查询到数据", ErrorCode.SERVER_INTERNAL_ERROR);
                 }
             } else {
-                return ResultUtil.error(timestamp, "您未发布碳交易", ErrorCode.REQUEST_METHOD_NOT_SUPPORTED);
+                return ResultUtil.error(timestamp, "您未发布碳交易", ErrorCode.CAN_T_PUBLISH_TRADE);
             }
         } else {
-            return ResultUtil.error(timestamp, "未查询到组长账号", ErrorCode.SERVER_INTERNAL_ERROR);
+            return ResultUtil.error(timestamp, "未查询到组织账号", ErrorCode.UUID_NOT_EXIST);
         }
     }
 
@@ -335,7 +339,53 @@ public class TradeServiceImpl implements TradeService {
                 return ResultUtil.error(timestamp, "未能查询到数据", ErrorCode.SERVER_INTERNAL_ERROR);
             }
         } else {
-            return ResultUtil.error(timestamp, "未查询到组长账号", ErrorCode.SERVER_INTERNAL_ERROR);
+            return ResultUtil.error(timestamp, "未查询到组长账号", ErrorCode.USER_NOT_EXISTED);
+        }
+    }
+
+    @NotNull
+    @Override
+    public ResponseEntity<BaseResponse> reviewTradeList(long timestamp, @NotNull HttpServletRequest request, @NotNull String tradeId) {
+        UserDO getUser = ProcessingUtil.getUserByHeaderUuid(request, userDAO);
+        if (getUser != null) {
+            CarbonTradeDO getCarbonTradeDO = carbonDAO.getTradeById(tradeId);
+            if (getCarbonTradeDO != null) {
+                getCarbonTradeDO
+                        .setVerifyUuid(getUser.getUuid())
+                        .setStatus("active");
+                if (carbonDAO.reviewTrade(getCarbonTradeDO)) {
+                    return ResultUtil.success(timestamp, "审核通过");
+                } else {
+                    return ResultUtil.error(timestamp, ErrorCode.UPDATE_DATA_ERROR);
+                }
+            } else {
+                return ResultUtil.error(timestamp, "交易不存在", ErrorCode.TRANSACTION_REVIEW_FAILED);
+            }
+        } else {
+            return ResultUtil.error(timestamp, "未查询到组织账号", ErrorCode.SERVER_INTERNAL_ERROR);
+        }
+    }
+
+    @NotNull
+    @Override
+    public ResponseEntity<BaseResponse> editCarbonTrade(long timestamp, @NotNull HttpServletRequest request, @NotNull EditTradeVO editTradeVO, @NotNull String id) {
+        log.info("[Service] 执行 releaseCarbonTrade 方法");
+        String getUuid = ProcessingUtil.getAuthorizeUserUuid(request);
+        // 判断用户是否发布过交易
+        // 判断交易是否已经发布
+
+        CarbonTradeDO carbonTradeDO = carbonDAO.getTradeByUuidAndId(getUuid, id);
+        String status = carbonTradeDO.getStatus();
+        if ("draft".equals(status) || "pending_review".equals(status)) {
+            // 判断编辑的信息是否合法有效，如果有效则可以提交编辑
+            if (editTradeVO.getDraft()) {
+                carbonTradeDAO.editTrade(getUuid, editTradeVO, "draft", id);
+            } else {
+                carbonTradeDAO.editTrade(getUuid, editTradeVO, "pending_review", id);
+            }
+            return ResultUtil.success(timestamp, "交易发布信息修改成功");
+        } else {
+            return ResultUtil.error(timestamp, ErrorCode.EDIT_TRADE_FAILURE);
         }
     }
 }
