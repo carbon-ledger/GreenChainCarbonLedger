@@ -116,7 +116,7 @@ public class TradeServiceImpl implements TradeService {
         if (getUser != null) {
             String getUuid = getUser.getUuid();
             //检查是否发布了碳交易
-            List<CarbonTradeDO> getOwnTradeList =carbonTradeDAO.getTradeListByUuid(getUuid);
+            List<CarbonTradeDO> getOwnTradeList = carbonTradeDAO.getTradeListByUuid(getUuid);
             if (getOwnTradeList != null && !getOwnTradeList.isEmpty()) {
                 log.debug("[Service] 校验参数");
                 //检查参数
@@ -161,7 +161,8 @@ public class TradeServiceImpl implements TradeService {
                         backCarbonTradeListVO.setOrganize(backUserVO)
                                 .setQuotaAmount(getTrade.getQuotaAmount().toString())
                                 .setPricePerUnit(getTrade.getPricePerUnit().toString())
-                                .setDescription(getTrade.getDescription());
+                                .setDescription(getTrade.getDescription())
+                                .setStatus(getTrade.getStatus());
                         backCarbonTradeList.add(backCarbonTradeListVO);
                     }
                     //输出
