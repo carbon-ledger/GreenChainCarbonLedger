@@ -41,6 +41,7 @@ import java.util.List;
 public class CarbonServiceImpl implements CarbonService {
     private final CarbonDAO carbonDAO;
     private final UserDAO userDAO;
+    private final RoleDAO roleDAO;
     private final CarbonAccountingDAO carbonAccountingDAO;
     private final CarbonQuotaDAO carbonQuotaDAO;
     private final CarbonMapper carbonMapper;
@@ -293,6 +294,7 @@ public class CarbonServiceImpl implements CarbonService {
                             .setAccountingPeriod(getReport.getAccountingPeriod())
                             .setTotalEmission(getReport.getTotalEmission())
                             .setReportStatus(getReport.getReportStatus())
+                            .setListOfReports(getReport.getListOfReports())
                             .setCreatedAt(getReport.getCreatedAt())
                             .setUpdatedAt(getReport.getUpdateAt());
                     backCarbonReportList.add(backCarbonReportVO);
@@ -638,19 +640,35 @@ public class CarbonServiceImpl implements CarbonService {
     @NotNull
     @Override
     public ResponseEntity<BaseResponse> addOrganizeIdQuota(long timestamp, @NotNull HttpServletRequest request, @NotNull String organizeId, @NotNull CarbonAddQuotaVO carbonAddQuotaVO) {
-        //首先提取年份
+        //校验organizeId是否存在
+        UserDO getOrganizeId =userDAO.getUserByUuid(organizeId);
+        if (getOrganizeId==null){
+            return ResultUtil.error(timestamp,"抱歉您要添加的组织不存在",ErrorCode.UUID_NOT_EXIST);
+        }
+        //校验要添加的账号角色是否为组织账号角色
+        RoleDO getRoleDO = roleDAO.getRoleByUuid(getOrganizeId.getRole());
+        if (!"organize".equals(getRoleDO.getName())){
+            return ResultUtil.error(timestamp,"您只能为组织添加碳配额",ErrorCode.NO_PERMISSION_ERROR);
+        }
+        //提取年份
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy");
         int localYear = Integer.parseInt(simpleDateFormat.format(timestamp));
         String combinedDate = new SimpleDateFormat("yyyy-MM-dd").format(timestamp);
+        //校验是否在同一年已经创建了碳配额
+        if (carbonQuotaDAO.getCarbonQuota(localYear,organizeId)!=null){
+            return ResultUtil.error(timestamp,"请勿重复创建碳配额",ErrorCode.DUPLICATE_CREATE);
+        }
         //创建此时今年的碳排放配额
         //编辑审计日志
         UserDO getUserDO = ProcessingUtil.getUserByHeaderUuid(request, userDAO);
         ArrayList<CarbonAuditLogDO> carbonAuditLogList = new ArrayList<>();
         CarbonAuditLogDO carbonAuditLog = new CarbonAuditLogDO();
-        carbonAuditLog
-                .setDate(combinedDate)
-                .setLog("添加 " + carbonAddQuotaVO.getQuota() + " 的交易配额，此次为初建碳排放配额表")
-                .setOperate(getUserDO.getUserName());
+        if (getUserDO != null) {
+            carbonAuditLog
+                    .setDate(combinedDate)
+                    .setLog( "添加 " + carbonAddQuotaVO.getQuota() + " 的交易配额，此次为初建碳排放配额表")
+                    .setOperate(getUserDO.getUserName());
+        }
         carbonAuditLogList.add(carbonAuditLog);
         //整理数据
         CarbonQuotaDO carbonQuotaDO = new CarbonQuotaDO();
