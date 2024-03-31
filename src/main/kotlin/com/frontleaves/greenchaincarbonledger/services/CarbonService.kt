@@ -67,12 +67,6 @@ interface CarbonService {
         tradeReleaseVO: TradeReleaseVO
     ): ResponseEntity<BaseResponse>
 
-    fun editCarbonTrade(
-        timestamp: Long,
-        request: HttpServletRequest,
-        editTradeVO: EditTradeVO,
-        id: String
-    ): ResponseEntity<BaseResponse>
 
     /**
      * 创建碳核算报告

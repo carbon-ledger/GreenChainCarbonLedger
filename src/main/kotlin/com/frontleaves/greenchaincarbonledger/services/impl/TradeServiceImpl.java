@@ -2,10 +2,12 @@ package com.frontleaves.greenchaincarbonledger.services.impl;
 
 import com.frontleaves.greenchaincarbonledger.dao.CarbonDAO;
 import com.frontleaves.greenchaincarbonledger.dao.CarbonQuotaDAO;
+import com.frontleaves.greenchaincarbonledger.dao.CarbonTradeDAO;
 import com.frontleaves.greenchaincarbonledger.dao.UserDAO;
 import com.frontleaves.greenchaincarbonledger.models.doData.CarbonQuotaDO;
 import com.frontleaves.greenchaincarbonledger.models.doData.CarbonTradeDO;
 import com.frontleaves.greenchaincarbonledger.models.doData.UserDO;
+import com.frontleaves.greenchaincarbonledger.models.voData.getData.EditTradeVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.returnData.BackCarbonBuyTradeVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.returnData.BackCarbonTradeListVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.returnData.BackUserVO;
@@ -34,6 +36,7 @@ import java.util.List;
 public class TradeServiceImpl implements TradeService {
     private final UserDAO userDAO;
     private final CarbonDAO carbonDAO;
+    private final CarbonTradeDAO carbonTradeDAO;
     private final CarbonQuotaDAO carbonQuotaDAO;
 
     @NotNull
@@ -332,6 +335,29 @@ public class TradeServiceImpl implements TradeService {
             }
         } else {
             return ResultUtil.error(timestamp, "未查询到组织账号", ErrorCode.SERVER_INTERNAL_ERROR);
+        }
+    }
+
+    @NotNull
+    @Override
+    public ResponseEntity<BaseResponse> editCarbonTrade(long timestamp, @NotNull HttpServletRequest request, @NotNull EditTradeVO editTradeVO, @NotNull String id) {
+        log.info("[Service] 执行 releaseCarbonTrade 方法");
+        String getUuid = ProcessingUtil.getAuthorizeUserUuid(request);
+        // 判断用户是否发布过交易
+        // 判断交易是否已经发布
+
+        CarbonTradeDO carbonTradeDO = carbonDAO.getTradeByUuidAndId(getUuid, id);
+        String status = carbonTradeDO.getStatus();
+        if ("draft".equals(status) || "pending_review".equals(status)) {
+            // 判断编辑的信息是否合法有效，如果有效则可以提交编辑
+            if (editTradeVO.getDraft()) {
+                carbonTradeDAO.editTrade(getUuid, editTradeVO, "draft", id);
+            } else {
+                carbonTradeDAO.editTrade(getUuid, editTradeVO, "pending_review", id);
+            }
+            return ResultUtil.success(timestamp, "交易发布信息修改成功");
+        } else {
+            return ResultUtil.error(timestamp, ErrorCode.EDIT_TRADE_FAILURE);
         }
     }
 }

@@ -1,5 +1,6 @@
 package com.frontleaves.greenchaincarbonledger.services
 
+import com.frontleaves.greenchaincarbonledger.models.voData.getData.EditTradeVO
 import com.frontleaves.greenchaincarbonledger.utils.BaseResponse
 import jakarta.servlet.http.HttpServletRequest
 import org.springframework.http.ResponseEntity
@@ -64,6 +65,14 @@ interface TradeService {
         limit: String,
         page: String,
         order: String
+    ): ResponseEntity<BaseResponse>
+
+
+    fun editCarbonTrade(
+        timestamp: Long,
+        request: HttpServletRequest,
+        editTradeVO: EditTradeVO,
+        id: String
     ): ResponseEntity<BaseResponse>
 
     fun reviewTradeList(

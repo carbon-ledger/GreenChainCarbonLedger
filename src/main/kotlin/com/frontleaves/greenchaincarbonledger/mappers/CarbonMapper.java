@@ -80,7 +80,7 @@ public interface CarbonMapper {
     List<CarbonTradeDO> getTradeListBySearch(String uuid, String search, Integer limit, Integer page, String order);
 
     @Update("UPDATE fy_carbon_trade SET quota_amount = #{amount}, price_per_unit = #{unit}, description = #{text}, status = #{status}, updated_at = NOW() WHERE organize_uuid = #{uuid} AND id = #{id}")
-    void updateTradeByUuid(String uuid, EditTradeVO editTradeVO, String status, String id);
+    void updateTradeByUuid(String uuid, String amount, String unit, String text, String status, String id);
 
     @Select("SELECT * FROM fy_carbon_trade WHERE id = #{id} AND organize_uuid = #{getUuid}")
     CarbonTradeDO getTradeByUuidAndId(String getUuid, String id);
