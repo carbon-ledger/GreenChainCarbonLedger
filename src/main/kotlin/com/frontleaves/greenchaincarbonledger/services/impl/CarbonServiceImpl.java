@@ -80,8 +80,8 @@ public class CarbonServiceImpl implements CarbonService {
             // 获取时间范围的结束日期
             long lastReportEndTime = Long.parseLong(getOrganizeUserLastCarbonReport.getAccountingPeriod().split("-")[1]);
             // 时间范围检查
-            if (nowReportStartTime < nowReportEndTime) {
-                if (lastReportEndTime >= nowReportStartTime) {
+            if (nowReportStartTime <= nowReportEndTime) {
+                if (lastReportEndTime < nowReportStartTime) {
                     return getFormatDateRange;
                 }
             }
