@@ -636,7 +636,7 @@ public class CarbonServiceImpl implements CarbonService {
                 setCellValue(sheet1, 1, 1, String.valueOf(totalCombustion));
                 // 给第三行第二列的单元格赋值
                 setCellValue(sheet1, 2, 1, String.valueOf(eCombustion));
-                setCellValue(sheet1, 3, 3, String.valueOf(eCourses));
+                setCellValue(sheet1, 3, 1, String.valueOf(eCourses));
                 setCellValue(sheet1, 4, 1, String.valueOf(eElectric + eHeat));
                 setCellValue(sheet1, 5, 1, String.valueOf(eCarbonSequestration));
                 //创建附表名称
@@ -747,7 +747,62 @@ public class CarbonServiceImpl implements CarbonService {
         //读取附表3
         try (FileInputStream inputStream = new FileInputStream("AppendixIron3.xlsx")) {
             try (Workbook workbook = new HSSFWorkbook(inputStream)) {
-                //为燃烧赋值
+                Sheet sheet3 = workbook.getSheetAt(0);
+                // 给E燃烧赋值
+                for (int i = 3; i <= 2+combustionConsumption.length; i++) {
+                    // 获取一维数组
+                    String[] materialInfo = combustionConsumption[i - 3];
+                    // 填入数据
+                    setCellValue(sheet3,i,1,materialInfo[0]);
+                    setCellValue(sheet3, i, 2, materialInfo[3]);
+                    setCellValue(sheet3, i, 3, materialInfo[4]);
+                }
+                //合并单元格
+                mergeCellsAndSetValue(sheet3,3,2+combustionConsumption.length,0,0,"化石燃料燃烧*");
+                //设置数据单位
+                setCellValue(sheet3,3+combustionConsumption.length,2,"数据");
+                setCellValue(sheet3,3+combustionConsumption.length,3,"单位");
+                //给E过程材料赋值
+                for(int i = 4+combustionConsumption.length;i <=  3 + combustionConsumption.length + courseConsumption.length; i++){
+                    //获取一维数组
+                    String [] materialInfo = combustionConsumption[i - 4 - combustionConsumption.length];
+                    //填入数据
+                    setCellValue(sheet3,i,1,materialInfo[0]);
+                    setCellValue(sheet3,i,2,materialInfo[2]);
+                    setCellValue(sheet3,i,3,"tCO2/t");
+                }
+                //合并单元格
+                mergeCellsAndSetValue(sheet3,3+combustionConsumption.length, 3 + combustionConsumption.length + courseConsumption.length,0,0,"工业生产过程");
+                //设置数据和单位
+                setCellValue(sheet3,4+combustionConsumption.length + courseConsumption.length,2,"数据");
+                setCellValue(sheet3,4+combustionConsumption.length + courseConsumption.length,3,"单位");
+                //给电力和热力赋值
+                setCellValue(sheet3,5+combustionConsumption.length + courseConsumption.length,1,"电力");
+                setCellValue(sheet3,5+combustionConsumption.length + courseConsumption.length,2,electricityCombustion[2]);
+                setCellValue(sheet3,5+combustionConsumption.length + courseConsumption.length,3,"tCO2/MWh");
+                setCellValue(sheet3,6+combustionConsumption.length + courseConsumption.length,1,"热力");
+                setCellValue(sheet3,6+combustionConsumption.length + courseConsumption.length,2,heatConsumption[0][2]);
+                setCellValue(sheet3,6+combustionConsumption.length + courseConsumption.length,3,"tCO2/ GJ");
+                //合并单元格
+                mergeCellsAndSetValue(sheet3,4+combustionConsumption.length + courseConsumption.length,
+                        6+combustionConsumption.length + courseConsumption.length,0,0,"净购入电力、热力");
+                //设置数据和单位
+                setCellValue(sheet3,7+combustionConsumption.length + courseConsumption.length,2,"数据");
+                setCellValue(sheet3,7+combustionConsumption.length + courseConsumption.length,3,"单位");
+                //给固碳赋值
+                for (int i = 8 + combustionConsumption.length + courseConsumption.length; i <= 7 + combustionConsumption.length + courseConsumption.length + carbonSequestrationConsumption.length;i++) {
+                    //获取一维数组
+                    String [] materialInfo = carbonSequestrationConsumption[i - 8 + combustionConsumption.length + courseConsumption.length];
+                    //填入数据
+                    setCellValue(sheet3,i,1,materialInfo[0]);
+                    setCellValue(sheet3,i,2,materialInfo[2]);
+                    setCellValue(sheet3,i,3,"tCO2/t");
+                }
+                //合并单元格
+                mergeCellsAndSetValue(sheet3,7+combustionConsumption.length + courseConsumption.length,
+                        7 + combustionConsumption.length + courseConsumption.length + carbonSequestrationConsumption.length,0,0,"固碳");
+                //表尾
+                setCellValue(sheet3,8+ combustionConsumption.length + courseConsumption.length + carbonSequestrationConsumption.length,0,"* 企业应自行添加未在表中列出但企业实际消耗的其他能源品种");
                 //创建附表名称
                 schedule3 = ProcessingUtil.createUuid();
                 String filePath = "workLoad/" + schedule3 + ".xlsx";
