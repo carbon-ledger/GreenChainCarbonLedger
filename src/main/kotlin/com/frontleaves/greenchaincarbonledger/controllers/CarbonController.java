@@ -245,11 +245,11 @@ public class CarbonController {
         if (bindingResult.hasErrors()) {
             return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR, ProcessingUtil.getValidatedErrorList(bindingResult));
         }
-        if (organizeId.isEmpty()){
-            return ResultUtil.error(timestamp,ErrorCode.PATH_VARIABLE_ERROR);
-        }else {
+        if (organizeId.isEmpty()) {
+            return ResultUtil.error(timestamp, ErrorCode.PATH_VARIABLE_ERROR);
+        } else {
             //进入业务操作
-            return carbonService.editCarbonQuota(timestamp,request,organizeId,carbonAddQuotaVO);
+            return carbonService.editCarbonQuota(timestamp, request, organizeId, carbonAddQuotaVO);
         }
     }
 }

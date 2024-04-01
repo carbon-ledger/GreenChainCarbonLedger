@@ -1,6 +1,5 @@
 package com.frontleaves.greenchaincarbonledger.models.voData.returnData;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -16,7 +15,6 @@ import java.sql.Timestamp;
  * @author xiao_lfeng
  */
 @Data
-@JsonInclude(JsonInclude.Include.NON_NULL)
 @Accessors(chain = true)
 public class BackUserVO {
     public String uuid;
