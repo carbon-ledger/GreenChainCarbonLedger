@@ -18,8 +18,8 @@ public interface CarbonCompensationMaterialMapper {
     Boolean initializationCarbonCompensationMaterial(String accountId,String rawMaterial);
 
     @Insert("""
-            INSERT INTO fy_carbon_compensation_material(accounting_id, raw_material, electric_material, created_at)
-            VALUES (#{accountId},#{rawMaterial},#{electricMaterial},now())
+            INSERT INTO fy_carbon_compensation_material(accounting_id, raw_material, electric_material)
+            VALUES (#{accountingId},#{rawMaterial},#{electricMaterial})
             """)
     Boolean insertCarbonCompensationMaterial(CarbonCompensationMaterialDO carbonCompensationMaterialDO);
 

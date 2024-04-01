@@ -55,10 +55,10 @@ public class MaterialsDO {
     @Accessors(chain = true)
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class Material {
-        public String buy;
-        public String openingInv;
-        public String endingInv;
-        public String outSide;
-        public String export;
+        public Double buy;
+        public Double openingInv;
+        public Double endingInv;
+        public Double outside;
+        public Double export;
     }
 }

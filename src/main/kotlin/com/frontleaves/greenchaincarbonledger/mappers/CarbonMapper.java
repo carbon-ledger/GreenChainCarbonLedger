@@ -60,7 +60,8 @@ public interface CarbonMapper {
             """)
     List<CarbonTradeDO> getTradeListAll(String uuid, Integer limit, Integer page, String order);
 
-
+    @Select("SELECT * FROM fy_carbon_trade WHERE organize_uuid=#{uuid}")
+    Boolean getTradeListByUuid(String uuid);
 
     @Select("""
             SELECT * FROM fy_carbon_trade
