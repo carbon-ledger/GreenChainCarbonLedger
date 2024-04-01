@@ -20,10 +20,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.util.CellRangeAddress;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -145,10 +143,9 @@ public class CarbonServiceImpl implements CarbonService {
      */
     private static String[][] combustionConsumption(@NotNull List<MaterialsDO.Materials> materialsList, CarbonItemTypeDAO carbonItemTypeDAO) {
         String[][] result = new String[materialsList.size()][5]; // 二维数组，每个内部数组包含五个信息
-
         for (int i = 0; i < materialsList.size(); i++) {
             //获取链表的第一个实例对象
-            MaterialsDO.Materials material =materialsList.get(i);
+            MaterialsDO.Materials material = materialsList.get(i);
             CarbonItemTypeDO carbonItemTypeDO = carbonItemTypeDAO.getCarbonItemTypeByName(material.getName());
             // 获取信息
             // 名称
@@ -323,6 +320,30 @@ public class CarbonServiceImpl implements CarbonService {
         Cell cell = row.createCell(columnIndex); // 获取要设置数据的单元格
         cell.setCellValue(value); // 设置单元格的值
     }
+
+    /**
+     * 合并单元格并且赋值
+     */
+    // 方法用于合并单元格并设置单元格的值和居中对齐
+    private static void mergeCellsAndSetValue(Sheet sheet, int startRow, int endRow, int startColumn, int endColumn, String value) {
+        // 合并单元格
+        sheet.addMergedRegion(new CellRangeAddress(startRow, endRow, startColumn, endColumn));
+
+        // 设置合并后单元格的值和样式
+        CellStyle style = sheet.getWorkbook().createCellStyle();
+        style.setAlignment(HorizontalAlignment.CENTER);
+
+        for (int i = startRow; i <= endRow; i++) {
+            Row row = sheet.getRow(i);
+            Cell cell = row.getCell(startColumn);
+            if (cell == null) {
+                cell = row.createCell(startColumn);
+            }
+            cell.setCellValue(value);
+            cell.setCellStyle(style); // 设置单元格居中对齐
+        }
+    }
+
 
 
     @NotNull
@@ -649,73 +670,61 @@ public class CarbonServiceImpl implements CarbonService {
             try (Workbook workbook = new HSSFWorkbook(inputStream)) {
                 //读取工作表1
                 Sheet sheet2 = workbook.getSheetAt(0);
-                // 获取 Excel 中的数据并进行匹配
-                for (int i = 3; i < 24; i++) {
-                    // 获取当前行
-                    Row row = sheet2.getRow(i);
-                    // 获取当前行的第二列单元格
-                    Cell cell = row.getCell(1);
-                    // 获取当前单元格的值
-                    String excelName = cell.getStringCellValue();
-                    // 遍历数组，匹配名称
-                    for (String[] materialInfo : combustionConsumption) {
-                        String arrayName = materialInfo[0];
-                        // 如果 Excel 中的名称与数组中的名称匹配成功
-                        if (excelName.equals(arrayName)) {
-                            // 将数组中的第二个值填入当前行的数据中
-                            setCellValue(sheet2, i, 2, materialInfo[1]);
-                            setCellValue(sheet2, i, 3, materialInfo[2]);
-                            // 匹配成功后跳出内层循环
-                            break;
-                        }
-                    }
+                // 给E燃烧赋值
+                for (int i = 3; i <= 2+combustionConsumption.length; i++) {
+                    // 获取一维数组
+                    String[] materialInfo = combustionConsumption[i - 3];
+                    // 填入数据
+                    setCellValue(sheet2,i,1,materialInfo[0]);
+                    setCellValue(sheet2, i, 2, materialInfo[1]);
+                    setCellValue(sheet2, i, 3, materialInfo[2]);
                 }
+                //合并单元格
+                mergeCellsAndSetValue(sheet2,3,2+combustionConsumption.length,0,0,"化石燃料燃烧*");
+                //设置数据单位
+                setCellValue(sheet2,3+combustionConsumption.length,2,"数据");
+                setCellValue(sheet2,3+combustionConsumption.length,3,"单位");
                 //给E过程材料赋值
-                // 获取 Excel 中的数据并进行匹配
-                for (int i = 26; i < 33; i++) {
-                    // 获取当前行
-                    Row row = sheet2.getRow(i);
-                    // 获取当前行的第二列单元格
-                    Cell cell = row.getCell(1);
-                    // 获取当前单元格的值
-                    String excelName = cell.getStringCellValue() + "消耗量";
-                    // 遍历数组，匹配名称
-                    for (String[] materialInfo : courseConsumption) {
-                        String arrayName = materialInfo[0];
-                        // 如果 Excel 中的名称与数组中的名称匹配成功
-                        if (excelName.equals(arrayName)) {
-                            // 将数组中的第二个值填入当前行的数据中
-                            setCellValue(sheet2, i, 2, materialInfo[1]);
-                            // 匹配成功后跳出内层循环
-                            break;
-                        }
-                    }
+                for(int i = 4+combustionConsumption.length;i <=  3 + combustionConsumption.length + courseConsumption.length; i++){
+                    //获取一维数组
+                    String [] materialInfo = combustionConsumption[i - 4 - combustionConsumption.length];
+                    //填入数据
+                    setCellValue(sheet2,i,1,materialInfo[0]+"消耗量");
+                    setCellValue(sheet2,i,2,materialInfo[1]);
+                    setCellValue(sheet2,i,3,"t");
                 }
-                //给E电消耗赋值
-                setCellValue(sheet2, 35, 2, electricityCombustion[1]);
-                //给热力赋值
-                setCellValue(sheet2, 36, 2, Arrays.toString(heatConsumption[1]));
+                //合并单元格
+                mergeCellsAndSetValue(sheet2,3+combustionConsumption.length, 3 + combustionConsumption.length + courseConsumption.length,0,0,"工业生产过程");
+                //设置数据和单位
+                setCellValue(sheet2,4+combustionConsumption.length + courseConsumption.length,2,"数据");
+                setCellValue(sheet2,4+combustionConsumption.length + courseConsumption.length,3,"单位");
+                //给电力和热力赋值
+                setCellValue(sheet2,5+combustionConsumption.length + courseConsumption.length,1,"电力净购入量");
+                setCellValue(sheet2,5+combustionConsumption.length + courseConsumption.length,2,electricityCombustion[1]);
+                setCellValue(sheet2,5+combustionConsumption.length + courseConsumption.length,3,"MWh");
+                setCellValue(sheet2,6+combustionConsumption.length + courseConsumption.length,1,"热力净购入量");
+                setCellValue(sheet2,6+combustionConsumption.length + courseConsumption.length,2,heatConsumption[0][1]);
+                setCellValue(sheet2,6+combustionConsumption.length + courseConsumption.length,3,"GJ");
+                //合并单元格
+                mergeCellsAndSetValue(sheet2,4+combustionConsumption.length + courseConsumption.length,
+                        6+combustionConsumption.length + courseConsumption.length,0,0,"净购入电力、热力");
+                //设置数据和单位
+                setCellValue(sheet2,7+combustionConsumption.length + courseConsumption.length,2,"数据");
+                setCellValue(sheet2,7+combustionConsumption.length + courseConsumption.length,3,"单位");
                 //给固碳赋值
-                // 获取 Excel 中的数据并进行匹配
-                for (int i = 38; i < 41; i++) {
-                    // 获取当前行
-                    Row row = sheet2.getRow(i);
-                    // 获取当前行的第二列单元格
-                    Cell cell = row.getCell(1);
-                    // 获取当前单元格的值
-                    String excelName = cell.getStringCellValue() + "购入量";
-                    // 遍历数组，匹配名称
-                    for (String[] materialInfo : carbonSequestrationConsumption) {
-                        String arrayName = materialInfo[0];
-                        // 如果 Excel 中的名称与数组中的名称匹配成功
-                        if (excelName.equals(arrayName)) {
-                            // 将数组中的第二个值填入当前行的数据中
-                            setCellValue(sheet2, i, 2, materialInfo[1]);
-                            // 匹配成功后跳出内层循环
-                            break;
-                        }
-                    }
+                for (int i = 8 + combustionConsumption.length + courseConsumption.length; i <= 7 + combustionConsumption.length + courseConsumption.length + carbonSequestrationConsumption.length;i++) {
+                    //获取一维数组
+                    String [] materialInfo = carbonSequestrationConsumption[i - 8 + combustionConsumption.length + courseConsumption.length];
+                    //填入数据
+                    setCellValue(sheet2,i,1,materialInfo[0]+"产量");
+                    setCellValue(sheet2,i,2,materialInfo[1]);
+                    setCellValue(sheet2,i,3,"t");
                 }
+                //合并单元格
+                mergeCellsAndSetValue(sheet2,7+combustionConsumption.length + courseConsumption.length,
+                        7 + combustionConsumption.length + courseConsumption.length + carbonSequestrationConsumption.length,0,0,"固碳");
+                //表末尾
+                setCellValue(sheet2,8+ combustionConsumption.length + courseConsumption.length + carbonSequestrationConsumption.length,0,"* 企业应自行添加未在表中列出但企业实际消耗的其他能源品种");
                 //创建附表名称
                 schedule2 = ProcessingUtil.createUuid();
                 String filePath = "workLoad/" + schedule2 + ".xlsx";
@@ -738,74 +747,7 @@ public class CarbonServiceImpl implements CarbonService {
         //读取附表3
         try (FileInputStream inputStream = new FileInputStream("AppendixIron3.xlsx")) {
             try (Workbook workbook = new HSSFWorkbook(inputStream)) {
-                Sheet sheet3 = workbook.getSheetAt(0);
                 //为燃烧赋值
-                // 获取 Excel 中的数据并进行匹配
-                for (int i = 3; i < 24; i++) {
-                    // 获取当前行
-                    Row row = sheet3.getRow(i);
-                    // 获取当前行的第二列单元格
-                    Cell cell = row.getCell(1);
-                    // 获取当前单元格的值
-                    String excelName = cell.getStringCellValue();
-                    // 遍历数组，匹配名称
-                    for (String[] materialInfo : combustionConsumption) {
-                        String arrayName = materialInfo[0];
-                        // 如果 Excel 中的名称与数组中的名称匹配成功
-                        if (excelName.equals(arrayName)) {
-                            // 将数组中的第二个值填入当前行的数据中
-                            setCellValue(sheet3, i, 2, materialInfo[3]);
-                            setCellValue(sheet3, i, 3, materialInfo[4]);
-                            // 匹配成功后跳出内层循环
-                            break;
-                        }
-                    }
-                }
-                //为过程赋值
-                for (int i = 26; i < 33; i++) {
-                    // 获取当前行
-                    Row row = sheet3.getRow(i);
-                    // 获取当前行的第二列单元格
-                    Cell cell = row.getCell(1);
-                    // 获取当前单元格的值
-                    String excelName = cell.getStringCellValue();
-                    // 遍历数组，匹配名称
-                    for (String[] materialInfo : courseConsumption) {
-                        String arrayName = materialInfo[0];
-                        // 如果 Excel 中的名称与数组中的名称匹配成功
-                        if (excelName.equals(arrayName)) {
-                            // 将数组中的第二个值填入当前行的数据中
-                            setCellValue(sheet3, i, 2, materialInfo[2]);
-                            // 匹配成功后跳出内层循环
-                            break;
-                        }
-                    }
-                }
-                //给E电消耗赋值
-                setCellValue(sheet3, 35, 2, electricityCombustion[2]);
-                //给热力赋值
-                setCellValue(sheet3, 36, 2, Arrays.toString(heatConsumption[2]));
-                //为固碳赋值
-                // 获取 Excel 中的数据并进行匹配
-                for (int i = 38; i < 41; i++) {
-                    // 获取当前行
-                    Row row = sheet3.getRow(i);
-                    // 获取当前行的第二列单元格
-                    Cell cell = row.getCell(1);
-                    // 获取当前单元格的值
-                    String excelName = cell.getStringCellValue();
-                    // 遍历数组，匹配名称
-                    for (String[] materialInfo : carbonSequestrationConsumption) {
-                        String arrayName = materialInfo[0];
-                        // 如果 Excel 中的名称与数组中的名称匹配成功
-                        if (excelName.equals(arrayName)) {
-                            // 将数组中的第二个值填入当前行的数据中
-                            setCellValue(sheet3, i, 2, materialInfo[2]);
-                            // 匹配成功后跳出内层循环
-                            break;
-                        }
-                    }
-                }
                 //创建附表名称
                 schedule3 = ProcessingUtil.createUuid();
                 String filePath = "workLoad/" + schedule3 + ".xlsx";
