@@ -1,4 +1,4 @@
-package com.frontleaves.greenchaincarbonledger.models.doData;
+package com.frontleaves.greenchaincarbonledger.models.doData.excel;
 
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -11,10 +11,12 @@ import lombok.experimental.Accessors;
 @Data
 @Accessors(chain = true)
 public class ExcelCarbonDioxideEmissionsDO {
-    // 燃料, json格式   净消耗量: 低位发热量
+    // 总排放量
+    String totalEmissions;
+    // 燃料
     String fuel;
-    // 脱硫剂, json格式  脱硫剂名称: 脱硫剂消耗量
+    // 脱硫剂
     String desulfurizer;
-    // 电力, 数字类型的字符串
+    // 电力
     String electricity;
 }

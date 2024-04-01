@@ -201,6 +201,52 @@ public class CarbonController {
         // 对原料相关参数进行解析
         try {
             materialsDO = gson.fromJson(carbonConsumeVO.getMaterials(), MaterialsDO.class);
+            /*
+             * 此处对materialDO中的各个列表数据再次进行解析，判断各个数据的值是否有效
+             * */
+            for (MaterialsDO.Materials materials : materialsDO.getMaterials()) {
+                if (materials.getName() != null) {
+                    if (materials.getMaterial().getBuy() == null || materials.getMaterial().getOpeningInv() == null || materials.getMaterial().getEndingInv() == null || materials.getMaterial().getOutside() == null || materials.getMaterial().getExport() == null) {
+                        return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR);
+                    }
+                } else {
+                    return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR);
+                }
+
+            }
+            for (MaterialsDO.Materials materials : materialsDO.getCourses()) {
+                if (materials.getName() != null) {
+                    if (materials.getMaterial().getBuy() == null || materials.getMaterial().getOpeningInv() == null || materials.getMaterial().getEndingInv() == null || materials.getMaterial().getOutside() == null || materials.getMaterial().getExport() == null) {
+                        return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR);
+                    }
+                } else {
+                    return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR);
+                }
+            }
+            for (MaterialsDO.Materials materials : materialsDO.getCarbonSequestrations()) {
+                if (materials.getName() != null) {
+                    if (materials.getMaterial().getOpeningInv() == null || materials.getMaterial().getEndingInv() == null || materials.getMaterial().getExport() == null) {
+                        return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR);
+                    }
+                } else {
+                    return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR);
+                }
+            }
+            for (MaterialsDO.Desulfurization desulfurization : materialsDO.getDesulfurization()) {
+                if (desulfurization.getName() != null) {
+                    if (desulfurization.getMaterial().getConsumption() == null) {
+                        return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR);
+                    }
+                } else {
+                    return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR);
+                }
+            }
+            for (MaterialsDO.Material material : materialsDO.getHeat()) {
+                if (material.getBuy() == null || material.getOutside() == null || material.getExport() == null) {
+                    return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR);
+                }
+            }
+
         } catch (JsonSyntaxException e) {
             log.error("[Controller] 原料参数解析失败");
             errorMessage.add("原料参数解析失败，请检查原料参数格式");
