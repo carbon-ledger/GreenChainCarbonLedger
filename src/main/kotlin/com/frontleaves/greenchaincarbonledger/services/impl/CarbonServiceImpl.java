@@ -147,7 +147,7 @@ public class CarbonServiceImpl implements CarbonService {
         String[][] result = new String[materialsList.size()][5]; // 二维数组，每个内部数组包含五个信息
 
         for (int i = 0; i < materialsList.size(); i++) {
-            MaterialsDO.Materials material = materialsList.get(i);
+            MaterialsDO.Materials material = new MaterialsDO.Materials();
             CarbonItemTypeDO carbonItemTypeDO = carbonItemTypeDAO.getCarbonItemTypeByName(material.getName());
             // 获取信息
             // 名称
