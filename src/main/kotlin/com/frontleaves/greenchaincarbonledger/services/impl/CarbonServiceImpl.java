@@ -147,7 +147,8 @@ public class CarbonServiceImpl implements CarbonService {
         String[][] result = new String[materialsList.size()][5]; // 二维数组，每个内部数组包含五个信息
 
         for (int i = 0; i < materialsList.size(); i++) {
-            MaterialsDO.Materials material = new MaterialsDO.Materials();
+            //获取链表的第一个实例对象
+            MaterialsDO.Materials material =materialsList.get(i);
             CarbonItemTypeDO carbonItemTypeDO = carbonItemTypeDAO.getCarbonItemTypeByName(material.getName());
             // 获取信息
             // 名称
@@ -222,7 +223,7 @@ public class CarbonServiceImpl implements CarbonService {
     private static String[][] coursesConsumption(@NotNull List<MaterialsDO.Materials> coursesList, ProcessEmissionFactorDAO processEmissionFactorDAO) {
         String[][] result = new String[coursesList.size()][3];
         for (int i = 0; i < coursesList.size(); i++) {
-            MaterialsDO.Materials courses = new MaterialsDO.Materials();
+            MaterialsDO.Materials courses = coursesList.get(i);
             ProcessEmissionFactorDO processEmissionFactorDO = processEmissionFactorDAO.getFactorByName(courses.getName());
             //获取名字
             result[i][0] = processEmissionFactorDO.getDisplayName();
@@ -261,7 +262,7 @@ public class CarbonServiceImpl implements CarbonService {
     private static String[][] carbonSequestrationConsumption(@NotNull List<MaterialsDO.Materials> carbonSequestrationList, OtherEmissionFactorDAO otherEmissionFactorDAO) {
         String[][] result = new String[carbonSequestrationList.size()][3];
         for (int i = 0; i < carbonSequestrationList.size(); i++) {
-            MaterialsDO.Materials carbonSequestration = new MaterialsDO.Materials();
+            MaterialsDO.Materials carbonSequestration = carbonSequestrationList.get(i);
             OtherEmissionFactorDO otherEmissionFactorDO = otherEmissionFactorDAO.getFactorByName(carbonSequestration.getName());
             //获取
             result[i][0] = otherEmissionFactorDO.getDisplayName();
@@ -300,7 +301,7 @@ public class CarbonServiceImpl implements CarbonService {
     private static String[][] heatConsumption(@NotNull List<MaterialsDO.Material> heatList, OtherEmissionFactorDAO otherEmissionFactorDAO) {
         String[][] result = new String[heatList.size()][3];
         for (int i = 0; i < heatList.size(); i++) {
-            MaterialsDO.Material heat = new MaterialsDO.Material();
+            MaterialsDO.Material heat = heatList.get(i);
             //获取
             OtherEmissionFactorDO otherEmissionFactorDO = otherEmissionFactorDAO.getFactorByName("thermalPower");
            result[i][0] = otherEmissionFactorDO.getDisplayName();
