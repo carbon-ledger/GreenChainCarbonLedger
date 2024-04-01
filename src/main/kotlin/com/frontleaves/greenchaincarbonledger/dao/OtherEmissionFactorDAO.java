@@ -23,7 +23,7 @@ public class OtherEmissionFactorDAO {
      */
     public OtherEmissionFactorDO getFactorByName(String name){
         log.info("[DAO] 执行 getFactorByName");
-        log.info("/t Mysql 查询");
+        log.info("\t> Mysql 查询");
         return otherEmissionFactorMapper.getFactorByName(name);
     }
 }

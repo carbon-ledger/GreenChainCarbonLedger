@@ -51,9 +51,9 @@ public class CarbonReportDAO {
      * @param id-报告id
      * @return 是否更新成功
      */
-    public Boolean updateEmissionById(Double totalEmission, String status, String id) {
+    public Boolean updateEmissionById(Double totalEmission, String status, String id,String listOfReports) {
         log.info("[DAO] 执行 totalEmission");
         log.info("\t> Mysql 更新");
-        return carbonReportMapper.updateEmissionById(totalEmission, status, id);
+        return carbonReportMapper.updateEmissionById(totalEmission, status, id,listOfReports);
     }
 }

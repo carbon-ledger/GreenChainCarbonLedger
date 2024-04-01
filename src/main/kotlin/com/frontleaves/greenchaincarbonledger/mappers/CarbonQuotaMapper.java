@@ -16,7 +16,7 @@ public interface CarbonQuotaMapper {
     @Select("SELECT * FROM fy_carbon_quota WHERE quota_year=#{year} AND organize_uuid=#{uuid}")
     CarbonQuotaDO getCarbonQuota(Integer year, String uuid);
 
-    @Update("UPDATE fy_carbon_quota SET total_quota=#{totalQuota} AND updated_at=now() WHERE organize_uuid=#{uuid} AND quota_year=#{year}")
+    @Update("UPDATE fy_carbon_quota SET total_quota=#{totalQuota}, updated_at=now() WHERE organize_uuid=#{uuid} AND quota_year=#{year}")
     Boolean finishCarbonTrade(Double totalQuota, String uuid, Integer year);
 
     @Insert("""
@@ -25,6 +25,6 @@ public interface CarbonQuotaMapper {
             """)
     boolean createCarbonQuota(CarbonQuotaDO carbonQuotaDO);
 
-    @Update("UPDATE fy_carbon_quota SET total_quota=#{totalQuota} AND compliance_status=#{status} AND audit_log=#{auditLog} AND updated_at=now() WHERE organize_uuid=#{uuid} AND quota_year=#{year}")
-    Boolean editCarbonQuota(String uuid, Integer year, Double totalQuota, boolean status, String auditLog);
+    @Update("UPDATE fy_carbon_quota SET allocated_quota=#{allocatedQuota}, compliance_status=#{complianceStatus}, audit_log=#{auditLog}, updated_at=now() WHERE uuid = #{uuid}")
+    Boolean editCarbonQuota(CarbonQuotaDO carbonQuotaDO);
 }

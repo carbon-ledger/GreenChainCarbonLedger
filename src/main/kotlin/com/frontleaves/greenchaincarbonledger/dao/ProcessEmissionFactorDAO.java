@@ -26,13 +26,13 @@ public class ProcessEmissionFactorDAO {
      */
     public ProcessEmissionFactorDO getFactorByName(String name){
         log.info("[DAO] 执行 getFactorByName");
-        log.info("/t Mysql 查询");
+        log.info("\t> Mysql 查询");
         return processEmissionFactorMapper.getFactorByName(name);
     }
 
     public DesulfurizationFactorDO getDesFactorByName(String name){
         log.info("[DAO] 执行 getDesFactorByName");
-        log.info("/t Mysql 查询");
+        log.info("\t> Mysql 查询");
         return desulfurizationFactorMapper.getDesFactorByName(name);
     }
 

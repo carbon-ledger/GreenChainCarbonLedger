@@ -39,8 +39,8 @@ public interface CarbonMapper {
     @Select("SELECT * FROM fy_carbon_accounting WHERE organize_uuid=#{uuid}")
     List<CarbonAccountingDO> getAccountByUuid(String uuid);
 
-    @Select("SELECT * FROM fy_carbon_quota WHERE uuid = #{uuid}")
-    CarbonQuotaDO getQuotaByUuid(String uuid);
+    @Select("SELECT * FROM fy_carbon_quota WHERE organize_uuid = #{uuid}")
+    CarbonQuotaDO getOrganizeQuotaByUuid(String uuid);
 
     @Insert("INSERT INTO fy_carbon_trade (organize_uuid, quota_amount, price_per_unit, description, status, created_at) VALUES (#{uuid}, #{amount}, #{unit}, #{text}, #{status}, NOW())")
     void insertTradeByUuid(String uuid, TradeReleaseVO tradeReleaseVO, String status);
@@ -51,7 +51,7 @@ public interface CarbonMapper {
     @Select("SELECT * FROM fy_carbon_trade WHERE id=#{id}")
     CarbonTradeDO getTradeById(String id);
 
-    @Update("UPDATE fy_carbon_trade SET status=#{status} AND updated_at=now() WHERE id=#{id}")
+    @Update("UPDATE fy_carbon_trade SET status=#{status}, updated_at=now() WHERE id=#{id}")
     Boolean deleteTrade(String id, String status);
 
     @Select("""
@@ -80,25 +80,25 @@ public interface CarbonMapper {
     List<CarbonTradeDO> getTradeListBySearch(String uuid, String search, Integer limit, Integer page, String order);
 
     @Update("UPDATE fy_carbon_trade SET quota_amount = #{amount}, price_per_unit = #{unit}, description = #{text}, status = #{status}, updated_at = NOW() WHERE organize_uuid = #{uuid} AND id = #{id}")
-    void updateTradeByUuid(String uuid, EditTradeVO editTradeVO, String status, String id);
+    void updateTradeByUuid(String uuid, String amount, String unit, String text, String status, String id);
 
     @Select("SELECT * FROM fy_carbon_trade WHERE id = #{id} AND organize_uuid = #{getUuid}")
     CarbonTradeDO getTradeByUuidAndId(String getUuid, String id);
 
     @Select("""
-            SELECT * FROM fy_carbon_trade WHERE status = #{'active'} OR status = #{'completed'}
+            SELECT * FROM fy_carbon_trade WHERE status = #{active} OR status = #{completed}
             ORDER BY ${order} LIMIT #{limit} OFFSET ${(page-1) * limit}
             """)
     List<CarbonTradeDO> getAvailableTradeListAll(Integer limit, Integer page, String order);
 
     @Select("""
-            SELECT * FROM fy_carbon_trade WHERE status = #{'active'}
+            SELECT * FROM fy_carbon_trade WHERE status = #{active}
             ORDER BY ${order} LIMIT #{limit} OFFSET ${(page-1) * limit}
             """)
     List<CarbonTradeDO> getAvailableTradeList(String search, Integer limit, Integer page, String order);
 
     @Select("""
-            SELECT * FROM fy_carbon_trade WHERE status = #{'completed'}
+            SELECT * FROM fy_carbon_trade WHERE status = #{completed}
             ORDER BY ${order} LIMIT #{limit} OFFSET ${(page-1) * limit}
             """)
     List<CarbonTradeDO> getCompletedTradeList(String search, Integer limit, Integer page, String order);
@@ -111,4 +111,7 @@ public interface CarbonMapper {
             ORDER BY ${order} LIMIT #{limit} OFFSET ${(page-1) * limit}
            """)
     List<CarbonTradeDO> getSearchTradeList(String search, Integer limit, Integer page, String order);
+
+    @Update("UPDATE fy_carbon_trade SET verify_uuid = #{verifyUuid}, status = #{status}, updated_at = now()  WHERE id = #{id}")
+    Boolean reviewTrade(CarbonTradeDO carbonTradeDO);
 }
