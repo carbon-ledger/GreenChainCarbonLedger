@@ -652,6 +652,10 @@ public class CarbonServiceImpl implements CarbonService {
             try (Workbook workbook = new XSSFWorkbook(inputStream)) {
                 //获取工作表1
                 Sheet sheet1 = workbook.getSheetAt(0);
+                String getStartTimeReplace = carbonConsumeVO.getStartTime().replace("-", "");
+                String firstFourCharacters = getStartTimeReplace.substring(0, 4);
+                //为第一行第一列合并居中并且赋值
+                mergeCellsAndSetValue(sheet1,0,0,0,0,"附表1   报告主体"+ firstFourCharacters +"年二氧化碳排放量报告");
                 // 给第二行第二列的单元格赋值
                 setCellValue(sheet1, 1, 1, String.valueOf(totalCombustion));
                 // 给第三行第二列的单元格赋值
