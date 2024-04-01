@@ -332,20 +332,22 @@ public class CarbonServiceImpl implements CarbonService {
     // 方法用于合并单元格并设置单元格的值和居中对齐
     private static void mergeCellsAndSetValue(Sheet sheet, int startRow, int endRow, int startColumn, int endColumn, String value) {
         // 合并单元格
-        sheet.addMergedRegion(new CellRangeAddress(startRow, endRow, startColumn, endColumn));
+        if (startRow < endRow) {
+            sheet.addMergedRegion(new CellRangeAddress(startRow, endRow, startColumn, endColumn));
 
-        // 设置合并后单元格的值和样式
-        CellStyle style = sheet.getWorkbook().createCellStyle();
-        style.setAlignment(HorizontalAlignment.CENTER);
+            // 设置合并后单元格的值和样式
+            CellStyle style = sheet.getWorkbook().createCellStyle();
+            style.setAlignment(HorizontalAlignment.CENTER);
 
-        for (int i = startRow; i <= endRow; i++) {
-            Row row = sheet.getRow(i);
-            Cell cell = row.getCell(startColumn);
-            if (cell == null) {
-                cell = row.createCell(startColumn);
+            for (int i = startRow; i <= endRow; i++) {
+                Row row = sheet.getRow(i);
+                Cell cell = row.getCell(startColumn);
+                if (cell == null) {
+                    cell = row.createCell(startColumn);
+                }
+                cell.setCellValue(value);
+                cell.setCellStyle(style);
             }
-            cell.setCellValue(value);
-            cell.setCellStyle(style);
         }
     }
 
