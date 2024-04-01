@@ -81,8 +81,8 @@ public class CarbonServiceImpl implements CarbonService {
             // 获取时间范围的结束日期
             long lastReportEndTime = Long.parseLong(getOrganizeUserLastCarbonReport.getAccountingPeriod().split("-")[1]);
             // 时间范围检查
-            if (nowReportStartTime < nowReportEndTime) {
-                if (lastReportEndTime >= nowReportStartTime) {
+            if (nowReportStartTime <= nowReportEndTime) {
+                if (lastReportEndTime < nowReportStartTime) {
                     return getFormatDateRange;
                 }
             }
@@ -260,8 +260,8 @@ public class CarbonServiceImpl implements CarbonService {
      */
     private static ArrayList<CarbonSequestrationConsumptionDO> carbonSequestrationConsumptionList(@NotNull List<MaterialsDO.Materials> carbonSequestrationList, OtherEmissionFactorDAO otherEmissionFactorDAO) {
         ArrayList<CarbonSequestrationConsumptionDO> resultList = new ArrayList<>();
-        for (MaterialsDO.Materials carbonSequestration : carbonSequestrationList){
-            CarbonSequestrationConsumptionDO carbonSequestrationConsumptionDO =new CarbonSequestrationConsumptionDO();
+        for (MaterialsDO.Materials carbonSequestration : carbonSequestrationList) {
+            CarbonSequestrationConsumptionDO carbonSequestrationConsumptionDO = new CarbonSequestrationConsumptionDO();
             OtherEmissionFactorDO otherEmissionFactorDO = otherEmissionFactorDAO.getFactorByName(carbonSequestration.getName());
             MaterialsDO.Material materialData = carbonSequestration.getMaterial();
             double netConsumption = materialData.getExport() + materialData.getEndingInv() - materialData.getOpeningInv();
@@ -348,7 +348,6 @@ public class CarbonServiceImpl implements CarbonService {
             cell.setCellStyle(style);
         }
     }
-
 
     @NotNull
     @Override
@@ -705,7 +704,7 @@ public class CarbonServiceImpl implements CarbonService {
                 setCellValue(sheet2, 3 + combustionConsumptionList.size(), 3, "单位");
                 //给E过程材料赋值
                 for (int i = 4 + combustionConsumptionList.size(); i <= 3 + combustionConsumptionList.size() + coursesConsumptionList.size(); i++) {
-                    CoursesConsumptionDO coursesConsumptionDO = coursesConsumptionList.get(i - 4 + combustionConsumptionList.size());
+                    CoursesConsumptionDO coursesConsumptionDO = coursesConsumptionList.get(i - 4 - combustionConsumptionList.size());
                     //填入数据
                     setCellValue(sheet2, i, 1, coursesConsumptionDO.getDisplayName());
                     setCellValue(sheet2, i, 2, coursesConsumptionDO.getNetConsumption());
@@ -731,7 +730,7 @@ public class CarbonServiceImpl implements CarbonService {
                 setCellValue(sheet2, 7 + combustionConsumptionList.size() + coursesConsumptionList.size(), 3, "单位");
                 //给固碳赋值
                 for (int i = 8 + combustionConsumptionList.size() + coursesConsumptionList.size(); i <= 7 + combustionConsumptionList.size() + coursesConsumptionList.size() + carbonSequestrationConsumption.size(); i++) {
-                    CarbonSequestrationConsumptionDO carbonSequestrationConsumptionDO = carbonSequestrationConsumption.get(i - 8 + combustionConsumptionList.size() + coursesConsumptionList.size());
+                    CarbonSequestrationConsumptionDO carbonSequestrationConsumptionDO = carbonSequestrationConsumption.get(i - 8 - combustionConsumptionList.size() - coursesConsumptionList.size());
                     //填入数据
                     setCellValue(sheet2, i, 1, carbonSequestrationConsumptionDO.getDisplayName() + "产量");
                     setCellValue(sheet2, i, 2, carbonSequestrationConsumptionDO.getNetConsumption());
@@ -767,7 +766,7 @@ public class CarbonServiceImpl implements CarbonService {
                 Sheet sheet3 = workbook.getSheetAt(0);
                 // 给E燃烧赋值
                 for (int i = 3; i <= 2 + combustionConsumptionList.size(); i++) {
-                   CombustionConsumptionDO combustionConsumptionDO =combustionConsumptionList.get(i - 3);
+                    CombustionConsumptionDO combustionConsumptionDO = combustionConsumptionList.get(i - 3);
                     // 填入数据
                     setCellValue(sheet3, i, 1, combustionConsumptionDO.getDisplayName());
                     setCellValue(sheet3, i, 2, combustionConsumptionDO.getCarbonUnitCalorific());
@@ -780,7 +779,7 @@ public class CarbonServiceImpl implements CarbonService {
                 setCellValue(sheet3, 3 + combustionConsumptionList.size(), 3, "单位");
                 //给E过程材料赋值
                 for (int i = 4 + combustionConsumptionList.size(); i <= 3 + combustionConsumptionList.size() + coursesConsumptionList.size(); i++) {
-                    CoursesConsumptionDO coursesConsumptionDO = coursesConsumptionList.get(i - 4 + combustionConsumptionList.size());
+                    CoursesConsumptionDO coursesConsumptionDO = coursesConsumptionList.get(i - 4 - combustionConsumptionList.size());
                     //填入数据
                     setCellValue(sheet3, i, 1, coursesConsumptionDO.getDisplayName());
                     setCellValue(sheet3, i, 2, coursesConsumptionDO.getFactor());
@@ -806,7 +805,7 @@ public class CarbonServiceImpl implements CarbonService {
                 setCellValue(sheet3, 7 + combustionConsumptionList.size() + coursesConsumptionList.size(), 3, "单位");
                 //给固碳赋值
                 for (int i = 8 + combustionConsumptionList.size() + coursesConsumptionList.size(); i <= 7 + combustionConsumptionList.size() + coursesConsumptionList.size() + carbonSequestrationConsumption.size(); i++) {
-                    CarbonSequestrationConsumptionDO carbonSequestrationConsumptionDO = carbonSequestrationConsumption.get(i - 8 + combustionConsumptionList.size() + coursesConsumptionList.size());
+                    CarbonSequestrationConsumptionDO carbonSequestrationConsumptionDO = carbonSequestrationConsumption.get(i - 8 - combustionConsumptionList.size() - coursesConsumptionList.size());
                     //填入数据
                     setCellValue(sheet3, i, 1, carbonSequestrationConsumptionDO.getDisplayName());
                     setCellValue(sheet3, i, 2, carbonSequestrationConsumptionDO.getFactor());
