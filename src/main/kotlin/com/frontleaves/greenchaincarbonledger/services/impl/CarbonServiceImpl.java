@@ -19,22 +19,23 @@ import com.google.gson.reflect.TypeToken;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Date;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -85,6 +86,8 @@ public class CarbonServiceImpl implements CarbonService {
                     return getFormatDateRange;
                 }
             }
+        } else {
+            return getFormatDateRange;
         }
         return null;
     }
@@ -130,7 +133,7 @@ public class CarbonServiceImpl implements CarbonService {
             // 获取能计算出净消耗量的相关参数
             MaterialsDO.Material materialData = material.getMaterial();
             // 计算净消耗量
-            double netConsumption = Double.parseDouble(materialData.getBuy()) + (Double.parseDouble(materialData.getOpeningInv()) - Double.parseDouble(materialData.getEndingInv())) + Double.parseDouble(materialData.getOutSide()) + Double.parseDouble(materialData.getExport());
+            double netConsumption = materialData.getBuy() + materialData.getOpeningInv() - materialData.getEndingInv() + materialData.getOutside() + materialData.getExport();
             double eCombustion = carbonItemTypeDO.getLowCalorific() * netConsumption * carbonItemTypeDO.getCarbonUnitCalorific() * carbonItemTypeDO.getFuelOxidationRate() / ((double) 44 / 12);
             // 累加
             value += eCombustion;
@@ -151,10 +154,9 @@ public class CarbonServiceImpl implements CarbonService {
             // 名称
             result[i][0] = carbonItemTypeDO.getDisplayName();
             // 净消耗量
-            result[i][1] = String.valueOf(Double.parseDouble(material.getMaterial().getBuy()) +
-                    (Double.parseDouble(material.getMaterial().getOpeningInv()) - Double.parseDouble(material.getMaterial().getEndingInv())) +
-                    Double.parseDouble(material.getMaterial().getOutSide()) +
-                    Double.parseDouble(material.getMaterial().getExport()));
+            result[i][1] = String.valueOf(material.getMaterial().getBuy() +
+                    (material.getMaterial().getOpeningInv() - material.getMaterial().getEndingInv()) +
+                    material.getMaterial().getOutside() + material.getMaterial().getExport());
             // 低热值
             result[i][2] = String.valueOf(carbonItemTypeDO.getLowCalorific());
             // 碳单元热值
@@ -206,7 +208,7 @@ public class CarbonServiceImpl implements CarbonService {
             // 获取能计算出净消耗量的相关参数
             MaterialsDO.Material materialData = courses.getMaterial();
             // 计算净消耗量
-            double netConsumption = Double.parseDouble(materialData.getBuy()) + (Double.parseDouble(materialData.getOpeningInv()) - Double.parseDouble(materialData.getEndingInv())) + Double.parseDouble(materialData.getOutSide()) + Double.parseDouble(materialData.getExport());
+            double netConsumption = materialData.getBuy() + (materialData.getOpeningInv() - materialData.getEndingInv()) + materialData.getOutside() + materialData.getExport();
             double eCousers = processEmissionFactorDO.getFactor() * netConsumption;
             //累加
             value += eCousers;
@@ -226,7 +228,7 @@ public class CarbonServiceImpl implements CarbonService {
             result[i][0] = processEmissionFactorDO.getDisplayName();
             // 获取能计算出净消耗量的相关参数
             MaterialsDO.Material materialData = courses.getMaterial();
-            result[i][1] = String.valueOf(Double.parseDouble(materialData.getBuy()) + (Double.parseDouble(materialData.getOpeningInv()) - Double.parseDouble(materialData.getEndingInv())) + Double.parseDouble(materialData.getOutSide()) + Double.parseDouble(materialData.getExport()));
+            result[i][1] = String.valueOf(materialData.getBuy() + (materialData.getOpeningInv() - materialData.getEndingInv()) + materialData.getOutside() + materialData.getExport());
             result[i][2] = String.valueOf(processEmissionFactorDO.getFactor());
         }
         return result;
@@ -245,7 +247,7 @@ public class CarbonServiceImpl implements CarbonService {
             // 获取能计算出净消耗量的相关参数
             MaterialsDO.Material materialData = carbonSequestration.getMaterial();
             //计算净消耗量
-            double netConsumption = Double.parseDouble(materialData.getExport()) + Double.parseDouble(materialData.getEndingInv()) - Double.parseDouble(materialData.getOpeningInv());
+            double netConsumption = materialData.getExport() + materialData.getEndingInv() - materialData.getOpeningInv();
             double eCarbonSequestration = otherEmissionFactorDO.getFactor() * netConsumption;
             //累加
             value += eCarbonSequestration;
@@ -264,7 +266,7 @@ public class CarbonServiceImpl implements CarbonService {
             //获取
             result[i][0] = otherEmissionFactorDO.getDisplayName();
             MaterialsDO.Material materialData = carbonSequestration.getMaterial();
-            double netConsumption = Double.parseDouble(materialData.getExport()) + Double.parseDouble(materialData.getEndingInv()) - Double.parseDouble(materialData.getOpeningInv());
+            double netConsumption = materialData.getExport() + materialData.getEndingInv() - materialData.getOpeningInv();
             result[i][1] = String.valueOf(netConsumption);
             result[i][2] = String.valueOf(otherEmissionFactorDO.getFactor());
         }
@@ -284,7 +286,7 @@ public class CarbonServiceImpl implements CarbonService {
             //获取排放因子
             OtherEmissionFactorDO otherEmissionFactorDO = otherEmissionFactorDAO.getFactorByName("thermalPower");
             // 计算得出净消耗量
-            double netConsumption = Double.parseDouble(heat.getBuy()) - Double.parseDouble(heat.getExport()) - Double.parseDouble(heat.getOutSide());
+            double netConsumption = heat.getBuy() - heat.getExport() - heat.getOutside();
             double eHeat = otherEmissionFactorDO.getFactor() * netConsumption;
             //累加
             value += eHeat;
@@ -301,8 +303,8 @@ public class CarbonServiceImpl implements CarbonService {
             MaterialsDO.Material heat = heatList.get(i);
             //获取
             OtherEmissionFactorDO otherEmissionFactorDO = otherEmissionFactorDAO.getFactorByName("thermalPower");
-           result[i][0] = otherEmissionFactorDO.getDisplayName();
-            double netConsumption = Double.parseDouble(heat.getBuy()) - Double.parseDouble(heat.getExport()) - Double.parseDouble(heat.getOutSide());
+            result[i][0] = otherEmissionFactorDO.getDisplayName();
+            double netConsumption = heat.getBuy() - heat.getExport() - heat.getOutside();
             result[i][1] = String.valueOf(netConsumption);
             result[i][2] = String.valueOf(otherEmissionFactorDO.getFactor());
         }
@@ -313,12 +315,16 @@ public class CarbonServiceImpl implements CarbonService {
      * 为附表中的单元格赋值
      */
     private static void setCellValue(Sheet sheet, int rowIndex, int columnIndex, String value) {
-        Row row = sheet.getRow(rowIndex); // 获取要设置数据的行
+        // 获取要设置数据的行
+        Row row = sheet.getRow(rowIndex);
         if (row == null) {
-            row = sheet.createRow(rowIndex); // 如果行不存在，则创建新行
+            // 如果行不存在，则创建新行
+            row = sheet.createRow(rowIndex);
         }
-        Cell cell = row.createCell(columnIndex); // 获取要设置数据的单元格
-        cell.setCellValue(value); // 设置单元格的值
+        // 获取要设置数据的单元格
+        Cell cell = row.createCell(columnIndex);
+        // 设置单元格的值
+        cell.setCellValue(value);
     }
 
     /**
@@ -340,10 +346,9 @@ public class CarbonServiceImpl implements CarbonService {
                 cell = row.createCell(startColumn);
             }
             cell.setCellValue(value);
-            cell.setCellStyle(style); // 设置单元格居中对齐
+            cell.setCellStyle(style);
         }
     }
-
 
 
     @NotNull
@@ -628,8 +633,8 @@ public class CarbonServiceImpl implements CarbonService {
                 .setElectric(electric);
         //读取附表1
         String schedule1;
-        try (FileInputStream inputStream = new FileInputStream("AppendixIron1.xlsx")) {
-            try (Workbook workbook = new HSSFWorkbook(inputStream)) {
+        try (InputStream inputStream = new ClassPathResource("files/AppendixIron1.xlsx").getInputStream()) {
+            try (Workbook workbook = new XSSFWorkbook(inputStream)) {
                 //获取工作表1
                 Sheet sheet1 = workbook.getSheetAt(0);
                 // 给第二行第二列的单元格赋值
@@ -660,71 +665,71 @@ public class CarbonServiceImpl implements CarbonService {
         //取出E材料燃烧消耗和ID
         String[][] combustionConsumption = combustionConsumption(materials, carbonItemTypeDAO);
         //取出E过程的消耗量
-        String[][] courseConsumption = coursesConsumption(materials, processEmissionFactorDAO);
+        String[][] courseConsumption = coursesConsumption(courses, processEmissionFactorDAO);
         String[] electricityCombustion = electricityCombustion(carbonConsumeVO, otherEmissionFactorDAO);
         String[][] heatConsumption = heatConsumption(heats, otherEmissionFactorDAO);
         String[][] carbonSequestrationConsumption = carbonSequestrationConsumption(carbonSequestrations, otherEmissionFactorDAO);
         String schedule2;
         //读取附表2
         try (FileInputStream inputStream = new FileInputStream("AppendixIron2.xlsx")) {
-            try (Workbook workbook = new HSSFWorkbook(inputStream)) {
+            try (Workbook workbook = new XSSFWorkbook(inputStream)) {
                 //读取工作表1
                 Sheet sheet2 = workbook.getSheetAt(0);
                 // 给E燃烧赋值
-                for (int i = 3; i <= 2+combustionConsumption.length; i++) {
+                for (int i = 3; i <= 2 + combustionConsumption.length; i++) {
                     // 获取一维数组
                     String[] materialInfo = combustionConsumption[i - 3];
                     // 填入数据
-                    setCellValue(sheet2,i,1,materialInfo[0]);
+                    setCellValue(sheet2, i, 1, materialInfo[0]);
                     setCellValue(sheet2, i, 2, materialInfo[1]);
                     setCellValue(sheet2, i, 3, materialInfo[2]);
                 }
                 //合并单元格
-                mergeCellsAndSetValue(sheet2,3,2+combustionConsumption.length,0,0,"化石燃料燃烧*");
+                mergeCellsAndSetValue(sheet2, 3, 2 + combustionConsumption.length, 0, 0, "化石燃料燃烧*");
                 //设置数据单位
-                setCellValue(sheet2,3+combustionConsumption.length,2,"数据");
-                setCellValue(sheet2,3+combustionConsumption.length,3,"单位");
+                setCellValue(sheet2, 3 + combustionConsumption.length, 2, "数据");
+                setCellValue(sheet2, 3 + combustionConsumption.length, 3, "单位");
                 //给E过程材料赋值
-                for(int i = 4+combustionConsumption.length;i <=  3 + combustionConsumption.length + courseConsumption.length; i++){
+                for (int i = 4 + combustionConsumption.length; i <= 3 + combustionConsumption.length + courseConsumption.length; i++) {
                     //获取一维数组
-                    String [] materialInfo = combustionConsumption[i - 4 - combustionConsumption.length];
+                    String[] materialInfo = combustionConsumption[i - 4 - combustionConsumption.length];
                     //填入数据
-                    setCellValue(sheet2,i,1,materialInfo[0]+"消耗量");
-                    setCellValue(sheet2,i,2,materialInfo[1]);
-                    setCellValue(sheet2,i,3,"t");
+                    setCellValue(sheet2, i, 1, materialInfo[0] + "消耗量");
+                    setCellValue(sheet2, i, 2, materialInfo[1]);
+                    setCellValue(sheet2, i, 3, "t");
                 }
                 //合并单元格
-                mergeCellsAndSetValue(sheet2,3+combustionConsumption.length, 3 + combustionConsumption.length + courseConsumption.length,0,0,"工业生产过程");
+                mergeCellsAndSetValue(sheet2, 3 + combustionConsumption.length, 3 + combustionConsumption.length + courseConsumption.length, 0, 0, "工业生产过程");
                 //设置数据和单位
-                setCellValue(sheet2,4+combustionConsumption.length + courseConsumption.length,2,"数据");
-                setCellValue(sheet2,4+combustionConsumption.length + courseConsumption.length,3,"单位");
+                setCellValue(sheet2, 4 + combustionConsumption.length + courseConsumption.length, 2, "数据");
+                setCellValue(sheet2, 4 + combustionConsumption.length + courseConsumption.length, 3, "单位");
                 //给电力和热力赋值
-                setCellValue(sheet2,5+combustionConsumption.length + courseConsumption.length,1,"电力净购入量");
-                setCellValue(sheet2,5+combustionConsumption.length + courseConsumption.length,2,electricityCombustion[1]);
-                setCellValue(sheet2,5+combustionConsumption.length + courseConsumption.length,3,"MWh");
-                setCellValue(sheet2,6+combustionConsumption.length + courseConsumption.length,1,"热力净购入量");
-                setCellValue(sheet2,6+combustionConsumption.length + courseConsumption.length,2,heatConsumption[0][1]);
-                setCellValue(sheet2,6+combustionConsumption.length + courseConsumption.length,3,"GJ");
+                setCellValue(sheet2, 5 + combustionConsumption.length + courseConsumption.length, 1, "电力净购入量");
+                setCellValue(sheet2, 5 + combustionConsumption.length + courseConsumption.length, 2, electricityCombustion[1]);
+                setCellValue(sheet2, 5 + combustionConsumption.length + courseConsumption.length, 3, "MWh");
+                setCellValue(sheet2, 6 + combustionConsumption.length + courseConsumption.length, 1, "热力净购入量");
+                setCellValue(sheet2, 6 + combustionConsumption.length + courseConsumption.length, 2, heatConsumption[0][1]);
+                setCellValue(sheet2, 6 + combustionConsumption.length + courseConsumption.length, 3, "GJ");
                 //合并单元格
-                mergeCellsAndSetValue(sheet2,4+combustionConsumption.length + courseConsumption.length,
-                        6+combustionConsumption.length + courseConsumption.length,0,0,"净购入电力、热力");
+                mergeCellsAndSetValue(sheet2, 4 + combustionConsumption.length + courseConsumption.length,
+                        6 + combustionConsumption.length + courseConsumption.length, 0, 0, "净购入电力、热力");
                 //设置数据和单位
-                setCellValue(sheet2,7+combustionConsumption.length + courseConsumption.length,2,"数据");
-                setCellValue(sheet2,7+combustionConsumption.length + courseConsumption.length,3,"单位");
+                setCellValue(sheet2, 7 + combustionConsumption.length + courseConsumption.length, 2, "数据");
+                setCellValue(sheet2, 7 + combustionConsumption.length + courseConsumption.length, 3, "单位");
                 //给固碳赋值
-                for (int i = 8 + combustionConsumption.length + courseConsumption.length; i <= 7 + combustionConsumption.length + courseConsumption.length + carbonSequestrationConsumption.length;i++) {
+                for (int i = 8 + combustionConsumption.length + courseConsumption.length; i <= 7 + combustionConsumption.length + courseConsumption.length + carbonSequestrationConsumption.length; i++) {
                     //获取一维数组
-                    String [] materialInfo = carbonSequestrationConsumption[i - 8 + combustionConsumption.length + courseConsumption.length];
+                    String[] materialInfo = carbonSequestrationConsumption[i - 8 + combustionConsumption.length + courseConsumption.length];
                     //填入数据
-                    setCellValue(sheet2,i,1,materialInfo[0]+"产量");
-                    setCellValue(sheet2,i,2,materialInfo[1]);
-                    setCellValue(sheet2,i,3,"t");
+                    setCellValue(sheet2, i, 1, materialInfo[0] + "产量");
+                    setCellValue(sheet2, i, 2, materialInfo[1]);
+                    setCellValue(sheet2, i, 3, "t");
                 }
                 //合并单元格
-                mergeCellsAndSetValue(sheet2,7+combustionConsumption.length + courseConsumption.length,
-                        7 + combustionConsumption.length + courseConsumption.length + carbonSequestrationConsumption.length,0,0,"固碳");
+                mergeCellsAndSetValue(sheet2, 7 + combustionConsumption.length + courseConsumption.length,
+                        7 + combustionConsumption.length + courseConsumption.length + carbonSequestrationConsumption.length, 0, 0, "固碳");
                 //表末尾
-                setCellValue(sheet2,8+ combustionConsumption.length + courseConsumption.length + carbonSequestrationConsumption.length,0,"* 企业应自行添加未在表中列出但企业实际消耗的其他能源品种");
+                setCellValue(sheet2, 8 + combustionConsumption.length + courseConsumption.length + carbonSequestrationConsumption.length, 0, "* 企业应自行添加未在表中列出但企业实际消耗的其他能源品种");
                 //创建附表名称
                 schedule2 = ProcessingUtil.createUuid();
                 String filePath = "workLoad/" + schedule2 + ".xlsx";
@@ -746,63 +751,63 @@ public class CarbonServiceImpl implements CarbonService {
         String schedule3;
         //读取附表3
         try (FileInputStream inputStream = new FileInputStream("AppendixIron3.xlsx")) {
-            try (Workbook workbook = new HSSFWorkbook(inputStream)) {
+            try (Workbook workbook = new XSSFWorkbook(inputStream)) {
                 Sheet sheet3 = workbook.getSheetAt(0);
                 // 给E燃烧赋值
-                for (int i = 3; i <= 2+combustionConsumption.length; i++) {
+                for (int i = 3; i <= 2 + combustionConsumption.length; i++) {
                     // 获取一维数组
                     String[] materialInfo = combustionConsumption[i - 3];
                     // 填入数据
-                    setCellValue(sheet3,i,1,materialInfo[0]);
+                    setCellValue(sheet3, i, 1, materialInfo[0]);
                     setCellValue(sheet3, i, 2, materialInfo[3]);
                     setCellValue(sheet3, i, 3, materialInfo[4]);
                 }
                 //合并单元格
-                mergeCellsAndSetValue(sheet3,3,2+combustionConsumption.length,0,0,"化石燃料燃烧*");
+                mergeCellsAndSetValue(sheet3, 3, 2 + combustionConsumption.length, 0, 0, "化石燃料燃烧*");
                 //设置数据单位
-                setCellValue(sheet3,3+combustionConsumption.length,2,"数据");
-                setCellValue(sheet3,3+combustionConsumption.length,3,"单位");
+                setCellValue(sheet3, 3 + combustionConsumption.length, 2, "数据");
+                setCellValue(sheet3, 3 + combustionConsumption.length, 3, "单位");
                 //给E过程材料赋值
-                for(int i = 4+combustionConsumption.length;i <=  3 + combustionConsumption.length + courseConsumption.length; i++){
+                for (int i = 4 + combustionConsumption.length; i <= 3 + combustionConsumption.length + courseConsumption.length; i++) {
                     //获取一维数组
-                    String [] materialInfo = combustionConsumption[i - 4 - combustionConsumption.length];
+                    String[] materialInfo = combustionConsumption[i - 4 - combustionConsumption.length];
                     //填入数据
-                    setCellValue(sheet3,i,1,materialInfo[0]);
-                    setCellValue(sheet3,i,2,materialInfo[2]);
-                    setCellValue(sheet3,i,3,"tCO2/t");
+                    setCellValue(sheet3, i, 1, materialInfo[0]);
+                    setCellValue(sheet3, i, 2, materialInfo[2]);
+                    setCellValue(sheet3, i, 3, "tCO2/t");
                 }
                 //合并单元格
-                mergeCellsAndSetValue(sheet3,3+combustionConsumption.length, 3 + combustionConsumption.length + courseConsumption.length,0,0,"工业生产过程");
+                mergeCellsAndSetValue(sheet3, 3 + combustionConsumption.length, 3 + combustionConsumption.length + courseConsumption.length, 0, 0, "工业生产过程");
                 //设置数据和单位
-                setCellValue(sheet3,4+combustionConsumption.length + courseConsumption.length,2,"数据");
-                setCellValue(sheet3,4+combustionConsumption.length + courseConsumption.length,3,"单位");
+                setCellValue(sheet3, 4 + combustionConsumption.length + courseConsumption.length, 2, "数据");
+                setCellValue(sheet3, 4 + combustionConsumption.length + courseConsumption.length, 3, "单位");
                 //给电力和热力赋值
-                setCellValue(sheet3,5+combustionConsumption.length + courseConsumption.length,1,"电力");
-                setCellValue(sheet3,5+combustionConsumption.length + courseConsumption.length,2,electricityCombustion[2]);
-                setCellValue(sheet3,5+combustionConsumption.length + courseConsumption.length,3,"tCO2/MWh");
-                setCellValue(sheet3,6+combustionConsumption.length + courseConsumption.length,1,"热力");
-                setCellValue(sheet3,6+combustionConsumption.length + courseConsumption.length,2,heatConsumption[0][2]);
-                setCellValue(sheet3,6+combustionConsumption.length + courseConsumption.length,3,"tCO2/ GJ");
+                setCellValue(sheet3, 5 + combustionConsumption.length + courseConsumption.length, 1, "电力");
+                setCellValue(sheet3, 5 + combustionConsumption.length + courseConsumption.length, 2, electricityCombustion[2]);
+                setCellValue(sheet3, 5 + combustionConsumption.length + courseConsumption.length, 3, "tCO2/MWh");
+                setCellValue(sheet3, 6 + combustionConsumption.length + courseConsumption.length, 1, "热力");
+                setCellValue(sheet3, 6 + combustionConsumption.length + courseConsumption.length, 2, heatConsumption[0][2]);
+                setCellValue(sheet3, 6 + combustionConsumption.length + courseConsumption.length, 3, "tCO2/ GJ");
                 //合并单元格
-                mergeCellsAndSetValue(sheet3,4+combustionConsumption.length + courseConsumption.length,
-                        6+combustionConsumption.length + courseConsumption.length,0,0,"净购入电力、热力");
+                mergeCellsAndSetValue(sheet3, 4 + combustionConsumption.length + courseConsumption.length,
+                        6 + combustionConsumption.length + courseConsumption.length, 0, 0, "净购入电力、热力");
                 //设置数据和单位
-                setCellValue(sheet3,7+combustionConsumption.length + courseConsumption.length,2,"数据");
-                setCellValue(sheet3,7+combustionConsumption.length + courseConsumption.length,3,"单位");
+                setCellValue(sheet3, 7 + combustionConsumption.length + courseConsumption.length, 2, "数据");
+                setCellValue(sheet3, 7 + combustionConsumption.length + courseConsumption.length, 3, "单位");
                 //给固碳赋值
-                for (int i = 8 + combustionConsumption.length + courseConsumption.length; i <= 7 + combustionConsumption.length + courseConsumption.length + carbonSequestrationConsumption.length;i++) {
+                for (int i = 8 + combustionConsumption.length + courseConsumption.length; i <= 7 + combustionConsumption.length + courseConsumption.length + carbonSequestrationConsumption.length; i++) {
                     //获取一维数组
-                    String [] materialInfo = carbonSequestrationConsumption[i - 8 + combustionConsumption.length + courseConsumption.length];
+                    String[] materialInfo = carbonSequestrationConsumption[i - 8 + combustionConsumption.length + courseConsumption.length];
                     //填入数据
-                    setCellValue(sheet3,i,1,materialInfo[0]);
-                    setCellValue(sheet3,i,2,materialInfo[2]);
-                    setCellValue(sheet3,i,3,"tCO2/t");
+                    setCellValue(sheet3, i, 1, materialInfo[0]);
+                    setCellValue(sheet3, i, 2, materialInfo[2]);
+                    setCellValue(sheet3, i, 3, "tCO2/t");
                 }
                 //合并单元格
-                mergeCellsAndSetValue(sheet3,7+combustionConsumption.length + courseConsumption.length,
-                        7 + combustionConsumption.length + courseConsumption.length + carbonSequestrationConsumption.length,0,0,"固碳");
+                mergeCellsAndSetValue(sheet3, 7 + combustionConsumption.length + courseConsumption.length,
+                        7 + combustionConsumption.length + courseConsumption.length + carbonSequestrationConsumption.length, 0, 0, "固碳");
                 //表尾
-                setCellValue(sheet3,8+ combustionConsumption.length + courseConsumption.length + carbonSequestrationConsumption.length,0,"* 企业应自行添加未在表中列出但企业实际消耗的其他能源品种");
+                setCellValue(sheet3, 8 + combustionConsumption.length + courseConsumption.length + carbonSequestrationConsumption.length, 0, "* 企业应自行添加未在表中列出但企业实际消耗的其他能源品种");
                 //创建附表名称
                 schedule3 = ProcessingUtil.createUuid();
                 String filePath = "workLoad/" + schedule3 + ".xlsx";

@@ -80,6 +80,15 @@ open class StartupConfiguration(
                 log.debug("\t> 创建文件夹: upload/avatar")
                 File("upload/avatar").mkdirs()
             }
+            if (!File("upload/files").exists()) {
+                log.debug("\t> 创建文件夹: upload/files")
+                File("upload/files").mkdirs()
+            }
+
+            if (!File("workLoad").exists()) {
+                log.debug("\t> 创建文件夹: workLoad")
+                File("workLoad").mkdirs()
+            }
         }
     }
 

@@ -23,7 +23,7 @@ public class CarbonItemTypeDAO {
      */
     public CarbonItemTypeDO getCarbonItemTypeByName(String name){
         log.info("[DAO] 执行 getCarbonItemTypeByName");
-        log.info("/t Mysql 查询");
+        log.info("\t> Mysql 查询");
         return carbonItemTypeMapper.getCarbonItemTypeByName(name);
     }
 }
