@@ -204,46 +204,56 @@ public class CarbonController {
             /*
              * 此处对materialDO中的各个列表数据再次进行解析，判断各个数据的值是否有效
              * */
-            for (MaterialsDO.Materials materials : materialsDO.getMaterials()) {
-                if (materials.getName() != null) {
-                    if (materials.getMaterial().getBuy() == null || materials.getMaterial().getOpeningInv() == null || materials.getMaterial().getEndingInv() == null || materials.getMaterial().getOutside() == null || materials.getMaterial().getExport() == null) {
+            if (materialsDO.getMaterials() != null) {
+                for (MaterialsDO.Materials materials : materialsDO.getMaterials()) {
+                    if (materials.getName() != null) {
+                        if (materials.getMaterial().getBuy() == null || materials.getMaterial().getOpeningInv() == null || materials.getMaterial().getEndingInv() == null || materials.getMaterial().getOutside() == null || materials.getMaterial().getExport() == null) {
+                            return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR);
+                        }
+                    } else {
                         return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR);
                     }
-                } else {
-                    return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR);
-                }
 
-            }
-            for (MaterialsDO.Materials materials : materialsDO.getCourses()) {
-                if (materials.getName() != null) {
-                    if (materials.getMaterial().getBuy() == null || materials.getMaterial().getOpeningInv() == null || materials.getMaterial().getEndingInv() == null || materials.getMaterial().getOutside() == null || materials.getMaterial().getExport() == null) {
-                        return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR);
-                    }
-                } else {
-                    return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR);
                 }
             }
-            for (MaterialsDO.Materials materials : materialsDO.getCarbonSequestrations()) {
-                if (materials.getName() != null) {
-                    if (materials.getMaterial().getOpeningInv() == null || materials.getMaterial().getEndingInv() == null || materials.getMaterial().getExport() == null) {
+            if (materialsDO.getCourses() != null) {
+                for (MaterialsDO.Materials materials : materialsDO.getCourses()) {
+                    if (materials.getName() != null) {
+                        if (materials.getMaterial().getBuy() == null || materials.getMaterial().getOpeningInv() == null || materials.getMaterial().getEndingInv() == null || materials.getMaterial().getOutside() == null || materials.getMaterial().getExport() == null) {
+                            return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR);
+                        }
+                    } else {
                         return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR);
                     }
-                } else {
-                    return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR);
                 }
             }
-            for (MaterialsDO.Desulfurization desulfurization : materialsDO.getDesulfurization()) {
-                if (desulfurization.getName() != null) {
-                    if (desulfurization.getMaterial().getConsumption() == null) {
+            if (materialsDO.getCarbonSequestrations() != null) {
+                for (MaterialsDO.Materials materials : materialsDO.getCarbonSequestrations()) {
+                    if (materials.getName() != null) {
+                        if (materials.getMaterial().getOpeningInv() == null || materials.getMaterial().getEndingInv() == null || materials.getMaterial().getExport() == null) {
+                            return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR);
+                        }
+                    } else {
                         return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR);
                     }
-                } else {
-                    return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR);
                 }
             }
-            for (MaterialsDO.Material material : materialsDO.getHeat()) {
-                if (material.getBuy() == null || material.getOutside() == null || material.getExport() == null) {
-                    return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR);
+            if (materialsDO.getDesulfurization() != null) {
+                for (MaterialsDO.Desulfurization desulfurization : materialsDO.getDesulfurization()) {
+                    if (desulfurization.getName() != null) {
+                        if (desulfurization.getMaterial().getConsumption() == null) {
+                            return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR);
+                        }
+                    } else {
+                        return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR);
+                    }
+                }
+            }
+            if (materialsDO.getHeat() != null) {
+                for (MaterialsDO.Material material : materialsDO.getHeat()) {
+                    if (material.getBuy() == null || material.getOutside() == null || material.getExport() == null) {
+                        return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR);
+                    }
                 }
             }
 
