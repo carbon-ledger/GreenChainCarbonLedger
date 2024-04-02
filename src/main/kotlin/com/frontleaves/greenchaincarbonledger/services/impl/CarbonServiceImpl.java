@@ -180,7 +180,7 @@ public class CarbonServiceImpl implements CarbonService {
             List<String> list33 = new ArrayList<>();
             list22.add("化石燃料燃烧");
             list33.add("化石燃料燃烧");
-            String name = material.getName();
+            String name = carbonItemTypeDAO.getCarbonItemTypeByName(material.getName()).getDisplayName();
             list22.add(name);
             list33.add(name);
             // 获取碳排放因子
@@ -248,17 +248,6 @@ public class CarbonServiceImpl implements CarbonService {
         electricCombustion = (Double.parseDouble(carbonConsumeVO.getElectricBuy()) - Double.parseDouble(carbonConsumeVO.getElectricOutside()) - Double.parseDouble(carbonConsumeVO.getElectricExport())) * otherEmissionFactorDO.getFactor();
         return electricCombustion;
     }
-
-    private static List<String> electricityData(CarbonConsumeVO carbonConsumeVO, OtherEmissionFactorDAO otherEmissionFactorDAO){
-        List<String > list = new ArrayList<>();
-        // 向列表中添加电力净购入量
-        list.add(String.valueOf(Double.parseDouble(carbonConsumeVO.getElectricBuy()) - Double.parseDouble(carbonConsumeVO.getElectricExport())));
-        // 向列表中添加排放因子
-        list.add(String.valueOf(otherEmissionFactorDAO.getFactorByName(carbonConsumeVO.getElectricCompany()).getFactor()));
-        return list;
-    }
-
-
 
     /**
      * 获取电力附表所需值
@@ -1006,6 +995,7 @@ public class CarbonServiceImpl implements CarbonService {
                 Sheet sheet = workbook.getSheetAt(0);
                 // 添加化石燃料部分数据
                 int rows = 2;
+                int count = rows;
                 for(List<String> dataList: listFuel2){
                     Row row = sheet.createRow(rows++);
                     for (int i = 0; i < dataList.size(); i++) {
@@ -1013,6 +1003,11 @@ public class CarbonServiceImpl implements CarbonService {
                         cell.setCellValue(dataList.get(i));
                     }
                 }
+                // 获取插入化石燃料燃烧一共多少行
+                count = rows - count -1;
+                // 进行合并赋值
+                mergeCellsAndSetValue(sheet, 2, 2 + count, 0, 0, "化石燃料燃烧");
+
                 // 添加脱硫过程部分数据
                 Row row = sheet.createRow(rows++);
                 List<String> dataList = Arrays.asList("", "", "数据", "单位");
@@ -1020,6 +1015,7 @@ public class CarbonServiceImpl implements CarbonService {
                     Cell cell = row.createCell(i);
                     cell.setCellValue(dataList.get(i));
                 }
+                int count1 = rows;
                 for(List<String> dataList1: listDes2){
                     Row row1 = sheet.createRow(rows++);
                     for (int i = 0; i < dataList1.size(); i++) {
@@ -1027,6 +1023,12 @@ public class CarbonServiceImpl implements CarbonService {
                         cell.setCellValue(dataList1.get(i));
                     }
                 }
+                // 获取脱硫过程中插入了多少行
+                count1 = rows - count1 - 1;
+                // 进行单元格合并赋值
+                mergeCellsAndSetValue(sheet, 3 + count, 3 + count + count1, 0, 0, "脱硫过程");
+
+
                 // 添加净购入电力相关数据
                 List<String> dataList2 = Arrays.asList("", "", "数据", "单位");
                 for (int i = 0; i < dataList2.size(); i++) {
