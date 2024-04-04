@@ -23,7 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.jetbrains.annotations.Contract;
+import org.hyperledger.fabric.gateway.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.core.io.ClassPathResource;
@@ -36,6 +36,7 @@ import java.io.InputStream;
 import java.sql.Date;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -59,6 +60,7 @@ public class CarbonServiceImpl implements CarbonService {
     private final CarbonItemTypeDAO carbonItemTypeDAO;
     private final ProcessEmissionFactorDAO processEmissionFactorDAO;
     private final OtherEmissionFactorDAO otherEmissionFactorDAO;
+    private final Contract contract;
 
     /**
      * 检查报告时间是否冲突
@@ -69,7 +71,6 @@ public class CarbonServiceImpl implements CarbonService {
      * @param getOrganizeUserLastCarbonReport 存放碳排放报告数据表的数据（上一次报告的内容获取）
      * @return 返回是否通过时间重复性检查（不通过为 true 通过为 false）
      */
-    @Contract("null, _ -> null")
     private static String checkReportTimeHasDuplicate(CarbonReportDO getOrganizeUserLastCarbonReport, @NotNull CarbonConsumeVO carbonConsumeVO) {
         String getStartTimeReplace = carbonConsumeVO.getStartTime().replace("-", "");
         String getEndTimeReplace = carbonConsumeVO.getEndTime().replace("-", "");
@@ -502,12 +503,22 @@ public class CarbonServiceImpl implements CarbonService {
                 // 3.如果企业的 已使用配额量used_quota 小于 已分配额量allocated_quota 的话，才允许发布碳交易
                 // 达到允许条件下，则可发布交易
                 if (nowQuota > 0 && allocatedQuota > usedQuota) {
-                    if (tradeReleaseVO.getDraft()) {
-                        carbonMapper.insertTradeByUuid(getUuid, tradeReleaseVO, "draft");
-                    } else {
-                        carbonMapper.insertTradeByUuid(getUuid, tradeReleaseVO, "pending_review");
+                    // 对发布的内容进行区块链上链
+                    String blockchainID = ProcessingUtil.createUuid();
+                    byte[] getByte = null;
+                    try {
+                        contract.submitTransaction("createContract", blockchainID, String.valueOf(carbonMapper.getLastThird().getId()+1), carbonQuotaDO.getOrganizeUuid(), tradeReleaseVO.getAmount(), tradeReleaseVO.getUnit());
+                        getByte = contract.evaluateTransaction("queryTrade", blockchainID);
+                    } catch (Exception e) {
+                        log.error("[Service] 区块链上链失败", e);
                     }
-                    return ResultUtil.success(timestamp, "交易发布成功");
+                    if (tradeReleaseVO.getDraft()) {
+                        carbonMapper.insertTradeByUuid(getUuid, tradeReleaseVO.getAmount(), tradeReleaseVO.getUnit(), tradeReleaseVO.getText(), blockchainID, "draft");
+                    } else {
+                        carbonMapper.insertTradeByUuid(getUuid, tradeReleaseVO.getAmount(), tradeReleaseVO.getUnit(), tradeReleaseVO.getText(), blockchainID, "pending_review");
+                    }
+                    // 获取区块链上链的数据
+                    return ResultUtil.success(timestamp, "交易发布成功", Arrays.toString(getByte));
                 } else {
                     if (nowQuota <= 0) {
                         return ResultUtil.error(timestamp, "当前组织碳配额量小于0，无法发布交易", ErrorCode.RELEASE_TRADE_FAILURE);

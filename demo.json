@@ -1,0 +1,32 @@
+{
+  "materials": [
+    {
+      "name": "anthracite",
+      "material": {
+        "buy": 0.0,
+        "openingInv": 0.0,
+        "endingInv": 0.0,
+        "outside": 0.0,
+        "export": 0.0
+      }
+    },
+    {
+      "name": "lignite",
+      "material": {
+        "buy": 10.0,
+        "openingInv": 0.0,
+        "endingInv": 0.0,
+        "outside": 0.0,
+        "export": 0.0
+      }
+    }
+  ],
+  "desulfurization": [
+    {
+      "name": "CaCO3",
+      "material": {
+        "consumption": "10"
+      }
+    }
+  ]
+}

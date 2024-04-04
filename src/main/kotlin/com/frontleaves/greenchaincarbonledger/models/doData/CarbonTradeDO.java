@@ -15,7 +15,7 @@ import lombok.experimental.Accessors;
 @Data
 @Accessors(chain = true)
 public class CarbonTradeDO {
-    String id;
+    Integer id;
     String organizeUuid;
     Double quotaAmount;
     Double pricePerUnit;
