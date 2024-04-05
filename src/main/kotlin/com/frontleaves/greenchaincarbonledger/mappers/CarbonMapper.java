@@ -37,7 +37,7 @@ public interface CarbonMapper {
     @Select("SELECT * FROM fy_carbon_accounting WHERE organize_uuid=#{uuid}")
     List<CarbonAccountingDO> getAccountByUuid(String uuid);
 
-    @Select("SELECT * FROM fy_carbon_quota WHERE organize_uuid = #{uuid}")
+    @Select("SELECT * FROM fy_carbon_quota WHERE organize_uuid = #{uuid} ORDER BY quota_year DESC LIMIT 1")
     CarbonQuotaDO getOrganizeQuotaByUuid(String uuid);
 
     @Insert("INSERT INTO fy_carbon_trade (organize_uuid, quota_amount, price_per_unit, description, status, blockchain_tx_id, created_at) VALUES (#{uuid}, #{amount}, #{unit}, #{text}, #{status}, #{blockChainId}, NOW())")
@@ -50,16 +50,13 @@ public interface CarbonMapper {
     CarbonTradeDO getTradeById(String id);
 
     @Update("UPDATE fy_carbon_trade SET status=#{status}, updated_at=now() WHERE id=#{id}")
-    Boolean deleteTrade(String id, String status);
+    Boolean changeStatus(String id, String status);
 
     @Select("""
             SELECT * FROM fy_carbon_trade WHERE organize_uuid=#{uuid}
             ORDER BY ${order} LIMIT #{limit} OFFSET ${(page-1) * limit}
             """)
     List<CarbonTradeDO> getTradeListAll(String uuid, Integer limit, Integer page, String order);
-
-    @Select("SELECT * FROM fy_carbon_trade WHERE organize_uuid=#{uuid}")
-    Boolean getTradeListByUuid(String uuid);
 
     @Select("""
             SELECT * FROM fy_carbon_trade
@@ -74,7 +71,7 @@ public interface CarbonMapper {
             WHERE organize_uuid=#{uuid}
             AND description LIKE CONCAT('%', #{search}, '%')
             ORDER BY ${order} LIMIT #{limit} OFFSET ${(page-1) * limit}
-                        """)
+            """)
     List<CarbonTradeDO> getTradeListBySearch(String uuid, String search, Integer limit, Integer page, String order);
 
     @Update("UPDATE fy_carbon_trade SET quota_amount = #{amount}, price_per_unit = #{unit}, description = #{text}, status = #{status}, updated_at = NOW() WHERE organize_uuid = #{uuid} AND id = #{id}")
@@ -121,4 +118,10 @@ public interface CarbonMapper {
 
     @Select("SELECT * FROM fy_carbon_trade WHERE status = 'pending_review'")
     List<CarbonTradeDO> getTradeNeedReview();
+
+    @Update("UPDATE fy_carbon_quota SET total_quota = #{totalQuota}, updated_at = now() WHERE uuid = #{uuid}")
+    void changeTotalQuota(String uuid, double totalQuota);
+
+    @Update("UPDATE fy_carbon_trade SET buy_uuid = #{uuid}, updated_at = now() WHERE id = #{id}")
+    void setTradeBuyUuid(String id, String uuid);
 }

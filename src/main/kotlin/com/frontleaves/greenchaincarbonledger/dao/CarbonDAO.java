@@ -135,16 +135,16 @@ public class CarbonDAO {
     }
 
     /**
-     * 软删除交易发布
+     * 更新碳交易发布状态
      *
      * @param id-交易id
-     * @param status-状态（cancelled）
-     * @return 成功返回ture，失败返回false
+     * @param status-状态
+     * @return 是否更新成功
      */
-    public Boolean deleteTrade(String id, String status) {
-        log.info("[DAO] 执行 deleteTrade");
+    public Boolean changeStatus(String id, String status) {
+        log.info("[DAO] 执行 changeStatus");
         log.info("\t> Mysql 更新");
-        return carbonMapper.deleteTrade(id, status);
+        return carbonMapper.changeStatus(id, status);
     }
 
     /**
@@ -300,5 +300,29 @@ public class CarbonDAO {
         log.info("[DAO] 执行 getTradeNeedReview");
         log.info("\t> Mysql 读取");
         return carbonMapper.getTradeNeedReview();
+    }
+
+    /**
+     * 更新组织配额
+     *
+     * @param uuid-组织uuid
+     * @param totalQuota-组织配额
+     */
+    public void changeTotalQuota(String uuid, double totalQuota) {
+        log.info("[DAO] 执行 changeTotalQuota");
+        log.info("\t> Mysql 更新");
+        carbonMapper.changeTotalQuota(uuid, totalQuota);
+    }
+
+    /**
+     * 更新碳交易发布信息
+     *
+     * @param uuid 组织uuid
+     * @param id 交易id
+     */
+    public void setTradeBuyUuid(String id, String uuid) {
+        log.info("[DAO] 执行 setTradeBuyUuid");
+        log.info("\t> Mysql 更新");
+        carbonMapper.setTradeBuyUuid(id, uuid);
     }
 }

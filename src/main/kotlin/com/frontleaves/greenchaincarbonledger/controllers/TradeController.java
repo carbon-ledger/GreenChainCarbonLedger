@@ -63,12 +63,12 @@ public class TradeController {
      * @return 响应
      */
     @DeleteMapping("/delete/{id}")
-    @CheckAccountPermission({"trade:deleteTrade"})
+    @CheckAccountPermission({"trade:changeStatus"})
     public ResponseEntity<BaseResponse> deleteTrade(
             @PathVariable("id") String id,
             HttpServletRequest request
     ) {
-        log.info("[Controller] 请求 deleteTrade 接口");
+        log.info("[Controller] 请求 changeStatus 接口");
         long timestamp = System.currentTimeMillis();
         //进行参数校验
         if (id == null || id.isEmpty()) {
@@ -293,5 +293,21 @@ public class TradeController {
         }
         // 返回业务操作
         return tradeService.getTradeBank(timestamp, request, tradeId);
+    }
+
+    @PutMapping("/check-success")
+    @CheckAccountPermission({"trade:checkTradeSuccess"})
+    public ResponseEntity<BaseResponse> checkTradeSuccess(
+            @RequestParam String tradeId,
+            HttpServletRequest request
+    ) {
+        log.info("[Controller] 请求 checkTradeSuccess 接口");
+        long timestamp = System.currentTimeMillis();
+        // 检查代码是否只是数字
+        if  (!tradeId.matches("^[0-9]*$")) {
+            return ResultUtil.error(timestamp, "参数 tradeId 错误", ErrorCode.PARAM_VARIABLE_ERROR);
+        }
+        // 返回业务操作
+        return tradeService.checkTradeSuccess(timestamp, request, tradeId);
     }
 }

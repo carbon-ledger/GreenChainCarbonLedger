@@ -519,7 +519,8 @@ public class CarbonServiceImpl implements CarbonService {
                     } else {
                         carbonMapper.insertTradeByUuid(getUuid, tradeReleaseVO.getAmount(), tradeReleaseVO.getUnit(), tradeReleaseVO.getText(), blockchainID, "pending_review");
                     }
-                    // 获取区块链上链的数据
+                    // 交易发布后扣除当前可用碳
+                    carbonDAO.changeTotalQuota(carbonQuotaDO.getUuid(), nowQuota);
                     return ResultUtil.success(timestamp, "交易发布成功", Arrays.toString(getByte));
                 } else {
                     if (nowQuota <= 0) {
