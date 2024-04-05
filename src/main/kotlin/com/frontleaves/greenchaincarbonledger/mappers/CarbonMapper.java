@@ -124,4 +124,7 @@ public interface CarbonMapper {
 
     @Update("UPDATE fy_carbon_trade SET buy_uuid = #{uuid}, updated_at = now() WHERE id = #{id}")
     void setTradeBuyUuid(String id, String uuid);
+
+    @Update("UPDATE fy_carbon_quota SET audit_log = #{auditLog}, updated_at = now() WHERE uuid = #{uuid}")
+    void addAuditLog(String uuid, String auditLog);
 }

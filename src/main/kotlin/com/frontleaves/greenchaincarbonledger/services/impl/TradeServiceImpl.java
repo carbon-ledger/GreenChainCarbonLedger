@@ -1,10 +1,7 @@
 package com.frontleaves.greenchaincarbonledger.services.impl;
 
 import com.frontleaves.greenchaincarbonledger.dao.*;
-import com.frontleaves.greenchaincarbonledger.models.doData.ApproveOrganizeDO;
-import com.frontleaves.greenchaincarbonledger.models.doData.CarbonQuotaDO;
-import com.frontleaves.greenchaincarbonledger.models.doData.CarbonTradeDO;
-import com.frontleaves.greenchaincarbonledger.models.doData.UserDO;
+import com.frontleaves.greenchaincarbonledger.models.doData.*;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.EditTradeVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.returnData.BackCarbonBuyTradeVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.returnData.BackCarbonTradeListVO;
@@ -15,6 +12,8 @@ import com.frontleaves.greenchaincarbonledger.utils.BaseResponse;
 import com.frontleaves.greenchaincarbonledger.utils.ErrorCode;
 import com.frontleaves.greenchaincarbonledger.utils.ProcessingUtil;
 import com.frontleaves.greenchaincarbonledger.utils.ResultUtil;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,6 +37,7 @@ public class TradeServiceImpl implements TradeService {
     private final CarbonTradeDAO carbonTradeDAO;
     private final CarbonQuotaDAO carbonQuotaDAO;
     private final ApproveDAO approveDAO;
+    private final Gson gson;
 
     @NotNull
     @Override
@@ -170,6 +170,8 @@ public class TradeServiceImpl implements TradeService {
                                 .setCreatedAt(getUser.getCreatedAt())
                                 .setUpdatedAt(getUser.getUpdatedAt());
                         backCarbonTradeListVO.setOrganize(backUserVO)
+                                .setTradeId(Long.valueOf(getTrade.getId()))
+                                .setBuyOrganization(getTrade.getOrganizeUuid())
                                 .setQuotaAmount(getTrade.getQuotaAmount().toString())
                                 .setPricePerUnit(getTrade.getPricePerUnit().toString())
                                 .setDescription(getTrade.getDescription())
@@ -518,6 +520,7 @@ public class TradeServiceImpl implements TradeService {
     @NotNull
     @Override
     public ResponseEntity<BaseResponse> checkTradeSuccess(long timestamp, @NotNull HttpServletRequest request, @NotNull String tradeId) {
+        log.info("[Service] 执行 checkTradeSuccess 方法");
         // 获取交易 ID
         CarbonTradeDO getTrade = carbonDAO.getTradeById(tradeId);
         if (getTrade != null) {
@@ -535,6 +538,16 @@ public class TradeServiceImpl implements TradeService {
                         getQuota.setTotalQuota(getQuota.getTotalQuota() + getTrade.getQuotaAmount());
                         // 更新数据库
                         carbonDAO.changeTotalQuota(getQuota.getUuid(), getQuota.getTotalQuota());
+                        // 添加审计日志
+                        ArrayList<AuditLogDO> auditLogDOList = gson.fromJson(getQuota.getAuditLog(), new TypeToken<List<AuditLogDO>>() {}.getType());
+                        auditLogDOList.add(new AuditLogDO()
+                                .setLog("来自交易添加，交易ID：" + getTrade.getId() + "，添加配额：" + getTrade.getQuotaAmount())
+                                .setDate(new Date().toString())
+                                .setOperate("Console Add"));
+                        getQuota.setAuditLog(gson.toJson(auditLogDOList));
+                        carbonDAO.addAuditLog(getQuota.getUuid(), getQuota.getAuditLog());
+                        // 修改自己状态
+                        carbonDAO.changeStatus(tradeId, "completed");
                         return ResultUtil.success(timestamp, "交易已完成");
                     } else {
                         return ResultUtil.error(timestamp, "未能查询到对方账户信息", ErrorCode.SERVER_INTERNAL_ERROR);

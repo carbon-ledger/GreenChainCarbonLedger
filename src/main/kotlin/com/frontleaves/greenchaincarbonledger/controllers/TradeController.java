@@ -304,7 +304,7 @@ public class TradeController {
         log.info("[Controller] 请求 checkTradeSuccess 接口");
         long timestamp = System.currentTimeMillis();
         // 检查代码是否只是数字
-        if  (!tradeId.matches("^[0-9]*$")) {
+        if  (!tradeId.matches("^[0-9]+$")) {
             return ResultUtil.error(timestamp, "参数 tradeId 错误", ErrorCode.PARAM_VARIABLE_ERROR);
         }
         // 返回业务操作

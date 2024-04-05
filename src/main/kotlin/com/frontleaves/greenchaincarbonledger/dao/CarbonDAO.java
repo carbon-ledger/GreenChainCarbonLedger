@@ -325,4 +325,16 @@ public class CarbonDAO {
         log.info("\t> Mysql 更新");
         carbonMapper.setTradeBuyUuid(id, uuid);
     }
+
+    /**
+     * 添加审计日志
+     *
+     * @param uuid 组织uuid
+     * @param auditLog 审计日志
+     */
+    public void addAuditLog(String uuid, String auditLog) {
+        log.info("[DAO] 执行 addAuditLog");
+        log.info("\t> Mysql 插入");
+        carbonMapper.addAuditLog(uuid, auditLog);
+    }
 }
