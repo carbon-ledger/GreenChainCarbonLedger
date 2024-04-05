@@ -36,5 +36,9 @@ public class ReviewOrganizeVO {
     public String legalIdCardFront;
     @NotBlank(message = "法人身份证反面照必须是 base64 图像数据")
     public String legalIdCardBack;
+    @NotBlank(message = "开户银行不能为空")
+    public String accountBank;
+    @NotBlank(message = "开户账号不能为空")
+    public String accountNumber;
     public String remark;
 }

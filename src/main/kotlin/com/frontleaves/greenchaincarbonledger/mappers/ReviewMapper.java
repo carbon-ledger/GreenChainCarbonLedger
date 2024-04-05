@@ -50,6 +50,8 @@ public interface ReviewMapper {
                 legal_representative_id,
                 legal_id_card_front_url,
                 legal_id_card_back_url,
+                account_bank,
+                account_number,
                 remarks
             )
             VALUES (
@@ -64,6 +66,8 @@ public interface ReviewMapper {
                 #{legalRepresentativeId},
                 #{legalIdCardFrontUrl},
                 #{legalIdCardBackUrl},
+                #{accountBank},
+                #{accountNumber},
                 #{remarks}
             )
             """)
@@ -148,6 +152,8 @@ public interface ReviewMapper {
                 legal_id_card_front_url = #{legalIdCardFrontUrl},
                 legal_id_card_back_url = #{legalIdCardBackUrl},
                 certification_status = #{certificationStatus},
+                account_bank = #{accountBank},
+                account_number = #{accountNumber},
                 apply_time = #{applyTime},
                 approve_time = #{approveTime},
                 updated_at = #{updatedAt},

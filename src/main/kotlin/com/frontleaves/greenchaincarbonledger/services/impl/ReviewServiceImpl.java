@@ -156,6 +156,8 @@ public class ReviewServiceImpl implements ReviewService {
                             .setLegalIdCardFrontUrl(getUserDO.getUuid() + "_front." + getImageType(reviewOrganizeVO.getLegalIdCardFront()))
                             .setLegalIdCardBackUrl(getUserDO.getUuid() + "_back." + getImageType(reviewOrganizeVO.getLegalIdCardBack()))
                             .setApplyTime(new Timestamp(System.currentTimeMillis()))
+                            .setAccountBank(reviewOrganizeVO.getAccountBank())
+                            .setAccountNumber(reviewOrganizeVO.getAccountNumber())
                             .setRemarks(reviewOrganizeVO.getRemark());
                 } catch (ParseException e) {
                     log.error("[Service] 日期解析错误: {}", e.getMessage(), e);
@@ -365,6 +367,8 @@ public class ReviewServiceImpl implements ReviewService {
                                     .setRemarks(reviewOrganizeVO.getRemark())
                                     .setApplyTime(new Timestamp(System.currentTimeMillis()))
                                     .setUpdatedAt(new Timestamp(System.currentTimeMillis()))
+                                    .setAccountBank(reviewOrganizeVO.getAccountBank())
+                                    .setAccountNumber(reviewOrganizeVO.getAccountNumber())
                                     .setApproveUuid(null)
                                     .setApproveRemarks(null)
                                     .setCertificationStatus((short) 0);

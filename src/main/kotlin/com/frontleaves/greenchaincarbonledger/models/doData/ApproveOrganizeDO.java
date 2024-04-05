@@ -31,6 +31,8 @@ public class ApproveOrganizeDO {
     public String legalIdCardFrontUrl;
     public String legalIdCardBackUrl;
     public Short certificationStatus;
+    public String accountBank;
+    public String accountNumber;
     public Timestamp applyTime;
     public Timestamp approveTime;
     public Timestamp updatedAt;
