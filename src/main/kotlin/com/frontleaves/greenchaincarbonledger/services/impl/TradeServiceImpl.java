@@ -1,15 +1,11 @@
 package com.frontleaves.greenchaincarbonledger.services.impl;
 
-import com.frontleaves.greenchaincarbonledger.dao.CarbonDAO;
-import com.frontleaves.greenchaincarbonledger.dao.CarbonQuotaDAO;
-import com.frontleaves.greenchaincarbonledger.dao.CarbonTradeDAO;
-import com.frontleaves.greenchaincarbonledger.dao.UserDAO;
-import com.frontleaves.greenchaincarbonledger.models.doData.CarbonQuotaDO;
-import com.frontleaves.greenchaincarbonledger.models.doData.CarbonTradeDO;
-import com.frontleaves.greenchaincarbonledger.models.doData.UserDO;
+import com.frontleaves.greenchaincarbonledger.dao.*;
+import com.frontleaves.greenchaincarbonledger.models.doData.*;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.EditTradeVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.returnData.BackCarbonBuyTradeVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.returnData.BackCarbonTradeListVO;
+import com.frontleaves.greenchaincarbonledger.models.voData.returnData.BackOpenAnAccount;
 import com.frontleaves.greenchaincarbonledger.models.voData.returnData.BackUserVO;
 import com.frontleaves.greenchaincarbonledger.services.TradeService;
 import com.frontleaves.greenchaincarbonledger.utils.BaseResponse;
@@ -38,6 +34,7 @@ public class TradeServiceImpl implements TradeService {
     private final CarbonDAO carbonDAO;
     private final CarbonTradeDAO carbonTradeDAO;
     private final CarbonQuotaDAO carbonQuotaDAO;
+    private final ApproveDAO approveDAO;
 
     @NotNull
     @Override
@@ -468,6 +465,54 @@ public class TradeServiceImpl implements TradeService {
                 backCarbonTradeList.add(backCarbonTradeListVO);
             }
             return ResultUtil.success(timestamp, "您的所需组织碳交易发布信息列表已准备完毕", backCarbonTradeList);
+        } else {
+            return ResultUtil.error(timestamp, "未能查询到数据", ErrorCode.SERVER_INTERNAL_ERROR);
+        }
+    }
+
+    @NotNull
+    @Override
+    public ResponseEntity<BaseResponse> getTradeBank(long timestamp, @NotNull HttpServletRequest request, @NotNull String tradeId) {
+        // 查询交易 tradeId
+        CarbonTradeDO getTrade = carbonDAO.getTradeById(tradeId);
+        if (getTrade != null) {
+            // 检查是否有权限查看交易
+            if (getTrade.getBuyUuid() != null) {
+                if (getTrade.getBuyUuid().equals(ProcessingUtil.getAuthorizeUserUuid(request))) {
+                    // 获取组织信息
+                    UserDO getUser = userDAO.getUserByUuid(getTrade.getOrganizeUuid());
+                    if (getUser != null) {
+                        // 获取组织账户信息
+                        ApproveOrganizeDO approveOrganizeDO = approveDAO.getOrganizeAccountByUuid(getTrade.getOrganizeUuid());
+                        // 处理返回数据
+                        if (approveOrganizeDO != null) {
+                            // 返回开户行相关信息以及对方账户的用户信息
+                            BackOpenAnAccount backOpenAnAccount = new BackOpenAnAccount();
+                            backOpenAnAccount.setOrganize(new BackUserVO()
+                                    .setUuid(getUser.getUuid())
+                                    .setUserName(getUser.getUserName())
+                                    .setNickName(getUser.getNickName())
+                                    .setRealName(getUser.getRealName())
+                                    .setEmail(getUser.getEmail())
+                                    .setPhone(getUser.getPhone())
+                                    .setCreatedAt(getUser.getCreatedAt())
+                                    .setUpdatedAt(getUser.getUpdatedAt()));
+                            backOpenAnAccount.setAccountOpen(new BackOpenAnAccount.AccountOpen()
+                                    .setAccountBank(approveOrganizeDO.getAccountBank())
+                                    .setAccountNumber(approveOrganizeDO.getAccountNumber()));
+                            return ResultUtil.success(timestamp, "您的所需组织碳交易发布信息列表已准备完毕", backOpenAnAccount);
+                        } else {
+                            return ResultUtil.error(timestamp, "未能查询到组织账户余额", ErrorCode.SERVER_INTERNAL_ERROR);
+                        }
+                    } else {
+                        return ResultUtil.error(timestamp, "未能查询到组织信息", ErrorCode.SERVER_INTERNAL_ERROR);
+                    }
+                } else {
+                    return ResultUtil.error(timestamp, "您没有权限查看该组织信息", ErrorCode.USER_CANNOT_BE_OPERATE);
+                }
+            } else {
+                return ResultUtil.error(timestamp, "交易还未达成", ErrorCode.USER_CANNOT_BE_OPERATE);
+            }
         } else {
             return ResultUtil.error(timestamp, "未能查询到数据", ErrorCode.SERVER_INTERNAL_ERROR);
         }

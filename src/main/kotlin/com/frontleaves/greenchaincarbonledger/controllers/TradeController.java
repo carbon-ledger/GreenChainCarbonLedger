@@ -270,4 +270,28 @@ public class TradeController {
         // 返回业务操作
         return tradeService.getReviewTradeList(timestamp, request);
     }
+
+    /**
+     * 获取此次碳交易中对方的开户行信息
+     * <hr/>
+     * 获取此次碳交易中对方开户行的信息，方便对方进行转账操作
+     *
+     * @param request-请求
+     * @return 响应
+     */
+    @GetMapping("/bank")
+    @CheckAccountPermission({"trade:getTradeBank"})
+    public ResponseEntity<BaseResponse> getTradeBank(
+            @RequestParam String tradeId,
+            HttpServletRequest request
+    ) {
+        log.info("[Controller] 请求 getTradeBank 接口");
+        long timestamp = System.currentTimeMillis();
+        // 检查代码是否只是数字
+        if  (!tradeId.matches("^[0-9]*$")) {
+            return ResultUtil.error(timestamp, "参数 tradeId 错误", ErrorCode.PARAM_VARIABLE_ERROR);
+        }
+        // 返回业务操作
+        return tradeService.getTradeBank(timestamp, request, tradeId);
+    }
 }

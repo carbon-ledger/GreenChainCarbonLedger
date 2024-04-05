@@ -36,4 +36,18 @@ public class ApproveDAO {
         log.info("\t> 读取 Mysql");
         return approveMapper.getApproveOrganizeList();
     }
+
+    /**
+     * 获取组织账户信息
+     * <hr/>
+     * 获取组织账户信息，用于组织审核
+     *
+     * @param organizeUuid 组织 UUID
+     * @return ApproveOrganizeDO
+     */
+    public ApproveOrganizeDO getOrganizeAccountByUuid(String organizeUuid) {
+        log.info("[DAO] 操作 getOrganizeAccountByUuid 方法");
+        log.info("\t> 读取 Mysql");
+        return approveMapper.getOrganizeAccountByUuid(organizeUuid);
+    }
 }

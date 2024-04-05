@@ -133,4 +133,18 @@ interface TradeService {
         request: HttpServletRequest
     ): ResponseEntity<BaseResponse>
 
+    /**
+     * 获取碳交易发布信息详情获取对方账户的开户信息作为交易使用
+     *
+     * @param timestamp 时间戳
+     * @param request HTTP请求对象
+     * @param tradeId 交易id
+     * @return 返回一个响应实体，包含碳交易发布信息详情
+     */
+    fun getTradeBank(
+        timestamp: Long,
+        request: HttpServletRequest,
+        tradeId: String
+    ): ResponseEntity<BaseResponse>
+
 }
