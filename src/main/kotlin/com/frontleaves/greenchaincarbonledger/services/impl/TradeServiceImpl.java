@@ -268,8 +268,8 @@ public class TradeServiceImpl implements TradeService {
                         } else {
                             return ResultUtil.error(timestamp, "抱歉您购买的碳交易订单并不存在", ErrorCode.ORDER_ILLEGAL);
                         }
-                    }else {
-                        return ResultUtil.error(timestamp,"抱歉不可以购买自己发布的订单",ErrorCode.ILLEGAL_PURCHASES);
+                    } else {
+                        return ResultUtil.error(timestamp, "抱歉不可以购买自己发布的订单", ErrorCode.ILLEGAL_PURCHASES);
                     }
                 }
             }
@@ -387,6 +387,75 @@ public class TradeServiceImpl implements TradeService {
             return ResultUtil.success(timestamp, "交易发布信息修改成功");
         } else {
             return ResultUtil.error(timestamp, ErrorCode.EDIT_TRADE_FAILURE);
+        }
+    }
+
+    @NotNull
+    @Override
+    public ResponseEntity<BaseResponse> getBuyTradeList(long timestamp, @NotNull HttpServletRequest request) {
+        // 获取当前用户
+        UserDO getUser = ProcessingUtil.getUserByHeaderUuid(request, userDAO);
+        if (getUser != null) {
+            // 获取此用户进行的所有碳交易信息
+            List<CarbonTradeDO> getTradeList = carbonDAO.getBuyTradeListByUuid(getUser.getUuid());
+            if (getTradeList != null) {
+                // 遍历获取到的所有碳交易信息
+                ArrayList<BackCarbonTradeListVO> backCarbonTradeList = new ArrayList<>();
+                for (CarbonTradeDO getTrade : getTradeList) {
+                    BackCarbonTradeListVO backCarbonTradeListVO = new BackCarbonTradeListVO();
+                    BackUserVO backUserVO = new BackUserVO();
+                    backUserVO.setUuid(getTrade.getOrganizeUuid())
+                            .setUserName(getUser.getUserName())
+                            .setNickName(getUser.getNickName())
+                            .setRealName(getUser.getRealName())
+                            .setEmail(getUser.getEmail())
+                            .setPhone(getUser.getPhone())
+                            .setCreatedAt(getUser.getCreatedAt())
+                            .setUpdatedAt(getUser.getUpdatedAt());
+                    backCarbonTradeListVO.setOrganize(backUserVO)
+                            .setQuotaAmount(getTrade.getQuotaAmount().toString())
+                            .setPricePerUnit(getTrade.getPricePerUnit().toString())
+                            .setDescription(getTrade.getDescription());
+                    backCarbonTradeList.add(backCarbonTradeListVO);
+                }
+                return ResultUtil.success(timestamp, "您的所需组织碳交易发布信息列表已准备完毕", backCarbonTradeList);
+            } else {
+                return ResultUtil.error(timestamp, "未能查询到数据", ErrorCode.SERVER_INTERNAL_ERROR);
+            }
+        } else {
+            return ResultUtil.error(timestamp, "未查询到组织账号", ErrorCode.USER_NOT_EXISTED);
+        }
+    }
+
+    @NotNull
+    @Override
+    public ResponseEntity<BaseResponse> getReviewTradeList(long timestamp, @NotNull HttpServletRequest request) {
+        // 获取需要审核的列表
+        List<CarbonTradeDO> getTradeList = carbonDAO.getTradeNeedReview();
+        if (getTradeList != null) {
+            // 遍历获取到的所有碳交易信息
+            ArrayList<BackCarbonTradeListVO> backCarbonTradeList = new ArrayList<>();
+            for (CarbonTradeDO getTrade : getTradeList) {
+                BackCarbonTradeListVO backCarbonTradeListVO = new BackCarbonTradeListVO();
+                BackUserVO backUserVO = new BackUserVO();
+                UserDO getUser = userDAO.getUserByUuid(getTrade.getOrganizeUuid());
+                backUserVO.setUuid(getTrade.getOrganizeUuid())
+                        .setUserName(getUser.getUserName())
+                        .setNickName(getUser.getNickName())
+                        .setRealName(getUser.getRealName())
+                        .setEmail(getUser.getEmail())
+                        .setPhone(getUser.getPhone())
+                        .setCreatedAt(getUser.getCreatedAt())
+                        .setUpdatedAt(getUser.getUpdatedAt());
+                backCarbonTradeListVO.setOrganize(backUserVO)
+                        .setQuotaAmount(getTrade.getQuotaAmount().toString())
+                        .setPricePerUnit(getTrade.getPricePerUnit().toString())
+                        .setDescription(getTrade.getDescription());
+                backCarbonTradeList.add(backCarbonTradeListVO);
+            }
+            return ResultUtil.success(timestamp, "您的所需组织碳交易发布信息列表已准备完毕", backCarbonTradeList);
+        } else {
+            return ResultUtil.error(timestamp, "未能查询到数据", ErrorCode.SERVER_INTERNAL_ERROR);
         }
     }
 }

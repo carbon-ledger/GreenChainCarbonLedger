@@ -84,7 +84,7 @@ public interface CarbonMapper {
     CarbonTradeDO getTradeByUuidAndId(String getUuid, String id);
 
     @Select("""
-            SELECT * FROM fy_carbon_trade WHERE status = #{active} OR status = #{completed}
+            SELECT * FROM fy_carbon_trade WHERE status = 'active' OR status = 'completed'
             ORDER BY ${order} LIMIT #{limit} OFFSET ${(page-1) * limit}
             """)
     List<CarbonTradeDO> getAvailableTradeListAll(Integer limit, Integer page, String order);
@@ -115,4 +115,10 @@ public interface CarbonMapper {
 
     @Select("SELECT * FROM fy_carbon_trade ORDER BY id DESC LIMIT 1")
     CarbonTradeDO getLastThird();
+
+    @Select("SELECT * FROM fy_carbon_trade WHERE buy_uuid = #{uuid} ORDER BY id DESC")
+    List<CarbonTradeDO> getBuyTradeListByUuid(String uuid);
+
+    @Select("SELECT * FROM fy_carbon_trade WHERE status = 'pending_review'")
+    List<CarbonTradeDO> getTradeNeedReview();
 }

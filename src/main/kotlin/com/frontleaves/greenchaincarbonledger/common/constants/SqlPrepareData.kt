@@ -43,10 +43,13 @@ object SqlPrepareData {
         add(ArrayList(listOf("carbon:addOrganizeIdQuota","为组织创建今年配额")))
         add(ArrayList(listOf("carbon:createCarbonReport","创建碳核算报告")))
         add(ArrayList(listOf("carbon:editCarbonQuota","为组织修改碳配额")))
+        add(ArrayList(listOf("carbon:getCarbonOperateList", "获取待处理配额创建列表")))
         add(ArrayList(listOf("trade:deleteTrade", "删除碳交易")))
         add(ArrayList(listOf("trade:getOwnTradeList", "获取自己的交易信息")))
         add(ArrayList(listOf("trade:buyTrade", "进行碳交易")))
         add(ArrayList(listOf("trade:getAllTradeList", "获取全部的碳交易信息")))
+        add(ArrayList(listOf("trade:buy", "获取自己的全部碳交易信息")))
+        add(ArrayList(listOf("trade:review", "审核碳交易")))
         add(ArrayList(listOf("review:addOrganize", "添加组织账户审核信息")))
         add(ArrayList(listOf("review:addAdmin", "添加监管账户审核信息")))
         add(ArrayList(listOf("review:checkOrganize", "审核组织账户")))
@@ -82,6 +85,7 @@ object SqlPrepareData {
         add("role:getCurrentRole")
         add("user:editUserInformation")
         add("user:getUserCurrent")
+        add("permission:getPermissionList")
     }
 
     /**
@@ -93,6 +97,9 @@ object SqlPrepareData {
         SQL_ROLE_DEFAULT_PERMISSION_LIST.forEach {
             add(it)
         }
+        add("review:addAdmin")
+        add("review:reSendAdmin")
+        add("trade:review")
     }
 
 
@@ -105,6 +112,17 @@ object SqlPrepareData {
         SQL_ROLE_DEFAULT_PERMISSION_LIST.forEach {
             add(it)
         }
+        add("carbon:getOwnCarbonQuota")
+        add("carbon:getCarbonReport")
+        add("carbon:createCarbonReport")
+        add("trade:deleteTrade")
+        add("trade:getOwnTradeList")
+        add("trade:buyTrade")
+        add("trade:getAllTradeList")
+        add("trade:buy")
+        add("review:addOrganize")
+        add("review:reSendOrganize")
+        add("review:getReport")
     }
 
     val SQL_CARBON_ITEM_LIST = ArrayList<HashMap<String, String>>().also {

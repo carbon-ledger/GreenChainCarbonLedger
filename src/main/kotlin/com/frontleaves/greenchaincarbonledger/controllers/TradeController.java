@@ -31,6 +31,14 @@ public class TradeController {
     private final TradeService tradeService;
     private final BusinessUtil businessUtil;
 
+    /**
+     * 创建交易
+     *
+     * @param tradeReleaseVO 交易信息
+     * @param bindingResult  校验结果
+     * @param request        请求
+     * @return 响应
+     */
     @PostMapping("/sell")
     public ResponseEntity<BaseResponse> releaseCarbonTrade(
             @RequestBody @Validated TradeReleaseVO tradeReleaseVO,
@@ -47,6 +55,13 @@ public class TradeController {
         return carbonService.releaseCarbonTrade(timestamp, request, tradeReleaseVO);
     }
 
+    /**
+     * 删除交易
+     *
+     * @param id       交易id
+     * @param request  请求
+     * @return 响应
+     */
     @DeleteMapping("/delete/{id}")
     @CheckAccountPermission({"trade:deleteTrade"})
     public ResponseEntity<BaseResponse> deleteTrade(
@@ -63,6 +78,17 @@ public class TradeController {
         }
     }
 
+    /**
+     * 获取交易列表
+     *
+     * @param type     类型
+     * @param search   搜索
+     * @param limit    限制
+     * @param page     页码
+     * @param order    排序
+     * @param request  请求
+     * @return 响应
+     */
     @GetMapping("/send")
     @CheckAccountPermission({"trade:getOwnTradeList"})
     public ResponseEntity<BaseResponse> getOwnTradeList(
@@ -93,6 +119,17 @@ public class TradeController {
         }
     }
 
+    /**
+     * 获取交易列表
+     *
+     * @param type     类型
+     * @param search   搜索
+     * @param limit    限制
+     * @param page     页码
+     * @param order    排序
+     * @param request  请求
+     * @return 响应
+     */
     @GetMapping("/list")
     @CheckAccountPermission({"trade:getAllTradeList"})
     public ResponseEntity<BaseResponse> getTradeList(
@@ -123,6 +160,14 @@ public class TradeController {
         }
     }
 
+    /**
+     * 审核交易
+     *
+     * @param id       交易id
+     * @param pass     审核结果
+     * @param request  请求
+     * @return 响应
+     */
     @PatchMapping("/review/{tradeId}")
     public ResponseEntity<BaseResponse> reviewTradeList(
             @PathVariable("tradeId") String id,
@@ -142,6 +187,15 @@ public class TradeController {
         }
     }
 
+    /**
+     * 编辑交易
+     *
+     * @param editTradeVO-编辑交易VO
+     * @param bindingResult-校验结果
+     * @param id-交易id
+     * @param request-请求
+     * @return 响应
+     */
     @PutMapping("/edit/{id}")
     public ResponseEntity<BaseResponse> editCarbonTrade(
             @RequestBody @Validated EditTradeVO editTradeVO,
@@ -180,5 +234,40 @@ public class TradeController {
         }
         //返回业务操作
         return tradeService.buyTrade(timestamp, request, id);
+    }
+
+    /**
+     * 获取购买碳交易的列表
+     *
+     * @param request-请求
+     * @return 响应
+     */
+    @GetMapping("/buy")
+    @CheckAccountPermission({"trade:buy"})
+    public ResponseEntity<BaseResponse> getBuyTradeList(
+            HttpServletRequest request
+    ) {
+        log.info("[Controller] 请求 getBuyTradeList 接口");
+        long timestamp = System.currentTimeMillis();
+        // 返回业务操作
+        return tradeService.getBuyTradeList(timestamp, request);
+    }
+
+    /**
+     * 获取审核碳交易的列表
+     * <hr/>
+     *
+     * @param request-请求
+     * @return 响应
+     */
+    @GetMapping("/review")
+    @CheckAccountPermission({"trade:review"})
+    public ResponseEntity<BaseResponse> getReviewTradeList(
+            HttpServletRequest request
+    ) {
+        log.info("[Controller] 请求 getReviewTradeList 接口");
+        long timestamp = System.currentTimeMillis();
+        // 返回业务操作
+        return tradeService.getReviewTradeList(timestamp, request);
     }
 }

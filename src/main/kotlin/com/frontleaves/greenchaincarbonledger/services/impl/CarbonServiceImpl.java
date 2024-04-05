@@ -10,6 +10,7 @@ import com.frontleaves.greenchaincarbonledger.models.voData.getData.TradeRelease
 import com.frontleaves.greenchaincarbonledger.models.voData.returnData.BackCarbonAccountingVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.returnData.BackCarbonQuotaVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.returnData.BackCarbonReportVO;
+import com.frontleaves.greenchaincarbonledger.models.voData.returnData.BackUserVO;
 import com.frontleaves.greenchaincarbonledger.services.CarbonService;
 import com.frontleaves.greenchaincarbonledger.utils.BaseResponse;
 import com.frontleaves.greenchaincarbonledger.utils.ErrorCode;
@@ -61,6 +62,7 @@ public class CarbonServiceImpl implements CarbonService {
     private final ProcessEmissionFactorDAO processEmissionFactorDAO;
     private final OtherEmissionFactorDAO otherEmissionFactorDAO;
     private final Contract contract;
+    private final ApproveDAO approveDAO;
 
     /**
      * 检查报告时间是否冲突
@@ -1078,5 +1080,35 @@ public class CarbonServiceImpl implements CarbonService {
             return ResultUtil.error(timestamp, "请检查要修改的组织id", ErrorCode.ID_ERROR);
         }
 
+    }
+
+    @NotNull
+    @Override
+    public ResponseEntity<BaseResponse> getCarbonOperateList(long timestamp, @NotNull HttpServletRequest request) {
+        // 获取全部通过认证的组织账户
+        List<ApproveOrganizeDO> getApproveOrganizeDOList = approveDAO.getApproveOrganizeList();
+        // 获取今年的年份
+        Integer thisYear = Integer.parseInt(new SimpleDateFormat("yyyy").format(timestamp));
+        List<BackUserVO> getUserDOList = new ArrayList<>();
+        // 检查在通过认证的组织中是否出现未分配碳排放配额的
+        getApproveOrganizeDOList.forEach(it -> {
+            if (carbonQuotaDAO.getCarbonQuota(thisYear, it.getAccountUuid()) == null) {
+                UserDO userDO = userDAO.getUserByUuid(it.getAccountUuid());
+                BackUserVO backUserVO = new BackUserVO();
+                backUserVO
+                        .setUuid(userDO.getUuid())
+                        .setUserName(userDO.getUserName())
+                        .setNickName(userDO.getNickName())
+                        .setRealName(userDO.getRealName())
+                        .setEmail(userDO.getEmail())
+                        .setAvatar(userDO.getAvatar())
+                        .setPhone(userDO.getPhone())
+                        .setCreatedAt(userDO.getCreatedAt())
+                        .setUpdatedAt(userDO.getUpdatedAt());
+                getUserDOList.add(backUserVO);
+            }
+        });
+        // 返回结果
+        return ResultUtil.success(timestamp, getUserDOList);
     }
 }

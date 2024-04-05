@@ -252,4 +252,14 @@ public class CarbonController {
             return carbonService.editCarbonQuota(timestamp, request, organizeId, carbonAddQuotaVO);
         }
     }
+
+    @GetMapping("/operate/list")
+    @CheckAccountPermission({"carbon:getCarbonOperateList"})
+    public ResponseEntity<BaseResponse> getCarbonOperateList(
+            HttpServletRequest request
+    ) {
+        log.info("[Controller] 请求 getCarbonOperateList 接口");
+        long timestamp = System.currentTimeMillis();
+        return carbonService.getCarbonOperateList(timestamp, request);
+    }
 }

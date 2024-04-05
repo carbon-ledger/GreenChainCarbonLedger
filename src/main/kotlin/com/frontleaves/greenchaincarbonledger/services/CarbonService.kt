@@ -3,7 +3,6 @@ package com.frontleaves.greenchaincarbonledger.services
 import com.frontleaves.greenchaincarbonledger.models.doData.MaterialsDO
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.CarbonConsumeVO
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.CarbonAddQuotaVO
-import com.frontleaves.greenchaincarbonledger.models.voData.getData.EditTradeVO
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.TradeReleaseVO
 import com.frontleaves.greenchaincarbonledger.utils.BaseResponse
 import jakarta.servlet.http.HttpServletRequest
@@ -29,6 +28,17 @@ interface CarbonService {
         end: String
     ): ResponseEntity<BaseResponse>
 
+    /**
+     * 获取碳排放记录
+     *
+     * @param timestamp 时间戳
+     * @param request 请求体
+     * @param limit 单页限制个数
+     * @param page 第几页
+     * @param order 排序顺序 [asc/desc]
+     *
+     * @return ResponseEntity<BaseResponse> 响应实体
+     */
     fun getCarbonAccounting(
         timestamp: Long,
         request: HttpServletRequest,
@@ -61,6 +71,14 @@ interface CarbonService {
         order: String?
     ): ResponseEntity<BaseResponse>
 
+    /**
+     * 发布碳交易
+     *
+     * @param timestamp 时间戳
+     * @param request 请求体
+     * @param tradeReleaseVO 发布碳交易所需要的信息体
+     * @return 是否完成发布
+     */
     fun releaseCarbonTrade(
         timestamp: Long,
         request: HttpServletRequest,
@@ -103,10 +121,10 @@ interface CarbonService {
      * @return 是否完成配额增加
      */
     fun addOrganizeIdQuota(
-         timestamp: Long,
-         request: HttpServletRequest,
-         organizeId: String,
-         carbonAddQuotaVO: CarbonAddQuotaVO
+        timestamp: Long,
+        request: HttpServletRequest,
+        organizeId: String,
+        carbonAddQuotaVO: CarbonAddQuotaVO
     ): ResponseEntity<BaseResponse>
 
     /**
@@ -124,5 +142,17 @@ interface CarbonService {
         request: HttpServletRequest,
         organizeId: String,
         carbonAddQuotaVO: CarbonAddQuotaVO
+    ): ResponseEntity<BaseResponse>
+
+    /**
+     * 获取碳核算报告操作列表
+     *
+     * @param timestamp-时间戳
+     * @param request-请求体
+     * @return 操作列表
+     */
+    fun getCarbonOperateList(
+        timestamp: Long,
+        request: HttpServletRequest
     ): ResponseEntity<BaseResponse>
 }

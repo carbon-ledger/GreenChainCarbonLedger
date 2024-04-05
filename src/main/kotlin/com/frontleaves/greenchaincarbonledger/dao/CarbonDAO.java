@@ -44,16 +44,16 @@ public class CarbonDAO {
         return carbonMapper.getQuotaListByOrganizeUuid(uuid, start, end);
     }
 
-    /**
-     * 根据给定的 uuid,分页参数和排序参数，从数据库中获取符合条件的碳排放报告列表。
-     *
-     * @param uuid  查询所需的 uuid，用于匹配报告的唯一标识符
-     * @param limit 每页限制的结果数，用于分页查询
-     * @param page  要查询的页数，用于分页查询
-     * @param order 排序方式，用于指定查询结果的排序顺序
-     * @return 符合条件的碳排放报告列表 -List
-     */
 
+    /**
+     * 通过组织uuid获取碳排放报告列表
+     *
+     * @param uuid   组织 UUID
+     * @param limit  每页限制的结果数
+     * @param page   要查询的页数
+     * @param order  排序方式，可选值包括 "asc"（升序）和 "desc"（降序）
+     * @return 包含碳排放报告信息的列表 -List
+     */
     public List<CarbonReportDO> getReportByUuid(String uuid, String limit, String page, String order) {
         log.info("[DAO] 执行 getReportByUuid 方法");
         log.info("Mysql 读取");
@@ -86,7 +86,7 @@ public class CarbonDAO {
      * @param order  排序顺序
      * @return 符合条件的碳报告列表 -List
      */
-    public List<CarbonReportDO> getReportBySearch(String uuid, String search, String  limit, String page, String order) {
+    public List<CarbonReportDO> getReportBySearch(String uuid, String search, String limit, String page, String order) {
         log.info("[DAO] 执行 getReportBySearch 方法");
         log.info("Mysql 读取");
         return carbonMapper.getReportBySearch(uuid, search, limit, page, order);
@@ -118,7 +118,7 @@ public class CarbonDAO {
      */
     public List<CarbonTradeDO> getTradeByUuid(String uuid) {
         log.info("[DAO] 执行 getTradeByUuid");
-        log.info("Mysql 读取");
+        log.info("\t> Mysql 读取");
         return carbonMapper.getTradeByUuid(uuid);
     }
 
@@ -130,7 +130,7 @@ public class CarbonDAO {
      */
     public CarbonTradeDO getTradeById(String id) {
         log.info("[DAO] 执行 getTradeById");
-        log.info("Mysql 读取");
+        log.info("\t> Mysql 读取");
         return carbonMapper.getTradeById(id);
     }
 
@@ -143,8 +143,8 @@ public class CarbonDAO {
      */
     public Boolean deleteTrade(String id, String status) {
         log.info("[DAO] 执行 deleteTrade");
-        log.info("Mysql 更新");
-        return carbonMapper.deleteTrade(id,status);
+        log.info("\t> Mysql 更新");
+        return carbonMapper.deleteTrade(id, status);
     }
 
     /**
@@ -158,6 +158,7 @@ public class CarbonDAO {
      */
     public List<CarbonTradeDO> getTradeListAll(String uuid, Integer limit, Integer page, String order) {
         log.info("[DAO] 执行 getTradeListAll");
+        log.info("\t> Mysql 读取");
         return carbonMapper.getTradeListAll(uuid, limit, page, order);
     }
 
@@ -174,11 +175,13 @@ public class CarbonDAO {
      */
     public List<CarbonTradeDO> getTradeListByStatus(String uuid, String search, Integer limit, Integer page, String order) {
         log.info("[DAO] 执行 getTradeListByStatus");
+        log.info("\t> Mysql 读取");
         return carbonMapper.getTradeListByStatus(uuid, search, limit, page, order);
     }
 
     /**
      * 通过模糊查询获取当前组织的全部碳交易发布信息列表
+     *
      * @param uuid-组织uuid
      * @param search-status
      * @param limit-页数限制
@@ -188,36 +191,114 @@ public class CarbonDAO {
      */
     public List<CarbonTradeDO> getTradeListBySearch(String uuid, String search, Integer limit, Integer page, String order) {
         log.info("[DAO] 执行 getTradeListBySearch");
+        log.info("\t> Mysql 读取");
         return carbonMapper.getTradeListBySearch(uuid, search, limit, page, order);
     }
 
+    /**
+     * 通过uuid和id获取碳交易发布
+     *
+     * @param getUuid-组织uuid
+     * @param id-交易id
+     * @return 返回CarbonTradeDO
+     */
     public CarbonTradeDO getTradeByUuidAndId(String getUuid, String id) {
         log.info("[DAO] 执行 getTradeByUuidAndId");
+        log.info("\t> Mysql 读取");
         return carbonMapper.getTradeByUuidAndId(getUuid, id);
     }
 
+    /**
+     * 获取全部可用的碳交易发布信息列表
+     *
+     * @param limit-页数限制
+     * @param page-页码
+     * @param order-顺序
+     * @return 碳交易发布信息列表
+     */
     public List<CarbonTradeDO> getAvailableTradeListAll(Integer limit, Integer page, String order) {
         log.info("[DAO] 执行 getAvailableTradeListAll");
+        log.info("\t> Mysql 读取");
         return carbonMapper.getAvailableTradeListAll(limit, page, order);
     }
 
+    /**
+     * 通过Status获取全部可用的碳交易发布信息列表
+     *
+     * @param search-status
+     * @param limit-页数限制
+     * @param page-页码
+     * @param order-顺序
+     * @return 碳交易发布信息列表
+     */
     public List<CarbonTradeDO> getAvailableTradeList(String search, Integer limit, Integer page, String order) {
         log.info("[DAO] 执行 getAvailableTradeList");
+        log.info("\t> Mysql 读取");
         return carbonMapper.getAvailableTradeList(search, limit, page, order);
     }
 
+    /**
+     * 获取全部已完成的碳交易发布信息列表
+     *
+     * @param search-status
+     * @param limit-页数限制
+     * @param page-页码
+     * @param order-顺序
+     * @return 碳交易发布信息列表
+     */
     public List<CarbonTradeDO> getCompletedTradeList(String search, Integer limit, Integer page, String order) {
         log.info("[DAO] 执行 getCompletedTradeList");
+        log.info("\t> Mysql 读取");
         return carbonMapper.getCompletedTradeList(search, limit, page, order);
     }
 
+    /**
+     * 通过模糊查询获取全部已完成的碳交易发布信息列表
+     *
+     * @param search-status
+     * @param limit-页数限制
+     * @param page-页码
+     * @param order-顺序
+     * @return 碳交易发布信息列表
+     */
     public List<CarbonTradeDO> getSearchTradeList(String search, Integer limit, Integer page, String order) {
         log.info("[DAO] 执行 getSearchTradeList");
+        log.info("\t> Mysql 读取");
         return carbonMapper.getSearchTradeList(search, limit, page, order);
     }
 
+    /**
+     * 审核碳交易发布
+     *
+     * @param carbonTradeDO-审核信息
+     * @return 成功返回ture，失败返回false
+     */
     public Boolean reviewTrade(CarbonTradeDO carbonTradeDO) {
         log.info("[DAO] 执行 reviewTrade");
+        log.info("\t> Mysql 更新");
         return carbonMapper.reviewTrade(carbonTradeDO);
+    }
+
+    /**
+     * 获取当前组织的全部碳交易购买信息列表
+     *
+     * @param uuid-组织uuid
+     * @return 碳交易发布信息列表
+     */
+    public List<CarbonTradeDO> getBuyTradeListByUuid(String uuid) {
+        log.info("[DAO] 执行 getBuyTradeListByUuid");
+        log.info("\t> Mysql 读取");
+        return carbonMapper.getBuyTradeListByUuid(uuid);
+    }
+
+    /**
+     * 获取需要审核的碳交易发布信息列表
+     *
+     * @return 碳交易发布信息列表
+     */
+    public List<CarbonTradeDO> getTradeNeedReview() {
+        log.info("[DAO] 执行 getTradeNeedReview");
+        log.info("\t> Mysql 读取");
+        return carbonMapper.getTradeNeedReview();
     }
 }
