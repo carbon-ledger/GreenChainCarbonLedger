@@ -324,7 +324,7 @@ public class TradeServiceImpl implements TradeService {
                     UserDO getOrganizeDO = userDAO.getUserByUuid(getTrade.getOrganizeUuid());
                     backUserVO
                             .setUuid(getOrganizeDO.getUuid())
-                            .setNickName(getOrganizeDO.getNickName())
+                            .setUserName(getOrganizeDO.getUserName())
                             .setRealName(getOrganizeDO.getRealName())
                             .setEmail(getOrganizeDO.getEmail())
                             .setAvatar(getOrganizeDO.getAvatar())
