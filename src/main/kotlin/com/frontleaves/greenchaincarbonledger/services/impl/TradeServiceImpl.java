@@ -320,20 +320,28 @@ public class TradeServiceImpl implements TradeService {
                 for (CarbonTradeDO getTrade : getTradeList) {
                     BackCarbonTradeListVO backCarbonTradeListVO = new BackCarbonTradeListVO();
                     BackUserVO backUserVO = new BackUserVO();
-                    backUserVO.setUuid(getUuid)
-                            .setUserName(getUser.getUserName())
-                            .setNickName(getUser.getNickName())
-                            .setRealName(getUser.getRealName())
-                            .setEmail(getUser.getEmail())
-                            .setPhone(getUser.getPhone())
-                            .setCreatedAt(getUser.getCreatedAt())
-                            .setUpdatedAt(getUser.getUpdatedAt());
+                    // 获取组织账户
+                    UserDO getOrganizeDO = userDAO.getUserByUuid(getTrade.getOrganizeUuid());
+                    backUserVO
+                            .setUuid(getOrganizeDO.getUuid())
+                            .setNickName(getOrganizeDO.getNickName())
+                            .setRealName(getOrganizeDO.getRealName())
+                            .setEmail(getOrganizeDO.getEmail())
+                            .setAvatar(getOrganizeDO.getAvatar())
+                            .setPhone(getOrganizeDO.getPhone())
+                            .setCreatedAt(getOrganizeDO.getCreatedAt())
+                            .setUpdatedAt(getOrganizeDO.getUpdatedAt());
                     backCarbonTradeListVO.setOrganize(backUserVO)
                             .setTradeId(Long.valueOf(getTrade.getId()))
                             .setStatus(getTrade.getStatus())
                             .setQuotaAmount(getTrade.getQuotaAmount().toString())
                             .setPricePerUnit(getTrade.getPricePerUnit().toString())
                             .setDescription(getTrade.getDescription());
+                    // 若已完成交易则获取买方
+                    if (getTrade.getStatus().equals("completed")) {
+                        UserDO getBuyUserDO = userDAO.getUserByUuid(getTrade.getBuyUuid());
+                        backCarbonTradeListVO.setBuyOrganization(getBuyUserDO.getRealName());
+                    }
                     backCarbonTradeList.add(backCarbonTradeListVO);
                 }
                 //输出

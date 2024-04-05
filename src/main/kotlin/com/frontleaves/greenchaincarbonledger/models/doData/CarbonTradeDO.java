@@ -22,6 +22,7 @@ public class CarbonTradeDO {
     String status;
     String description;
     String verifyUuid;
+    String buyUuid;
     String blockchainTxId;
     String createdAt;
     String updateAt;
