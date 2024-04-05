@@ -329,6 +329,8 @@ public class TradeServiceImpl implements TradeService {
                             .setCreatedAt(getUser.getCreatedAt())
                             .setUpdatedAt(getUser.getUpdatedAt());
                     backCarbonTradeListVO.setOrganize(backUserVO)
+                            .setTradeId(Long.valueOf(getTrade.getId()))
+                            .setStatus(getTrade.getStatus())
                             .setQuotaAmount(getTrade.getQuotaAmount().toString())
                             .setPricePerUnit(getTrade.getPricePerUnit().toString())
                             .setDescription(getTrade.getDescription());
@@ -413,9 +415,11 @@ public class TradeServiceImpl implements TradeService {
                             .setCreatedAt(getUser.getCreatedAt())
                             .setUpdatedAt(getUser.getUpdatedAt());
                     backCarbonTradeListVO.setOrganize(backUserVO)
+                            .setTradeId(Long.valueOf(getTrade.getId()))
                             .setQuotaAmount(getTrade.getQuotaAmount().toString())
                             .setPricePerUnit(getTrade.getPricePerUnit().toString())
-                            .setDescription(getTrade.getDescription());
+                            .setDescription(getTrade.getDescription())
+                            .setStatus(getTrade.getStatus());
                     backCarbonTradeList.add(backCarbonTradeListVO);
                 }
                 return ResultUtil.success(timestamp, "您的所需组织碳交易发布信息列表已准备完毕", backCarbonTradeList);
@@ -448,9 +452,11 @@ public class TradeServiceImpl implements TradeService {
                         .setCreatedAt(getUser.getCreatedAt())
                         .setUpdatedAt(getUser.getUpdatedAt());
                 backCarbonTradeListVO.setOrganize(backUserVO)
+                        .setTradeId(Long.valueOf(getTrade.getId()))
                         .setQuotaAmount(getTrade.getQuotaAmount().toString())
                         .setPricePerUnit(getTrade.getPricePerUnit().toString())
-                        .setDescription(getTrade.getDescription());
+                        .setDescription(getTrade.getDescription())
+                        .setStatus(getTrade.getStatus());
                 backCarbonTradeList.add(backCarbonTradeListVO);
             }
             return ResultUtil.success(timestamp, "您的所需组织碳交易发布信息列表已准备完毕", backCarbonTradeList);
