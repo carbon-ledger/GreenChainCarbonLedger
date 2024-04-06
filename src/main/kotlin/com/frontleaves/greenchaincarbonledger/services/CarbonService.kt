@@ -1,9 +1,8 @@
 package com.frontleaves.greenchaincarbonledger.services
 
 import com.frontleaves.greenchaincarbonledger.models.doData.MaterialsDO
-import com.frontleaves.greenchaincarbonledger.models.voData.getData.CarbonConsumeVO
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.CarbonAddQuotaVO
-import com.frontleaves.greenchaincarbonledger.models.voData.getData.TradeReleaseVO
+import com.frontleaves.greenchaincarbonledger.models.voData.getData.CarbonConsumeVO
 import com.frontleaves.greenchaincarbonledger.utils.BaseResponse
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.validation.constraints.NotNull
@@ -70,21 +69,6 @@ interface CarbonService {
         page: String,
         order: String?
     ): ResponseEntity<BaseResponse>
-
-    /**
-     * 发布碳交易
-     *
-     * @param timestamp 时间戳
-     * @param request 请求体
-     * @param tradeReleaseVO 发布碳交易所需要的信息体
-     * @return 是否完成发布
-     */
-    fun releaseCarbonTrade(
-        timestamp: Long,
-        request: HttpServletRequest,
-        tradeReleaseVO: TradeReleaseVO
-    ): ResponseEntity<BaseResponse>
-
 
     /**
      * 创建碳核算报告

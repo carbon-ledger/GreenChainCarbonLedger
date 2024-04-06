@@ -1,11 +1,27 @@
 package com.frontleaves.greenchaincarbonledger.services
 
-import com.frontleaves.greenchaincarbonledger.models.voData.getData.EditTradeVO
+import com.frontleaves.greenchaincarbonledger.models.voData.getData.TradeReleaseVO
 import com.frontleaves.greenchaincarbonledger.utils.BaseResponse
 import jakarta.servlet.http.HttpServletRequest
 import org.springframework.http.ResponseEntity
 
 interface TradeService {
+
+    /**
+     * 发布碳交易
+     *
+     * @param timestamp 时间戳
+     * @param request 请求体
+     * @param tradeReleaseVO 发布碳交易所需要的信息体
+     * @return 是否完成发布
+     */
+    fun releaseCarbonTrade(
+        timestamp: Long,
+        request: HttpServletRequest,
+        tradeReleaseVO: TradeReleaseVO
+    ): ResponseEntity<BaseResponse>
+
+
     /**
      * 删除碳交易发布（软删除）
      * <hr/>
@@ -84,14 +100,14 @@ interface TradeService {
      *
      * @param timestamp 时间戳
      * @param request HTTP请求对象
-     * @param editTradeVO 修改碳交易发布信息对象
+     * @param tradeReleaseVO 修改碳交易发布信息对象
      * @param id 交易id
      * @return 返回一个响应实体，包含修改后的碳交易发布信息
      */
     fun editCarbonTrade(
         timestamp: Long,
         request: HttpServletRequest,
-        editTradeVO: EditTradeVO,
+        tradeReleaseVO: TradeReleaseVO,
         id: String
     ): ResponseEntity<BaseResponse>
 
@@ -106,7 +122,8 @@ interface TradeService {
     fun reviewTradeList(
         timestamp: Long,
         request: HttpServletRequest,
-        id: String
+        id: String,
+        pass: Boolean
     ): ResponseEntity<BaseResponse>
 
     /**

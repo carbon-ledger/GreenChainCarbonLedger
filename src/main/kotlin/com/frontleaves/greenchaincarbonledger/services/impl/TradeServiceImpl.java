@@ -1,8 +1,9 @@
 package com.frontleaves.greenchaincarbonledger.services.impl;
 
 import com.frontleaves.greenchaincarbonledger.dao.*;
+import com.frontleaves.greenchaincarbonledger.mappers.CarbonMapper;
 import com.frontleaves.greenchaincarbonledger.models.doData.*;
-import com.frontleaves.greenchaincarbonledger.models.voData.getData.EditTradeVO;
+import com.frontleaves.greenchaincarbonledger.models.voData.getData.TradeReleaseVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.returnData.BackCarbonBuyTradeVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.returnData.BackCarbonTradeListVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.returnData.BackOpenAnAccount;
@@ -17,6 +18,7 @@ import com.google.gson.reflect.TypeToken;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.hyperledger.fabric.gateway.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -38,6 +40,66 @@ public class TradeServiceImpl implements TradeService {
     private final CarbonQuotaDAO carbonQuotaDAO;
     private final ApproveDAO approveDAO;
     private final Gson gson;
+    private final Contract contract;
+    private final CarbonMapper carbonMapper;
+
+    @NotNull
+    @Override
+    public ResponseEntity<BaseResponse> releaseCarbonTrade(long timestamp, @NotNull HttpServletRequest request, @NotNull TradeReleaseVO tradeReleaseVO) {
+        log.info("[Service] 执行 releaseCarbonTrade 方法");
+        String getUuid = ProcessingUtil.getAuthorizeUserUuid(request);
+        // 先对自己组织剩余的碳配额量进行判断
+        // 1.获取 总配额量total_quota、已分配额量allocated_quota、已使用配额量used_quota
+        CarbonQuotaDO carbonQuotaDO = carbonDAO.getOrganizeQuotaByUuid(getUuid);
+        if (carbonQuotaDO != null) {
+            // 获取年份
+            if (new SimpleDateFormat("yyyy").format(timestamp).equals(carbonQuotaDO.getQuotaYear().toString())) {
+                double totalQuota = carbonQuotaDO.getTotalQuota();
+                double allocatedQuota = carbonQuotaDO.getAllocatedQuota();
+                double usedQuota = carbonQuotaDO.getUsedQuota();
+                // 2.根据三个数据获取组织现有的碳配额量
+                double nowQuota = totalQuota - usedQuota - Integer.parseInt(tradeReleaseVO.getAmount());
+                // 3.如果企业的 已使用配额量used_quota 小于 已分配额量allocated_quota 的话，才允许发布碳交易
+                // 达到允许条件下，则可发布交易
+                if (nowQuota > 0 && allocatedQuota > usedQuota) {
+                    // 对发布的内容进行区块链上链
+                    String blockchainID = ProcessingUtil.createUuid();
+                    byte[] getByte = null;
+                    try {
+                        contract.submitTransaction("createContract", blockchainID, String.valueOf(carbonMapper.getLastThird().getId() + 1), carbonQuotaDO.getOrganizeUuid(), tradeReleaseVO.getAmount(), tradeReleaseVO.getUnit());
+                        getByte = contract.evaluateTransaction("queryTrade", blockchainID);
+                    } catch (Exception e) {
+                        log.error("[Service] 区块链上链失败", e);
+                    }
+                    if (tradeReleaseVO.getDraft()) {
+                        carbonMapper.insertTradeByUuid(getUuid, tradeReleaseVO.getAmount(), tradeReleaseVO.getUnit(), tradeReleaseVO.getText(), blockchainID, "draft");
+                    } else {
+                        carbonMapper.insertTradeByUuid(getUuid, tradeReleaseVO.getAmount(), tradeReleaseVO.getUnit(), tradeReleaseVO.getText(), blockchainID, "pending_review");
+                    }
+                    // 添加审计日志
+                    ArrayList<AuditLogDO> auditLogDOList = gson.fromJson(carbonQuotaDO.getAuditLog(), new TypeToken<List<AuditLogDO>>() {
+                    }.getType());
+                    carbonQuotaDO.setAuditLog(gson.toJson(
+                            ProcessingUtil.addAuditLog(
+                                    auditLogDOList,
+                                    "来自交易扣除，扣除配额：" + tradeReleaseVO.getAmount() + "吨",
+                                    "系统交易操作")
+                    ));
+                    carbonDAO.addAuditLog(carbonQuotaDO.getUuid(), carbonQuotaDO.getAuditLog());
+                    // 交易发布后扣除当前可用碳
+                    carbonDAO.changeTotalQuota(carbonQuotaDO.getUuid(), totalQuota - Integer.parseInt(tradeReleaseVO.getAmount()));
+                    return ResultUtil.success(timestamp, "交易发布成功", Arrays.toString(getByte));
+                } else {
+                    if (nowQuota <= 0) {
+                        return ResultUtil.error(timestamp, "组织剩余配额不足", ErrorCode.RELEASE_TRADE_FAILURE);
+                    } else {
+                        return ResultUtil.error(timestamp, "无法使用购入的碳配额量进行交易", ErrorCode.RELEASE_TRADE_FAILURE);
+                    }
+                }
+            }
+        }
+        return ResultUtil.error(timestamp, "您还未申请碳配额", ErrorCode.RELEASE_TRADE_FAILURE);
+    }
 
     @NotNull
     @Override
@@ -56,7 +118,7 @@ public class TradeServiceImpl implements TradeService {
                 boolean state = false;
                 //校验id是否存在
                 for (CarbonTradeDO carbonTradeDO : getCarbonTradeList) {
-                    if (carbonTradeDO.getId().equals(id)) {
+                    if (id.equals(carbonTradeDO.getId().toString())) {
                         state = true;
                         break;
                     }
@@ -91,6 +153,15 @@ public class TradeServiceImpl implements TradeService {
                                         CarbonQuotaDO getCarbonQuota = carbonQuotaDAO.getCarbonQuota(localYear, getAuthUserDO.getUuid());
                                         //进行碳交易碳总量的返还
                                         Double nowBuyTotalQuota = getCarbonTrade.getQuotaAmount() + getCarbonQuota.getTotalQuota();
+                                        ArrayList<AuditLogDO> auditLogDOList = gson.fromJson(getCarbonQuota.getAuditLog(), new TypeToken<List<AuditLogDO>>() {
+                                        }.getType());
+                                        getCarbonQuota.setAuditLog(gson.toJson(
+                                                ProcessingUtil.addAuditLog(
+                                                        auditLogDOList,
+                                                        "来自交易添取消返还，返还配额：" + getCarbonTrade.getQuotaAmount() + "吨",
+                                                        "系统交易操作")
+                                        ));
+                                        carbonDAO.addAuditLog(getCarbonQuota.getUuid(), getCarbonQuota.getAuditLog());
                                         //借用数据库更新
                                         if (carbonQuotaDAO.finishCarbonTrade(nowBuyTotalQuota, getAuthUserDO.getUuid(), localYear)) {
                                             return ResultUtil.success(timestamp, "删除成功");
@@ -235,15 +306,19 @@ public class TradeServiceImpl implements TradeService {
                                             //整理数据
                                             BackCarbonBuyTradeVO backCarbonBuyTrade = new BackCarbonBuyTradeVO();
                                             BackUserVO backUserVO = new BackUserVO();
-                                            backUserVO.setUuid(getOrganizeDO.getUuid())
-                                                    .setUserName(getOrganizeDO.getUserName())
-                                                    .setNickName(getOrganizeDO.getNickName())
-                                                    .setRealName(getOrganizeDO.getRealName())
-                                                    .setEmail(getOrganizeDO.getEmail())
-                                                    .setPhone(getOrganizeDO.getPhone())
-                                                    .setCreatedAt(getOrganizeDO.getCreatedAt())
-                                                    .setUpdatedAt(getOrganizeDO.getUpdatedAt());
+                                            // 获取交易组织
+                                            UserDO getSendOrganizeDO = userDAO.getUserByUuid(carbonTradeDO.getOrganizeUuid());
+                                            backUserVO
+                                                    .setUuid(getSendOrganizeDO.getUuid())
+                                                    .setUserName(getSendOrganizeDO.getUserName())
+                                                    .setNickName(getSendOrganizeDO.getNickName())
+                                                    .setRealName(getSendOrganizeDO.getRealName())
+                                                    .setEmail(getSendOrganizeDO.getEmail())
+                                                    .setPhone(getSendOrganizeDO.getPhone())
+                                                    .setCreatedAt(getSendOrganizeDO.getCreatedAt())
+                                                    .setUpdatedAt(getSendOrganizeDO.getUpdatedAt());
                                             backCarbonBuyTrade.setOrganize(backUserVO)
+
                                                     .setQuotaAmount(carbonTradeDO.getQuotaAmount().toString())
                                                     .setPricePerUnit(carbonTradeDO.getPricePerUnit().toString())
                                                     .setDescription(carbonTradeDO.getDescription());
@@ -283,12 +358,11 @@ public class TradeServiceImpl implements TradeService {
             String search,
             @NotNull String limit,
             @NotNull String page,
-            @NotNull String order) {
+            @NotNull String order
+    ) {
+        log.info("[Service] 执行 getTradeList 方法");
         UserDO getUser = ProcessingUtil.getUserByHeaderUuid(request, userDAO);
         if (getUser != null) {
-            String getUuid = getUser.getUuid();
-            // 此时，type参数已经被校验、page、limit仅仅验证了结构，未校验范围、order还需要赋值添加字段名
-            // 转变page和limit类型
             limit = (limit.isEmpty() || Integer.parseInt(limit) > 100) ? "20" : limit;
             page = (page.isEmpty()) ? "1" : page;
             if (order.isEmpty()) {
@@ -352,14 +426,19 @@ public class TradeServiceImpl implements TradeService {
 
     @NotNull
     @Override
-    public ResponseEntity<BaseResponse> reviewTradeList(long timestamp, @NotNull HttpServletRequest request, @NotNull String tradeId) {
+    public ResponseEntity<BaseResponse> reviewTradeList(long timestamp, @NotNull HttpServletRequest request, @NotNull String tradeId, boolean pass) {
+        log.info("[Service] 执行 reviewTradeList 方法");
         UserDO getUser = ProcessingUtil.getUserByHeaderUuid(request, userDAO);
         if (getUser != null) {
             CarbonTradeDO getCarbonTradeDO = carbonDAO.getTradeById(tradeId);
             if (getCarbonTradeDO != null) {
                 getCarbonTradeDO
-                        .setVerifyUuid(getUser.getUuid())
-                        .setStatus("active");
+                        .setVerifyUuid(getUser.getUuid());
+                if (pass) {
+                    getCarbonTradeDO.setStatus("active");
+                } else {
+                    getCarbonTradeDO.setStatus("draft");
+                }
                 if (carbonDAO.reviewTrade(getCarbonTradeDO)) {
                     return ResultUtil.success(timestamp, "审核通过");
                 } else {
@@ -375,8 +454,8 @@ public class TradeServiceImpl implements TradeService {
 
     @NotNull
     @Override
-    public ResponseEntity<BaseResponse> editCarbonTrade(long timestamp, @NotNull HttpServletRequest request, @NotNull EditTradeVO editTradeVO, @NotNull String id) {
-        log.info("[Service] 执行 releaseCarbonTrade 方法");
+    public ResponseEntity<BaseResponse> editCarbonTrade(long timestamp, @NotNull HttpServletRequest request, @NotNull TradeReleaseVO tradeReleaseVO, @NotNull String id) {
+        log.info("[Service] 执行 editCarbonTrade 方法");
         String getUuid = ProcessingUtil.getAuthorizeUserUuid(request);
         // 判断用户是否发布过交易
         // 判断交易是否已经发布
@@ -385,10 +464,10 @@ public class TradeServiceImpl implements TradeService {
         String status = carbonTradeDO.getStatus();
         if ("draft".equals(status) || "pending_review".equals(status)) {
             // 判断编辑的信息是否合法有效，如果有效则可以提交编辑
-            if (editTradeVO.getDraft()) {
-                carbonTradeDAO.editTrade(getUuid, editTradeVO, "draft", id);
+            if (tradeReleaseVO.getDraft()) {
+                carbonTradeDAO.editTrade(getUuid, tradeReleaseVO, "draft", id);
             } else {
-                carbonTradeDAO.editTrade(getUuid, editTradeVO, "pending_review", id);
+                carbonTradeDAO.editTrade(getUuid, tradeReleaseVO, "pending_review", id);
             }
             return ResultUtil.success(timestamp, "交易发布信息修改成功");
         } else {
@@ -410,14 +489,17 @@ public class TradeServiceImpl implements TradeService {
                 for (CarbonTradeDO getTrade : getTradeList) {
                     BackCarbonTradeListVO backCarbonTradeListVO = new BackCarbonTradeListVO();
                     BackUserVO backUserVO = new BackUserVO();
-                    backUserVO.setUuid(getTrade.getOrganizeUuid())
-                            .setUserName(getUser.getUserName())
-                            .setNickName(getUser.getNickName())
-                            .setRealName(getUser.getRealName())
-                            .setEmail(getUser.getEmail())
-                            .setPhone(getUser.getPhone())
-                            .setCreatedAt(getUser.getCreatedAt())
-                            .setUpdatedAt(getUser.getUpdatedAt());
+                    // 获取对方交易的信息
+                    UserDO getOrganizeDO = userDAO.getUserByUuid(getTrade.getOrganizeUuid());
+                    backUserVO
+                            .setUuid(getOrganizeDO.getUuid())
+                            .setUserName(getOrganizeDO.getUserName())
+                            .setRealName(getOrganizeDO.getRealName())
+                            .setNickName(getOrganizeDO.getNickName())
+                            .setEmail(getOrganizeDO.getEmail())
+                            .setPhone(getOrganizeDO.getPhone())
+                            .setCreatedAt(getOrganizeDO.getCreatedAt())
+                            .setUpdatedAt(getOrganizeDO.getUpdatedAt());
                     backCarbonTradeListVO.setOrganize(backUserVO)
                             .setTradeId(Long.valueOf(getTrade.getId()))
                             .setQuotaAmount(getTrade.getQuotaAmount().toString())
@@ -539,12 +621,14 @@ public class TradeServiceImpl implements TradeService {
                         // 更新数据库
                         carbonDAO.changeTotalQuota(getQuota.getUuid(), getQuota.getTotalQuota());
                         // 添加审计日志
-                        ArrayList<AuditLogDO> auditLogDOList = gson.fromJson(getQuota.getAuditLog(), new TypeToken<List<AuditLogDO>>() {}.getType());
-                        auditLogDOList.add(new AuditLogDO()
-                                .setLog("来自交易添加，交易ID：" + getTrade.getId() + "，添加配额：" + getTrade.getQuotaAmount())
-                                .setDate(new Date().toString())
-                                .setOperate("Console Add"));
-                        getQuota.setAuditLog(gson.toJson(auditLogDOList));
+                        ArrayList<AuditLogDO> auditLogDOList = gson.fromJson(getQuota.getAuditLog(), new TypeToken<List<AuditLogDO>>() {
+                        }.getType());
+                        getQuota.setAuditLog(gson.toJson(
+                                ProcessingUtil.addAuditLog(
+                                        auditLogDOList,
+                                        "来自交易添加，交易ID：" + getTrade.getId() + "，添加配额：" + getTrade.getQuotaAmount(),
+                                        "系统交易操作")
+                        ));
                         carbonDAO.addAuditLog(getQuota.getUuid(), getQuota.getAuditLog());
                         // 修改自己状态
                         carbonDAO.changeStatus(tradeId, "completed");

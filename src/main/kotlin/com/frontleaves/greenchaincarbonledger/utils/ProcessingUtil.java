@@ -2,6 +2,7 @@ package com.frontleaves.greenchaincarbonledger.utils;
 
 import com.frontleaves.greenchaincarbonledger.dao.RoleDAO;
 import com.frontleaves.greenchaincarbonledger.dao.UserDAO;
+import com.frontleaves.greenchaincarbonledger.models.doData.AuditLogDO;
 import com.frontleaves.greenchaincarbonledger.models.doData.RoleDO;
 import com.frontleaves.greenchaincarbonledger.models.doData.UserDO;
 import jakarta.servlet.http.HttpServletRequest;
@@ -13,6 +14,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Random;
 import java.util.UUID;
 
@@ -161,8 +163,8 @@ public class ProcessingUtil {
      * 用于检查用户是否有权限
      *
      * @param userUuid 用户UUID
-     * @param userDAO 用户DAO
-     * @param roleDAO 角色DAO
+     * @param userDAO  用户DAO
+     * @param roleDAO  角色DAO
      * @return {@link Boolean}
      * @since v1.0.0
      */
@@ -188,8 +190,8 @@ public class ProcessingUtil {
      * 用于检查用户是否有超级管理员权限
      *
      * @param userUuid 用户UUID
-     * @param userDAO 用户DAO
-     * @param roleDAO 角色DAO
+     * @param userDAO  用户DAO
+     * @param roleDAO  角色DAO
      * @return {@link Boolean}
      * @since v1.0.0
      */
@@ -222,5 +224,24 @@ public class ProcessingUtil {
         log.debug("\t> 获取Token: {}", getAuthUuid);
 
         return getAuthUuid;
+    }
+
+    /**
+     * 添加审计日志
+     * <hr/>
+     * 用于添加审计日志, 用于记录审计日志, 用于审计
+     *
+     * @param auditLogDOList 审计日志列表
+     * @param log            日志
+     * @param operate        操作
+     * @return {@link ArrayList<AuditLogDO>}
+     * @since v1.0.0
+     */
+    public static ArrayList<AuditLogDO> addAuditLog(ArrayList<AuditLogDO> auditLogDOList, String log, String operate) {
+        auditLogDOList.add(new AuditLogDO()
+                .setLog(log)
+                .setDate(new Date().toString())
+                .setOperate(operate));
+        return auditLogDOList;
     }
 }

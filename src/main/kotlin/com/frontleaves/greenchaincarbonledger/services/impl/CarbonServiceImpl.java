@@ -1,12 +1,10 @@
 package com.frontleaves.greenchaincarbonledger.services.impl;
 
 import com.frontleaves.greenchaincarbonledger.dao.*;
-import com.frontleaves.greenchaincarbonledger.mappers.CarbonMapper;
 import com.frontleaves.greenchaincarbonledger.models.doData.*;
 import com.frontleaves.greenchaincarbonledger.models.doData.ExcelData.*;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.CarbonAddQuotaVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.CarbonConsumeVO;
-import com.frontleaves.greenchaincarbonledger.models.voData.getData.TradeReleaseVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.returnData.BackCarbonAccountingVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.returnData.BackCarbonQuotaVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.returnData.BackCarbonReportVO;
@@ -24,7 +22,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.hyperledger.fabric.gateway.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.core.io.ClassPathResource;
@@ -37,7 +34,6 @@ import java.io.InputStream;
 import java.sql.Date;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -53,7 +49,6 @@ public class CarbonServiceImpl implements CarbonService {
     private final RoleDAO roleDAO;
     private final CarbonAccountingDAO carbonAccountingDAO;
     private final CarbonQuotaDAO carbonQuotaDAO;
-    private final CarbonMapper carbonMapper;
     private final Gson gson;
     private final CarbonReportDAO carbonReportDAO;
     private final CarbonTypeDAO carbonTypeDAO;
@@ -61,7 +56,6 @@ public class CarbonServiceImpl implements CarbonService {
     private final CarbonItemTypeDAO carbonItemTypeDAO;
     private final ProcessEmissionFactorDAO processEmissionFactorDAO;
     private final OtherEmissionFactorDAO otherEmissionFactorDAO;
-    private final Contract contract;
     private final ApproveDAO approveDAO;
 
     /**
@@ -488,55 +482,6 @@ public class CarbonServiceImpl implements CarbonService {
 
     @NotNull
     @Override
-    public ResponseEntity<BaseResponse> releaseCarbonTrade(long timestamp, @NotNull HttpServletRequest request, @NotNull TradeReleaseVO tradeReleaseVO) {
-        log.info("[Service] 执行 releaseCarbonTrade 方法");
-        String getUuid = ProcessingUtil.getAuthorizeUserUuid(request);
-        // 先对自己组织剩余的碳配额量进行判断
-        // 1.获取 总配额量total_quota、已分配额量allocated_quota、已使用配额量used_quota
-        CarbonQuotaDO carbonQuotaDO = carbonDAO.getOrganizeQuotaByUuid(getUuid);
-        if (carbonQuotaDO != null) {
-            // 获取年份
-            if (new SimpleDateFormat("yyyy").format(timestamp).equals(carbonQuotaDO.getQuotaYear().toString())) {
-                double totalQuota = carbonQuotaDO.getTotalQuota();
-                double allocatedQuota = carbonQuotaDO.getAllocatedQuota();
-                double usedQuota = carbonQuotaDO.getUsedQuota();
-                // 2.根据三个数据获取组织现有的碳配额量
-                double nowQuota = totalQuota - usedQuota;
-                // 3.如果企业的 已使用配额量used_quota 小于 已分配额量allocated_quota 的话，才允许发布碳交易
-                // 达到允许条件下，则可发布交易
-                if (nowQuota > 0 && allocatedQuota > usedQuota) {
-                    // 对发布的内容进行区块链上链
-                    String blockchainID = ProcessingUtil.createUuid();
-                    byte[] getByte = null;
-                    try {
-                        contract.submitTransaction("createContract", blockchainID, String.valueOf(carbonMapper.getLastThird().getId()+1), carbonQuotaDO.getOrganizeUuid(), tradeReleaseVO.getAmount(), tradeReleaseVO.getUnit());
-                        getByte = contract.evaluateTransaction("queryTrade", blockchainID);
-                    } catch (Exception e) {
-                        log.error("[Service] 区块链上链失败", e);
-                    }
-                    if (tradeReleaseVO.getDraft()) {
-                        carbonMapper.insertTradeByUuid(getUuid, tradeReleaseVO.getAmount(), tradeReleaseVO.getUnit(), tradeReleaseVO.getText(), blockchainID, "draft");
-                    } else {
-                        carbonMapper.insertTradeByUuid(getUuid, tradeReleaseVO.getAmount(), tradeReleaseVO.getUnit(), tradeReleaseVO.getText(), blockchainID, "pending_review");
-                    }
-                    // 交易发布后扣除当前可用碳
-                    carbonDAO.changeTotalQuota(carbonQuotaDO.getUuid(), nowQuota);
-                    return ResultUtil.success(timestamp, "交易发布成功", Arrays.toString(getByte));
-                } else {
-                    if (nowQuota <= 0) {
-                        return ResultUtil.error(timestamp, "当前组织碳配额量小于0，无法发布交易", ErrorCode.RELEASE_TRADE_FAILURE);
-                    } else {
-                        return ResultUtil.error(timestamp, "无法使用购入的碳配额量进行交易", ErrorCode.RELEASE_TRADE_FAILURE);
-                    }
-                }
-            }
-        }
-        return ResultUtil.error(timestamp, "您还未申请碳配额", ErrorCode.RELEASE_TRADE_FAILURE);
-    }
-
-
-    @NotNull
-    @Override
     public ResponseEntity<BaseResponse> createCarbonReport(
             long timestamp,
             @NotNull HttpServletRequest request,
@@ -669,7 +614,7 @@ public class CarbonServiceImpl implements CarbonService {
                 String getStartTimeReplace = carbonConsumeVO.getStartTime().replace("-", "");
                 String firstFourCharacters = getStartTimeReplace.substring(0, 4);
                 //为第一行第一列合并居中并且赋值
-                mergeCellsAndSetValue(sheet1,0,0,0,0,"附表1   报告主体"+ firstFourCharacters +"年二氧化碳排放量报告");
+                mergeCellsAndSetValue(sheet1, 0, 0, 0, 0, "附表1   报告主体" + firstFourCharacters + "年二氧化碳排放量报告");
                 // 给第二行第二列的单元格赋值
                 setCellValue(sheet1, 1, 1, String.valueOf(totalCombustion));
                 // 给第三行第二列的单元格赋值
@@ -999,7 +944,6 @@ public class CarbonServiceImpl implements CarbonService {
         //提取年份
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy");
         int localYear = Integer.parseInt(simpleDateFormat.format(timestamp));
-        String combinedDate = new SimpleDateFormat("yyyy-MM-dd").format(timestamp);
         //校验是否在同一年已经创建了碳配额
         if (carbonQuotaDAO.getCarbonQuota(localYear, organizeId) != null) {
             return ResultUtil.error(timestamp, "请勿重复创建碳配额", ErrorCode.DUPLICATE_CREATE);
@@ -1011,7 +955,7 @@ public class CarbonServiceImpl implements CarbonService {
         CarbonAuditLogDO carbonAuditLog = new CarbonAuditLogDO();
         if (getUserDO != null) {
             carbonAuditLog
-                    .setDate(combinedDate)
+                    .setDate(new java.util.Date().toString())
                     .setLog("添加 " + carbonAddQuotaVO.getQuota() + " 的交易配额，此次为初建碳排放配额表")
                     .setOperate(getUserDO.getUserName());
         }

@@ -52,6 +52,7 @@ object SqlPrepareData {
         add(ArrayList(listOf("trade:review", "审核碳交易")))
         add(ArrayList(listOf("trade:getTradeBank", "获取碳交易银行")))
         add(ArrayList(listOf("trade:checkTradeSuccess", "检查碳交易成功")))
+        add(ArrayList(listOf("trade:deleteTrade", "删除碳交易")))
         add(ArrayList(listOf("review:addOrganize", "添加组织账户审核信息")))
         add(ArrayList(listOf("review:addAdmin", "添加监管账户审核信息")))
         add(ArrayList(listOf("review:checkOrganize", "审核组织账户")))
@@ -102,6 +103,7 @@ object SqlPrepareData {
         add("review:addAdmin")
         add("review:reSendAdmin")
         add("trade:review")
+        add("trade:deleteTrade")
     }
 
 
@@ -127,6 +129,7 @@ object SqlPrepareData {
         add("review:getReport")
         add("trade:getTradeBank")
         add("trade:checkTradeSuccess")
+        add("trade:deleteTrade")
     }
 
     val SQL_CARBON_ITEM_LIST = ArrayList<HashMap<String, String>>().also {
