@@ -6,6 +6,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 /**
  * 用于对CarbonItemType表的数据库操作
  * @author FLASHLACK
@@ -25,5 +27,16 @@ public class CarbonItemTypeDAO {
         log.info("[DAO] 执行 getCarbonItemTypeByName");
         log.info("\t> Mysql 查询");
         return carbonItemTypeMapper.getCarbonItemTypeByName(name);
+    }
+
+    /**
+     * 获取所有的碳排放类型
+     *
+     * @return carbonItemTypeDO
+     */
+    public List<CarbonItemTypeDO> getCarbonItemTypeList() {
+        log.info("[DAO] 执行 getCarbonItemTypeList");
+        log.info("\t> Mysql 查询");
+        return carbonItemTypeMapper.getCarbonItemTypeList();
     }
 }

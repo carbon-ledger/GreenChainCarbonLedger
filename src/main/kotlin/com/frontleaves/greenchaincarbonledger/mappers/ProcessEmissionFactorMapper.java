@@ -4,6 +4,8 @@ import com.frontleaves.greenchaincarbonledger.models.doData.ProcessEmissionFacto
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 
+import java.util.List;
+
 /**
  * 对于排放因子表的数据库操作语句
  * @author FALSHLACK
@@ -12,4 +14,7 @@ import org.apache.ibatis.annotations.Select;
 public interface ProcessEmissionFactorMapper {
     @Select("SELECT * FROM fy_process_emission_factor WHERE name=#{name}")
     ProcessEmissionFactorDO getFactorByName(String name);
+
+    @Select("SELECT * FROM fy_process_emission_factor")
+    List<ProcessEmissionFactorDO> getProcessEmissionFactorList();
 }

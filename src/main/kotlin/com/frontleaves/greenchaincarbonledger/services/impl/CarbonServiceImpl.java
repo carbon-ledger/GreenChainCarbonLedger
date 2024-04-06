@@ -5,10 +5,7 @@ import com.frontleaves.greenchaincarbonledger.models.doData.*;
 import com.frontleaves.greenchaincarbonledger.models.doData.ExcelData.*;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.CarbonAddQuotaVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.CarbonConsumeVO;
-import com.frontleaves.greenchaincarbonledger.models.voData.returnData.BackCarbonAccountingVO;
-import com.frontleaves.greenchaincarbonledger.models.voData.returnData.BackCarbonQuotaVO;
-import com.frontleaves.greenchaincarbonledger.models.voData.returnData.BackCarbonReportVO;
-import com.frontleaves.greenchaincarbonledger.models.voData.returnData.BackUserVO;
+import com.frontleaves.greenchaincarbonledger.models.voData.returnData.*;
 import com.frontleaves.greenchaincarbonledger.services.CarbonService;
 import com.frontleaves.greenchaincarbonledger.utils.BaseResponse;
 import com.frontleaves.greenchaincarbonledger.utils.ErrorCode;
@@ -57,6 +54,7 @@ public class CarbonServiceImpl implements CarbonService {
     private final ProcessEmissionFactorDAO processEmissionFactorDAO;
     private final OtherEmissionFactorDAO otherEmissionFactorDAO;
     private final ApproveDAO approveDAO;
+    private final DesulfurizationFactorDAO desulfurizationFactorDAO;
 
     /**
      * 检查报告时间是否冲突
@@ -97,7 +95,7 @@ public class CarbonServiceImpl implements CarbonService {
      * @param desulfurizationComposition 存放企业传入的脱硫剂参数——脱硫剂类型、脱硫剂消耗量
      * @return E脱硫的值
      */
-    private static double eDesulfurization(@NotNull List<MaterialsDO.Desulfurization> desulfurizationComposition, ProcessEmissionFactorDAO processEmissionFactorDAO) {
+    private static double eDesulfurization(@NotNull List<MaterialsDO.Desulfurization> desulfurizationComposition, DesulfurizationFactorDAO desulfurizationFactorDAO) {
         // E脱硫(脱硫过程产生的所有碳排放)
         double ehCombustion = 0.0;
         for (MaterialsDO.Desulfurization des : desulfurizationComposition) {
@@ -106,7 +104,7 @@ public class CarbonServiceImpl implements CarbonService {
             // 脱硫剂消耗量(前端传入)
             double consumption = des.material.consumption;
             // 数据库读取
-            DesulfurizationFactorDO desulfurizationFactorDO = processEmissionFactorDAO.getDesFactorByName(type);
+            DesulfurizationFactorDO desulfurizationFactorDO = desulfurizationFactorDAO.getDesFactorByName(type);
             // 脱硫剂中碳酸盐含量
             double carbonateContent = desulfurizationFactorDO.getCarbonateContent();
             double factor = desulfurizationFactorDO.getFactor();
@@ -880,7 +878,7 @@ public class CarbonServiceImpl implements CarbonService {
          * 3. 计算E电力
          */
         double eCombustion = eCombustion(materials, carbonItemTypeDAO);
-        double eDesulfurization = eDesulfurization(desulfurization, processEmissionFactorDAO);
+        double eDesulfurization = eDesulfurization(desulfurization, desulfurizationFactorDAO);
         double eElectric = electricity(carbonConsumeVO, otherEmissionFactorDAO);
         // 汇总碳排放
         double totalCombustion = eCombustion + eDesulfurization + eElectric;
@@ -1055,5 +1053,86 @@ public class CarbonServiceImpl implements CarbonService {
         });
         // 返回结果
         return ResultUtil.success(timestamp, getUserDOList);
+    }
+
+    @NotNull
+    @Override
+    public ResponseEntity<BaseResponse> getCarbonItemType(long timestamp, @NotNull HttpServletRequest request) {
+        // 获取全部的碳排放类型
+        List<CarbonItemTypeDO> getCarbonItemTypeDOList = carbonItemTypeDAO.getCarbonItemTypeList();
+        List<BackCarbonItemTypeVO> backCarbonItemTypeVOList = new ArrayList<>();
+        if (getCarbonItemTypeDOList != null) {
+            // 处理数据进一步处理
+            getCarbonItemTypeDOList.forEach(it -> {
+                BackCarbonItemTypeVO backCarbonItemTypeVO = new BackCarbonItemTypeVO();
+                backCarbonItemTypeVO
+                        .setName(it.getName())
+                        .setDisplayName(it.getDisplayName());
+                backCarbonItemTypeVOList.add(backCarbonItemTypeVO);
+            });
+            return ResultUtil.success(timestamp, backCarbonItemTypeVOList);
+        } else {
+            return ResultUtil.error(timestamp, "获取失败", ErrorCode.SERVER_INTERNAL_ERROR);
+        }
+    }
+
+    @NotNull
+    @Override
+    public ResponseEntity<BaseResponse> getCarbonFactorProcess(long timestamp, @NotNull HttpServletRequest request) {
+        // 获取全部的碳过程排放因子
+        List<ProcessEmissionFactorDO> getProcessEmissionFactors = processEmissionFactorDAO.getProcessEmissionFactorList();
+        List<BackCarbonProcessFactorVO> backCarbonFactorVOList = new ArrayList<>();
+        if (getProcessEmissionFactors != null) {
+            getProcessEmissionFactors.forEach(it -> {
+                BackCarbonProcessFactorVO backCarbonProcessFactorVO = new BackCarbonProcessFactorVO();
+                backCarbonProcessFactorVO
+                        .setName(it.getName())
+                        .setDisplayName(it.getDisplayName());
+                backCarbonFactorVOList.add(backCarbonProcessFactorVO);
+            });
+            return ResultUtil.success(timestamp, backCarbonFactorVOList);
+        } else {
+            return ResultUtil.error(timestamp, "获取失败", ErrorCode.SERVER_INTERNAL_ERROR);
+        }
+    }
+
+    @NotNull
+    @Override
+    public ResponseEntity<BaseResponse> getCarbonFactorDesulfurization(long timestamp, @NotNull HttpServletRequest request) {
+        // 获取全部的脱硫排放因子
+        List<DesulfurizationFactorDO> getDesulfurizationFactors = desulfurizationFactorDAO.getDesulfurizationFactorList();
+        List<BackCarbonDesulfurizationFactorVO> backCarbonFactorVOList = new ArrayList<>();
+        if (getDesulfurizationFactors != null) {
+            getDesulfurizationFactors.forEach(it -> {
+                BackCarbonDesulfurizationFactorVO backCarbonDesulfurizationFactorVO = new BackCarbonDesulfurizationFactorVO();
+                backCarbonDesulfurizationFactorVO
+                        .setName(it.getName())
+                        .setDisplayName(it.getDisplayName());
+                backCarbonFactorVOList.add(backCarbonDesulfurizationFactorVO);
+            });
+            return ResultUtil.success(timestamp, backCarbonFactorVOList);
+        } else {
+            return ResultUtil.error(timestamp, "获取失败", ErrorCode.SERVER_INTERNAL_ERROR);
+        }
+    }
+
+    @NotNull
+    @Override
+    public ResponseEntity<BaseResponse> getCarbonFactorOther(long timestamp, @NotNull HttpServletRequest request) {
+        // 获取全部的其他排放因子
+        List<OtherEmissionFactorDO> getOtherEmissionFactors = otherEmissionFactorDAO.getOtherEmissionFactorList();
+        List<BackCarbonOtherFactorVO> backCarbonFactorVOList = new ArrayList<>();
+        if (getOtherEmissionFactors != null) {
+            getOtherEmissionFactors.forEach(it -> {
+                BackCarbonOtherFactorVO backCarbonOtherFactorVO = new BackCarbonOtherFactorVO();
+                backCarbonOtherFactorVO
+                        .setName(it.getName())
+                        .setDisplayName(it.getDisplayName());
+                backCarbonFactorVOList.add(backCarbonOtherFactorVO);
+            });
+            return ResultUtil.success(timestamp,backCarbonFactorVOList);
+        } else {
+            return ResultUtil.error(timestamp, "获取失败", ErrorCode.SERVER_INTERNAL_ERROR);
+        }
     }
 }

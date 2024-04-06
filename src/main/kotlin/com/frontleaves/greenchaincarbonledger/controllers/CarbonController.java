@@ -155,10 +155,10 @@ public class CarbonController {
     /**
      * 为组织添加配额
      *
-     * @param carbonAddQuotaVO-添加配额的值
-     * @param bindingResult-结果
-     * @param organizeId-组织UUID
-     * @param request-请求图
+     * @param carbonAddQuotaVO 添加配额的值
+     * @param bindingResult 结果
+     * @param organizeId 组织UUID
+     * @param request 请求图
      * @return 是否完成配额的添加
      */
     @PostMapping("/add/{organizeId}")
@@ -183,6 +183,14 @@ public class CarbonController {
         }
     }
 
+    /**
+     * 创建碳排放报告
+     *
+     * @param carbonConsumeVO 碳排放报告
+     * @param bindingResult 结果
+     * @param request 请求
+     * @return 是否完成报告的创建
+     */
     @PostMapping("/report/create")
     @CheckAccountPermission({"carbon:createCarbonReport"})
     public ResponseEntity<BaseResponse> createCarbonReport(
@@ -231,6 +239,15 @@ public class CarbonController {
         }
     }
 
+    /**
+     * 编辑组织配额
+     *
+     * @param carbonAddQuotaVO 配额值
+     * @param bindingResult 结果
+     * @param organizeId 组织UUID
+     * @param request 请求
+     * @return 是否完成配额的编辑
+     */
     @PatchMapping("/edit/{organizeId}")
     @CheckAccountPermission({"carbon:editCarbonQuota"})
     public ResponseEntity<BaseResponse> editCarbonQuota(
@@ -253,6 +270,12 @@ public class CarbonController {
         }
     }
 
+    /**
+     * 获取组织操作记录
+     *
+     * @param request 请求
+     * @return 操作记录
+     */
     @GetMapping("/operate/list")
     @CheckAccountPermission({"carbon:getCarbonOperateList"})
     public ResponseEntity<BaseResponse> getCarbonOperateList(
@@ -261,5 +284,69 @@ public class CarbonController {
         log.info("[Controller] 请求 getCarbonOperateList 接口");
         long timestamp = System.currentTimeMillis();
         return carbonService.getCarbonOperateList(timestamp, request);
+    }
+
+    /**
+     * 获取碳项类型
+     *
+     * @param request 请求
+     * @return 类型
+     */
+    @GetMapping("/item/type")
+    @CheckAccountPermission({"carbon:getCarbonItemType"})
+    public ResponseEntity<BaseResponse> getCarbonItemType(
+            HttpServletRequest request
+    ) {
+        log.info("[Controller] 请求 getCarbonItemType 接口");
+        long timestamp = System.currentTimeMillis();
+        return carbonService.getCarbonItemType(timestamp, request);
+    }
+
+    /**
+     * 获取碳过程排放因子
+     *
+     * @param request 请求
+     * @return 系数
+     */
+    @GetMapping("/factor/process")
+    @CheckAccountPermission({"carbon:getCarbonFactorProcess"})
+    public ResponseEntity<BaseResponse> getCarbonFactorProcess(
+            HttpServletRequest request
+    ) {
+        log.info("[Controller] 请求 getCarbonFactorProcess 接口");
+        long timestamp = System.currentTimeMillis();
+        return carbonService.getCarbonFactorProcess(timestamp, request);
+    }
+
+    /**
+     * 获取碳脱排放因子
+     *
+     * @param request 请求
+     * @return 系数
+     */
+    @GetMapping("/factor/desulfurization")
+    @CheckAccountPermission({"carbon:getCarbonFactorDesulfurization"})
+    public ResponseEntity<BaseResponse> getCarbonFactorDesulfurization(
+            HttpServletRequest request
+    ) {
+        log.info("[Controller] 请求 getCarbonFactorDesulfurization 接口");
+        long timestamp = System.currentTimeMillis();
+        return carbonService.getCarbonFactorDesulfurization(timestamp, request);
+    }
+
+    /**
+     * 获取碳其他排放因子
+     *
+     * @param request 请求
+     * @return 系数
+     */
+    @GetMapping("/factor/other")
+    @CheckAccountPermission({"carbon:getCarbonFactorOther"})
+    public ResponseEntity<BaseResponse> getCarbonFactorOther(
+            HttpServletRequest request
+    ) {
+        log.info("[Controller] 请求 getCarbonFactorOther 接口");
+        long timestamp = System.currentTimeMillis();
+        return carbonService.getCarbonFactorOther(timestamp, request);
     }
 }

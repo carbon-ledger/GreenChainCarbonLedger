@@ -72,9 +72,9 @@ interface CarbonService {
 
     /**
      * 创建碳核算报告
-     * @param timestamp-时间戳
-     * @param request-请求体
-     * @param carbonConsumeVO-创建报告所需要的信息体
+     * @param timestamp 时间戳
+     * @param request 请求体
+     * @param carbonConsumeVO 创建报告所需要的信息体
      * @return 是否完成报告
      */
     fun createCarbonReport(
@@ -87,6 +87,13 @@ interface CarbonService {
         heats: MutableList<MaterialsDO.Material>
     ): ResponseEntity<BaseResponse>
 
+    /**
+     * 创建碳核算报告
+     * @param timestamp 时间戳
+     * @param request 请求体
+     * @param carbonConsumeVO 创建报告所需要的信息体
+     * @return 是否完成报告
+     */
     fun createCarbonReport1(
         timestamp: Long,
         request: HttpServletRequest,
@@ -98,10 +105,10 @@ interface CarbonService {
     /**
      * 为组织添加配额
      *
-     * @param timestamp-时间戳
-     * @param request-请求体
-     * @param organizeId-组织UUID
-     * @param carbonAddQuotaVO-添加的配额值
+     * @param timestamp 时间戳
+     * @param request 请求体
+     * @param organizeId 组织UUID
+     * @param carbonAddQuotaVO 添加的配额值
      * @return 是否完成配额增加
      */
     fun addOrganizeIdQuota(
@@ -114,10 +121,10 @@ interface CarbonService {
     /**
      * 为组织修改碳配额
      *
-     * @param timestamp-时间戳
-     * @param request-请求体
-     * @param organizeId-组织uuid
-     * @param carbonAddQuotaVO-修改内容
+     * @param timestamp 时间戳
+     * @param request 请求体
+     * @param organizeId 组织uuid
+     * @param carbonAddQuotaVO 修改内容
      * @return 是否完成
      *
      */
@@ -131,11 +138,59 @@ interface CarbonService {
     /**
      * 获取碳核算报告操作列表
      *
-     * @param timestamp-时间戳
-     * @param request-请求体
+     * @param timestamp 时间戳
+     * @param request 请求体
      * @return 操作列表
      */
     fun getCarbonOperateList(
+        timestamp: Long,
+        request: HttpServletRequest
+    ): ResponseEntity<BaseResponse>
+
+    /**
+     * 获取碳核算报告操作列表
+     *
+     * @param timestamp 时间戳
+     * @param request 请求体
+     * @return 操作列表
+     */
+    fun getCarbonItemType(
+        timestamp: Long,
+        request: HttpServletRequest
+    ): ResponseEntity<BaseResponse>
+
+    /**
+     * 获取碳核算过程因子
+     *
+     * @param timestamp 时间戳
+     * @param request 请求体
+     * @return 操作列表
+     */
+    fun getCarbonFactorProcess(
+        timestamp: Long,
+        request: HttpServletRequest
+    ): ResponseEntity<BaseResponse>
+
+    /**
+     * 获取碳核算过程因子
+     *
+     * @param timestamp 时间戳
+     * @param request 请求体
+     * @return 操作列表
+     */
+    fun getCarbonFactorDesulfurization(
+        timestamp: Long,
+        request: HttpServletRequest
+    ): ResponseEntity<BaseResponse>
+
+    /**
+     * 获取碳核算过程因子
+     *
+     * @param timestamp 时间戳
+     * @param request 请求体
+     * @return 操作列表
+     */
+    fun getCarbonFactorOther(
         timestamp: Long,
         request: HttpServletRequest
     ): ResponseEntity<BaseResponse>

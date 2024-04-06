@@ -4,6 +4,8 @@ import com.frontleaves.greenchaincarbonledger.models.doData.OtherEmissionFactorD
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 
+import java.util.List;
+
 /**
  * 对OtherEmissionFactor表的数据库操作
  * @author FALSHLACK
@@ -12,4 +14,7 @@ import org.apache.ibatis.annotations.Select;
 public interface OtherEmissionFactorMapper {
     @Select("SELECT * FROM fy_other_emission_factor WHERE name=#{name}")
     OtherEmissionFactorDO getFactorByName(String name);
+
+    @Select("SELECT * FROM fy_other_emission_factor")
+    List<OtherEmissionFactorDO> getOtherEmissionFactorList();
 }
