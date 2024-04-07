@@ -266,9 +266,25 @@ public class CarbonController {
             }
 
         } catch (JsonSyntaxException e) {
-            log.error("[Controller] 原料参数解析失败");
+            log.error("[Controller] 原料参数解析失败", e);
             errorMessage.add("原料参数解析失败，请检查原料参数格式");
             return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR, errorMessage);
+        }
+        // 如果为空的部分需要新建内容
+        if (materialsDO.getMaterials() == null) {
+            materialsDO.setMaterials(new ArrayList<>());
+        }
+        if (materialsDO.getCourses() == null) {
+            materialsDO.setCourses(new ArrayList<>());
+        }
+        if (materialsDO.getCarbonSequestrations() == null) {
+            materialsDO.setCarbonSequestrations(new ArrayList<>());
+        }
+        if (materialsDO.getDesulfurization() == null) {
+            materialsDO.setDesulfurization(new ArrayList<>());
+        }
+        if (materialsDO.getHeat() == null) {
+            materialsDO.setHeat(new ArrayList<>());
         }
         // 返回业务操作
         switch (carbonConsumeVO.getType()) {

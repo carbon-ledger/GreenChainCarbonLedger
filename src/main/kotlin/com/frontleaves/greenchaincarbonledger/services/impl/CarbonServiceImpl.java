@@ -25,6 +25,7 @@ import org.jetbrains.annotations.Nullable;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -112,7 +113,7 @@ public class CarbonServiceImpl implements CarbonService {
         return ehCombustion;
     }
 
-    private static List<List<List<String>>> desulfurizationData(@NotNull List<MaterialsDO.Desulfurization> desulfurizationComposition, ProcessEmissionFactorDAO processEmissionFactorDAO){
+    private static List<List<List<String>>> desulfurizationData(@NotNull List<MaterialsDO.Desulfurization> desulfurizationComposition, DesulfurizationFactorDAO desulfurizationFactorDAO){
         List<List<String>> list2 = new ArrayList<>();
         List<List<String>> list3 = new ArrayList<>();
         for (MaterialsDO.Desulfurization des : desulfurizationComposition) {
@@ -126,7 +127,7 @@ public class CarbonServiceImpl implements CarbonService {
             // 脱硫剂消耗量(前端传入)
             list22.add(String.valueOf(des.material.consumption));
             // 数据库读取
-            DesulfurizationFactorDO desulfurizationFactorDO = processEmissionFactorDAO.getDesFactorByName(des.name);
+            DesulfurizationFactorDO desulfurizationFactorDO = desulfurizationFactorDAO.getDesFactorByName(des.name);
             // 脱硫剂排放因子
             double factor = desulfurizationFactorDO.getFactor();
             list33.add(String.valueOf(factor));
@@ -149,7 +150,7 @@ public class CarbonServiceImpl implements CarbonService {
      *
      * @return 返回是否通过时间重复性检查
      */
-    private static double eCombustion(@NotNull List<MaterialsDO.Materials> materialsList, CarbonItemTypeDAO carbonItemTypeDAO) {
+    private static double eCombustion(List<MaterialsDO.Materials> materialsList, CarbonItemTypeDAO carbonItemTypeDAO) {
         double value = 0.0;
         for (MaterialsDO.Materials material : materialsList) {
             // 获取碳排放因子
@@ -167,7 +168,7 @@ public class CarbonServiceImpl implements CarbonService {
     /**
     * 计算附表二和三种中的化石燃料的相关数据
     * */
-    private static List<List<List<String>>> fuelData(@NotNull List<MaterialsDO.Materials> materialsList, CarbonItemTypeDAO carbonItemTypeDAO){
+    private static List<List<List<String>>> fuelData(List<MaterialsDO.Materials> materialsList, CarbonItemTypeDAO carbonItemTypeDAO){
         List<List<String>> list2 = new ArrayList<>();
         List<List<String>> list3 = new ArrayList<>();
         for (MaterialsDO.Materials material : materialsList) {
@@ -537,6 +538,7 @@ public class CarbonServiceImpl implements CarbonService {
 
     @NotNull
     @Override
+    @Transactional
     public ResponseEntity<BaseResponse> createCarbonReport(long timestamp, @NotNull HttpServletRequest request, @NotNull CarbonConsumeVO carbonConsumeVO, @NotNull List<MaterialsDO.Materials> materials, @NotNull List<MaterialsDO.Materials> courses, @NotNull List<MaterialsDO.Materials> carbonSequestrations, @NotNull List<MaterialsDO.Material> heats) {
         // 从前端获取时间并进行格式化
         CarbonReportDO getOrganizeUserLastCarbonReport = carbonReportDAO.getLastReportByUuid(ProcessingUtil.getAuthorizeUserUuid(request));
@@ -829,6 +831,7 @@ public class CarbonServiceImpl implements CarbonService {
 
     @NotNull
     @Override
+    @Transactional
     public ResponseEntity<BaseResponse> createCarbonReport1(long timestamp, @NotNull HttpServletRequest request, @NotNull CarbonConsumeVO carbonConsumeVO, @NotNull List<MaterialsDO.Materials> materials, @NotNull List<MaterialsDO.Desulfurization> desulfurization) {
         // 从数据库获取上一份报告的数据，准备进行比较
         CarbonReportDO getOrganizeUserLastCarbonReport = carbonReportDAO.getLastReportByUuid(ProcessingUtil.getAuthorizeUserUuid(request));
@@ -878,7 +881,7 @@ public class CarbonServiceImpl implements CarbonService {
         if (eCombustion < 0){
             return ResultUtil.error(timestamp, "化石燃烧相关参数错误", ErrorCode.REQUEST_BODY_ERROR);
         }
-        double eDesulfurization = eDesulfurization(desulfurization, processEmissionFactorDAO);
+        double eDesulfurization = eDesulfurization(desulfurization, desulfurizationFactorDAO);
         if (eDesulfurization < 0){
             return ResultUtil.error(timestamp, "脱硫过程相关参数错误", ErrorCode.REQUEST_BODY_ERROR);
         }
@@ -948,7 +951,7 @@ public class CarbonServiceImpl implements CarbonService {
         String schedule2;
         // 获取附表二所需要的数据，直接获取list向excel表格中写入
         List<List<String>> listFuel2 = fuelData(materials, carbonItemTypeDAO).get(0);
-        List<List<String>> listDes2 = desulfurizationData(desulfurization, processEmissionFactorDAO).get(0);
+        List<List<String>> listDes2 = desulfurizationData(desulfurization, desulfurizationFactorDAO).get(0);
         //创建附表名称
         try (InputStream inputStream = new ClassPathResource("files1/PowerGeneration2.xlsx").getInputStream()) {
             try (Workbook workbook = new XSSFWorkbook(inputStream)) {
@@ -1026,7 +1029,7 @@ public class CarbonServiceImpl implements CarbonService {
         // 获取附表三所需要的数据，直接获取list向excel表格中写入
         String schedule3;
         List<List<String>> listFuel3 = fuelData(materials, carbonItemTypeDAO).get(1);
-        List<List<String>> listDes3 = desulfurizationData(desulfurization, processEmissionFactorDAO).get(1);
+        List<List<String>> listDes3 = desulfurizationData(desulfurization, desulfurizationFactorDAO).get(1);
         try (InputStream inputStream = new ClassPathResource("files1/PowerGeneration3.xlsx").getInputStream()) {
             try (Workbook workbook = new XSSFWorkbook(inputStream)) {
                 //获取工作表1

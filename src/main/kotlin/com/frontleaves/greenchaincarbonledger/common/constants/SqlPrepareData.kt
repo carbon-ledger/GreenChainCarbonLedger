@@ -127,6 +127,7 @@ object SqlPrepareData {
         add("carbon:getCarbonFactorProcess")
         add("carbon:getCarbonFactorDesulfurization")
         add("carbon:getCarbonFactorOther")
+        add("carbon:getCarbonAccounting")
         add("trade:changeStatus")
         add("trade:getOwnTradeList")
         add("trade:buyTrade")

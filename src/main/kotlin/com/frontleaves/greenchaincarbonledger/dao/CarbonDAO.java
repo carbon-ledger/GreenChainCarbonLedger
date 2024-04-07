@@ -57,7 +57,7 @@ public class CarbonDAO {
     public List<CarbonReportDO> getReportByUuid(String uuid, String limit, String page, String order) {
         log.info("[DAO] 执行 getReportByUuid 方法");
         log.info("Mysql 读取");
-        return carbonMapper.getReportByUuid(uuid, limit, page, order);
+        return carbonMapper.getReportByUuid(uuid, Integer.parseInt(limit), Integer.parseInt(page), order);
     }
 
     /**
@@ -73,7 +73,7 @@ public class CarbonDAO {
     public List<CarbonReportDO> getReportByStatus(String uuid, String search, String limit, String page, String order) {
         log.info("[DAO] 执行 getReportByStatus 操作");
         log.info("Mysql 读取");
-        return carbonMapper.getReportByStatus(uuid, search, limit, page, order);
+        return carbonMapper.getReportByStatus(uuid, search, Integer.parseInt(limit), Integer.parseInt(page), order);
     }
 
     /**
@@ -89,7 +89,7 @@ public class CarbonDAO {
     public List<CarbonReportDO> getReportBySearch(String uuid, String search, String limit, String page, String order) {
         log.info("[DAO] 执行 getReportBySearch 方法");
         log.info("Mysql 读取");
-        return carbonMapper.getReportBySearch(uuid, search, limit, page, order);
+        return carbonMapper.getReportBySearch(uuid, search, Integer.parseInt(limit), Integer.parseInt(page), order);
     }
 
     /**
