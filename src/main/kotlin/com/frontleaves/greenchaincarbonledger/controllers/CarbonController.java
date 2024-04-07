@@ -430,6 +430,13 @@ public class CarbonController {
         return carbonService.getCarbonReviewReport(timestamp, request);
     }
 
+    /**
+     * 获取碳材料的控制器方法。
+     *
+     * @param reportId 报告的唯一标识符，必须为数字。
+     * @param request 用户的请求对象，用于获取请求相关信息。
+     * @return 根据请求结果构建的响应实体，包含碳材料信息或错误信息。
+     */
     @GetMapping("/material/{reportId}")
     @CheckAccountPermission({"carbon:getCarbonMaterial"})
     public ResponseEntity<BaseResponse> getCarbonMaterial(
@@ -438,10 +445,38 @@ public class CarbonController {
     ) {
         log.info("[Controller] 请求 getCarbonMaterial 接口");
         long timestamp = System.currentTimeMillis();
-        // 对 reportId 进行检查是否是数字
+        // 检查 reportId 是否为数字格式
         if (!reportId.matches("^[0-9]*$")) {
             return ResultUtil.error(timestamp, "参数 reportId 错误", ErrorCode.PATH_VARIABLE_ERROR);
         }
         return carbonService.getCarbonMaterial(timestamp, request, Long.parseLong(reportId));
+    }
+
+    /**
+     * 获取碳审查检查结果的接口。
+     *
+     * @param reportId 报告ID，必须为纯数字字符串。
+     * @param pass 是否通过的标志，只能为"true"或"false"。
+     * @param request HttpServletRequest对象，用于获取请求相关信息。
+     * @return ResponseEntity<BaseResponse> HTTP响应实体，包含处理结果。
+     */
+    @PutMapping("/review/check")
+    @CheckAccountPermission({"carbon:getCarbonReviewCheck"})
+    public ResponseEntity<BaseResponse> getCarbonReviewCheck(
+            @RequestParam String reportId,
+            @RequestParam String pass,
+            HttpServletRequest request
+    ) {
+        log.info("[Controller] 请求 getCarbonReviewCheck 接口");
+        long timestamp = System.currentTimeMillis();
+        // 验证输入参数
+        if (!reportId.matches("^[0-9]*$")) {
+            return ResultUtil.error(timestamp, "参数 reportId 错误", ErrorCode.PATH_VARIABLE_ERROR);
+        }
+        if (!"true".equals(pass) && !"false".equals(pass)) {
+            return ResultUtil.error(timestamp, "参数 pass 错误", ErrorCode.PATH_VARIABLE_ERROR);
+        }
+        // 调用服务层处理逻辑
+        return carbonService.getCarbonReviewCheck(timestamp, request, Long.parseLong(reportId), pass);
     }
 }

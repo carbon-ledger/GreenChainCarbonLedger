@@ -382,4 +382,26 @@ public class CarbonDAO {
         log.info("\t> Mysql 读取");
         return carbonMapper.getCarbonCompensationMaterialByAccountId(id);
     }
+
+    /**
+     * 修改碳排放报告的状态。
+     * @param id 报告的唯一标识符。
+     * @param approved 新的状态，通常表示是否批准该报告。
+     */
+    public void changeCarbonReportStatus(Long id, String approved) {
+        log.info("[DAO] 执行 changeCarbonReportStatus");
+        log.info("\t> Mysql 更新");
+        carbonMapper.changeCarbonReportStatus(id, approved);
+    }
+
+    /**
+     * 修改碳排放核算报告状态。
+     * @param id 报告的唯一标识符。
+     * @param verified 新的状态，通常表示是否批准该报告。
+     */
+    public void changeCarbonAccountingStatus(Long id, String verified) {
+        log.info("[DAO] 执行 changeCarbonAccountingStatus");
+        log.info("\t> Mysql 更新");
+        carbonMapper.changeCarbonAccountingStatus(id, verified);
+    }
 }

@@ -252,4 +252,21 @@ interface CarbonService {
         request: HttpServletRequest,
         reportId: Long
     ): ResponseEntity<BaseResponse>
+
+    /**
+     * 审核报告
+     *
+     * @param timestamp 时间戳
+     * @param request 请求体
+     * @param reportId 报告ID
+     * @param pass 是否通过
+     *
+     * @return ResponseEntity<BaseResponse> 响应实体
+     */
+    fun getCarbonReviewCheck(
+        timestamp: Long,
+        request: HttpServletRequest,
+        reportId: Long,
+        pass: String
+    ): ResponseEntity<BaseResponse>
 }

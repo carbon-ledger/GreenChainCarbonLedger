@@ -1369,4 +1369,25 @@ public class CarbonServiceImpl implements CarbonService {
         }
     }
 
+    @NotNull
+    @Override
+    public ResponseEntity<BaseResponse> getCarbonReviewCheck(long timestamp, @NotNull HttpServletRequest request, long reportId, @NotNull String pass) {
+        // 获取报告 ID
+        CarbonReportDO carbonReportDO = carbonDAO.getReportById(reportId);
+        if (carbonReportDO != null) {
+            if ("true".equals(pass)) {
+                // 通过审核
+                carbonDAO.changeCarbonReportStatus(carbonReportDO.getId(), "approved");
+                carbonDAO.changeCarbonAccountingStatus(carbonReportDO.getId(), "verified");
+                // TODO: 扣除碳源
+            } else if ("false".equals(pass)) {
+                // 拒绝审核
+                carbonDAO.changeCarbonReportStatus(carbonReportDO.getId(), "rejected");
+                carbonDAO.changeCarbonAccountingStatus(carbonReportDO.getId(), "rejected");
+            }
+            return ResultUtil.success(timestamp, "审核完成");
+        } else {
+            return ResultUtil.error(timestamp, "获取失败", ErrorCode.SERVER_INTERNAL_ERROR);
+        }
+    }
 }
