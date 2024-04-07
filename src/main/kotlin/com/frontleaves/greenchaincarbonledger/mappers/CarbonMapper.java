@@ -127,4 +127,10 @@ public interface CarbonMapper {
 
     @Update("UPDATE fy_carbon_quota SET audit_log = #{auditLog}, updated_at = now() WHERE uuid = #{uuid}")
     void addAuditLog(String uuid, String auditLog);
+
+    @Select("SELECT * FROM fy_carbon_report WHERE id = #{getReportId}")
+    CarbonReportDO getReportById(Long getReportId);
+
+    @Select("SELECT * FROM fy_carbon_accounting WHERE report_id = #{reportId}")
+    CarbonAccountingDO getAccountingByReportId(long reportId);
 }

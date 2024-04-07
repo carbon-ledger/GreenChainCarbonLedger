@@ -9,10 +9,10 @@ import lombok.experimental.Accessors;
 @Data
 @Accessors(chain = true)
 public class BackCarbonAccountingVO {
-    String id;
+    Long id;
     String organizeUuid;
     String emissionSource;
-    Integer emissionAmount;
+    Double emissionAmount;
     String accountingPeriod;
     String dataVerificationStatus;
     String createAt;

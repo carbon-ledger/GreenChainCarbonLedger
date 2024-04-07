@@ -337,4 +337,28 @@ public class CarbonDAO {
         log.info("\t> Mysql 插入");
         carbonMapper.addAuditLog(uuid, auditLog);
     }
+
+    /**
+     * 获取碳交易报告
+     *
+     * @param getReportId 获取报告 ID
+     * @return 返回报告内容实体
+     */
+    public CarbonReportDO getReportById(Long getReportId) {
+        log.info("[DAO] 执行 getReportById");
+        log.info("\t> Mysql 读取");
+        return carbonMapper.getReportById(getReportId);
+    }
+
+    /**
+     * 获取碳交易报告
+     *
+     * @param reportId 获取报告 ID
+     * @return 返回报告内容实体列表
+     */
+    public CarbonAccountingDO getAccountingByReportId(long reportId) {
+        log.info("[DAO] 执行 getAccountingByReportId");
+        log.info("\t> Mysql 读取");
+        return carbonMapper.getAccountingByReportId(reportId);
+    }
 }

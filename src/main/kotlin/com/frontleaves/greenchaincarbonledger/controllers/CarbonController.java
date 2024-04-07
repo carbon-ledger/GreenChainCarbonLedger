@@ -209,82 +209,28 @@ public class CarbonController {
         // 对原料相关参数进行解析
         try {
             materialsDO = gson.fromJson(carbonConsumeVO.getMaterials(), MaterialsDO.class);
-            /*
-             * 此处对materialDO中的各个列表数据再次进行解析，判断各个数据的值是否有效
-             * */
-            if (materialsDO.getMaterials() != null) {
-                for (MaterialsDO.Materials materials : materialsDO.getMaterials()) {
-                    if (materials.getName() != null) {
-                        if (materials.getMaterial().getBuy() == null || materials.getMaterial().getOpeningInv() == null || materials.getMaterial().getEndingInv() == null || materials.getMaterial().getOutside() == null || materials.getMaterial().getExport() == null) {
-                            return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR);
-                        }
-                    } else {
-                        return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR);
-                    }
 
-                }
+            // 如果为空的部分需要新建内容
+            if (materialsDO.getMaterials() == null) {
+                materialsDO.setMaterials(new ArrayList<>());
             }
-            if (materialsDO.getCourses() != null) {
-                for (MaterialsDO.Materials materials : materialsDO.getCourses()) {
-                    if (materials.getName() != null) {
-                        if (materials.getMaterial().getBuy() == null || materials.getMaterial().getOpeningInv() == null || materials.getMaterial().getEndingInv() == null || materials.getMaterial().getOutside() == null || materials.getMaterial().getExport() == null) {
-                            return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR);
-                        }
-                    } else {
-                        return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR);
-                    }
-                }
+            if (materialsDO.getCourses() == null) {
+                materialsDO.setCourses(new ArrayList<>());
             }
-            if (materialsDO.getCarbonSequestrations() != null) {
-                for (MaterialsDO.Materials materials : materialsDO.getCarbonSequestrations()) {
-                    if (materials.getName() != null) {
-                        if (materials.getMaterial().getOpeningInv() == null || materials.getMaterial().getEndingInv() == null || materials.getMaterial().getExport() == null) {
-                            return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR);
-                        }
-                    } else {
-                        return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR);
-                    }
-                }
+            if (materialsDO.getCarbonSequestrations() == null) {
+                materialsDO.setCarbonSequestrations(new ArrayList<>());
             }
-            if (materialsDO.getDesulfurization() != null) {
-                for (MaterialsDO.Desulfurization desulfurization : materialsDO.getDesulfurization()) {
-                    if (desulfurization.getName() != null) {
-                        if (desulfurization.getMaterial().getConsumption() == null) {
-                            return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR);
-                        }
-                    } else {
-                        return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR);
-                    }
-                }
+            if (materialsDO.getDesulfurization() == null) {
+                materialsDO.setDesulfurization(new ArrayList<>());
             }
-            if (materialsDO.getHeat() != null) {
-                for (MaterialsDO.Material material : materialsDO.getHeat()) {
-                    if (material.getBuy() == null || material.getOutside() == null || material.getExport() == null) {
-                        return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR);
-                    }
-                }
+            if (materialsDO.getHeat() == null) {
+                materialsDO.setHeat(new ArrayList<>());
             }
-
+            log.info(materialsDO.toString());
         } catch (JsonSyntaxException e) {
             log.error("[Controller] 原料参数解析失败", e);
             errorMessage.add("原料参数解析失败，请检查原料参数格式");
             return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR, errorMessage);
-        }
-        // 如果为空的部分需要新建内容
-        if (materialsDO.getMaterials() == null) {
-            materialsDO.setMaterials(new ArrayList<>());
-        }
-        if (materialsDO.getCourses() == null) {
-            materialsDO.setCourses(new ArrayList<>());
-        }
-        if (materialsDO.getCarbonSequestrations() == null) {
-            materialsDO.setCarbonSequestrations(new ArrayList<>());
-        }
-        if (materialsDO.getDesulfurization() == null) {
-            materialsDO.setDesulfurization(new ArrayList<>());
-        }
-        if (materialsDO.getHeat() == null) {
-            materialsDO.setHeat(new ArrayList<>());
         }
         // 返回业务操作
         switch (carbonConsumeVO.getType()) {
@@ -420,5 +366,35 @@ public class CarbonController {
         log.info("[Controller] 请求 getCarbonFactorOther 接口");
         long timestamp = System.currentTimeMillis();
         return carbonService.getCarbonFactorOther(timestamp, request);
+    }
+
+    @GetMapping("/report/get/{reportId}")
+    @CheckAccountPermission({"carbon:getCarbonReport"})
+    public ResponseEntity<BaseResponse> getCarbonReportSingle(
+            @PathVariable String reportId,
+            HttpServletRequest request
+    ) {
+        log.info("[Controller] 请求 getCarbonReportSingle 接口");
+        long timestamp = System.currentTimeMillis();
+        // 对 reportId 进行检查是否是数字
+        if (!reportId.matches("^[0-9]*$")) {
+            return ResultUtil.error(timestamp, "参数 reportId 错误", ErrorCode.PATH_VARIABLE_ERROR);
+        }
+        return carbonService.getCarbonReportSingle(timestamp, request, Long.parseLong(reportId));
+    }
+
+    @GetMapping("/accounting/get/{reportId}")
+    @CheckAccountPermission({"carbon:getCarbonAccounting"})
+    public ResponseEntity<BaseResponse> getCarbonAccountingSingle(
+            @PathVariable String reportId,
+            HttpServletRequest request
+    ) {
+        log.info("[Controller] 请求 getCarbonAccountingSingle 接口");
+        long timestamp = System.currentTimeMillis();
+        // 对 reportId 进行检查是否是数字
+        if (!reportId.matches("^[0-9]*$")) {
+            return ResultUtil.error(timestamp, "参数 reportId 错误", ErrorCode.PATH_VARIABLE_ERROR);
+        }
+        return carbonService.getCarbonAccountingSingle(timestamp, request, Long.parseLong(reportId));
     }
 }

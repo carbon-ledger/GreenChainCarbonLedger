@@ -15,17 +15,17 @@ import lombok.experimental.Accessors;
 @Data
 @Accessors(chain = true)
 public class CarbonAccountingDO {
-    String id;
+    Long id;
     String organizeUuid;
-    String reportId;
+    Long reportId;
     String emissionType;
     String emissionVolume;
-    Integer emissionAmount;
+    Double emissionAmount;
     String accountingPeriod;
     String dataVerificationStatus;
     String verifierUuid;
     String verificationNotes;
-    Integer blockchainTxId;
+    String blockchainTxId;
     String createdAt;
     String updatedAt;
 }

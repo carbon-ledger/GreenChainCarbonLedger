@@ -2,8 +2,8 @@ package com.frontleaves.greenchaincarbonledger.services.impl;
 
 import com.frontleaves.greenchaincarbonledger.dao.*;
 import com.frontleaves.greenchaincarbonledger.models.doData.*;
-import com.frontleaves.greenchaincarbonledger.models.doData.excel.*;
 import com.frontleaves.greenchaincarbonledger.models.doData.ExcelData.*;
+import com.frontleaves.greenchaincarbonledger.models.doData.excel.ExcelCarbonDioxideEmissionsDO;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.CarbonAddQuotaVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.CarbonConsumeVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.returnData.*;
@@ -32,7 +32,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Date;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
 
 /**
  * @author FLASHLACK
@@ -113,7 +116,7 @@ public class CarbonServiceImpl implements CarbonService {
         return ehCombustion;
     }
 
-    private static List<List<List<String>>> desulfurizationData(@NotNull List<MaterialsDO.Desulfurization> desulfurizationComposition, DesulfurizationFactorDAO desulfurizationFactorDAO){
+    private static List<List<List<String>>> desulfurizationData(@NotNull List<MaterialsDO.Desulfurization> desulfurizationComposition, DesulfurizationFactorDAO desulfurizationFactorDAO) {
         List<List<String>> list2 = new ArrayList<>();
         List<List<String>> list3 = new ArrayList<>();
         for (MaterialsDO.Desulfurization des : desulfurizationComposition) {
@@ -165,10 +168,11 @@ public class CarbonServiceImpl implements CarbonService {
         }
         return value;
     }
+
     /**
-    * 计算附表二和三种中的化石燃料的相关数据
-    * */
-    private static List<List<List<String>>> fuelData(List<MaterialsDO.Materials> materialsList, CarbonItemTypeDAO carbonItemTypeDAO){
+     * 计算附表二和三种中的化石燃料的相关数据
+     */
+    private static List<List<List<String>>> fuelData(List<MaterialsDO.Materials> materialsList, CarbonItemTypeDAO carbonItemTypeDAO) {
         List<List<String>> list2 = new ArrayList<>();
         List<List<String>> list3 = new ArrayList<>();
         for (MaterialsDO.Materials material : materialsList) {
@@ -176,11 +180,10 @@ public class CarbonServiceImpl implements CarbonService {
             List<String> list33 = new ArrayList<>();
             list22.add("化石燃料燃烧");
             list33.add("化石燃料燃烧");
-            String name = carbonItemTypeDAO.getCarbonItemTypeByName(material.getName()).getDisplayName();
-            list22.add(name);
-            list33.add(name);
             // 获取碳排放因子
-            CarbonItemTypeDO carbonItemTypeDO = carbonItemTypeDAO.getCarbonItemTypeByName(name);
+            CarbonItemTypeDO carbonItemTypeDO = carbonItemTypeDAO.getCarbonItemTypeByName(material.getName());
+            list22.add(carbonItemTypeDO.getDisplayName());
+            list33.add(carbonItemTypeDO.getDisplayName());
             // 获取能计算出净消耗量的相关参数
             MaterialsDO.Material materialData = material.getMaterial();
             // 计算净消耗量
@@ -204,8 +207,6 @@ public class CarbonServiceImpl implements CarbonService {
     }
 
 
-
-
     /**
      * 获取附表1中燃烧材料的附表
      */
@@ -217,12 +218,7 @@ public class CarbonServiceImpl implements CarbonService {
             MaterialsDO.Material materialData = material.getMaterial();
             double netConsumption = materialData.getBuy() + materialData.getOpeningInv() - materialData.getEndingInv() + materialData.getOutside() + materialData.getExport();
             //获取信息
-            combustionConsumptionDO
-                    .setDisplayName(carbonItemTypeDO.getDisplayName())
-                    .setNetConsumption(String.valueOf(netConsumption))
-                    .setLowCalorific(String.valueOf(carbonItemTypeDO.getLowCalorific()))
-                    .setCarbonUnitCalorific(String.valueOf(carbonItemTypeDO.getCarbonUnitCalorific()))
-                    .setFuelOxidationRate(String.valueOf(carbonItemTypeDO.getFuelOxidationRate()));
+            combustionConsumptionDO.setDisplayName(carbonItemTypeDO.getDisplayName()).setNetConsumption(String.valueOf(netConsumption)).setLowCalorific(String.valueOf(carbonItemTypeDO.getLowCalorific())).setCarbonUnitCalorific(String.valueOf(carbonItemTypeDO.getCarbonUnitCalorific())).setFuelOxidationRate(String.valueOf(carbonItemTypeDO.getFuelOxidationRate()));
             resultList.add(combustionConsumptionDO);
         }
         return resultList;
@@ -251,11 +247,7 @@ public class CarbonServiceImpl implements CarbonService {
     private static ElectricityCombustionDO electricityCombustion(CarbonConsumeVO carbonConsumeVO, OtherEmissionFactorDAO otherEmissionFactorDAO) {
         ElectricityCombustionDO electricityCombustionDO = new ElectricityCombustionDO();
         OtherEmissionFactorDO otherEmissionFactorDO = otherEmissionFactorDAO.getFactorByName(carbonConsumeVO.getElectricCompany());
-        electricityCombustionDO
-                .setDisplayName(carbonConsumeVO.getElectricCompany())
-                .setNetCombustion(String.valueOf((Double.parseDouble(carbonConsumeVO.getElectricBuy())
-                        - Double.parseDouble(carbonConsumeVO.getElectricOutside()) - Double.parseDouble(carbonConsumeVO.getElectricExport()))))
-                .setFactor(String.valueOf(otherEmissionFactorDO.getFactor()));
+        electricityCombustionDO.setDisplayName(carbonConsumeVO.getElectricCompany()).setNetCombustion(String.valueOf((Double.parseDouble(carbonConsumeVO.getElectricBuy()) - Double.parseDouble(carbonConsumeVO.getElectricOutside()) - Double.parseDouble(carbonConsumeVO.getElectricExport())))).setFactor(String.valueOf(otherEmissionFactorDO.getFactor()));
         return electricityCombustionDO;
     }
 
@@ -290,10 +282,7 @@ public class CarbonServiceImpl implements CarbonService {
             ProcessEmissionFactorDO processEmissionFactorDO = processEmissionFactorDAO.getFactorByName(courses.getName());
             MaterialsDO.Material materialData = courses.getMaterial();
             double netConsumption = materialData.getBuy() + (materialData.getOpeningInv() - materialData.getEndingInv()) + materialData.getOutside() + materialData.getExport();
-            coursesConsumptionDO
-                    .setDisplayName(processEmissionFactorDO.getDisplayName())
-                    .setNetConsumption(String.valueOf(netConsumption))
-                    .setFactor(String.valueOf(processEmissionFactorDO.getFactor()));
+            coursesConsumptionDO.setDisplayName(processEmissionFactorDO.getDisplayName()).setNetConsumption(String.valueOf(netConsumption)).setFactor(String.valueOf(processEmissionFactorDO.getFactor()));
             resultList.add(coursesConsumptionDO);
         }
         return resultList;
@@ -330,10 +319,7 @@ public class CarbonServiceImpl implements CarbonService {
             OtherEmissionFactorDO otherEmissionFactorDO = otherEmissionFactorDAO.getFactorByName(carbonSequestration.getName());
             MaterialsDO.Material materialData = carbonSequestration.getMaterial();
             double netConsumption = materialData.getExport() + materialData.getEndingInv() - materialData.getOpeningInv();
-            carbonSequestrationConsumptionDO
-                    .setDisplayName(otherEmissionFactorDO.getDisplayName())
-                    .setNetConsumption(String.valueOf(netConsumption))
-                    .setFactor(String.valueOf(otherEmissionFactorDO.getFactor()));
+            carbonSequestrationConsumptionDO.setDisplayName(otherEmissionFactorDO.getDisplayName()).setNetConsumption(String.valueOf(netConsumption)).setFactor(String.valueOf(otherEmissionFactorDO.getFactor()));
             resultList.add(carbonSequestrationConsumptionDO);
         }
         return resultList;
@@ -368,10 +354,7 @@ public class CarbonServiceImpl implements CarbonService {
         MaterialsDO.Material heat = heatList.get(0);
         OtherEmissionFactorDO otherEmissionFactorDO = otherEmissionFactorDAO.getFactorByName("thermalPower");
         double netConsumption = heat.getBuy() - heat.getExport() - heat.getOutside();
-        heatConsumptionDO
-                .setDisplayName(otherEmissionFactorDO.getDisplayName())
-                .setNetConsumption(String.valueOf(netConsumption))
-                .setFactor(String.valueOf(otherEmissionFactorDO.getFactor()));
+        heatConsumptionDO.setDisplayName(otherEmissionFactorDO.getDisplayName()).setNetConsumption(String.valueOf(netConsumption)).setFactor(String.valueOf(otherEmissionFactorDO.getFactor()));
         return heatConsumptionDO;
     }
 
@@ -431,19 +414,8 @@ public class CarbonServiceImpl implements CarbonService {
             ArrayList<BackCarbonQuotaVO> backCarbonQuotaVOList = new ArrayList<>();
             carbonQuotaList.forEach(carbonQuotaDO -> {
                 BackCarbonQuotaVO backCarbonQuotaVO = new BackCarbonQuotaVO();
-                backCarbonQuotaVO
-                        .setUuid(carbonQuotaDO.getUuid())
-                        .setOrganizeUuid(carbonQuotaDO.getOrganizeUuid())
-                        .setAuditLog(gson.fromJson(carbonQuotaDO.getAuditLog(), new TypeToken<ArrayList<AuditLogDO>>() {
-                        }.getType()))
-                        .setQuotaYear(carbonQuotaDO.getQuotaYear())
-                        .setTotalQuota(carbonQuotaDO.getTotalQuota())
-                        .setAllocatedQuota(carbonQuotaDO.getAllocatedQuota())
-                        .setUsedQuota(carbonQuotaDO.getUsedQuota())
-                        .setAllocationDate(carbonQuotaDO.getAllocationDate().toString())
-                        .setComplianceStatus(carbonQuotaDO.isComplianceStatus())
-                        .setCreatedAt(carbonQuotaDO.getCreatedAt())
-                        .setUpdatedAt(carbonQuotaDO.getUpdatedAt());
+                backCarbonQuotaVO.setUuid(carbonQuotaDO.getUuid()).setOrganizeUuid(carbonQuotaDO.getOrganizeUuid()).setAuditLog(gson.fromJson(carbonQuotaDO.getAuditLog(), new TypeToken<ArrayList<AuditLogDO>>() {
+                }.getType())).setQuotaYear(carbonQuotaDO.getQuotaYear()).setTotalQuota(carbonQuotaDO.getTotalQuota()).setAllocatedQuota(carbonQuotaDO.getAllocatedQuota()).setUsedQuota(carbonQuotaDO.getUsedQuota()).setAllocationDate(carbonQuotaDO.getAllocationDate().toString()).setComplianceStatus(carbonQuotaDO.isComplianceStatus()).setCreatedAt(carbonQuotaDO.getCreatedAt()).setUpdatedAt(carbonQuotaDO.getUpdatedAt());
                 backCarbonQuotaVOList.add(backCarbonQuotaVO);
             });
             return ResultUtil.success(timestamp, backCarbonQuotaVOList);
@@ -487,15 +459,7 @@ public class CarbonServiceImpl implements CarbonService {
             if (getReportList != null) {
                 for (CarbonReportDO getReport : getReportList) {
                     BackCarbonReportVO backCarbonReportVO = new BackCarbonReportVO();
-                    backCarbonReportVO
-                            .setId(getReport.getId())
-                            .setOrganizeUuid(getReport.getOrganizeUuid())
-                            .setAccountingPeriod(getReport.getAccountingPeriod())
-                            .setTotalEmission(getReport.getTotalEmission())
-                            .setReportStatus(getReport.getReportStatus())
-                            .setListOfReports(getReport.getListOfReports())
-                            .setCreatedAt(getReport.getCreatedAt())
-                            .setUpdatedAt(getReport.getUpdateAt());
+                    backCarbonReportVO.setId(getReport.getId()).setOrganizeUuid(getReport.getOrganizeUuid()).setAccountingPeriod(getReport.getAccountingPeriod()).setTotalEmission(getReport.getTotalEmission()).setReportStatus(getReport.getReportStatus()).setListOfReports(getReport.getListOfReports()).setCreatedAt(getReport.getCreatedAt()).setUpdatedAt(getReport.getUpdatedAt());
                     backCarbonReportList.add(backCarbonReportVO);
                 }
                 //输出
@@ -620,12 +584,7 @@ public class CarbonServiceImpl implements CarbonService {
         heat.setName("eCourse").setHeatEmissions(eHeat);
         electric.setName("eElectric").setElectricEmissions(eElectric);
         // 存入总表
-        carbonAccountingEmissionsVolumeDO
-                .setMaterials(material)
-                .setCourses(course)
-                .setCarbonSequestrations(carbonSequestration)
-                .setHeat(heat)
-                .setElectric(electric);
+        carbonAccountingEmissionsVolumeDO.setMaterials(material).setCourses(course).setCarbonSequestrations(carbonSequestration).setHeat(heat).setElectric(electric);
         //读取附表1
         String schedule1;
         try (InputStream inputStream = new ClassPathResource("files/AppendixIron1.xlsx").getInputStream()) {
@@ -709,8 +668,7 @@ public class CarbonServiceImpl implements CarbonService {
                 setCellValue(sheet2, 6 + combustionConsumptionList.size() + coursesConsumptionList.size(), 2, heatConsumption.getNetConsumption());
                 setCellValue(sheet2, 6 + combustionConsumptionList.size() + coursesConsumptionList.size(), 3, "GJ");
                 //合并单元格
-                mergeCellsAndSetValue(sheet2, 4 + combustionConsumptionList.size() + coursesConsumptionList.size(),
-                        6 + combustionConsumptionList.size() + coursesConsumptionList.size(), 0, 0, "净购入电力、热力");
+                mergeCellsAndSetValue(sheet2, 4 + combustionConsumptionList.size() + coursesConsumptionList.size(), 6 + combustionConsumptionList.size() + coursesConsumptionList.size(), 0, 0, "净购入电力、热力");
                 //设置数据和单位
                 setCellValue(sheet2, 7 + combustionConsumptionList.size() + coursesConsumptionList.size(), 2, "数据");
                 setCellValue(sheet2, 7 + combustionConsumptionList.size() + coursesConsumptionList.size(), 3, "单位");
@@ -723,8 +681,7 @@ public class CarbonServiceImpl implements CarbonService {
                     setCellValue(sheet2, i, 3, "t");
                 }
                 //合并单元格
-                mergeCellsAndSetValue(sheet2, 7 + combustionConsumptionList.size() + coursesConsumptionList.size(),
-                        7 + combustionConsumptionList.size() + coursesConsumptionList.size() + carbonSequestrationConsumption.size(), 0, 0, "固碳");
+                mergeCellsAndSetValue(sheet2, 7 + combustionConsumptionList.size() + coursesConsumptionList.size(), 7 + combustionConsumptionList.size() + coursesConsumptionList.size() + carbonSequestrationConsumption.size(), 0, 0, "固碳");
                 //表末尾
                 setCellValue(sheet2, 8 + combustionConsumptionList.size() + coursesConsumptionList.size() + carbonSequestrationConsumption.size(), 0, "* 企业应自行添加未在表中列出但企业实际消耗的其他能源品种");
                 //创建附表名称
@@ -784,8 +741,7 @@ public class CarbonServiceImpl implements CarbonService {
                 setCellValue(sheet3, 6 + combustionConsumptionList.size() + coursesConsumptionList.size(), 2, heatConsumption.getFactor());
                 setCellValue(sheet3, 6 + combustionConsumptionList.size() + coursesConsumptionList.size(), 3, "tCO2/ GJ");
                 //合并单元格
-                mergeCellsAndSetValue(sheet3, 4 + combustionConsumptionList.size() + coursesConsumptionList.size(),
-                        6 + combustionConsumptionList.size() + coursesConsumptionList.size(), 0, 0, "净购入电力、热力");
+                mergeCellsAndSetValue(sheet3, 4 + combustionConsumptionList.size() + coursesConsumptionList.size(), 6 + combustionConsumptionList.size() + coursesConsumptionList.size(), 0, 0, "净购入电力、热力");
                 //设置数据和单位
                 setCellValue(sheet3, 7 + combustionConsumptionList.size() + coursesConsumptionList.size(), 2, "数据");
                 setCellValue(sheet3, 7 + combustionConsumptionList.size() + coursesConsumptionList.size(), 3, "单位");
@@ -798,8 +754,7 @@ public class CarbonServiceImpl implements CarbonService {
                     setCellValue(sheet3, i, 3, "tCO2/t");
                 }
                 //合并单元格
-                mergeCellsAndSetValue(sheet3, 7 + combustionConsumptionList.size() + coursesConsumptionList.size(),
-                        7 + combustionConsumptionList.size() + coursesConsumptionList.size() + carbonSequestrationConsumption.size(), 0, 0, "固碳");
+                mergeCellsAndSetValue(sheet3, 7 + combustionConsumptionList.size() + coursesConsumptionList.size(), 7 + combustionConsumptionList.size() + coursesConsumptionList.size() + carbonSequestrationConsumption.size(), 0, 0, "固碳");
                 //表尾
                 setCellValue(sheet3, 8 + combustionConsumptionList.size() + coursesConsumptionList.size() + carbonSequestrationConsumption.size(), 0, "* 企业应自行添加未在表中列出但企业实际消耗的其他能源品种");
                 //创建附表名称
@@ -878,15 +833,15 @@ public class CarbonServiceImpl implements CarbonService {
          * 3. 计算E电力
          */
         double eCombustion = eCombustion(materials, carbonItemTypeDAO);
-        if (eCombustion < 0){
+        if (eCombustion < 0) {
             return ResultUtil.error(timestamp, "化石燃烧相关参数错误", ErrorCode.REQUEST_BODY_ERROR);
         }
         double eDesulfurization = eDesulfurization(desulfurization, desulfurizationFactorDAO);
-        if (eDesulfurization < 0){
+        if (eDesulfurization < 0) {
             return ResultUtil.error(timestamp, "脱硫过程相关参数错误", ErrorCode.REQUEST_BODY_ERROR);
         }
         double eElectric = electricity(carbonConsumeVO, otherEmissionFactorDAO);
-        if (eElectric < 0){
+        if (eElectric < 0) {
             return ResultUtil.error(timestamp, "电力相关参数错误", ErrorCode.REQUEST_BODY_ERROR);
         }
         // 汇总碳排放
@@ -902,18 +857,14 @@ public class CarbonServiceImpl implements CarbonService {
         carbonAccountingEmissionsVolumeDO.setMaterials(material).setDesulfuizations(desulfuization).setElectric(electric);
         // 创建3个excel附表
         /*
-        * 1. 准备DO数据————CarbonDioxideEmissions、EmissionActivityLevel、EmissionFactor
-        * 2. 数据插入excel中
-        * 3. 返回附表
-        * */
+         * 1. 准备DO数据————CarbonDioxideEmissions、EmissionActivityLevel、EmissionFactor
+         * 2. 数据插入excel中
+         * 3. 返回附表
+         * */
         // 获取附表一所需要的数据
         String schedule1;
         ExcelCarbonDioxideEmissionsDO excelCarbonDioxideEmissionsDO = new ExcelCarbonDioxideEmissionsDO();
-        excelCarbonDioxideEmissionsDO
-            .setTotalEmissions(String.valueOf(totalCombustion))
-            .setFuel(String.valueOf(eCombustion))
-            .setElectricity(String.valueOf(eElectric))
-            .setDesulfurizer(String.valueOf(eDesulfurization));
+        excelCarbonDioxideEmissionsDO.setTotalEmissions(String.valueOf(totalCombustion)).setFuel(String.valueOf(eCombustion)).setElectricity(String.valueOf(eElectric)).setDesulfurizer(String.valueOf(eDesulfurization));
         // 写入数据到附表一
         try (InputStream inputStream = new ClassPathResource("files1/PowerGeneration1.xlsx").getInputStream()) {
             try (Workbook workbook = new XSSFWorkbook(inputStream)) {
@@ -926,9 +877,9 @@ public class CarbonServiceImpl implements CarbonService {
                 setCellValue(sheet, 3, 1, excelCarbonDioxideEmissionsDO.getDesulfurizer());
                 setCellValue(sheet, 4, 1, excelCarbonDioxideEmissionsDO.getElectricity());
                 /*
-                *
-                * 数据表第一行中还有一处年份未进行替换
-                * */
+                 *
+                 * 数据表第一行中还有一处年份未进行替换
+                 * */
                 //创建附表名称
                 schedule1 = ProcessingUtil.createUuid();
                 String filePath = "workLoad/" + schedule1 + ".xlsx";
@@ -961,7 +912,7 @@ public class CarbonServiceImpl implements CarbonService {
                 // 添加化石燃料部分数据
                 int rows = 2;
                 int count = rows;
-                for(List<String> dataList: listFuel2){
+                for (List<String> dataList : listFuel2) {
                     Row row = sheet.createRow(rows++);
                     for (int i = 0; i < dataList.size(); i++) {
                         Cell cell = row.createCell(i);
@@ -969,7 +920,7 @@ public class CarbonServiceImpl implements CarbonService {
                     }
                 }
                 // 获取插入化石燃料燃烧一共多少行
-                count = rows - count -1;
+                count = rows - count - 1;
                 // 进行合并赋值
                 mergeCellsAndSetValue(sheet, 2, 2 + count, 0, 0, "化石燃料燃烧");
 
@@ -981,7 +932,7 @@ public class CarbonServiceImpl implements CarbonService {
                     cell.setCellValue(dataList.get(i));
                 }
                 int count1 = rows;
-                for(List<String> dataList1: listDes2){
+                for (List<String> dataList1 : listDes2) {
                     Row row1 = sheet.createRow(rows++);
                     for (int i = 0; i < dataList1.size(); i++) {
                         Cell cell = row1.createCell(i);
@@ -1002,7 +953,7 @@ public class CarbonServiceImpl implements CarbonService {
                 }
                 Double electricBuy = Double.parseDouble(carbonConsumeVO.getElectricBuy());
                 Double electricExport = Double.parseDouble(carbonConsumeVO.getElectricExport());
-                List<String> dataList3 = Arrays.asList("净购入电力", "电力净购入量", String.valueOf(electricBuy-electricExport), "MWh");
+                List<String> dataList3 = Arrays.asList("净购入电力", "电力净购入量", String.valueOf(electricBuy - electricExport), "MWh");
                 for (int i = 0; i < dataList3.size(); i++) {
                     Cell cell = row.createCell(i);
                     cell.setCellValue(dataList3.get(i));
@@ -1037,7 +988,7 @@ public class CarbonServiceImpl implements CarbonService {
                 Sheet sheet = workbook.getSheetAt(0);
                 // 添加化石燃料部分数据
                 int rows = 2;
-                for(List<String> dataList: listFuel3){
+                for (List<String> dataList : listFuel3) {
                     Row row = sheet.createRow(rows++);
                     for (int i = 0; i < dataList.size(); i++) {
                         Cell cell = row.createCell(i);
@@ -1051,7 +1002,7 @@ public class CarbonServiceImpl implements CarbonService {
                     Cell cell = row.createCell(i);
                     cell.setCellValue(dataList.get(i));
                 }
-                for(List<String> dataList1: listDes3){
+                for (List<String> dataList1 : listDes3) {
                     Row row1 = sheet.createRow(rows++);
                     for (int i = 0; i < dataList1.size(); i++) {
                         Cell cell = row1.createCell(i);
@@ -1089,10 +1040,7 @@ public class CarbonServiceImpl implements CarbonService {
             log.error("读取模板附表3错误", e);
             return ResultUtil.error(timestamp, "读取模板附表3错误", ErrorCode.SERVER_INTERNAL_ERROR);
         }
-        carbonAccountingEmissionsVolumeDO
-                .setMaterials(material)
-                .setDesulfuizations(desulfuization)
-                .setElectric(electric);
+        carbonAccountingEmissionsVolumeDO.setMaterials(material).setDesulfuizations(desulfuization).setElectric(electric);
 
         //整理3个文件的链接
         ArrayList<String> listOrReports = new ArrayList<>();
@@ -1104,8 +1052,7 @@ public class CarbonServiceImpl implements CarbonService {
     }
 
     @NotNull
-    private ResponseEntity<BaseResponse> getBaseResponseResponseEntity(
-            long timestamp, @NotNull CarbonConsumeVO carbonConsumeVO, CarbonReportDO getLastReport, @NotNull CarbonAccountingDO getLastCarbonAccounting, double totalCombustion, CarbonAccountingEmissionsVolumeDO carbonAccountingEmissionsVolumeDO, ArrayList<String> listOrReports) {
+    private ResponseEntity<BaseResponse> getBaseResponseResponseEntity(long timestamp, @NotNull CarbonConsumeVO carbonConsumeVO, CarbonReportDO getLastReport, @NotNull CarbonAccountingDO getLastCarbonAccounting, double totalCombustion, CarbonAccountingEmissionsVolumeDO carbonAccountingEmissionsVolumeDO, ArrayList<String> listOrReports) {
         if (!(carbonAccountingDAO.updateEmissionByUuidId(gson.toJson(carbonAccountingEmissionsVolumeDO), totalCombustion, getLastCarbonAccounting.getId()))) {
             return ResultUtil.error(timestamp, "更新碳核算数据表错误", ErrorCode.SERVER_INTERNAL_ERROR);
         }
@@ -1149,10 +1096,7 @@ public class CarbonServiceImpl implements CarbonService {
         ArrayList<CarbonAuditLogDO> carbonAuditLogList = new ArrayList<>();
         CarbonAuditLogDO carbonAuditLog = new CarbonAuditLogDO();
         if (getUserDO != null) {
-            carbonAuditLog
-                    .setDate(new java.util.Date().toString())
-                    .setLog("添加 " + carbonAddQuotaVO.getQuota() + " 的交易配额，此次为初建碳排放配额表")
-                    .setOperate(getUserDO.getUserName());
+            carbonAuditLog.setDate(new java.util.Date().toString()).setLog("添加 " + carbonAddQuotaVO.getQuota() + " 的交易配额，此次为初建碳排放配额表").setOperate(getUserDO.getUserName());
         }
         carbonAuditLogList.add(carbonAuditLog);
         //整理数据
@@ -1189,17 +1133,11 @@ public class CarbonServiceImpl implements CarbonService {
             CarbonAuditLogDO newCarbonAuditLog = new CarbonAuditLogDO();
             if (getUserDO != null) {
                 log.debug("[Service]审计日志添加");
-                newCarbonAuditLog.setDate(combinedDate)
-                        .setLog("进行碳配额的修改 " + Double.parseDouble(carbonAddQuotaVO.getQuota()))
-                        .setOperate(getUserDO.getUserName());
+                newCarbonAuditLog.setDate(combinedDate).setLog("进行碳配额的修改 " + Double.parseDouble(carbonAddQuotaVO.getQuota())).setOperate(getUserDO.getUserName());
                 oldCarbonAuditLogList.add(newCarbonAuditLog);
                 String carbonAuditLog = gson.toJson(oldCarbonAuditLogList);
                 //整理更新数据
-                getCarbonQuota
-                        .setComplianceStatus(!carbonAddQuotaVO.getStatus())
-                        .setQuotaYear(localYear)
-                        .setAllocatedQuota(Double.parseDouble(carbonAddQuotaVO.getQuota()))
-                        .setAuditLog(carbonAuditLog);
+                getCarbonQuota.setComplianceStatus(!carbonAddQuotaVO.getStatus()).setQuotaYear(localYear).setAllocatedQuota(Double.parseDouble(carbonAddQuotaVO.getQuota())).setAuditLog(carbonAuditLog);
                 if (carbonQuotaDAO.editCarbonQuota(getCarbonQuota)) {
                     return ResultUtil.success(timestamp, "修改成功");
                 } else {
@@ -1227,16 +1165,7 @@ public class CarbonServiceImpl implements CarbonService {
             if (carbonQuotaDAO.getCarbonQuota(thisYear, it.getAccountUuid()) == null) {
                 UserDO userDO = userDAO.getUserByUuid(it.getAccountUuid());
                 BackUserVO backUserVO = new BackUserVO();
-                backUserVO
-                        .setUuid(userDO.getUuid())
-                        .setUserName(userDO.getUserName())
-                        .setNickName(userDO.getNickName())
-                        .setRealName(userDO.getRealName())
-                        .setEmail(userDO.getEmail())
-                        .setAvatar(userDO.getAvatar())
-                        .setPhone(userDO.getPhone())
-                        .setCreatedAt(userDO.getCreatedAt())
-                        .setUpdatedAt(userDO.getUpdatedAt());
+                backUserVO.setUuid(userDO.getUuid()).setUserName(userDO.getUserName()).setNickName(userDO.getNickName()).setRealName(userDO.getRealName()).setEmail(userDO.getEmail()).setAvatar(userDO.getAvatar()).setPhone(userDO.getPhone()).setCreatedAt(userDO.getCreatedAt()).setUpdatedAt(userDO.getUpdatedAt());
                 getUserDOList.add(backUserVO);
             }
         });
@@ -1254,9 +1183,7 @@ public class CarbonServiceImpl implements CarbonService {
             // 处理数据进一步处理
             getCarbonItemTypeDOList.forEach(it -> {
                 BackCarbonItemTypeVO backCarbonItemTypeVO = new BackCarbonItemTypeVO();
-                backCarbonItemTypeVO
-                        .setName(it.getName())
-                        .setDisplayName(it.getDisplayName());
+                backCarbonItemTypeVO.setName(it.getName()).setDisplayName(it.getDisplayName());
                 backCarbonItemTypeVOList.add(backCarbonItemTypeVO);
             });
             return ResultUtil.success(timestamp, backCarbonItemTypeVOList);
@@ -1274,9 +1201,7 @@ public class CarbonServiceImpl implements CarbonService {
         if (getProcessEmissionFactors != null) {
             getProcessEmissionFactors.forEach(it -> {
                 BackCarbonProcessFactorVO backCarbonProcessFactorVO = new BackCarbonProcessFactorVO();
-                backCarbonProcessFactorVO
-                        .setName(it.getName())
-                        .setDisplayName(it.getDisplayName());
+                backCarbonProcessFactorVO.setName(it.getName()).setDisplayName(it.getDisplayName());
                 backCarbonFactorVOList.add(backCarbonProcessFactorVO);
             });
             return ResultUtil.success(timestamp, backCarbonFactorVOList);
@@ -1294,9 +1219,7 @@ public class CarbonServiceImpl implements CarbonService {
         if (getDesulfurizationFactors != null) {
             getDesulfurizationFactors.forEach(it -> {
                 BackCarbonDesulfurizationFactorVO backCarbonDesulfurizationFactorVO = new BackCarbonDesulfurizationFactorVO();
-                backCarbonDesulfurizationFactorVO
-                        .setName(it.getName())
-                        .setDisplayName(it.getDisplayName());
+                backCarbonDesulfurizationFactorVO.setName(it.getName()).setDisplayName(it.getDisplayName());
                 backCarbonFactorVOList.add(backCarbonDesulfurizationFactorVO);
             });
             return ResultUtil.success(timestamp, backCarbonFactorVOList);
@@ -1314,14 +1237,73 @@ public class CarbonServiceImpl implements CarbonService {
         if (getOtherEmissionFactors != null) {
             getOtherEmissionFactors.forEach(it -> {
                 BackCarbonOtherFactorVO backCarbonOtherFactorVO = new BackCarbonOtherFactorVO();
-                backCarbonOtherFactorVO
-                        .setName(it.getName())
-                        .setDisplayName(it.getDisplayName());
+                backCarbonOtherFactorVO.setName(it.getName()).setDisplayName(it.getDisplayName());
                 backCarbonFactorVOList.add(backCarbonOtherFactorVO);
             });
-            return ResultUtil.success(timestamp,backCarbonFactorVOList);
+            return ResultUtil.success(timestamp, backCarbonFactorVOList);
         } else {
             return ResultUtil.error(timestamp, "获取失败", ErrorCode.SERVER_INTERNAL_ERROR);
+        }
+    }
+
+    @NotNull
+    @Override
+    public ResponseEntity<BaseResponse> getCarbonReportSingle(long timestamp, @NotNull HttpServletRequest request, long reportId) {
+        UserDO getUser = ProcessingUtil.getUserByHeaderUuid(request, userDAO);
+        if (getUser != null) {
+            // 对 reportId 进行查询
+            CarbonReportDO carbonReportDO = carbonDAO.getReportById(reportId);
+            if (carbonReportDO != null) {
+                RoleDO roleDO = roleDAO.getRoleByUuid(getUser.getRole());
+                if (carbonReportDO.getOrganizeUuid().equals(getUser.getUuid()) || "admin".equals(roleDO.getName()) || "console".equals(roleDO.getName())) {
+                    // 获取到数据之后进行返回
+                    BackCarbonReportSingleVO backCarbonReportSingleVO = new BackCarbonReportSingleVO();
+                    // 检查是否是当前用户或者管理员用户
+                    backCarbonReportSingleVO.setId(carbonReportDO.getId()).setReportTitle(carbonReportDO.getReportTitle()).setReportType(carbonReportDO.getReportType()).setReportStatus(carbonReportDO.getReportStatus()).setListOfReports(carbonReportDO.getListOfReports()).setCreatedAt(carbonReportDO.getCreatedAt()).setOrganizeUuid(carbonReportDO.getOrganizeUuid()).setVerificationDate(carbonReportDO.getVerificationDate()).setUpdatedAt(carbonReportDO.getUpdatedAt()).setVerifierUuid(carbonReportDO.getVerifierUuid()).setAccountingPeriod(carbonReportDO.getAccountingPeriod()).setTotalEmission(carbonReportDO.getTotalEmission()).setReportSummary(carbonReportDO.getReportSummary());
+                    return ResultUtil.success(timestamp, backCarbonReportSingleVO);
+                } else {
+                    return ResultUtil.error(timestamp, "没有权限", ErrorCode.NO_PERMISSION_ERROR);
+                }
+            } else {
+                return ResultUtil.error(timestamp, "获取失败", ErrorCode.SERVER_INTERNAL_ERROR);
+            }
+        } else {
+            return ResultUtil.error(timestamp, "无法找到用户", ErrorCode.USER_NOT_EXISTED);
+        }
+    }
+
+    @NotNull
+    @Override
+    public ResponseEntity<BaseResponse> getCarbonAccountingSingle(long timestamp, @NotNull HttpServletRequest request, long reportId) {
+        UserDO getUser = ProcessingUtil.getUserByHeaderUuid(request, userDAO);
+        if (getUser != null) {
+            CarbonAccountingDO carbonAccountingDO = carbonDAO.getAccountingByReportId(reportId);
+            if (carbonAccountingDO != null) {
+                RoleDO roleDO = roleDAO.getRoleByUuid(getUser.getRole());
+                if (carbonAccountingDO.getOrganizeUuid().equals(getUser.getUuid()) || "admin".equals(roleDO.getName()) || "console".equals(roleDO.getName())) {
+                    BackCarbonAccountingSingleVO backCarbonAccountingSingleVO = new BackCarbonAccountingSingleVO();
+                    backCarbonAccountingSingleVO
+                            .setId(carbonAccountingDO.getId())
+                            .setOrganizeUuid(carbonAccountingDO.getOrganizeUuid())
+                            .setReportId(carbonAccountingDO.getReportId())
+                            .setEmissionType(carbonAccountingDO.getEmissionType())
+                            .setEmissionVolume(carbonAccountingDO.getEmissionVolume())
+                            .setEmissionAmount(carbonAccountingDO.getEmissionAmount())
+                            .setAccountingPeriod(carbonAccountingDO.getAccountingPeriod())
+                            .setDataVerificationStatus(carbonAccountingDO.getDataVerificationStatus())
+                            .setVerifierUuid(carbonAccountingDO.getVerifierUuid())
+                            .setVerificationNotes(carbonAccountingDO.getVerificationNotes())
+                            .setCreatedAt(carbonAccountingDO.getCreatedAt())
+                            .setUpdatedAt(carbonAccountingDO.getUpdatedAt());
+                    return ResultUtil.success(timestamp, backCarbonAccountingSingleVO);
+                } else {
+                    return ResultUtil.error(timestamp, "没有权限", ErrorCode.NO_PERMISSION_ERROR);
+                }
+            } else {
+                return ResultUtil.error(timestamp, "获取失败", ErrorCode.SERVER_INTERNAL_ERROR);
+            }
+        } else {
+            return ResultUtil.error(timestamp, "无法找到用户", ErrorCode.USER_NOT_EXISTED);
         }
     }
 }

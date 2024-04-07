@@ -10,7 +10,7 @@ import lombok.experimental.Accessors;
 @Data
 @Accessors(chain = true)
 public class CarbonReportDO {
-    String id;
+    Long id;
     String organizeUuid;
     String reportTitle;
     String reportType;
@@ -23,5 +23,5 @@ public class CarbonReportDO {
     String blockchainTxId;
     String listOfReports;
     String createdAt;
-    String updateAt;
+    String updatedAt;
 }

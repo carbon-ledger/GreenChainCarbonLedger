@@ -11,9 +11,9 @@ import lombok.experimental.Accessors;
 @Data
 @Accessors(chain = true)
 public class CarbonCompensationMaterialDO {
-    String id;
+    Long id;
     // 碳核算数据ID
-    String accountingId;
+    Long accountingId;
     // 原料
     String rawMaterial;
     // 电力原料

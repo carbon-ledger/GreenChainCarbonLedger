@@ -194,4 +194,34 @@ interface CarbonService {
         timestamp: Long,
         request: HttpServletRequest
     ): ResponseEntity<BaseResponse>
+
+    /**
+     * 获取碳核算报告
+     *
+     * @param timestamp 时间戳
+     * @param request HTTP 请求对象
+     * @param reportId 报告ID
+     *
+     * @return ResponseEntity<BaseResponse> 响应实体
+     */
+    fun getCarbonReportSingle(
+        timestamp: Long,
+        request: HttpServletRequest,
+        reportId: Long
+    ): ResponseEntity<BaseResponse>
+
+    /**
+     * 获取碳排放记录
+     *
+     * @param timestamp 时间戳
+     * @param request 请求体
+     * @param reportId 报告ID
+     *
+     * @return ResponseEntity<BaseResponse> 响应实体
+     */
+    fun getCarbonAccountingSingle(
+        timestamp: Long,
+        request: HttpServletRequest,
+        reportId: Long
+    ): ResponseEntity<BaseResponse>
 }

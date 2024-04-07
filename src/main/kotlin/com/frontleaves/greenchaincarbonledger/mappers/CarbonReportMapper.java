@@ -22,7 +22,7 @@ public interface CarbonReportMapper {
     Boolean insertReportMapper(CarbonReportDO carbonReportDO);
 
     @Update("UPDATE fy_carbon_report SET total_emission=#{totalEmission} , report_status=#{status},list_of_reports=#{listOfReports} , updated_at=now() WHERE id=#{id}")
-    Boolean updateEmissionById(Double totalEmission, String status, String id, String listOfReports);
+    Boolean updateEmissionById(Double totalEmission, String status, Long id, String listOfReports);
 
     @Select("SELECT * FROM fy_carbon_report WHERE organize_uuid = #{organizeUserUuid} ORDER BY id DESC LIMIT 1")
     CarbonReportDO getLastReportByUuid(String organizeUserUuid);

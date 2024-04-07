@@ -57,7 +57,7 @@ public class CarbonAccountingDAO {
      * @param emissionAmount-总排放量
      * @return 是否完成
      */
-    public Boolean updateEmissionByUuidId(String emissionsVolume,Double emissionAmount,String id){
+    public Boolean updateEmissionByUuidId(String emissionsVolume,Double emissionAmount,Long id){
         log.info("[DAO] 执行 updateEmissionByUuidId");
         log.info("\t> Mysql 更新");
         return  carbonAccountingMapper.updateEmissionByUuidId(emissionsVolume, emissionAmount,id);

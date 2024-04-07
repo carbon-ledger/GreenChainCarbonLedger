@@ -28,8 +28,8 @@ public interface CarbonAccountingMapper {
             """)
     Boolean insertCarbonAccounting(CarbonAccountingDO carbonAccountingDO);
 
-    @Update("UPDATE fy_carbon_accounting SET emissions_volume =#{emissionsVolume} , emission_amount=#{emissionAmount} , updated_at =now() WHERE id=#{id}")
-    Boolean updateEmissionByUuidId(String emissionsVolume,Double emissionAmount,String id);
+    @Update("UPDATE fy_carbon_accounting SET emission_volume =#{emissionsVolume} , emission_amount=#{emissionAmount} , updated_at =now() WHERE id=#{id}")
+    Boolean updateEmissionByUuidId(String emissionsVolume,Double emissionAmount,Long id);
 
     @Select("SELECT * FROM fy_carbon_accounting WHERE organize_uuid=#{uuid} ORDER BY id DESC LIMIT 1")
     CarbonAccountingDO getLastCarbonAccountingByUuid(String uuid);
