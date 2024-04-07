@@ -538,7 +538,10 @@ public class CarbonServiceImpl implements CarbonService {
         setMaterials.put("courses", courses);
         setMaterials.put("carbonSequestrations", carbonSequestrations);
         setMaterials.put("heats", heats);
-        carbonCompensationMaterialDO.setAccountingId(getLastCarbonAccounting.getId()).setRawMaterial(gson.toJson(setMaterials)).setElectricMaterial(electricJson);
+        carbonCompensationMaterialDO
+                .setAccountingId(getLastCarbonAccounting.getId())
+                .setRawMaterial(gson.toJson(setMaterials))
+                .setElectricMaterial(electricJson);
         if (!(carbonCompensationMaterialDAO.insertCarbonCompensationMaterial(carbonCompensationMaterialDO))) {
             return ResultUtil.error(timestamp, "新增碳原料数据表记录失败", ErrorCode.SERVER_INTERNAL_ERROR);
         }
@@ -558,9 +561,9 @@ public class CarbonServiceImpl implements CarbonService {
             return ResultUtil.error(timestamp, "请检查过程消耗量输入值", ErrorCode.REQUEST_BODY_ERROR);
         }
         double eCarbonSequestration = eCarbonSequestration(carbonSequestrations, otherEmissionFactorDAO);
-        if (eCarbonSequestration < 0) {
+        /*if (eCarbonSequestration > 0) {
             return ResultUtil.error(timestamp, "请检查固碳消耗量输入值", ErrorCode.REQUEST_BODY_ERROR);
-        }
+        }*/
         double eHeat = eHeat(heats, otherEmissionFactorDAO);
         if (eHeat < 0) {
             return ResultUtil.error(timestamp, "请检查热力材料消耗输入值", ErrorCode.REQUEST_BODY_ERROR);
@@ -1306,4 +1309,53 @@ public class CarbonServiceImpl implements CarbonService {
             return ResultUtil.error(timestamp, "无法找到用户", ErrorCode.USER_NOT_EXISTED);
         }
     }
+
+    @NotNull
+    @Override
+    public ResponseEntity<BaseResponse> getCarbonReviewReport(long timestamp, @NotNull HttpServletRequest request) {
+        // 获取所有在等待审核的排放内容
+        List<CarbonReportDO> carbonReportDOList = carbonDAO.getCarbonReportListByStatus("pending_review");
+        if (carbonReportDOList != null) {
+            // 获取到数据之后进行返回
+            List<BackCarbonReportVO> backCarbonReviewReportVOList = new ArrayList<>();
+            carbonReportDOList.forEach(it -> {
+                BackCarbonReportVO backCarbonReviewReportVO = new BackCarbonReportVO();
+                backCarbonReviewReportVO
+                        .setId(it.getId())
+                        .setReportStatus(it.getReportStatus())
+                        .setListOfReports(it.getListOfReports())
+                        .setCreatedAt(it.getCreatedAt())
+                        .setOrganizeUuid(it.getOrganizeUuid())
+                        .setUpdatedAt(it.getUpdatedAt())
+                        .setAccountingPeriod(it.getAccountingPeriod())
+                        .setTotalEmission(it.getTotalEmission());
+                backCarbonReviewReportVOList.add(backCarbonReviewReportVO);
+            });
+            return ResultUtil.success(timestamp, backCarbonReviewReportVOList);
+        } else {
+            return ResultUtil.error(timestamp, "获取失败", ErrorCode.SERVER_INTERNAL_ERROR);
+        }
+    }
+
+    @NotNull
+    @Override
+    public ResponseEntity<BaseResponse> getCarbonMaterial(long timestamp, @NotNull HttpServletRequest request, long reportId) {
+        // 根据 ReportId 获取碳核算
+        CarbonAccountingDO carbonAccountingDO = carbonDAO.getAccountingByReportId(reportId);
+        if (carbonAccountingDO != null) {
+            // 根据 AccountId 获取 CarbonCompensationMaterial
+            CarbonCompensationMaterialDO carbonCompensationMaterialDO = carbonDAO.getCarbonCompensationMaterialByAccountId(carbonAccountingDO.getId());
+            if (carbonCompensationMaterialDO != null) {
+                HashMap<String, Object> map = new HashMap<>();
+                map.put("materials", gson.fromJson(carbonCompensationMaterialDO.getRawMaterial(), HashMap.class));
+                map.put("electric", gson.fromJson(carbonCompensationMaterialDO.getElectricMaterial(), HashMap.class));
+                return ResultUtil.success(timestamp, map);
+            } else {
+                return ResultUtil.error(timestamp, "获取失败", ErrorCode.SERVER_INTERNAL_ERROR);
+            }
+        } else {
+            return ResultUtil.error(timestamp, "获取失败", ErrorCode.SERVER_INTERNAL_ERROR);
+        }
+    }
+
 }

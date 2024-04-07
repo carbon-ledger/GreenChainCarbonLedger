@@ -1,9 +1,6 @@
 package com.frontleaves.greenchaincarbonledger.mappers;
 
-import com.frontleaves.greenchaincarbonledger.models.doData.CarbonAccountingDO;
-import com.frontleaves.greenchaincarbonledger.models.doData.CarbonQuotaDO;
-import com.frontleaves.greenchaincarbonledger.models.doData.CarbonReportDO;
-import com.frontleaves.greenchaincarbonledger.models.doData.CarbonTradeDO;
+import com.frontleaves.greenchaincarbonledger.models.doData.*;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
@@ -133,4 +130,10 @@ public interface CarbonMapper {
 
     @Select("SELECT * FROM fy_carbon_accounting WHERE report_id = #{reportId}")
     CarbonAccountingDO getAccountingByReportId(long reportId);
+
+    @Select("SELECT * FROM fy_carbon_report WHERE report_status = #{pending}")
+    List<CarbonReportDO> getCarbonReportListByStatus(String pending);
+
+    @Select("SELECT * FROM fy_carbon_compensation_material WHERE accounting_id = #{id}")
+    CarbonCompensationMaterialDO getCarbonCompensationMaterialByAccountId(Long id);
 }

@@ -234,5 +234,19 @@ public class UserController {
         //返回业务操作
         return userService.putUserForceEdit(timestamp, request, userUuid, userForceEditVO);
     }
+
+    @GetMapping("/uuid/{uuid}")
+    @CheckAccountPermission({"user:getUserByUuid"})
+    public ResponseEntity<BaseResponse> getUserByUuid(
+            @PathVariable("uuid") String userUuid,
+            HttpServletRequest request
+    ) {
+        log.info("[Controller] 请求 getUserByUuid 接口");
+        long timestamp = System.currentTimeMillis();
+        if (!userUuid.matches("^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$")) {
+            return ResultUtil.error(timestamp, "uuid 参数不正确", ErrorCode.PATH_VARIABLE_ERROR);
+        }
+        return userService.getUserByUuid(timestamp, request, userUuid);
+    }
 }
 

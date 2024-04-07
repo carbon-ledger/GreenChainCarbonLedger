@@ -217,8 +217,8 @@ public class CarbonController {
             if (materialsDO.getCourses() == null) {
                 materialsDO.setCourses(new ArrayList<>());
             }
-            if (materialsDO.getCarbonSequestrations() == null) {
-                materialsDO.setCarbonSequestrations(new ArrayList<>());
+            if (materialsDO.getCarbonSequestration() == null) {
+                materialsDO.setCarbonSequestration(new ArrayList<>());
             }
             if (materialsDO.getDesulfurization() == null) {
                 materialsDO.setDesulfurization(new ArrayList<>());
@@ -239,7 +239,7 @@ public class CarbonController {
                         timestamp, request, carbonConsumeVO,
                         materialsDO.getMaterials(),
                         materialsDO.getCourses(),
-                        materialsDO.getCarbonSequestrations(),
+                        materialsDO.getCarbonSequestration(),
                         materialsDO.getHeat()
                 );
             }
@@ -368,6 +368,13 @@ public class CarbonController {
         return carbonService.getCarbonFactorOther(timestamp, request);
     }
 
+    /**
+     * 获取碳报告
+     *
+     * @param reportId CarbonReport 的 ID
+     * @param request  请求
+     * @return CarbonReport
+     */
     @GetMapping("/report/get/{reportId}")
     @CheckAccountPermission({"carbon:getCarbonReport"})
     public ResponseEntity<BaseResponse> getCarbonReportSingle(
@@ -383,6 +390,13 @@ public class CarbonController {
         return carbonService.getCarbonReportSingle(timestamp, request, Long.parseLong(reportId));
     }
 
+    /**
+     * 获取碳核算
+     *
+     * @param reportId  CarbonReport 的 ID
+     * @param request  请求
+     * @return CarbonAccounting
+     */
     @GetMapping("/accounting/get/{reportId}")
     @CheckAccountPermission({"carbon:getCarbonAccounting"})
     public ResponseEntity<BaseResponse> getCarbonAccountingSingle(
@@ -396,5 +410,36 @@ public class CarbonController {
             return ResultUtil.error(timestamp, "参数 reportId 错误", ErrorCode.PATH_VARIABLE_ERROR);
         }
         return carbonService.getCarbonAccountingSingle(timestamp, request, Long.parseLong(reportId));
+    }
+
+    /**
+     * 获取碳审核报告
+     *
+     * @param request 请求
+     * @return CarbonReport
+     */
+    @GetMapping("/review/report")
+    @CheckAccountPermission({"carbon:getCarbonReviewReport"})
+    public ResponseEntity<BaseResponse> getCarbonReviewReport(
+            HttpServletRequest request
+    ) {
+        log.info("[Controller] 请求 getCarbonReviewReport 接口");
+        long timestamp = System.currentTimeMillis();
+        return carbonService.getCarbonReviewReport(timestamp, request);
+    }
+
+    @GetMapping("/material/{reportId}")
+    @CheckAccountPermission({"carbon:getCarbonMaterial"})
+    public ResponseEntity<BaseResponse> getCarbonMaterial(
+            @PathVariable String reportId,
+            HttpServletRequest request
+    ) {
+        log.info("[Controller] 请求 getCarbonMaterial 接口");
+        long timestamp = System.currentTimeMillis();
+        // 对 reportId 进行检查是否是数字
+        if (!reportId.matches("^[0-9]*$")) {
+            return ResultUtil.error(timestamp, "参数 reportId 错误", ErrorCode.PATH_VARIABLE_ERROR);
+        }
+        return carbonService.getCarbonMaterial(timestamp, request, Long.parseLong(reportId));
     }
 }

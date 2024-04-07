@@ -19,7 +19,7 @@ public class MaterialsDO {
     // E过程参数
     List<Materials> courses;
     // E固碳参数
-    List<Materials> carbonSequestrations;
+    List<Materials> carbonSequestration;
     // E脱硫参数
     List<Desulfurization> desulfurization;
     // E热力参数

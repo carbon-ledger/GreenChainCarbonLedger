@@ -1,10 +1,7 @@
 package com.frontleaves.greenchaincarbonledger.dao;
 
 import com.frontleaves.greenchaincarbonledger.mappers.CarbonMapper;
-import com.frontleaves.greenchaincarbonledger.models.doData.CarbonAccountingDO;
-import com.frontleaves.greenchaincarbonledger.models.doData.CarbonQuotaDO;
-import com.frontleaves.greenchaincarbonledger.models.doData.CarbonReportDO;
-import com.frontleaves.greenchaincarbonledger.models.doData.CarbonTradeDO;
+import com.frontleaves.greenchaincarbonledger.models.doData.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
@@ -360,5 +357,29 @@ public class CarbonDAO {
         log.info("[DAO] 执行 getAccountingByReportId");
         log.info("\t> Mysql 读取");
         return carbonMapper.getAccountingByReportId(reportId);
+    }
+
+    /**
+     * 获取碳交易报告
+     *
+     * @param pending 获取报告状态
+     * @return 返回报告内容实体列表
+     */
+    public List<CarbonReportDO> getCarbonReportListByStatus(String pending) {
+        log.info("[DAO] 执行 getCarbonReportListByStatus");
+        log.info("\t> Mysql 读取");
+        return carbonMapper.getCarbonReportListByStatus(pending);
+    }
+
+    /**
+     * 获取碳交易报告
+     *
+     * @param id 获取报告 ID
+     * @return 返回报告内容实体列表
+     */
+    public CarbonCompensationMaterialDO getCarbonCompensationMaterialByAccountId(Long id) {
+        log.info("[DAO] 执行 getCarbonCompensationMaterialByAccountId");
+        log.info("\t> Mysql 读取");
+        return carbonMapper.getCarbonCompensationMaterialByAccountId(id);
     }
 }

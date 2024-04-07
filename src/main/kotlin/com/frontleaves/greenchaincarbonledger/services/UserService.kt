@@ -111,4 +111,19 @@ interface UserService {
         request: HttpServletRequest,
         roleUuid: String
     ): ResponseEntity<BaseResponse>
+
+    /**
+     * 获取用户信息
+     *
+     * 通过用户UUID获取用户信息
+     *
+     * @param timestamp 时间戳
+     * @param request   请求
+     * @return 返回响应实体
+     */
+    fun getUserByUuid(
+        timestamp: Long,
+        request: HttpServletRequest,
+        userUuid: String
+    ): ResponseEntity<BaseResponse>
 }

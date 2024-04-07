@@ -11,10 +11,7 @@ import com.frontleaves.greenchaincarbonledger.models.doData.VerifyCodeDO;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.UserAddVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.UserEditVO;
 import com.frontleaves.greenchaincarbonledger.models.voData.getData.UserForceEditVO;
-import com.frontleaves.greenchaincarbonledger.models.voData.returnData.BackAddUserVO;
-import com.frontleaves.greenchaincarbonledger.models.voData.returnData.BackDesensitizationVO;
-import com.frontleaves.greenchaincarbonledger.models.voData.returnData.BackUserCurrentVO;
-import com.frontleaves.greenchaincarbonledger.models.voData.returnData.BackUserForceEditVO;
+import com.frontleaves.greenchaincarbonledger.models.voData.returnData.*;
 import com.frontleaves.greenchaincarbonledger.services.UserService;
 import com.frontleaves.greenchaincarbonledger.utils.BaseResponse;
 import com.frontleaves.greenchaincarbonledger.utils.ErrorCode;
@@ -356,6 +353,29 @@ public class UserServiceImpl implements UserService {
             }
         } else {
             return ResultUtil.error(timestamp, getUserHasExist, ErrorCode.USER_EXISTED);
+        }
+    }
+
+    @NotNull
+    @Override
+    public ResponseEntity<BaseResponse> getUserByUuid(long timestamp, @NotNull HttpServletRequest request, @NotNull String userUuid) {
+        // 获取用户的 UUID
+        UserDO getUserDO = userDAO.getUserByUuid(userUuid);
+        if (getUserDO != null) {
+            BackUserVO backUserVO = new BackUserVO();
+            backUserVO
+                    .setUuid(getUserDO.getUuid())
+                    .setUserName(getUserDO.getUserName())
+                    .setRealName(getUserDO.getRealName())
+                    .setEmail(getUserDO.getEmail())
+                    .setPhone(getUserDO.getPhone())
+                    .setNickName(getUserDO.getNickName())
+                    .setAvatar(getUserDO.getAvatar())
+                    .setCreatedAt(getUserDO.getCreatedAt())
+                    .setUpdatedAt(getUserDO.getUpdatedAt());
+            return ResultUtil.success(timestamp, "获取用户信息成功", backUserVO);
+        } else {
+            return ResultUtil.error(timestamp, ErrorCode.USER_NOT_EXISTED);
         }
     }
 }
