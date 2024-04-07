@@ -450,7 +450,9 @@ public class CarbonServiceImpl implements CarbonService {
                 case "draft", "pending_review", "approved", "rejected" ->
                         getReportList = carbonDAO.getReportByStatus(getUuid, search, limit, page, order);
                 default -> {
-                    return ResultUtil.error(timestamp, "type 参数有误", ErrorCode.REQUEST_BODY_ERROR);
+                    ArrayList<String> errorCodeReturn = new ArrayList<>();
+                    errorCodeReturn.add("type 参数有误");
+                    return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR, errorCodeReturn);
                 }
             }
             //整理数据
@@ -504,6 +506,7 @@ public class CarbonServiceImpl implements CarbonService {
     @Override
     @Transactional
     public ResponseEntity<BaseResponse> createCarbonReport(long timestamp, @NotNull HttpServletRequest request, @NotNull CarbonConsumeVO carbonConsumeVO, @NotNull List<MaterialsDO.Materials> materials, @NotNull List<MaterialsDO.Materials> courses, @NotNull List<MaterialsDO.Materials> carbonSequestrations, @NotNull List<MaterialsDO.Material> heats) {
+        ArrayList<String> errorCodeReturn = new ArrayList<>();
         // 从前端获取时间并进行格式化
         CarbonReportDO getOrganizeUserLastCarbonReport = carbonReportDAO.getLastReportByUuid(ProcessingUtil.getAuthorizeUserUuid(request));
         if (checkReportTimeHasDuplicate(getOrganizeUserLastCarbonReport, carbonConsumeVO) == null) {
@@ -554,11 +557,13 @@ public class CarbonServiceImpl implements CarbonService {
          */
         double eCombustion = eCombustion(materials, carbonItemTypeDAO);
         if (eCombustion < 0) {
-            return ResultUtil.error(timestamp, "请检查燃烧消耗量输入值", ErrorCode.REQUEST_BODY_ERROR);
+            errorCodeReturn.add("请检查燃烧消耗量输入值");
+            return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR, errorCodeReturn);
         }
         double eCourses = eCousers(courses, processEmissionFactorDAO);
         if (eCourses < 0) {
-            return ResultUtil.error(timestamp, "请检查过程消耗量输入值", ErrorCode.REQUEST_BODY_ERROR);
+            errorCodeReturn.add("请检查课程消耗量输入值");
+            return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR, errorCodeReturn);
         }
         double eCarbonSequestration = eCarbonSequestration(carbonSequestrations, otherEmissionFactorDAO);
         /*if (eCarbonSequestration > 0) {
@@ -566,11 +571,13 @@ public class CarbonServiceImpl implements CarbonService {
         }*/
         double eHeat = eHeat(heats, otherEmissionFactorDAO);
         if (eHeat < 0) {
-            return ResultUtil.error(timestamp, "请检查热力材料消耗输入值", ErrorCode.REQUEST_BODY_ERROR);
+            errorCodeReturn.add("请检查热力材料消耗输入值");
+            return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR, errorCodeReturn);
         }
         double eElectric = electricity(carbonConsumeVO, otherEmissionFactorDAO);
         if (eElectric < 0) {
-            return ResultUtil.error(timestamp, "请检检查电力消耗值", ErrorCode.REQUEST_BODY_ERROR);
+            errorCodeReturn.add("请检检查电力消耗值");
+            return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR, errorCodeReturn);
         }
         // 汇总碳排放
         double totalCombustion = eCombustion + eCourses + eElectric + eHeat - eCarbonSequestration;
@@ -791,6 +798,7 @@ public class CarbonServiceImpl implements CarbonService {
     @Override
     @Transactional
     public ResponseEntity<BaseResponse> createCarbonReport1(long timestamp, @NotNull HttpServletRequest request, @NotNull CarbonConsumeVO carbonConsumeVO, @NotNull List<MaterialsDO.Materials> materials, @NotNull List<MaterialsDO.Desulfurization> desulfurization) {
+        ArrayList<String> errorCodeReturn = new ArrayList<>();
         // 从数据库获取上一份报告的数据，准备进行比较
         CarbonReportDO getOrganizeUserLastCarbonReport = carbonReportDAO.getLastReportByUuid(ProcessingUtil.getAuthorizeUserUuid(request));
         // 使用静态方法检查时间冲突
@@ -837,15 +845,18 @@ public class CarbonServiceImpl implements CarbonService {
          */
         double eCombustion = eCombustion(materials, carbonItemTypeDAO);
         if (eCombustion < 0) {
-            return ResultUtil.error(timestamp, "化石燃烧相关参数错误", ErrorCode.REQUEST_BODY_ERROR);
+            errorCodeReturn.add("化石燃烧相关参数错误");
+            return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR, errorCodeReturn);
         }
         double eDesulfurization = eDesulfurization(desulfurization, desulfurizationFactorDAO);
         if (eDesulfurization < 0) {
-            return ResultUtil.error(timestamp, "脱硫过程相关参数错误", ErrorCode.REQUEST_BODY_ERROR);
+            errorCodeReturn.add("脱硫过程相关参数错误");
+            return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR, errorCodeReturn);
         }
         double eElectric = electricity(carbonConsumeVO, otherEmissionFactorDAO);
         if (eElectric < 0) {
-            return ResultUtil.error(timestamp, "电力相关参数错误", ErrorCode.REQUEST_BODY_ERROR);
+            errorCodeReturn.add("电力相关参数错误");
+            return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR, errorCodeReturn);
         }
         // 汇总碳排放
         double totalCombustion = eCombustion + eDesulfurization + eElectric;
