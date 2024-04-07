@@ -222,7 +222,9 @@ public class TradeServiceImpl implements TradeService {
                     case "search" ->
                             getTradeList = carbonDAO.getTradeListBySearch(getUuid, search, Integer.valueOf(limit), Integer.valueOf(page), order);
                     default -> {
-                        return ResultUtil.error(timestamp, "type参数错误", ErrorCode.REQUEST_BODY_ERROR);
+                        ArrayList<String> errorCodeReturn = new ArrayList<>();
+                        errorCodeReturn.add("type 参数错误");
+                        return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR,errorCodeReturn);
                     }
                 }
                 log.debug("[Service] 整理输出数据");
@@ -382,7 +384,9 @@ public class TradeServiceImpl implements TradeService {
                 case "search" ->
                         getTradeList = carbonDAO.getSearchTradeList(search, Integer.valueOf(limit), Integer.valueOf(page), order);
                 default -> {
-                    return ResultUtil.error(timestamp, "type参数错误", ErrorCode.REQUEST_BODY_ERROR);
+                    ArrayList<String> errorCodeReturn = new ArrayList<>();
+                    errorCodeReturn.add("type 参数错误");
+                    return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR,errorCodeReturn);
                 }
             }
             ArrayList<BackCarbonTradeListVO> backCarbonTradeList = new ArrayList<>();

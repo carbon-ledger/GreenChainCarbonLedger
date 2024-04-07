@@ -13,6 +13,8 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+
 /**
  * TradeController
  * <hr/>
@@ -104,7 +106,9 @@ public class TradeController {
             return checkResult;
         } else {
             if (!"all".equals(type) && !"search".equals(type) && !"draft".equals(type) && !"completed".equals(type) && !"cancelled".equals(type)) {
-                return ResultUtil.error(timestamp, "type 参数错误", ErrorCode.REQUEST_BODY_ERROR);
+                ArrayList<String> errorCodeReturn = new ArrayList<>();
+                errorCodeReturn.add("type 参数错误");
+                return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR,errorCodeReturn);
             }
             if (limit == null) {
                 limit = "";
@@ -223,7 +227,9 @@ public class TradeController {
         long timestamp = System.currentTimeMillis();
         //校验参数
         if (id.isEmpty()) {
-            return ResultUtil.error(timestamp, "Path参数错误", ErrorCode.REQUEST_BODY_ERROR);
+            ArrayList<String> errorCodeReturn = new ArrayList<>();
+            errorCodeReturn.add("Path参数错误");
+            return ResultUtil.error(timestamp,  ErrorCode.REQUEST_BODY_ERROR,errorCodeReturn);
         }
         //返回业务操作
         return tradeService.buyTrade(timestamp, request, id);

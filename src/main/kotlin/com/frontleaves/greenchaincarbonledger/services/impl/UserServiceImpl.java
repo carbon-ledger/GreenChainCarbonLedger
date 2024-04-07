@@ -150,7 +150,9 @@ public class UserServiceImpl implements UserService {
                     getUserDO = userDAO.getUserByAvailableList(Integer.valueOf(limit), Integer.valueOf(page), order);
             case "all" -> getUserDO = userDAO.getUserByAllList(Integer.valueOf(limit), Integer.valueOf(page), order);
             default -> {
-                return ResultUtil.error(timestamp, "type 参数有误", ErrorCode.REQUEST_BODY_ERROR);
+                ArrayList<String> errorCodeReturn = new ArrayList<>();
+                errorCodeReturn.add("type 参数错误");
+                return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR,errorCodeReturn);
             }
         }
         List<BackDesensitizationVO> desensitizationVO = modelMapper.map(getUserDO, new TypeToken<List<BackDesensitizationVO>>() {

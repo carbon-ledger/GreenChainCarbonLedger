@@ -124,7 +124,9 @@ public class CarbonController {
                 }
                 return carbonService.getCarbonReport(timestamp, request, type, search, limit, page, order);
             } else {
-                return ResultUtil.error(timestamp, "type 参数错误", ErrorCode.REQUEST_BODY_ERROR);
+                ArrayList<String> errorCodeReturn = new ArrayList<>();
+                errorCodeReturn.add("type 参数错误");
+                return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR,errorCodeReturn);
             }
         } else {
             return checkResult;

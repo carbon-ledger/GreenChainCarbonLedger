@@ -15,6 +15,8 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+
 /**
  * UserController
  * <hr/>
@@ -84,7 +86,9 @@ public class UserController {
             return checkResult;
         } else {
             if (!"all".equals(type) && !"search".equals(type) && !"unbanlist".equals(type) && !"banlist".equals(type) && !"available".equals(type)) {
-                return ResultUtil.error(timestamp, "type 参数错误", ErrorCode.REQUEST_BODY_ERROR);
+                ArrayList<String> errorCodeReturn = new ArrayList<>();
+                errorCodeReturn.add("type 参数错误");
+                return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR,errorCodeReturn);
             }
             if (limit == null) {
                 limit = "";

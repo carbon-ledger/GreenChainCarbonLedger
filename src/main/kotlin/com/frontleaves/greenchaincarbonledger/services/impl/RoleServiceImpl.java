@@ -65,7 +65,9 @@ public class RoleServiceImpl implements RoleService {
                 ArrayList<String> arrayList2 = new ArrayList<>(permissionMapper.getPermissionByName());
                 for (String s : arrayList1) {
                     if (!(arrayList2.contains(s))) {
-                        return ResultUtil.error(timestamp, "权限无效", ErrorCode.REQUEST_BODY_ERROR);
+                        ArrayList<String> errorCodeReturn = new ArrayList<>();
+                        errorCodeReturn.add("权限无效");
+                        return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR,errorCodeReturn);
                     }
                 }
                 String uuid = ProcessingUtil.createUuid();
@@ -77,7 +79,9 @@ public class RoleServiceImpl implements RoleService {
                     return ResultUtil.error(timestamp, ErrorCode.SERVER_INTERNAL_ERROR);
                 }
             } else {
-                return ResultUtil.error(timestamp, "角色名重复", ErrorCode.REQUEST_BODY_ERROR);
+                ArrayList<String> errorCodeReturn = new ArrayList<>();
+                errorCodeReturn.add("角色名重复");
+                return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR,errorCodeReturn);
             }
         } else {
             return ResultUtil.error(timestamp, ErrorCode.UUID_NOT_EXIST);
@@ -128,14 +132,18 @@ public class RoleServiceImpl implements RoleService {
             RoleDO roleDO = roleDAO.getRoleByName(roleVO.getName());
             if (roleDO != null) {
                 if (!roleDO.getUuid().equals(roleUuid)) {
-                    return ResultUtil.error(timestamp, "角色名重复", ErrorCode.REQUEST_BODY_ERROR);
+                    ArrayList<String> errorCodeReturn = new ArrayList<>();
+                    errorCodeReturn.add("角色名重复");
+                    return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR,errorCodeReturn);
                 }
             }
             ArrayList<String> arrayList1 = roleVO.getPermission();
             ArrayList<String> arrayList2 = new ArrayList<>(permissionMapper.getPermissionByName());
             for (String s : arrayList1) {
                 if (!(arrayList2.contains(s))) {
-                    return ResultUtil.error(timestamp, "权限无效", ErrorCode.REQUEST_BODY_ERROR);
+                    ArrayList<String> errorCodeReturn = new ArrayList<>();
+                    errorCodeReturn.add("权限无效");
+                    return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR,errorCodeReturn);
                 }
             }
             // 判断角色名不重复、角色权限存在且有效
@@ -212,7 +220,9 @@ public class RoleServiceImpl implements RoleService {
                 }
             }
             default -> {
-                return ResultUtil.error(timestamp, "type 参数有误", ErrorCode.REQUEST_BODY_ERROR);
+                ArrayList<String> errorCodeReturn = new ArrayList<>();
+                errorCodeReturn.add("type 参数错误");
+                return ResultUtil.error(timestamp, ErrorCode.REQUEST_BODY_ERROR,errorCodeReturn);
             }
         }
         // 整理数据
