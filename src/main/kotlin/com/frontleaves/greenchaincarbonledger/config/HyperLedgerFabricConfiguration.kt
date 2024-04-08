@@ -1,3 +1,4 @@
+/*
 package com.frontleaves.greenchaincarbonledger.config
 
 import org.hyperledger.fabric.gateway.*
@@ -7,9 +8,11 @@ import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.nio.file.Paths
 
+*/
 /**
  * Fabric 配置文件
- */
+ *//*
+
 @Configuration
 open class HyperLedgerFabricConfiguration(
     private val hyperLedgerFabricProperties: HyperLedgerFabricProperties
@@ -43,4 +46,4 @@ open class HyperLedgerFabricConfiguration(
     open fun catContract(network: Network): Contract {
         return network.getContract("hyperledger-fabric-contract-java-demo", "CarbonTradingContract")
     }
-}
+}*/

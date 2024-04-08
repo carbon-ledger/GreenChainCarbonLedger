@@ -18,7 +18,7 @@ import com.google.gson.reflect.TypeToken;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.hyperledger.fabric.gateway.Contract;
+//import org.hyperledger.fabric.gateway.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -40,7 +40,7 @@ public class TradeServiceImpl implements TradeService {
     private final CarbonQuotaDAO carbonQuotaDAO;
     private final ApproveDAO approveDAO;
     private final Gson gson;
-    private final Contract contract;
+    //private final Contract contract;
     private final CarbonMapper carbonMapper;
 
     @NotNull
@@ -65,12 +65,12 @@ public class TradeServiceImpl implements TradeService {
                     // 对发布的内容进行区块链上链
                     String blockchainID = ProcessingUtil.createUuid();
                     byte[] getByte = null;
-                    try {
-                        contract.submitTransaction("createContract", blockchainID, String.valueOf(carbonMapper.getLastThird().getId() + 1), carbonQuotaDO.getOrganizeUuid(), tradeReleaseVO.getAmount(), tradeReleaseVO.getUnit());
-                        getByte = contract.evaluateTransaction("queryTrade", blockchainID);
-                    } catch (Exception e) {
-                        log.error("[Service] 区块链上链失败", e);
-                    }
+//                    try {
+//                        contract.submitTransaction("createContract", blockchainID, String.valueOf(carbonMapper.getLastThird().getId() + 1), carbonQuotaDO.getOrganizeUuid(), tradeReleaseVO.getAmount(), tradeReleaseVO.getUnit());
+//                        getByte = contract.evaluateTransaction("queryTrade", blockchainID);
+//                    } catch (Exception e) {
+//                        log.error("[Service] 区块链上链失败", e);
+//                    }
                     if (tradeReleaseVO.getDraft()) {
                         carbonMapper.insertTradeByUuid(getUuid, tradeReleaseVO.getAmount(), tradeReleaseVO.getUnit(), tradeReleaseVO.getText(), blockchainID, "draft");
                     } else {
