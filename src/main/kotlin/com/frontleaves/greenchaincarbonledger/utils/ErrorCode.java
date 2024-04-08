@@ -56,6 +56,7 @@ public enum ErrorCode {
     PAGE_NOT_FOUNDED("PageNotFounded", 40401, "页面不存在"),
     REQUEST_METHOD_NOT_SUPPORTED("RequestMethodNotSupported", 40500, "请求方法不支持"),
     SERVER_INTERNAL_ERROR("ServerInternalError", 50000, "服务器内部错误"),
+    CARBON_ACCOUNTING_MANAGEMENT_ERROR("CarbonAccountingManagementError", 40326, "碳核算管理错误"),
     MAIL_TEMPLATE_NOT_EXIST("MailTemplateNotExist", 50001, "邮箱模板不存在"),
     ORGANIZE_NOT_EXISTED("OrganizeRegisterFailed", 40399, "账户注册失败"),
     INVITE_CODE_ERROR("VerifyCodeError", 40398, "邀请码错误"),

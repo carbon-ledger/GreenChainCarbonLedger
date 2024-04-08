@@ -1202,7 +1202,7 @@ public class CarbonServiceImpl implements CarbonService {
             });
             return ResultUtil.success(timestamp, backCarbonItemTypeVOList);
         } else {
-            return ResultUtil.error(timestamp, "获取失败", ErrorCode.SERVER_INTERNAL_ERROR);
+            return ResultUtil.error(timestamp, "获取失败", ErrorCode.CARBON_ACCOUNTING_MANAGEMENT_ERROR);
         }
     }
 
@@ -1220,7 +1220,7 @@ public class CarbonServiceImpl implements CarbonService {
             });
             return ResultUtil.success(timestamp, backCarbonFactorVOList);
         } else {
-            return ResultUtil.error(timestamp, "获取失败", ErrorCode.SERVER_INTERNAL_ERROR);
+            return ResultUtil.error(timestamp, "获取失败", ErrorCode.CARBON_ACCOUNTING_MANAGEMENT_ERROR);
         }
     }
 
@@ -1238,7 +1238,7 @@ public class CarbonServiceImpl implements CarbonService {
             });
             return ResultUtil.success(timestamp, backCarbonFactorVOList);
         } else {
-            return ResultUtil.error(timestamp, "获取失败", ErrorCode.SERVER_INTERNAL_ERROR);
+            return ResultUtil.error(timestamp, "获取失败", ErrorCode.CARBON_ACCOUNTING_MANAGEMENT_ERROR);
         }
     }
 
@@ -1256,7 +1256,7 @@ public class CarbonServiceImpl implements CarbonService {
             });
             return ResultUtil.success(timestamp, backCarbonFactorVOList);
         } else {
-            return ResultUtil.error(timestamp, "获取失败", ErrorCode.SERVER_INTERNAL_ERROR);
+            return ResultUtil.error(timestamp, "获取失败", ErrorCode.CARBON_ACCOUNTING_MANAGEMENT_ERROR);
         }
     }
 
@@ -1276,10 +1276,10 @@ public class CarbonServiceImpl implements CarbonService {
                     backCarbonReportSingleVO.setId(carbonReportDO.getId()).setReportTitle(carbonReportDO.getReportTitle()).setReportType(carbonReportDO.getReportType()).setReportStatus(carbonReportDO.getReportStatus()).setListOfReports(carbonReportDO.getListOfReports()).setCreatedAt(carbonReportDO.getCreatedAt()).setOrganizeUuid(carbonReportDO.getOrganizeUuid()).setVerificationDate(carbonReportDO.getVerificationDate()).setUpdatedAt(carbonReportDO.getUpdatedAt()).setVerifierUuid(carbonReportDO.getVerifierUuid()).setAccountingPeriod(carbonReportDO.getAccountingPeriod()).setTotalEmission(carbonReportDO.getTotalEmission()).setReportSummary(carbonReportDO.getReportSummary());
                     return ResultUtil.success(timestamp, backCarbonReportSingleVO);
                 } else {
-                    return ResultUtil.error(timestamp, "没有权限", ErrorCode.NO_PERMISSION_ERROR);
+                    return ResultUtil.error(timestamp, "没有权限", ErrorCode.CARBON_ACCOUNTING_MANAGEMENT_ERROR);
                 }
             } else {
-                return ResultUtil.error(timestamp, "获取失败", ErrorCode.SERVER_INTERNAL_ERROR);
+                return ResultUtil.error(timestamp, "获取失败", ErrorCode.CARBON_ACCOUNTING_MANAGEMENT_ERROR);
             }
         } else {
             return ResultUtil.error(timestamp, "无法找到用户", ErrorCode.USER_NOT_EXISTED);
@@ -1314,7 +1314,7 @@ public class CarbonServiceImpl implements CarbonService {
                     return ResultUtil.error(timestamp, "没有权限", ErrorCode.NO_PERMISSION_ERROR);
                 }
             } else {
-                return ResultUtil.error(timestamp, "获取失败", ErrorCode.SERVER_INTERNAL_ERROR);
+                return ResultUtil.error(timestamp, "获取失败", ErrorCode.CARBON_ACCOUNTING_MANAGEMENT_ERROR);
             }
         } else {
             return ResultUtil.error(timestamp, "无法找到用户", ErrorCode.USER_NOT_EXISTED);
@@ -1344,7 +1344,7 @@ public class CarbonServiceImpl implements CarbonService {
             });
             return ResultUtil.success(timestamp, backCarbonReviewReportVOList);
         } else {
-            return ResultUtil.error(timestamp, "获取失败", ErrorCode.SERVER_INTERNAL_ERROR);
+            return ResultUtil.error(timestamp, "获取失败", ErrorCode.CARBON_ACCOUNTING_MANAGEMENT_ERROR);
         }
     }
 
@@ -1362,10 +1362,10 @@ public class CarbonServiceImpl implements CarbonService {
                 map.put("electric", gson.fromJson(carbonCompensationMaterialDO.getElectricMaterial(), HashMap.class));
                 return ResultUtil.success(timestamp, map);
             } else {
-                return ResultUtil.error(timestamp, "获取失败", ErrorCode.SERVER_INTERNAL_ERROR);
+                return ResultUtil.error(timestamp, "获取失败", ErrorCode.CARBON_ACCOUNTING_MANAGEMENT_ERROR);
             }
         } else {
-            return ResultUtil.error(timestamp, "获取失败", ErrorCode.SERVER_INTERNAL_ERROR);
+            return ResultUtil.error(timestamp, "获取失败", ErrorCode.CARBON_ACCOUNTING_MANAGEMENT_ERROR);
         }
     }
 
@@ -1379,15 +1379,38 @@ public class CarbonServiceImpl implements CarbonService {
                 // 通过审核
                 carbonDAO.changeCarbonReportStatus(carbonReportDO.getId(), "approved");
                 carbonDAO.changeCarbonAccountingStatus(carbonReportDO.getId(), "verified");
-                // TODO: 扣除碳源
-            } else if ("false".equals(pass)) {
+                // 获取报告组织今年的碳排放源
+                CarbonQuotaDO carbonQuotaDO = carbonDAO.getOrganizeQuotaByUuid(carbonReportDO.getOrganizeUuid());
+                if (carbonQuotaDO != null) {
+                    if (carbonQuotaDO.getTotalQuota() - carbonQuotaDO.getUsedQuota() > carbonReportDO.getTotalEmission()) {
+                        // 执行扣除
+                        carbonQuotaDO.setUsedQuota(carbonQuotaDO.getUsedQuota() + carbonReportDO.getTotalEmission());
+                        carbonDAO.changeUsedQuota(carbonQuotaDO.getUuid(), carbonQuotaDO.getUsedQuota());
+                        // 添加审计日志
+                        ArrayList<AuditLogDO> auditLogDOList = gson.fromJson(carbonQuotaDO.getAuditLog(), new TypeToken<List<AuditLogDO>>() {
+                        }.getType());
+                        carbonQuotaDO.setAuditLog(gson.toJson(
+                                ProcessingUtil.addAuditLog(
+                                        auditLogDOList,
+                                        "来自核算扣除，扣除配额：" + carbonReportDO.getTotalEmission() + "吨",
+                                        "系统交易操作")
+                        ));
+                        carbonDAO.addAuditLog(carbonQuotaDO.getUuid(), carbonQuotaDO.getAuditLog());
+                        return ResultUtil.success(timestamp, "审核完成");
+                    } else {
+                        return ResultUtil.error(timestamp, "配额不足", ErrorCode.CARBON_ACCOUNTING_MANAGEMENT_ERROR);
+                    }
+                } else {
+                    return ResultUtil.error(timestamp, "获取失败", ErrorCode.CARBON_ACCOUNTING_MANAGEMENT_ERROR);
+                }
+            } else {
                 // 拒绝审核
                 carbonDAO.changeCarbonReportStatus(carbonReportDO.getId(), "rejected");
                 carbonDAO.changeCarbonAccountingStatus(carbonReportDO.getId(), "rejected");
+                return ResultUtil.success(timestamp, "审核完成");
             }
-            return ResultUtil.success(timestamp, "审核完成");
         } else {
-            return ResultUtil.error(timestamp, "获取失败", ErrorCode.SERVER_INTERNAL_ERROR);
+            return ResultUtil.error(timestamp, "获取失败", ErrorCode.CARBON_ACCOUNTING_MANAGEMENT_ERROR);
         }
     }
 }

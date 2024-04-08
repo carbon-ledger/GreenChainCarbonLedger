@@ -404,4 +404,17 @@ public class CarbonDAO {
         log.info("\t> Mysql 更新");
         carbonMapper.changeCarbonAccountingStatus(id, verified);
     }
+
+    /**
+     * 修改使用的配额量。
+     * 该方法用于更新指定UUID的实体的已使用配额总量。
+     *
+     * @param uuid 实体的唯一标识符，用于确定哪个实体的配额被修改。
+     * @param totalQuota 修改后的总配额量。
+     */
+    public void changeUsedQuota(String uuid, double totalQuota) {
+        log.info("[DAO] 执行 changeUsedQuota");
+        log.info("\t> Mysql 更新");
+        carbonMapper.changeUsedQuota(uuid, totalQuota);
+    }
 }

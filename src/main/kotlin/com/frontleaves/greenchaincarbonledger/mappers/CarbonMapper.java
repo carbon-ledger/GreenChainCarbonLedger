@@ -137,9 +137,12 @@ public interface CarbonMapper {
     @Select("SELECT * FROM fy_carbon_compensation_material WHERE accounting_id = #{id}")
     CarbonCompensationMaterialDO getCarbonCompensationMaterialByAccountId(Long id);
 
-    @Update("UPDATE fy_carbon_report SET report_status = #{approved} WHERE id = #{id}")
+    @Update("UPDATE fy_carbon_report SET report_status = #{approved}, updated_at = now() WHERE id = #{id}")
     void changeCarbonReportStatus(Long id, String approved);
 
-    @Update("UPDATE fy_carbon_accounting SET data_verification_status = #{verified} WHERE id = #{id}")
+    @Update("UPDATE fy_carbon_accounting SET data_verification_status = #{verified}, updated_at = now() WHERE id = #{id}")
     void changeCarbonAccountingStatus(Long id, String verified);
+
+    @Update("UPDATE fy_carbon_quota SET used_quota = #{totalQuota}, updated_at = now() WHERE uuid = #{uuid}")
+    void changeUsedQuota(String uuid, double totalQuota);
 }
