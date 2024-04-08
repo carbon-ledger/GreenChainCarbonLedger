@@ -71,6 +71,9 @@ object SqlPrepareData {
         add(ArrayList(listOf("review:getReview", "获取审核信息")))
         add(ArrayList(listOf("review:getReport", "获取审核报告")))
         add(ArrayList(listOf("review:getReviewInfo", "获取详细审核信息")))
+        add(ArrayList(listOf("system:getSystemInfo", "获取系统信息")))
+        add(ArrayList(listOf("system:getWebSetting", "获取网站设置")))
+        add(ArrayList(listOf("system:getCopyRight", "获取版权信息")))
     }
 
     /**
@@ -108,10 +111,38 @@ object SqlPrepareData {
         SQL_ROLE_DEFAULT_PERMISSION_LIST.forEach {
             add(it)
         }
-        add("review:addAdmin")
-        add("review:reSendAdmin")
+        add("carbon:getOwnCarbonQuota")
+        add("carbon:getCarbonAccounting")
+        add("carbon:getCarbonReport")
+        add("carbon:addOrganizeIdQuota")
+        add("carbon:createCarbonReport")
+        add("carbon:editCarbonQuota")
+        add("carbon:getCarbonOperateList")
+        add("carbon:getCarbonItemType")
+        add("carbon:getCarbonFactorProcess")
+        add("carbon:getCarbonFactorDesulfurization")
+        add("carbon:getCarbonFactorOther")
+        add("carbon:getCarbonReviewReport")
+        add("carbon:getCarbonMaterial")
+        add("carbon:getCarbonReviewCheck")
+        add("trade:changeStatus")
+        add("trade:getOwnTradeList")
+        add("trade:buyTrade")
+        add("trade:getAllTradeList")
+        add("trade:buy")
         add("trade:review")
+        add("trade:getTradeBank")
+        add("trade:checkTradeSuccess")
         add("trade:deleteTrade")
+        add("review:addOrganize")
+        add("review:addAdmin")
+        add("review:checkOrganize")
+        add("review:checkAdmin")
+        add("review:reSendOrganize")
+        add("review:reSendAdmin")
+        add("review:getList")
+        add("review:getReview")
+        add("review:getReport")
     }
 
 
@@ -143,6 +174,10 @@ object SqlPrepareData {
         add("review:addOrganize")
         add("review:reSendOrganize")
         add("review:getReport")
+        add("review:getReviewInfo")
+        add("system:getSystemInfo")
+        add("system:getWebSetting")
+        add("system:getCopyRight")
     }
 
     val SQL_CARBON_ITEM_LIST = ArrayList<HashMap<String, String>>().also {
