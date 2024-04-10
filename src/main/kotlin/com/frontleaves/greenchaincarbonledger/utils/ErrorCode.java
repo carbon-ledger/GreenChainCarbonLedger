@@ -68,7 +68,6 @@ public enum ErrorCode {
     CARBON_ACCOUNTING_MANAGEMENT_ERROR("CarbonAccountingManagementError", 40338, "碳核算管理错误"),
 
     PAGE_NOT_FOUNDED("PageNotFounded", 40401, "页面不存在"),
-
     REQUEST_METHOD_NOT_SUPPORTED("RequestMethodNotSupported", 40501, "请求方法不支持"),
 
     SERVER_INTERNAL_ERROR("ServerInternalError", 50001, "服务器内部错误"),
