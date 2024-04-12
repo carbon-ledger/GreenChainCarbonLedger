@@ -17,10 +17,3 @@ server:
 logging:
   file:
     path: "./logs"
-fabric:
-  networkConnectionConfigPath: "src/main/resources/fabric-connect.yaml"
-  certificatePath: "src/main/resources/crypto-config/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/signcerts/Admin@org1.example.com-cert.pem"
-  privateKeyPath: "src/main/resources/crypto-config/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/keystore/priv_sk"
-  msp-id: "Org1MSP"
-  channel: "mychannel"
-  tls-cert-path: "src/main/resources/crypto-config/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/tlscacerts/tlsca.org1.example.com-cert.pem"

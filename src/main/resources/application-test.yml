@@ -14,7 +14,7 @@ spring:
       port: 6379
       host: localhost
       database: 0
-      password: "jhkdjhkjdhsIUTYURTU_rBpjHG"
+      password: "jhkdjhkjdhsIUTYURTU_efDBct"
 logging:
   level:
     root: error

@@ -15,8 +15,15 @@ spring:
       host: localhost
       database: 0
       password:
+fabric:
+  networkConnectionConfigPath: ""
+  certificatePath: ""
+  privateKeyPath: ""
+  msp-id: ""
+  channel: ""
+  tls-cert-path: ""
 logging:
   level:
     root: error
-    com.frontleaves.greenchaincarbonledger: debug
+    com.frontleaves.greenchaincarbonledger: info
     com.frontleaves.greenchaincarbonledger.mappers: info
